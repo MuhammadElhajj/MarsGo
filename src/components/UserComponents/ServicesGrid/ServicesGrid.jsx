@@ -20,10 +20,11 @@ export default function ServicesGrid() {
   return (
     <div className="services-grid">
       {services.map((service) => {
-        // تحديد الخلفية: صورة أو لون
-        const bgStyle = service.backgroundImageBase64
-          ? { backgroundImage: `url(${service.backgroundImageBase64})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: service.backgroundColor || 'var(--color-accent)' };
+        // ✅ التصحيح: استخدم bgImageBase64 بدلاً من backgroundImageBase64
+        // ✅ استخدم bgColor بدلاً من backgroundColor
+        const bgStyle = service.bgImageBase64
+          ? { backgroundImage: `url(${service.bgImageBase64})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { backgroundColor: service.bgColor || 'var(--color-accent)' };
 
         return (
           <Link
