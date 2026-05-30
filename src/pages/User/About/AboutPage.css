@@ -1,0 +1,32 @@
+.about-page {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--color-bg-secondary);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.3s ease;
+}
+
+.about-page__title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-accent);
+  margin-bottom: 1.5rem;
+}
+
+.about-page__content p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.about-page__content h3 {
+  font-size: 1.3rem;
+  margin: 1.5rem 0 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.about-page__content ul {
+  list-style: disc;
+  padding-right: 1.5rem;
+}

@@ -1,0 +1,86 @@
+/* ========== الحاوية الرئيسية ========== */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;      /* ارتفاع كامل الشاشة */
+  overflow: hidden;   /* منع التمرير المزدوج */
+}
+
+/* ========== الهيدر ========== */
+/* نعتمد على class .header الموجود في Header.css */
+/* نضمن أنه ثابت في الأعلى */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+/* ========== الجسم الرئيسي ========== */
+.app-body {
+  display: flex;
+  flex: 1;            /* يأخذ المساحة المتبقية بعد الهيدر */
+  overflow: hidden;   /* التمرير سيكون داخل app-content-wrapper */
+}
+
+/* ========== السايدبار ========== */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background-color: var(--color-bg-secondary);
+  overflow-y: auto;   /* تمرير داخلي للسايدبار */
+  height: 100%;
+}
+
+/* ========== حاوية المحتوى والفوتنر ========== */
+.app-content-wrapper {
+  flex: 1;            /* يأخذ باقي المساحة */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;   /* هذا هو العنصر الذي يتم التمرير فيه */
+  height: 100%;
+}
+
+/* ========== المحتوى الرئيسي (الصفحات) ========== */
+.app-content {
+  flex: 1;            /* يدفع الفوتر للأسفل إذا كان المحتوى قليلاً */
+  padding: 2rem;
+  background-color: var(--color-bg-primary);
+}
+
+/* ========== الفوتر ========== */
+.footer {
+  flex-shrink: 0;     /* لا يتقلص */
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  padding: 1.5rem;
+  margin-top: auto;   /* يبقى في الأسفل دائماً */
+}
+
+/* ========== الجوال ========== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -260px;
+    bottom: 0;
+    z-index: 25;
+    transition: right 0.3s ease;
+    width: 260px;
+    box-shadow: none;
+    padding-top: 4rem; /* مساحة للهيدر */
+  }
+
+  .sidebar--open {
+    right: 0;
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 20;
+    display: block;
+  }
+}

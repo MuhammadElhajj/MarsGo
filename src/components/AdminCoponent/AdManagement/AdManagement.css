@@ -1,0 +1,228 @@
+.ad-management {
+  width: 100%;
+  animation: fadeIn 0.3s ease;
+}
+
+.ad-management__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ad-management__header h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.ad-management__empty {
+  text-align: center;
+  padding: 3rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.ad-management__empty p {
+  margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.ad-management__table-wrapper {
+  overflow-x: auto;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.ad-management__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.ad-management__table th,
+.ad-management__table td {
+  padding: 1rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.ad-management__table th {
+  background: var(--color-bg-primary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.ad-management__thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.ad-management__description-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ad-management__link-cell a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.ad-management__link-cell a:hover {
+  text-decoration: underline;
+}
+
+.ad-management__status {
+  padding: 0.3rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.ad-management__status.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ad-management__status.inactive {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.ad-management__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ad-management__btn {
+  width: auto;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.ad-management-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+/* مودال */
+.ad-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ad-modal {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  width: 90%;
+  max-width: 550px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+}
+
+.ad-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ad-modal__header h3 {
+  font-size: 1.3rem;
+  color: var(--color-text-primary);
+}
+
+.ad-modal__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.ad-modal__form {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ad-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ad-modal__field label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.ad-modal__current-image {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ad-modal__current-image img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.ad-modal__current-image button {
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.ad-modal__checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.ad-modal__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ad-modal__actions .btn {
+  width: auto;
+  flex: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

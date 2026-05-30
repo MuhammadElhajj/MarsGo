@@ -1,0 +1,169 @@
+/* ===== الحاوية الرئيسية ===== */
+.payment-info {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  direction: rtl;
+  width: 100%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  transition: all 0.3s;
+}
+
+/* ===== العنوان ===== */
+.payment-info h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  color: var(--color-accent);
+  border-right: 3px solid var(--color-accent);
+  padding-right: 0.8rem;
+}
+
+/* ===== قسم الـ QR ===== */
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.8rem;
+}
+.qr-image img {
+  max-width: 160px;
+  border: 2px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  background: white;
+  transition: transform 0.2s;
+}
+.qr-image img:hover {
+  transform: scale(1.02);
+}
+
+/* ===== تفاصيل الحساب ===== */
+.account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--color-bg-primary);
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  transition: background 0.2s;
+}
+.detail-row strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 100px;
+}
+.detail-row span,
+.detail-row code {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+.detail-row code {
+  background: var(--color-border);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  font-family: monospace;
+  direction: ltr;
+  display: inline-block;
+  word-break: break-all;
+}
+
+/* ===== زر النسخ ===== */
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-accent);
+  padding: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.4rem;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: rgba(79, 70, 229, 0.1);
+  transform: scale(1.05);
+}
+
+/* ===== رابط الدفع الإلكتروني ===== */
+.payment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-accent);
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 2rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
+.payment-link:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== حالة التحميل ===== */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+/* ===== استجابة للشاشات المتوسطة (تابلت) ===== */
+@media (max-width: 768px) {
+  .payment-info {
+    padding: 1.2rem;
+    max-width: 100%;
+  }
+  .payment-info h3 {
+    font-size: 1.2rem;
+  }
+  .qr-image img {
+    max-width: 130px;
+  }
+  .detail-row strong {
+    min-width: 80px;
+    font-size: 0.85rem;
+  }
+  .detail-row span,
+  .detail-row code {
+    font-size: 0.8rem;
+  }
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 480px) {
+  .payment-info {
+    padding: 1rem;
+  }
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+  .detail-row strong {
+    min-width: auto;
+  }
+  .copy-btn {
+    align-self: flex-start;
+  }
+  .payment-link {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,71 @@
+.user-management {
+  width: 100%;
+}
+
+.user-management__title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+}
+
+.user-management__table-wrapper {
+  overflow-x: auto;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-management__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.user-management__table th,
+.user-management__table td {
+  padding: 1rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.user-management__table th {
+  background: var(--color-bg-primary);
+  font-weight: 600;
+}
+
+.user-management__user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-management__avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-management__role {
+  padding: 0.2rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.user-management__role--admin { background: #dbeafe; color: #1e40af; }
+.user-management__role--verifier { background: #d1fae5; color: #065f46; }
+.user-management__role--customer { background: #f3f4f6; color: #4b5563; }
+
+.user-management__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.user-management__btn {
+  width: auto;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+}

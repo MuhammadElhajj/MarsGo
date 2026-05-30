@@ -1,0 +1,125 @@
+/* ===== الحاوية الرئيسية – خلفية كاملة ===== */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  padding: 1rem;
+}
+
+/* ===== البطاقة – تصميم أنيق ومركز ===== */
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  background: var(--color-bg-secondary);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+}
+
+/* ===== عنوان الصفحة ===== */
+.login-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-accent), #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== النموذج ===== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===== تحسين الحقول ===== */
+.login-form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.login-form input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ===== رسالة الخطأ ===== */
+.login-error {
+  color: var(--color-danger);
+  font-size: 0.8rem;
+  text-align: center;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+/* ===== الفاصل بين الخيارات ===== */
+.login-separator {
+  text-align: center;
+  margin: 1rem 0;
+  color: var(--color-text-secondary);
+  position: relative;
+  font-size: 0.8rem;
+}
+.login-separator::before,
+.login-separator::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  height: 1px;
+  background-color: var(--color-border);
+}
+.login-separator::before {
+  right: 0;
+}
+.login-separator::after {
+  left: 0;
+}
+
+/* ===== زر تبديل التسجيل/الدخول ===== */
+.login-switch {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+.login-switch-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.login-switch-btn:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+  .login-title {
+    font-size: 1.6rem;
+  }
+  .login-form input {
+    padding: 0.6rem 0.8rem;
+  }
+}

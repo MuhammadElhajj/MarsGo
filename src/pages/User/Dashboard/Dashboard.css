@@ -1,0 +1,83 @@
+.dashboard {
+  animation: fadeIn 0.3s ease;
+}
+.dashboard__greeting {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+}
+.dashboard__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard {
+  animation: fadeIn 0.3s ease;
+}
+
+.dashboard__greeting {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+}
+
+.dashboard__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard {
+  animation: fadeIn 0.3s ease;
+}
+
+.dashboard__greeting {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.dashboard__cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* افتراضي 4 أعمدة على الشاشات الكبيرة */
+  gap: 1.5rem;
+}
+
+/* شاشات متوسطة (تابلت) – عمودين */
+@media (max-width: 1024px) {
+  .dashboard__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* شاشات الجوال – عمودين أيضاً */
+@media (max-width: 640px) {
+  .dashboard__greeting {
+    font-size: 1.5rem;
+  }
+  .dashboard__cards {
+    grid-template-columns: 1fr 1fr; /* عمودين */
+    gap: 1rem;
+  }
+  .app-content {
+
+    padding: 0.7rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

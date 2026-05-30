@@ -1,0 +1,58 @@
+.verifier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);
+  color: white;
+  height: 4rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.verifier-header__left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.verifier-header__back-link {
+  color: #a7f3d0;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.verifier-header__back-link:hover {
+  color: white;
+}
+
+.verifier-header__title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.verifier-header__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verifier-header__name {
+  font-weight: 500;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .verifier-header__name {
+    display: inline;
+  }
+}
+
+.verifier-header__logout {
+  width: auto;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}

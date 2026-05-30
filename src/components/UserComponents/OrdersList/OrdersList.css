@@ -1,0 +1,62 @@
+.orders-list {
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  margin-top: 2rem;
+}
+
+.orders-list__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+}
+
+.orders-list__table-wrapper {
+  overflow-x: auto;
+}
+
+.orders-list__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-list__table th,
+.orders-list__table td {
+  padding: 0.75rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+.orders-list__table th {
+  background-color: var(--color-bg-primary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.orders-list__status {
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.orders-list__status--pending_verification { background: #fef3c7; color: #92400e; }
+.orders-list__status--awaiting_customer_resubmit { background: #e0e7ff; color: #3730a3; }
+.orders-list__status--verified_pending_execution { background: #d1fae5; color: #065f46; }
+.orders-list__status--rejected { background: #fee2e2; color: #b91c1c; }
+.orders-list__status--completed { background: #dbeafe; color: #1e40af; }
+
+.orders-list__loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.orders-list__empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}

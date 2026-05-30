@@ -1,0 +1,11 @@
+.payment-info-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.payment-info-page .container {
+  max-width: 600px;
+  width: 100%;
+}

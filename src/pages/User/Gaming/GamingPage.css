@@ -1,0 +1,162 @@
+/* ===== الصفحة الرئيسية – عرض كامل ===== */
+.gaming-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== العنوان الرئيسي ===== */
+.gaming-page__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 1.5rem;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 1rem;
+}
+
+/* ===== نموذج الطلب – عرض مناسب مع الحفاظ على الجمالية ===== */
+.gaming-page__form {
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 650px;  /* حد أقصى للنموذج ليبقى مريحاً للقراءة */
+  transition: all 0.3s;
+}
+
+/* ===== الحقول ===== */
+.gaming-page__field {
+  margin-bottom: 1.2rem;
+}
+.gaming-page__field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.gaming-page__field select,
+.gaming-page__field input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.gaming-page__field select:focus,
+.gaming-page__field input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* ===== رسائل النجاح والخطأ ===== */
+.gaming-page__success {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  border-right: 3px solid #10b981;
+}
+.gaming-page__error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  border-right: 3px solid #ef4444;
+}
+
+/* ===== قسم الطلبات السابقة (إن وجد) – متجاوب مع تمرير أفقي ===== */
+.gaming-page__orders {
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+.gaming-page__orders h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+}
+
+/* ===== جدول الطلبات – متجاوب ===== */
+.gaming-page__table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.gaming-page__table th {
+  background: var(--color-bg-primary);
+  padding: 0.8rem 0.5rem;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid var(--color-border);
+}
+.gaming-page__table td {
+  padding: 0.7rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+.gaming-page__table tr:hover td {
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+/* ===== استجابة للشاشات المتوسطة (تابلت) ===== */
+@media (max-width: 900px) {
+  .gaming-page {
+    padding: 1rem;
+  }
+  .gaming-page__title {
+    font-size: 1.5rem;
+  }
+  .gaming-page__form,
+  .gaming-page__orders {
+    padding: 1.2rem;
+  }
+  .gaming-page__form {
+    max-width: 100%;
+  }
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 640px) {
+  .gaming-page__title {
+    font-size: 1.3rem;
+    border-right-width: 3px;
+  }
+  .gaming-page__form {
+    padding: 1rem;
+  }
+  .gaming-page__field select,
+  .gaming-page__field input {
+    padding: 0.6rem 0.8rem;
+  }
+  .gaming-page__table th,
+  .gaming-page__table td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.75rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,38 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  width: 100%;
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn--primary {
+  background-color: var(--color-accent);
+  color: white;
+}
+.btn--primary:hover {
+  background-color: var(--color-accent-hover);
+}
+.btn--google {
+  background-color: var(--color-google);
+  color: white;
+}
+.btn--google:hover {
+  opacity: 0.9;
+}
+.btn--danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+.btn--danger:hover {
+  background-color: var(--color-danger-hover);
+}

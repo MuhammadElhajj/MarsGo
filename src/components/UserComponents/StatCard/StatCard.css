@@ -1,0 +1,23 @@
+.stat-card {
+  background-color: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+}
+.stat-title {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+}
+.stat-card--accent .stat-value { color: var(--color-accent); }
+.stat-card--blue .stat-value { color: #2563eb; }
+.stat-card--yellow .stat-value { color: #d97706; }
+.stat-card--green .stat-value { color: #059669; }

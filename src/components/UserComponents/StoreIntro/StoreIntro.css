@@ -1,0 +1,89 @@
+.store-intro {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #7c3aed 100%);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.store-intro::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+}
+
+.store-intro__content {
+  position: relative;
+  z-index: 1;
+}
+
+.store-intro__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.store-intro__description {
+  opacity: 0.9;
+  line-height: 1.8;
+  max-width: 600px;
+  margin-bottom: 1.5rem;
+}
+
+/* شبكة الميزات: صف واحد على الكبير، صفّين على الجوال */
+.store-intro__highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.store-intro__highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  background: rgba(255,255,255,0.15);
+  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  flex: 1 1 auto;
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* جعل كل عنصر يأخذ نصف العرض على الجوال */
+@media (max-width: 640px) {
+  .store-intro__highlights {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* عمودين */
+  }
+  .store-intro__highlight-item {
+    justify-content: center;
+    min-width: 0;
+  }
+}
+
+.store-intro__icon {
+  font-size: 1.2rem;
+}
+
+.store-intro__stats-mini {
+  display: flex;
+  gap: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.store-intro__stat {
+  font-weight: 500;
+  opacity: 0.85;
+}
