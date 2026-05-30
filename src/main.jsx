@@ -6,6 +6,10 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';  // ✅ يجب أن يكون موجوداً
 import { PaymentSettingsProvider } from './context/PaymentSettingsContext';
 import './index.css';
+import { StoreSettingsProvider } from './context/StoreSettingsContext';
+import { ServicesProvider } from './context/ServicesContext';
+
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -13,7 +17,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider>       {/* ✅ ThemeProvider أولاً */}
         <AuthProvider>      {/* ✅ ثم AuthProvider */}
         <PaymentSettingsProvider>
-      <App />
+      <StoreSettingsProvider>  {/* أضفه هنا */}
+           <ServicesProvider>   {/* <-- أضف هذا */}
+          <App />
+        </ServicesProvider>
+      </StoreSettingsProvider>
     </PaymentSettingsProvider>
         </AuthProvider>
       </ThemeProvider>

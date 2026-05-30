@@ -1,0 +1,41 @@
+.user-stats-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* شاشات كبيرة جداً (أكثر من 1400px) - 6 أعمدة */
+@media (min-width: 1280px) {
+  .user-stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* شاشات متوسطة (بين 900px و 1279px) - 3 أعمدة */
+@media (min-width: 900px) and (max-width: 1279px) {
+  .user-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* شاشات متوسطة صغيرة (بين 640px و 899px) - يمكن أيضاً 3 أعمدة أو 2، اخترت 2 لتكون مريحة */
+@media (min-width: 640px) and (max-width: 899px) {
+  .user-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* شاشات الجوال (أقل من 640px) - عمودين */
+@media (max-width: 639px) {
+  .user-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.user-stats-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+

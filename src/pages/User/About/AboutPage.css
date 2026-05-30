@@ -1,32 +1,232 @@
+/* ========================================
+   About Page - Full Width (بدون قيود عرض)
+   ======================================== */
+
 .about-page {
+  width: 100%;
+  animation: fadeIn 0.4s ease;
+  direction: rtl;
+}
+
+/* القسم البطولي (Hero) */
+.about-hero {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #7c3aed 100%);
+  padding: 4rem 2rem;
+  text-align: center;
+  width: 100%;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.about-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.about-hero p {
+  font-size: 1.2rem;
   max-width: 800px;
   margin: 0 auto;
-  background-color: var(--color-bg-secondary);
+  opacity: 0.9;
+}
+
+/* نبذة عنا - كامل العرض */
+.about-narrative {
+  width: 100%;
   padding: 2rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  animation: fadeIn 0.3s ease;
+  margin: 0;
 }
 
-.about-page__title {
-  font-size: 2rem;
-  font-weight: bold;
+.narrative-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s;
+  width: 100%;
+}
+
+.narrative-card:hover {
+  transform: translateY(-3px);
+}
+
+.narrative-card h2 {
+  font-size: 1.8rem;
   color: var(--color-accent);
-  margin-bottom: 1.5rem;
-}
-
-.about-page__content p {
   margin-bottom: 1rem;
-  line-height: 1.8;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 1rem;
 }
 
-.about-page__content h3 {
-  font-size: 1.3rem;
-  margin: 1.5rem 0 0.5rem;
+.narrative-card p {
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+/* إحصائيات */
+.about-stats {
+  background: var(--color-bg-secondary);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  margin: 1rem 0;
+  width: 100%;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.about-stats h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-accent);
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  background: var(--color-bg-primary);
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  min-width: 150px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+/* خدماتنا - شبكة مرنة بدون تحديد عدد ثابت للأعمدة */
+.about-services {
+  width: 100%;
+  padding: 2rem;
+  margin: 0;
+}
+
+.about-services h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
   color: var(--color-text-primary);
 }
 
-.about-page__content ul {
-  list-style: disc;
-  padding-right: 1.5rem;
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.service-item {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s;
+  border: 1px solid var(--color-border);
+}
+
+.service-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.service-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.service-item h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.service-item p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* قسم الاتصال */
+.about-contact {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #4f46e5 100%);
+  color: white;
+  text-align: center;
+  padding: 3rem 2rem;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.about-contact h3 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.contact-details {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.contact-details p {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+}
+
+/* استجابة للجوال */
+@media (max-width: 768px) {
+  .about-hero {
+    padding: 2rem 1rem;
+  }
+  .about-hero h1 {
+    font-size: 1.8rem;
+  }
+  .narrative-card h2 {
+    font-size: 1.5rem;
+  }
+  .about-narrative, .about-services {
+    padding: 1rem;
+  }
+  .stats-grid {
+    gap: 1rem;
+  }
+  .stat-item {
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+  }
+  .stat-number {
+    font-size: 1.5rem;
+  }
+  .contact-details {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

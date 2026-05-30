@@ -20,7 +20,11 @@ const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
 const AdminUsersPage = lazy(() => import("./pages/Admin/AdminUsers"));
 const AdManagementPage = lazy(() => import("./pages/Admin/AdManagementPage"));
+
 import AdminPaymentSettingsPage from './pages/Admin/AdminPaymentSettingsPage';
+// مع باقي استيرادات صفحات المدير
+const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettingsPage"));
+const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 // صفحات المدقق
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
@@ -58,7 +62,8 @@ function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrdersPage />} />
-       
+     
+     <Route path="services" element={<AdminServicesPage />} />  <Route path="store-settings" element={<AdminStoreSettingsPage />} />
        <Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />   <Route path="ads" element={<AdManagementPage />} />
           <Route path="users" element={<AdminUsersPage />} />
         </Route>

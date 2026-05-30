@@ -120,7 +120,7 @@ export default function AdSpace() {
         )}
 
       {/* </div> */}
-      {ads.length > 1 && (
+      {/* {ads.length > 1 && (
         <div className="ad-space__dots">
           {ads.map((_, idx) => (
             <button
@@ -131,7 +131,7 @@ export default function AdSpace() {
             />
           ))}
         </div>
-      )}
+      )} */}
     </div>
     </div>
   );

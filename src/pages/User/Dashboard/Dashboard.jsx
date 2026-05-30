@@ -5,10 +5,13 @@ import StoreIntro from "../../../components/UserComponents/StoreIntro/StoreIntro
 import AdSpace from "../../../components/UserComponents/AdSpace/AdSpace";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import './Dashboard.css';
-
+import UserStatsGrid from "../../../components/UserComponents/UserStatsGrid/UserStatsGrid";
+import useUserStats from "../../../hooks/useUserStats";
+import ServicesGrid from "../../../components/UserComponents/ServicesGrid/ServicesGrid";
 export default function Dashboard() {
   const { userData } = useAuth();
   const { stats, loading } = useStats();
+  const { stats: userStats, loading: userStatsLoading } = useUserStats();
 
   if (loading) return <Loading />;
 
@@ -22,12 +25,15 @@ export default function Dashboard() {
       <AdSpace />
 
       {/* بطاقات الإحصائيات */}
-      <div className="dashboard__cards">
-        <StatCard title="إجمالي المستخدمين" value={stats.users} colorClass="accent" />
-        <StatCard title="إجمالي الطلبات" value={stats.orders} colorClass="blue" />
-        <StatCard title="الطلبات المعلقة" value={stats.pendingOrders} colorClass="yellow" />
-        <StatCard title="الطلبات المنجزة اليوم" value={stats.completedToday} colorClass="green" />
-      </div>
+      {/* <div className="dashboard__cards"> */}
+    <UserStatsGrid stats={userStats} loading={userStatsLoading} /> 
+    <div className="dashboard__services">
+  <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
+  <ServicesGrid />
+</div>
+    
     </div>
+    // </div>
+    
   );
 }
