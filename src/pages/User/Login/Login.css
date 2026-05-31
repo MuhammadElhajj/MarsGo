@@ -391,7 +391,7 @@
   .login-submit,
   .google-login {
     font-size: 13px;
-    padding: 8px;
+    padding: 15px;
   }
   .switch-btn {
     font-size: 13px;
@@ -402,4 +402,74 @@
   .login-copyright {
     font-size: 11px;
   }
+}
+
+
+/* زر Google - التصميم الجديد */
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3c4043;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.google-login:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-color: #d2d5d9;
+}
+
+.google-login:active:not(:disabled) {
+  background-color: #f1f3f4;
+}
+
+.google-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-login__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.google-login span {
+  line-height: 1.4;
+}
+
+.spinner-small {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner-small {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #0095f6; /* لون أزرق واضح */
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

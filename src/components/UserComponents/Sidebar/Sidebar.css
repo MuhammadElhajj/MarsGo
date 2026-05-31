@@ -118,7 +118,7 @@
     z-index: 25;
     transform: translateX(100%);
     box-shadow: none;
-    padding-top: 5rem; /* ✅ المساحة المطلوبة لزر الإغلاق والهيدر */
+   padding-top: 5rem !important;/* ✅ المساحة المطلوبة لزر الإغلاق والهيدر */
   }
 
   .sidebar--open {
@@ -130,3 +130,4 @@
     display: flex; /* ✅ إظهار زر الإغلاق */
   }
 }
+

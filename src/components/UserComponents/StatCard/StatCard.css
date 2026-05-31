@@ -1,23 +1,124 @@
+/* ========================================
+   StatCard - Luxury Animated Cards
+   ======================================== */
+
 .stat-card {
-  background-color: var(--color-bg-secondary);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s;
+  position: relative;
+  background: linear-gradient(145deg, var(--color-bg-secondary), rgba(0, 0, 0, 0.02));
+  backdrop-filter: blur(2px);
+  padding: 1.5rem 1.2rem;
+  border-radius: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  overflow: hidden;
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* شريط علوي متوهج */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0.6;
+  transition: height 0.3s ease;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.1), transparent);
+  transition: height 0.3s;
+  pointer-events: none;
+}
+
 .stat-card:hover {
-  box-shadow: var(--shadow-md);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 24px 40px -12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
 }
+
+.stat-card:hover::after {
+  height: 30px;
+}
+
+.stat-card:hover::before {
+  height: 6px;
+  opacity: 1;
+  box-shadow: 0 0 12px currentColor;
+}
+
+/* الألوان الفاخرة لكل نوع */
+.stat-card--accent { color: #8b5cf6; }
+.stat-card--accent .stat-value { text-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
+.stat-card--accent:hover { border-top: 1px solid rgba(139, 92, 246, 0.4); }
+
+.stat-card--blue { color: #3b82f6; }
+.stat-card--blue .stat-value { text-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+
+.stat-card--yellow { color: #f59e0b; }
+.stat-card--yellow .stat-value { text-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
+
+.stat-card--green { color: #10b981; }
+.stat-card--green .stat-value { text-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+
+.stat-card--red { color: #ef4444; }
+.stat-card--red .stat-value { text-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+
+.stat-card--orange { color: #f97316; }
+.stat-card--orange .stat-value { text-shadow: 0 0 12px rgba(249, 115, 22, 0.4); }
+
+.stat-card--purple { color: #a855f7; }
+.stat-card--purple .stat-value { text-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
+
+/* العناوين والقيم */
 .stat-title {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
   color: var(--color-text-secondary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+  transition: opacity 0.2s;
 }
+
 .stat-value {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+  background: linear-gradient(135deg, #ffffff, var(--color-text-primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: all 0.3s;
 }
-.stat-card--accent .stat-value { color: var(--color-accent); }
-.stat-card--blue .stat-value { color: #2563eb; }
-.stat-card--yellow .stat-value { color: #d97706; }
-.stat-card--green .stat-value { color: #059669; }
+
+/* أيقونة وهمية (اختيارية) يمكن إضافتها مستقبلاً */
+.stat-card:hover .stat-value {
+  transform: scale(1.03);
+  letter-spacing: 1px;
+}
+
+/* استجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+  .stat-card {
+    padding: 1rem 0.8rem;
+    border-radius: 1.2rem;
+  }
+  .stat-value {
+    font-size: 1.8rem;
+  }
+  .stat-title {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+  }
+}
