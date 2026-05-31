@@ -19,8 +19,10 @@ export function StoreSettingsProvider({ children }) {
       if (docSnap.exists()) {
         setSettings(docSnap.data());
       } else {
+        // ✅ إضافة loginPhoneImage في البيانات الافتراضية
         const defaultData = {
-          backgroundImageBase64: '', // صورة الخلفية بصيغة Base64
+          backgroundImageBase64: '',
+          loginPhoneImage: '',      // <-- الحقل الجديد
           updatedAt: new Date().toISOString(),
         };
         setDoc(docRef, defaultData);

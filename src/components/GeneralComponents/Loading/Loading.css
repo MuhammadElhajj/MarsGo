@@ -1,4 +1,4 @@
-.loading-spinner {
+/* .loading-spinner {
   display: flex;
   justify-content: center;
   padding: 2rem;
@@ -13,4 +13,77 @@
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
+} */
+
+
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-primary);
+  z-index: 9999;
+  gap: 1.2rem;
+}
+
+/* سبينر دائري (اختياري) - يمكنك إزالته إذا أردت الكرات فقط */
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 4px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* النص */
+.loading-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* حاوية الكرات الثلاث */
+.loading-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  direction: ltr;
+}
+
+/* الكرة الواحدة */
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  animation: bounceAndColor 1.4s infinite ease-in-out both;
+}
+
+/* ترتيب البدء لكل كرة */
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+.dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes bounceAndColor {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    background-color: var(--color-border);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    background-color: var(--color-accent);
+    opacity: 1;
+  }
 }

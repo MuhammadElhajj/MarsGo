@@ -1,125 +1,405 @@
-/* ===== الحاوية الرئيسية – خلفية كاملة ===== */
+/* ========== الحاوية الرئيسية ========== */
 .login-container {
   min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  direction: rtl;
+  gap: 2rem;
+  padding: 2rem 1rem;
+}
+
+/* ========== صف الأعمدة (الصورة + النموذج) ========== */
+.login-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch;
+  justify-content: center;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+
+  height: 75vh;
+}
+
+/* ========== العمود الأيسر (صورة الهاتف) ========== */
+.login-phone {
+  display: none;
+  flex: 1;
+  max-width: 380px;
+}
+@media (min-width: 992px) {
+  .login-phone {
+    display: block;
+  }
+}
+
+.phone-mockup {
+  position: relative;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  background: #fafafa;
+  aspect-ratio: 9 / 16;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg-primary);
-  padding: 1rem;
+  height: 100%;
 }
 
-/* ===== البطاقة – تصميم أنيق ومركز ===== */
-.login-card {
+.phone-image {
   width: 100%;
-  max-width: 450px;
-  background: var(--color-bg-secondary);
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  transition: all 0.3s ease;
-  border: 1px solid var(--color-border);
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-/* ===== عنوان الصفحة ===== */
-.login-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--color-accent), #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 1.5rem;
-}
-
-/* ===== النموذج ===== */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* ===== تحسين الحقول ===== */
-.login-form input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-.login-form input:focus {
-  outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-/* ===== رسالة الخطأ ===== */
-.login-error {
-  color: var(--color-danger);
-  font-size: 0.8rem;
-  text-align: center;
-  background: rgba(239, 68, 68, 0.1);
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-}
-
-/* ===== الفاصل بين الخيارات ===== */
-.login-separator {
-  text-align: center;
-  margin: 1rem 0;
-  color: var(--color-text-secondary);
-  position: relative;
-  font-size: 0.8rem;
-}
-.login-separator::before,
-.login-separator::after {
-  content: "";
+/* مؤشر التحميل داخل الصورة */
+.phone-loading {
   position: absolute;
-  top: 50%;
-  width: 30%;
-  height: 1px;
-  background-color: var(--color-border);
-}
-.login-separator::before {
-  right: 0;
-}
-.login-separator::after {
+  top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 2;
+  border-radius: 24px;
 }
 
-/* ===== زر تبديل التسجيل/الدخول ===== */
-.login-switch {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
+/* Spinner صغير */
+.spinner-small {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #0095f6;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
-.login-switch-btn {
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.phone-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
+  color: #8e8e8e;
+  font-size: 14px;
+}
+
+/* ========== العمود الأيمن (نموذج تسجيل الدخول) ========== */
+.login-form-container {
+  flex: 1;
+  max-width: 380px;
+  width: 100%;
+}
+
+.login-card {
+  background: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  padding: 32px 40px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* الشعار والعنوان */
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.login-logo-icon {
+  font-size: 32px;
+}
+.login-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* حقول الإدخال */
+.input-group {
+  margin-bottom: 12px;
+}
+.input-group input {
+  width: 100%;
+  padding: 12px 12px;
+  background: #fafafa;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #262626;
+  transition: border 0.2s;
+}
+.input-group input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+  background: #ffffff;
+}
+.input-group input::placeholder {
+  color: #8e8e8e;
+}
+
+/* زر تسجيل الدخول / إنشاء حساب */
+.login-submit {
+  background: #0095f6;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.login-submit:hover:not(:disabled) {
+  background: #1877f2;
+}
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* رسالة الخطأ */
+.login-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* الفاصل "أو" */
+.login-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+.divider-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e8e;
+  background: #ffffff;
+  padding: 0 18px;
+}
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dbdbdb;
+}
+
+/* زر Google */
+.google-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;
+  font-weight: 600;
+  font-size: 14px;
+  color: #262626;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.google-login svg {
+  fill: #262626;
+}
+.google-login:hover:not(:disabled) {
+  background: #fafafa;
+}
+.google-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* الروابط السفلية داخل البطاقة (نسيت كلمة المرور، التبديل بين تسجيل الدخول والتسجيل) */
+.login-footer {
+  margin-top: 20px;
+}
+.forgot-password {
+  font-size: 12px;
+  color: #00376b;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+.forgot-password:hover {
+  text-decoration: underline;
+}
+.signup-switch {
+  font-size: 14px;
+  color: #262626;
+  border-top: 1px solid #dbdbdb;
+  padding-top: 20px;
+}
+.switch-btn {
   background: none;
   border: none;
-  color: var(--color-accent);
+  color: #0095f6;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  font-size: 14px;
 }
-.login-switch-btn:hover {
+.switch-btn:hover {
   text-decoration: underline;
-  opacity: 0.8;
 }
 
-/* ===== استجابة للجوال ===== */
-@media (max-width: 480px) {
+/* ========== تذييل الصفحة (أسفل العمودين) ========== */
+.login-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 20px;
+  margin: 0 0 12px;
+}
+.login-footer-links a {
+  font-size: 12px;
+  color: #8e8e8e;
+  text-decoration: none;
+}
+.login-footer-links a:hover {
+  text-decoration: underline;
+}
+.login-copyright {
+  text-align: center;
+  font-size: 12px;
+  color: #8e8e8e;
+}
+
+/* ========== استجابة للشاشات الصغيرة ========== */
+@media (max-width: 768px) {
+  .login-wrapper {
+    padding: 0 16px;
+  }
   .login-card {
-    padding: 1.5rem;
-    max-width: 100%;
+    padding: 24px 28px;
   }
   .login-title {
-    font-size: 1.6rem;
+    font-size: 28px;
   }
-  .login-form input {
-    padding: 0.6rem 0.8rem;
+  .login-logo-icon {
+    font-size: 28px;
+  }
+}
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px 16px;
+  }
+  .login-title {
+    font-size: 24px;
+  }
+  .login-logo-icon {
+    font-size: 24px;
+  }
+}
+
+/* ========== تحسين الجوال: عرض كامل وارتفاع مناسب ========== */
+@media (max-width: 991px) {
+  .login-container {
+    padding: 1rem;
+    gap: 1rem;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .login-wrapper {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: auto;
+    padding: 0;
+    gap: 1rem;
+  }
+
+  /* إخفاء صورة الهاتف نهائياً في الجوال (بالفعل موجود لكن للتأكيد) */
+  .login-phone {
+    display: none;
+  }
+
+  .login-form-container {
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
+  }
+
+  .login-card {
+    width: 100%;
+    padding: 24px 20px;
+    margin-bottom: 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  /* تعديل حجم الشعار */
+  .login-logo-icon {
+    font-size: 28px;
+  }
+  .login-title {
+    font-size: 28px;
+  }
+
+  /* تقليل الهوامش الداخلية لحقول الإدخال */
+  .input-group input {
+    padding: 10px 12px;
+  }
+
+  /* روابط التذييل تصبح في صفوف منسدلة بشكل أفضل */
+  .login-footer-links {
+    gap: 8px 16px;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px 16px;
+  }
+  .login-logo-icon {
+    font-size: 24px;
+  }
+  .login-title {
+    font-size: 24px;
+  }
+  .login-submit,
+  .google-login {
+    font-size: 13px;
+    padding: 8px;
+  }
+  .switch-btn {
+    font-size: 13px;
+  }
+  .login-footer-links a {
+    font-size: 11px;
+  }
+  .login-copyright {
+    font-size: 11px;
   }
 }
