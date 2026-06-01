@@ -56,3 +56,43 @@
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
 }
+
+.verifier-header__hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: white;
+  transition: all 0.2s ease;
+  line-height: 0;
+}
+.verifier-header__hamburger:hover {
+  background: rgba(255,255,255,0.1);
+}
+.verifier-header__logout-icon {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.verifier-header__logout-icon:hover {
+  background: rgba(239,68,68,0.2);
+  color: #ef4444;
+  transform: scale(1.05);
+}
+@media (max-width: 768px) {
+  .verifier-header__hamburger {
+    display: flex;
+  }
+  .verifier-header__back-link {
+    display: none;
+  }
+}
