@@ -160,3 +160,173 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* إضافة التنسيقات الجديدة مع الحفاظ على القديمة */
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.game-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+.game-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.game-card.selected {
+  border-color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.game-card.unavailable {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+.game-card.unavailable:hover {
+  transform: none;
+}
+
+.game-card__image {
+  width: 70px;
+  height: 70px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.game-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.game-card__placeholder {
+  font-size: 2rem;
+}
+
+.game-card__info {
+  flex: 1;
+}
+.game-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.game-card__note {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.25rem;
+}
+.game-card__unavailable-reason {
+  font-size: 0.7rem;
+  color: #dc2626;
+}
+.game-card__status {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  display: inline-block;
+}
+.status-available {
+  background: #d1fae5;
+  color: #065f46;
+}
+.status-unavailable {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* الباقات */
+.packages-section {
+  margin: 2rem 0;
+}
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.package-card {
+  background: var(--color-bg-secondary);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--color-border);
+}
+.package-card:hover {
+  border-color: var(--color-accent);
+  transform: translateX(-4px);
+}
+.package-card__title {
+  font-weight: 600;
+}
+.package-card__badge {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  margin-right: 0.5rem;
+}
+.package-card__price {
+  text-align: left;
+}
+.package-card__amount {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.package-card__old-price {
+  font-size: 0.7rem;
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+  margin-right: 0.5rem;
+}
+.package-card__discount {
+  font-size: 0.7rem;
+  color: #10b981;
+}
+
+/* نموذج الطلب */
+.order-form {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.price-summary {
+  margin: 1rem 0;
+  font-size: 1rem;
+}
+.price-summary strong {
+  color: var(--color-accent);
+  font-size: 1.2rem;
+}
+
+/* المودال موجود مسبقاً، نضيف التأثيرات */
+.status-modal-overlay {
+  /* كما هو موجود */
+}
+.status-modal {
+  /* كما هو موجود */
+}

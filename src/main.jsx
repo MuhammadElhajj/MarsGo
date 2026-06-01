@@ -8,7 +8,7 @@ import { PaymentSettingsProvider } from './context/PaymentSettingsContext';
 import './index.css';
 import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import { ServicesProvider } from './context/ServicesContext';
-
+import { GamesProvider } from './context/GamesContext';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -19,7 +19,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <PaymentSettingsProvider>
       <StoreSettingsProvider>  {/* أضفه هنا */}
            <ServicesProvider>   {/* <-- أضف هذا */}
-          <App />
+            <GamesProvider>   {/* <-- أضف هذا */}
+                  <App />
+                </GamesProvider>
         </ServicesProvider>
       </StoreSettingsProvider>
     </PaymentSettingsProvider>
