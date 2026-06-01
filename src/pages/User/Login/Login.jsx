@@ -4,6 +4,7 @@ import { auth } from '../../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { useStoreSettings } from '../../../context/StoreSettingsContext';
 import './Login.css';
+import Logo1 from "../../../assets/logo-light.png";
 
 // صورة افتراضية مدمجة (Base64) - يمكنك استبدالها بأي صورة تريدها
 const DEFAULT_PHONE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 350'%3E%3Crect width='200' height='350' fill='%234f46e5'/%3E%3Ccircle cx='100' cy='120' r='40' fill='%23ffffff' opacity='0.8'/%3E%3Crect x='60' y='180' width='80' height='10' rx='5' fill='%23ffffff' opacity='0.6'/%3E%3Crect x='50' y='210' width='100' height='10' rx='5' fill='%23ffffff' opacity='0.4'/%3E%3Crect x='70' y='240' width='60' height='10' rx='5' fill='%23ffffff' opacity='0.3'/%3E%3Ctext x='100' y='300' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EMarsGo%3C/text%3E%3C/svg%3E";
@@ -105,7 +106,9 @@ export default function Login() {
         <div className="login-form-container">
           <div className="login-card">
             <div className="login-logo">
-              <h1 className="login-title">MarsGo</h1>
+              
+              <img src={Logo1} alt="Logo" className='Login-Logo--img'/>
+              <h1 className="login-title">تسجيل الدخول</h1>
             </div>
 
             <form onSubmit={handleSubmit}>

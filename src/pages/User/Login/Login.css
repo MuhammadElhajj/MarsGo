@@ -120,13 +120,14 @@
   justify-content: center;
   gap: 8px;
   margin-bottom: 16px;
+  flex-direction: column;
 }
 .login-logo-icon {
   font-size: 32px;
 }
 .login-title {
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 16px !important;
+  /* font-weight: 600; */
   color: #262626;
   margin: 0;
   letter-spacing: -0.5px;
@@ -472,4 +473,8 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.Login-Logo--img {
+  width: 150px;
 }

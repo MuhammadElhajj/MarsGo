@@ -403,3 +403,7 @@
     gap: 0.5rem;
   }
 }
+
+.header-Logo--img {
+  width: 100px;
+}

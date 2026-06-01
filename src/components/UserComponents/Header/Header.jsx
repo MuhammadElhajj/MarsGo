@@ -6,6 +6,8 @@ import Search from "../../GeneralComponents/Search/Search";
 import ThemeToggle from '../../GeneralComponents/ThemeToggle/ThemeToggle';
 import { FiMenu, FiLogOut } from 'react-icons/fi';  // ✅ أيقونات React
 import './Header.css';
+import Logo from "../../../assets/logo-dark.png";
+
 
 export default function Header({ onToggleSidebar }) {
   const { userData } = useAuth();
@@ -21,7 +23,9 @@ export default function Header({ onToggleSidebar }) {
         <button className="header__hamburger" onClick={onToggleSidebar} aria-label="القائمة">
           <FiMenu size={22} />
         </button>
-        <h1 className="header__brand">MarsGo</h1>
+         <img src={Logo} alt="Logo" className='header-Logo--img'/>
+                     
+         {/* <h1 className="header__brand">MarsGo</h1> */}
       </div>
 
       <div className="header__center">
