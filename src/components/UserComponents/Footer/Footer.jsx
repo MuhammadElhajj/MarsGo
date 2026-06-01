@@ -39,7 +39,7 @@ export default function Footer() {
 
         {/* حقوق النشر */}
         <div className="footer__section footer__copyright">
-          <p>© {new Date().getFullYear()} DevFix. جميع الحقوق محفوظة.</p>
+          <p>© {new Date().getFullYear()} MarsGo. جميع الحقوق محفوظة.</p>
         </div>
       </div>
     </footer>

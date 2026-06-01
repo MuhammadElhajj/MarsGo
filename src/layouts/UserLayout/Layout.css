@@ -44,7 +44,7 @@
 /* ========== المحتوى الرئيسي (الصفحات) ========== */
 .app-content {
   flex: 1;            /* يدفع الفوتر للأسفل إذا كان المحتوى قليلاً */
-  padding: 2rem;
+  padding: 0.30rem;
   background-color: var(--color-bg-primary);
 }
 

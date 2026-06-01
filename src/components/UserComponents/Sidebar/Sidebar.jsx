@@ -52,11 +52,17 @@ export default function Sidebar({ isOpen, onClose }) {
               <ul className="sidebar__sublist">
                 <li><Link to="/crypto" className={linkClass("/crypto")} onClick={handleLinkClick}>عملات رقمية</Link></li>
                 <li><Link to="/gaming" className={linkClass("/gaming")} onClick={handleLinkClick}>شحن ألعاب</Link></li>
+             
                 <li><Link to="/transfer" className={linkClass("/transfer")} onClick={handleLinkClick}>تحويل دولي</Link></li>
                 <li><Link to="/exchange" className={linkClass("/exchange")} onClick={handleLinkClick}>صرافة شام كاش</Link></li>
               </ul>
             )}
           </li>
+          <li>
+            <Link to="/my-orders" className={linkClass("/my-orders")} onClick={handleLinkClick}>
+     طلباتي
+  </Link>
+</li> 
           <li>
             <Link to="/about" className={linkClass("/about")} onClick={handleLinkClick}>
               من نحن

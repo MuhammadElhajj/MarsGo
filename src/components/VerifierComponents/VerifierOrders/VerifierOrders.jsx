@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -124,9 +123,8 @@ export default function VerifierOrders() {
                 <p><strong>تاريخ التقديم:</strong> {order.createdAt?.toDate().toLocaleString('ar-SY')}</p>
               </div>
 
-              {/* عرض الصور المخزنة كـ base64 أو روابط قديمة */}
+              {/* عرض الصور المخزنة كـ base64 */}
               <div className="verifier-orders__files">
-                {/* صورة الهوية */}
                 {order.idImage && (
                   <button 
                     className="image-preview-btn"
@@ -135,14 +133,10 @@ export default function VerifierOrders() {
                     📄 صورة الهوية (اضغط للمعاينة)
                   </button>
                 )}
-                {order.idImageUrl && !order.idImage && (
-                  <a href={order.idImageUrl} target="_blank" rel="noopener noreferrer">📄 صورة الهوية (رابط قديم)</a>
-                )}
-                {!order.idImage && !order.idImageUrl && order.idImageRef && (
+                {!order.idImage && order.idImageRef && (
                   <span>صورة الهوية: {order.idImageRef}</span>
                 )}
 
-                {/* إيصال الدفع */}
                 {order.receiptImage && (
                   <button 
                     className="image-preview-btn"
@@ -151,10 +145,7 @@ export default function VerifierOrders() {
                     📄 إيصال الدفع (اضغط للمعاينة)
                   </button>
                 )}
-                {order.receiptImageUrl && !order.receiptImage && (
-                  <a href={order.receiptImageUrl} target="_blank" rel="noopener noreferrer">📄 إيصال الدفع (رابط قديم)</a>
-                )}
-                {!order.receiptImage && !order.receiptImageUrl && order.receiptImageRef && (
+                {!order.receiptImage && order.receiptImageRef && (
                   <span>إيصال الدفع: {order.receiptImageRef}</span>
                 )}
               </div>
