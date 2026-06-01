@@ -17,9 +17,10 @@ export default function AdminSidebar({ isOpen, onClose }) {
       <li><Link to="/admin/payment-settings" className={linkClass('/admin/payment-settings')}>💳 إعدادات الدفع</Link></li>
       <li><Link to="/admin/games" className={linkClass('/admin/games')} onClick={handleLinkClick}>🎮 إدارة الألعاب</Link></li>
           <li><Link to="/admin/ads" className={linkClass('/admin/ads')} onClick={handleLinkClick}>📢 إدارة الإعلانات</Link></li>
-          <li><Link to="/admin/settings" className={linkClass('/admin/settings')} onClick={handleLinkClick}>⚙️ الإعدادات</Link></li>
           <li><Link to="/admin/services" className={linkClass('/admin/services')} onClick={handleLinkClick}>🔧 إدارة الخدمات</Link></li>
-          <li><Link to="/admin/store-settings" className={linkClass('/admin/store-settings')} onClick={handleLinkClick}>🎨 إعدادات المتجر</Link></li>
+        
+        <li><Link to="/admin/navigation" className={linkClass('/admin/navigation')} onClick={handleLinkClick}>🌐 روابط التنقل</Link></li>  <li><Link to="/admin/store-settings" className={linkClass('/admin/store-settings')} onClick={handleLinkClick}>🎨 إعدادات المتجر</Link></li>
+          <li><Link to="/admin/settings" className={linkClass('/admin/settings')} onClick={handleLinkClick}>⚙️ الإعدادات</Link></li>
         </ul>
       </nav>
     </aside>

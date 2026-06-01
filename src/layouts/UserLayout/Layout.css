@@ -84,3 +84,10 @@
     display: block;
   }
 }
+
+/* ضبط الهوامش إذا لزم الأمر */
+.navigation-bar {
+  position: sticky;
+  top: 4rem; /* تحت الهيدر مباشرة */
+  z-index: 15;
+}

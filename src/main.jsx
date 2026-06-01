@@ -9,7 +9,7 @@ import './index.css';
 import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import { ServicesProvider } from './context/ServicesContext';
 import { GamesProvider } from './context/GamesContext';
-
+import { NavLinksProvider } from './context/NavLinksContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -20,7 +20,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <StoreSettingsProvider>  {/* أضفه هنا */}
            <ServicesProvider>   {/* <-- أضف هذا */}
             <GamesProvider>   {/* <-- أضف هذا */}
-                  <App />
+                  <NavLinksProvider>
+  <App />
+</NavLinksProvider>
                 </GamesProvider>
         </ServicesProvider>
       </StoreSettingsProvider>

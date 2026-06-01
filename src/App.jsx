@@ -22,6 +22,7 @@ const AdminUsersPage = lazy(() => import("./pages/Admin/AdminUsers"));
 const AdManagementPage = lazy(() => import("./pages/Admin/AdManagementPage"));
 const AdminGamesPage = lazy(() => import("./pages/Admin/AdminGames"));
 import AdminPaymentSettingsPage from './pages/Admin/AdminPaymentSettingsPage';
+const AdminNavLinksPage = lazy(() => import("./pages/Admin/AdminNavLinks"));
 // مع باقي استيرادات صفحات المدير
 const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettingsPage"));
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
@@ -65,6 +66,7 @@ function App() {
      <Route path="games" element={<AdminGamesPage />} />
      <Route path="services" element={<AdminServicesPage />} />  <Route path="store-settings" element={<AdminStoreSettingsPage />} />
        <Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />   <Route path="ads" element={<AdManagementPage />} />
+          <Route path="navigation" element={<AdminNavLinksPage />} />
           <Route path="users" element={<AdminUsersPage />} />
         </Route>
 
