@@ -14,7 +14,7 @@
 .admin-layout__content {
   flex: 1;
   overflow-y: auto;
-  padding: 2rem;
+  padding: 0.7rem !important;
   background-color: var(--color-bg-primary);
 }
 

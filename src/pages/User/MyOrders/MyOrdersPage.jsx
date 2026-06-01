@@ -25,27 +25,51 @@ export default function MyOrdersPage() {
   const { userData } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState('all'); // 'all', 'gaming', 'transfer', 'crypto', 'exchange'
+  const [filterType, setFilterType] = useState('all');
+  const [error, setError] = useState('');
 
   const fetchOrders = async () => {
-    if (!userData?.uid) return;
+    if (!userData?.uid) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
+    setError('');
     try {
+      // نحاول أولاً بدون orderBy لتجنب مشكلة الفهرس
       let q = query(
         collection(db, 'orders'),
-        where('userId', '==', userData.uid),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userData.uid)
       );
+      // نحاول إضافة orderBy إذا كان الفهرس موجوداً، وإلا نتعامل مع الخطأ
+      try {
+        q = query(q, orderBy('createdAt', 'desc'));
+      } catch (err) {
+        console.warn("orderBy not supported, skipping");
+      }
       const snapshot = await getDocs(q);
       let allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      // ترتيب يدوي إذا لم ينجح orderBy
+      if (!snapshot.docs.length || !snapshot.docs[0].data().createdAt) {
+        allOrders.sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(0);
+          const dateB = b.createdAt?.toDate?.() || new Date(0);
+          return dateB - dateA;
+        });
+      }
       
       if (filterType !== 'all') {
         allOrders = allOrders.filter(order => order.type === filterType);
       }
-      
       setOrders(allOrders);
     } catch (err) {
-      console.error('خطأ في جلب الطلبات:', err);
+      console.error('Firestore error:', err);
+      if (err.code === 'failed-precondition') {
+        setError('الرجاء إنشاء الفهرس المطلوب. تحقق من رابط الخطأ في Console (F12).');
+      } else {
+        setError('حدث خطأ في جلب الطلبات: ' + err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -55,66 +79,51 @@ export default function MyOrdersPage() {
     fetchOrders();
   }, [userData, filterType]);
 
-  const handleFilterChange = (type) => {
-    setFilterType(type);
-  };
+  const handleFilterChange = (type) => setFilterType(type);
 
   if (loading) return <Loading text="جاري تحميل طلباتك..." />;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="my-orders-page" dir="rtl">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+      <div className="my-orders-header">
         <GoBackButton text="رجوع" />
         <h2 className="my-orders-page__title">طلباتي</h2>
-        <div></div> {/* فراغ للمحاذاة */}
+        <div></div>
       </div>
 
-      {/* فلترة حسب النوع */}
       <div className="filter-buttons">
         <button className={filterType === 'all' ? 'active' : ''} onClick={() => handleFilterChange('all')}>الكل</button>
-        <button className={filterType === 'gaming' ? 'active' : ''} onClick={() => handleFilterChange('gaming')}>🎮 شحن ألعاب</button>
-        <button className={filterType === 'transfer' ? 'active' : ''} onClick={() => handleFilterChange('transfer')}>💸 تحويل شام كاش</button>
-        <button className={filterType === 'crypto' ? 'active' : ''} onClick={() => handleFilterChange('crypto')}>₿ عملات رقمية</button>
+        <button className={filterType === 'gaming' ? 'active' : ''} onClick={() => handleFilterChange('gaming')}>🎮 ألعاب</button>
+        <button className={filterType === 'transfer' ? 'active' : ''} onClick={() => handleFilterChange('transfer')}>💸 تحويل</button>
+        <button className={filterType === 'crypto' ? 'active' : ''} onClick={() => handleFilterChange('crypto')}>₿ عملات</button>
         <button className={filterType === 'exchange' ? 'active' : ''} onClick={() => handleFilterChange('exchange')}>🔄 صرافة</button>
       </div>
 
       {orders.length === 0 ? (
-        <div className="empty-orders">لا توجد طلبات</div>
+        <div className="empty-orders">📭 لا توجد طلبات حتى الآن</div>
       ) : (
         <div className="orders-table-wrapper">
           <table className="orders-table">
             <thead>
               <tr>
-                <th>رقم الطلب</th>
-                <th>النوع</th>
-                <th>التفاصيل</th>
-                <th>المبلغ</th>
-                <th>الحالة</th>
-                <th>التاريخ</th>
+                <th>رقم الطلب</th><th>النوع</th><th>التفاصيل</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th>
               </tr>
             </thead>
             <tbody>
               {orders.map(order => (
                 <tr key={order.id}>
-                  <td>#{order.id.slice(-8)}</td>
+                  <td>{order.id.slice(-6)}</td>
                   <td>{orderTypes[order.type] || order.type}</td>
                   <td>
-                    {order.type === 'gaming' && `${order.gameName} - ${order.packageName} (ID: ${order.playerId})`}
-                    {order.type === 'transfer' && `إلى: ${order.recipientName} - ${order.shamCashPhone}`}
+                    {order.type === 'gaming' && `${order.gameName} - ${order.packageName} (${order.playerId})`}
+                    {order.type === 'transfer' && `${order.recipientName} - ${order.shamCashPhone}`}
                     {order.type === 'crypto' && `${order.tradeType === 'buy' ? 'شراء' : 'بيع'} ${order.amount} USDT`}
-                    {order.type === 'exchange' && `${order.exchangeType === 'buy_dollar' ? 'شراء دولار' : 'بيع دولار'} - المبلغ: ${order.amount}`}
-                   </td>
-                  <td>
-                    {order.finalPrice || order.amount} {order.currency === 'USD' ? '$' : order.currency || 'USD'}
-                   </td>
-                  <td>
-                    <span className={`status-badge status-${order.status}`}>
-                      {statusLabels[order.status] || order.status}
-                    </span>
-                   </td>
-                  <td>
-                    {order.createdAt?.toDate().toLocaleDateString('ar-SY') || '—'}
-                   </td>
+                    {order.type === 'exchange' && `${order.exchangeType === 'buy_dollar' ? 'شراء دولار' : 'بيع دولار'} - ${order.amount}`}
+                    </td>
+                  <td>{order.finalPrice || order.amount} {order.currency === 'USD' ? '$' : order.currency || 'USD'}</td>
+                  <td><span className={`status-badge status-${order.status}`}>{statusLabels[order.status] || order.status}</span></td>
+                  <td>{order.createdAt?.toDate?.().toLocaleDateString('ar-SY') || '—'}</td>
                 </tr>
               ))}
             </tbody>

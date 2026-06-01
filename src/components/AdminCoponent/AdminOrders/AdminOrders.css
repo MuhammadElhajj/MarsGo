@@ -1,53 +1,218 @@
+/* ========================================
+   طلبات التنفيذ للمدير - تصميم متجاوب بالكامل
+   ======================================== */
+
+/* الحاوية الرئيسية */
 .admin-orders {
   width: 100%;
+  animation: fadeIn 0.3s ease;
 }
 
+/* العنوان */
 .admin-orders__title {
   font-size: 1.8rem;
-  font-weight: bold;
+  font-weight: 700;
   margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
+/* قائمة البطاقات */
 .admin-orders__list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+/* بطاقة الطلب */
 .admin-orders__card {
   background: var(--color-bg-secondary);
-  padding: 1.5rem;
-  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
 }
 
+.admin-orders__card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* رأس البطاقة */
 .admin-orders__card-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
+/* حالة الطلب */
 .admin-orders__status {
   background: #d1fae5;
   color: #065f46;
   padding: 0.2rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+  letter-spacing: 0.3px;
 }
 
+/* تفاصيل الطلب */
 .admin-orders__details p {
   margin-bottom: 0.5rem;
+  line-height: 1.4;
+  font-size: 0.9rem;
 }
 
+.admin-orders__details strong {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* حقل الإجراء (رقم العملية + زر) */
 .admin-orders__action {
   display: flex;
   gap: 1rem;
-  align-items: center;
+  align-items: flex-end;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
+.admin-orders__action .input-group {
+  flex: 2;
+  min-width: 150px;
+}
+
+.admin-orders__action .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* حالة عدم وجود طلبات */
 .admin-orders__empty {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
   color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+/* ========================================
+   استجابة للشاشات المتوسطة والصغيرة
+   ======================================== */
+
+@media (max-width: 768px) {
+  .admin-orders__title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .admin-orders__card {
+    padding: 1rem;
+  }
+
+  .admin-orders__card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-orders__action {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .admin-orders__action .input-group,
+  .admin-orders__action .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* ========================================
+   شاشات صغيرة جداً (حتى عرض 250px)
+   ======================================== */
+
+@media (max-width: 480px) {
+  .admin-orders__title {
+    font-size: 1.2rem;
+  }
+
+  .admin-orders__card {
+    padding: 0.75rem;
+  }
+
+  .admin-orders__details p {
+    font-size: 0.8rem;
+    word-break: break-word;
+  }
+
+  .admin-orders__status {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.6rem;
+  }
+
+  .admin-orders__action {
+    gap: 0.5rem;
+  }
+}
+
+/* دعم عرض 250px (أصغر شاشة ممكنة) */
+@media (max-width: 250px) {
+  .admin-orders__title {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .admin-orders__card {
+    padding: 0.5rem;
+  }
+
+  .admin-orders__details p {
+    font-size: 0.7rem;
+    word-break: break-all;
+  }
+
+  .admin-orders__status {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .admin-orders__action .btn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
+/* ========================================
+   دعم الوضع الداكن
+   ======================================== */
+.dark .admin-orders__status {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+.dark .admin-orders__card {
+  border-color: var(--color-border);
+}
+
+/* ========================================
+   حركة الظهور
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

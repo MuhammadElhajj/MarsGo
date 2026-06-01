@@ -1,10 +1,134 @@
-.admin-stats h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
+/* ========================================
+   إحصائيات المدير - تصميم احترافي متجاوب
+   ======================================== */
+
+/* الحاوية الرئيسية */
+.admin-stats {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
+/* عنوان القسم */
+.admin-stats h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+/* شبكة البطاقات */
 .admin-stats__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
+  width: 100%;
+}
+
+/* تنسيق البطاقات (تفترض وجود مكون StatCard، لكن نضيف تحسينات على المستوى الأب) */
+.admin-stats__grid > * {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-stats__grid > *:hover {
+  transform: translateY(-4px);
+}
+
+/* ========================================
+   استجابة للشاشات المختلفة
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .admin-stats h2 {
+    font-size: 1.6rem;
+  }
+
+  .admin-stats__grid {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-stats h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .admin-stats__grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-stats h2 {
+    font-size: 1.2rem;
+    border-right-width: 3px;
+    padding-right: 0.5rem;
+  }
+
+  .admin-stats__grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats h2 {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .admin-stats__grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.6rem;
+  }
+}
+
+/* دعم الشاشات الصغيرة جداً (حتى 250px) */
+@media (max-width: 250px) {
+  .admin-stats h2 {
+    font-size: 0.9rem;
+    text-align: center;
+    border-right: none;
+    padding-right: 0;
+  }
+
+  .admin-stats__grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+/* ========================================
+   دعم الوضع الداكن
+   ======================================== */
+.dark .admin-stats h2 {
+  background: linear-gradient(135deg, #f9fafb, var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+/* ========================================
+   حركة الظهور
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-stats {
+  animation: fadeIn 0.3s ease;
 }

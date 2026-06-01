@@ -1,35 +1,223 @@
+/* ========================================
+   إعدادات المتجر للمدير - تصميم كامل العرض
+   ======================================== */
+
+/* الحاوية الرئيسية - بدون حدود عرض */
 .admin-store-settings {
+  width: 100%;
   background: var(--color-bg-secondary);
   padding: 1.5rem;
-  border-radius: 1rem;
-  max-width: 700px;
-  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+  transition: all 0.2s;
 }
+
+/* عنوان القسم (يمكن إضافته في JSX، لكن نضيف تنسيقاً عاماً) */
+.admin-store-settings h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+/* معاينة الصورة الحالية */
+.current-background {
+  margin-bottom: 1rem;
+}
+
 .current-background img {
   max-width: 100%;
   max-height: 200px;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   margin-top: 0.5rem;
   border: 1px solid var(--color-border);
+  object-fit: contain;
+  background: var(--color-bg-primary);
+  transition: transform 0.2s;
 }
+
+.current-background img:hover {
+  transform: scale(1.01);
+}
+
+/* قسم رفع الصورة */
 .upload-section {
   margin: 1.5rem 0;
 }
+
+/* معاينة الصورة الجديدة */
 .preview img {
   max-width: 100%;
   max-height: 150px;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   margin-top: 0.5rem;
+  border: 1px solid var(--color-border);
+  object-fit: contain;
+  background: var(--color-bg-primary);
 }
+
+/* مجموعة الأزرار */
 .actions {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.5rem;
 }
+
+/* حالة عدم وجود صورة */
 .no-image {
   color: var(--color-text-secondary);
   background: var(--color-bg-primary);
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   text-align: center;
+  font-size: 0.9rem;
+}
+
+/* فصل الأقسام داخل الإعدادات (مثل خلفية الترحيب وصورة الهاتف) */
+.settings-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.section-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* ========================================
+   استجابة للشاشات المختلفة
+   ======================================== */
+
+@media (max-width: 768px) {
+  .admin-store-settings {
+    padding: 1rem;
+  }
+
+  .admin-store-settings h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .current-background img {
+    max-height: 160px;
+  }
+
+  .preview img {
+    max-height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-store-settings {
+    padding: 0.75rem;
+  }
+
+  .admin-store-settings h2 {
+    font-size: 1.1rem;
+    border-right-width: 3px;
+    padding-right: 0.5rem;
+  }
+
+  .actions {
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .current-background img {
+    max-height: 130px;
+  }
+
+  .preview img {
+    max-height: 100px;
+  }
+
+  .no-image {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .section-desc {
+    font-size: 0.75rem;
+  }
+}
+
+/* دعم الشاشات الصغيرة جداً (حتى 250px) */
+@media (max-width: 250px) {
+  .admin-store-settings {
+    padding: 0.5rem;
+  }
+
+  .admin-store-settings h2 {
+    font-size: 1rem;
+    text-align: center;
+    border-right: none;
+    padding-right: 0;
+  }
+
+  .current-background img {
+    max-height: 100px;
+  }
+
+  .preview img {
+    max-height: 80px;
+  }
+
+  .no-image {
+    padding: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .actions .btn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
+/* ========================================
+   دعم الوضع الداكن
+   ======================================== */
+.dark .current-background img,
+.dark .preview img {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border);
+}
+
+/* ========================================
+   حركة الظهور
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-store-settings {
+  animation: fadeIn 0.3s ease;
 }

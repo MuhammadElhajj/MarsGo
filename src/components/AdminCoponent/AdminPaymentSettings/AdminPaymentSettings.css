@@ -1,25 +1,138 @@
+/* ========================================
+   إعدادات الدفع للمدير - تصميم كامل العرض (Full Width)
+   ======================================== */
+
+/* الحاوية الرئيسية - بدون حدود عرض */
 .admin-payment-settings {
+  width: 100%;
   background: var(--color-bg-secondary);
-  padding: 2rem;
-  border-radius: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+  transition: all 0.2s;
 }
+
+/* العنوان */
 .admin-payment-settings h2 {
-  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 0.75rem;
 }
+
+/* نموذج الدفع */
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.25rem;
 }
+
+/* معاينة رمز QR */
 .qr-preview {
   margin-top: 0.5rem;
   text-align: center;
 }
+
 .qr-preview img {
   max-width: 150px;
   border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   padding: 0.5rem;
+  background: white;
+  transition: transform 0.2s;
+}
+
+.qr-preview img:hover {
+  transform: scale(1.02);
+}
+
+/* تنسيق الحقول (اختياري لضمان تناسق مع باقي النماذج) */
+.payment-form .input-group {
+  width: 100%;
+}
+
+.payment-form .input-field {
+  width: 100%;
+  padding: 0.7rem;
+}
+
+/* ========================================
+   استجابة للشاشات المتوسطة والصغيرة
+   ======================================== */
+
+@media (max-width: 768px) {
+  .admin-payment-settings {
+    padding: 1rem;
+  }
+
+  .admin-payment-settings h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .payment-form {
+    gap: 1rem;
+  }
+
+  .qr-preview img {
+    max-width: 120px;
+  }
+}
+
+/* شاشات صغيرة جداً (حتى 480px) */
+@media (max-width: 480px) {
+  .admin-payment-settings {
+    padding: 0.75rem;
+  }
+
+  .admin-payment-settings h2 {
+    font-size: 1.1rem;
+    border-right-width: 3px;
+    padding-right: 0.5rem;
+  }
+
+  .payment-form {
+    gap: 0.75rem;
+  }
+
+  .payment-form .input-field {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .qr-preview img {
+    max-width: 100px;
+  }
+}
+
+/* ========================================
+   دعم الوضع الداكن
+   ======================================== */
+.dark .qr-preview img {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border);
+}
+
+/* ========================================
+   حركة الظهور
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-payment-settings {
+  animation: fadeIn 0.3s ease;
 }

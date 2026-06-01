@@ -1,39 +1,88 @@
+/* ========================================
+   رأس لوحة الإدارة - تصميم احترافي
+   ======================================== */
+
 .admin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: white;
   height: 4rem;
   position: sticky;
   top: 0;
   z-index: 30;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* القسم الأيسر */
 .admin-header__left {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
+/* زر القائمة (هامبرغر) */
+.admin-header__hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-header__hamburger:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hamburger-icon {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+/* عنوان الصفحة (تم تقليل الحجم) */
+.admin-header__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #fff, #a5b4fc);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* زر العودة إلى المتجر (سيتم تطبيقه على مكون GoBackButton) */
 .admin-header__back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: #93c5fd;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
 
 .admin-header__back-link:hover {
+  background: rgba(255, 255, 255, 0.2);
   color: white;
+  transform: translateX(-3px);
 }
 
-.admin-header__title {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
+/* القسم الأيمن (المستخدم) */
 .admin-header__user {
   display: flex;
   align-items: center;
@@ -42,38 +91,84 @@
 
 .admin-header__name {
   font-weight: 500;
+  font-size: 0.9rem;
   display: none;
+  white-space: nowrap;
 }
 
+/* زر تسجيل الخروج */
+.admin-header__logout {
+  width: auto;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 2rem;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fecaca;
+  transition: all 0.2s;
+}
+
+.admin-header__logout:hover {
+  background: #ef4444;
+  color: white;
+  transform: scale(1.02);
+}
+
+/* استجابة للشاشات المتوسطة */
 @media (min-width: 640px) {
   .admin-header__name {
-    display: inline;
+    display: inline-block;
   }
 }
 
-.admin-header__logout {
-  width: auto;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.8rem;
+/* استجابة للجوال */
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 0.5rem 1rem;
+  }
+
+  .admin-header__hamburger {
+    display: flex;
+  }
+
+  .admin-header__title {
+    font-size: 1rem;
+  }
+
+  .admin-header__back-link {
+    display: none; /* إخفاء النص واكتفاء بالهامبرغر للتنقل */
+  }
+
+  .admin-header__user {
+    gap: 0.5rem;
+  }
+
+  .admin-header__name {
+    display: none;
+  }
+
+  .admin-header__logout {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
 }
 
-.admin-header__hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  margin-left: 0.5rem;
+@media (max-width: 380px) {
+  .admin-header__title {
+    font-size: 0.85rem;
+    white-space: normal;
+    word-break: keep-all;
+  }
+  .admin-header__left {
+    gap: 0.5rem;
+  }
 }
-.hamburger-icon {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background-color: white;
-  transition: 0.3s;
-}
-@media (max-width: 768px) {
-  .admin-header__hamburger { display: flex; }
+
+@media (max-width: 350px) {
+  .admin-header__title {
+   display: none;
+  }
+  .admin-header__left {
+    gap: 0.5rem;
+  }
 }

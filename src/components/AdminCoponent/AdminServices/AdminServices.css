@@ -1,13 +1,16 @@
 /* ========================================
-   AdminServices - Full Width Professional
+   إدارة الخدمات - تصميم احترافي كامل العرض
    ======================================== */
 
+/* الحاوية الرئيسية - بدون حدود */
 .admin-services {
   width: 100%;
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
+/* رأس الصفحة */
 .admin-services__header {
   display: flex;
   justify-content: space-between;
@@ -21,9 +24,14 @@
 .admin-services__header h2 {
   margin: 0;
   font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-/* شبكة الكروت - متجاوبة وتملأ العرض */
+/* شبكة البطاقات - متجاوبة وتملأ العرض */
 .admin-services__list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -31,9 +39,10 @@
   width: 100%;
 }
 
+/* البطاقة */
 .admin-services__card {
   background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
@@ -41,13 +50,16 @@
   flex-wrap: wrap;
   gap: 1rem;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
 }
 
 .admin-services__card:hover {
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
+/* معلومات الخدمة */
 .admin-services__card-info {
   display: flex;
   align-items: center;
@@ -55,6 +67,7 @@
   flex-wrap: wrap;
 }
 
+/* أيقونة الخدمة */
 .admin-services__icon {
   font-size: 1.8rem;
   background: var(--color-bg-primary);
@@ -64,16 +77,24 @@
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
 }
 
+/* اسم الخدمة */
 .admin-services__card-info strong {
   font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
+/* الحالة (نشط/غير نشط) */
 .status {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: inline-block;
 }
 
 .status.active {
@@ -86,20 +107,25 @@
   color: #b91c1c;
 }
 
+/* علامة "قريباً" */
 .coming-soon {
   background: #fef3c7;
   color: #92400e;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
+  border-radius: 2rem;
+  font-weight: 500;
 }
 
+/* أزرار الإجراءات */
 .admin-services__card-actions {
   display: flex;
   gap: 0.5rem;
 }
 
-/* ===== المودال - احترافي ويملأ الشاشة في الجوال ===== */
+/* ========================================
+   المودال - احترافي ومتجاوب
+   ======================================== */
 .admin-modal-overlay {
   position: fixed;
   top: 0;
@@ -107,11 +133,12 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s;
 }
 
 .admin-modal {
@@ -122,20 +149,21 @@
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
-  animation: fadeInScale 0.2s ease;
+  animation: slideUp 0.2s ease;
 }
 
-@keyframes fadeInScale {
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
 
+/* رأس المودال */
 .admin-modal__header {
   display: flex;
   justify-content: space-between;
@@ -152,6 +180,7 @@
 .admin-modal__header h3 {
   margin: 0;
   font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .admin-modal__header .close {
@@ -160,22 +189,22 @@
   font-size: 1.8rem;
   cursor: pointer;
   color: var(--color-text-secondary);
-  line-height: 1;
-  padding: 0;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .admin-modal__header .close:hover {
   background: rgba(0, 0, 0, 0.1);
   color: var(--color-danger);
+  transform: scale(1.05);
 }
 
+/* نموذج المودال */
 .admin-modal__form {
   padding: 1.5rem;
   display: flex;
@@ -183,7 +212,7 @@
   gap: 1.2rem;
 }
 
-/* تحسين الحقول */
+/* حقول الإدخال */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -191,8 +220,8 @@
 }
 
 .input-label {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--color-text-secondary);
 }
 
@@ -204,7 +233,7 @@
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: 0.9rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
 }
 
 .input-field:focus {
@@ -213,22 +242,7 @@
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
-select.input-field {
-  cursor: pointer;
-}
-
-/* أزرار داخل المودال */
-.admin-modal__actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.admin-modal__actions .btn {
-  flex: 1;
-}
-
-/* الإيموجي بيكر */
+/* منتقي الإيموجي */
 .emoji-picker {
   display: flex;
   flex-wrap: wrap;
@@ -238,7 +252,6 @@ select.input-field {
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  max-width: 100%;
 }
 
 .emoji-option {
@@ -277,13 +290,13 @@ select.input-field {
 .admin-modal__preview img {
   max-width: 120px;
   max-height: 120px;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   padding: 0.25rem;
   background: white;
 }
 
-/* شيك بوكس */
+/* مربع الاختيار */
 .admin-modal__checkbox {
   display: flex;
   align-items: center;
@@ -291,28 +304,156 @@ select.input-field {
   margin-top: 0.5rem;
 }
 
-/* استجابة للجوال */
-@media (max-width: 640px) {
+/* أزرار المودال */
+.admin-modal__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.admin-modal__actions .btn {
+  flex: 1;
+}
+
+/* ========================================
+   استجابة للشاشات المختلفة
+   ======================================== */
+
+@media (max-width: 768px) {
   .admin-services__header h2 {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
   }
+
   .admin-services__list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 0.75rem;
   }
-  .admin-modal {
-    width: 95%;
-    max-width: none;
+
+  .admin-services__card {
+    padding: 0.8rem 1rem;
   }
-  .admin-modal__form {
-    padding: 1rem;
+}
+
+@media (max-width: 640px) {
+  .admin-services__header h2 {
+    font-size: 1.3rem;
   }
+
+  .admin-services__list {
+    grid-template-columns: 1fr;
+  }
+
   .admin-services__card {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .admin-services__card-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .admin-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .admin-modal__form {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-services__header h2 {
+    font-size: 1.2rem;
+  }
+
+  .admin-services__card-info {
+    gap: 0.5rem;
+  }
+
+  .admin-services__icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.4rem;
+  }
+
+  .admin-services__card-info strong {
+    font-size: 0.9rem;
+  }
+
+  .status,
+  .coming-soon {
+    font-size: 0.6rem;
+    padding: 0.1rem 0.5rem;
+  }
+
+  .admin-modal__header h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* دعم الشاشات الصغيرة جداً (250px) */
+@media (max-width: 250px) {
+  .admin-services__header h2 {
+    font-size: 1rem;
+  }
+
+  .admin-services__card {
+    padding: 0.5rem;
+  }
+
+  .admin-services__icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+  }
+
+  .admin-services__card-actions {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .admin-services__card-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .admin-modal__form {
+    gap: 0.8rem;
+  }
+}
+
+/* ========================================
+   دعم الوضع الداكن
+   ======================================== */
+.dark .status.active {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+.dark .status.inactive {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.dark .coming-soon {
+  background: #78350f;
+  color: #fde68a;
+}
+
+.dark .admin-modal__preview img {
+  background: var(--color-bg-primary);
+}
+
+/* ========================================
+   حركات
+   ======================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
