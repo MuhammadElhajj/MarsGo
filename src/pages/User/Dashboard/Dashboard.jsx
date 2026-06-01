@@ -5,6 +5,8 @@ import StoreIntro from "../../../components/UserComponents/StoreIntro/StoreIntro
 import AdSpace from "../../../components/UserComponents/AdSpace/AdSpace";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import './Dashboard.css';
+import HowItWorks from "../../../components/UserComponents/HowItWorks/HowItWorks"; // ✅ استيراد المكون
+
 import UserStatsGrid from "../../../components/UserComponents/UserStatsGrid/UserStatsGrid";
 import useUserStats from "../../../hooks/useUserStats";
 import ServicesGrid from "../../../components/UserComponents/ServicesGrid/ServicesGrid";
@@ -17,7 +19,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" dir="rtl">
-   
+      <HowItWorks page="dashboard" /> 
       {/* لمحة عن المتجر */}
       <StoreIntro />
 
