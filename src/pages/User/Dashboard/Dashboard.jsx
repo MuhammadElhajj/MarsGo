@@ -22,10 +22,12 @@ export default function Dashboard() {
       <StoreIntro />
 
       {/* مساحة إعلانية */}
+         <h3 class="dashboard__services-title">مساحة اعلانية</h3>
       <AdSpace />
 
       {/* بطاقات الإحصائيات */}
       {/* <div className="dashboard__cards"> */}
+      <h3 class="dashboard__services-title">احصائيات المستخدم</h3>
     <UserStatsGrid stats={userStats} loading={userStatsLoading} /> 
     <div className="dashboard__services">
   <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
