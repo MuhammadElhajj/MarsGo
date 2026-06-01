@@ -1,21 +1,14 @@
-/* ===== الحاوية الرئيسية ===== */
+/* ========================================
+   معلومات الدفع - تصميم متوافق مع TransferForm
+   ======================================== */
+
 .payment-info {
-  background: var(--color-bg-secondary);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-md);
-  direction: rtl;
   width: 100%;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  transition: all 0.3s;
+  animation: fadeIn 0.3s ease;
 }
 
-/* ===== العنوان ===== */
-.payment-info h3 {
-  font-size: 1.3rem;
+.payment-info__title {
+  font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 1.2rem;
   color: var(--color-accent);
@@ -23,147 +16,244 @@
   padding-right: 0.8rem;
 }
 
-/* ===== قسم الـ QR ===== */
-.qr-section {
+.payment-info__card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+  transition: all 0.3s;
+  border: 1px solid var(--color-border);
+}
+
+.payment-info__card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* قسم الـ QR */
+.payment-info__qr {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 1.8rem;
 }
-.qr-image img {
-  max-width: 160px;
+
+.payment-info__qr-image {
+  max-width: 200px;
   border: 2px solid var(--color-border);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   padding: 0.5rem;
   background: white;
   transition: transform 0.2s;
 }
-.qr-image img:hover {
+.payment-info__qr-image:hover {
   transform: scale(1.02);
 }
 
-/* ===== تفاصيل الحساب ===== */
-.account-details {
+/* تفاصيل الحساب */
+.payment-info__details {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
   margin-bottom: 1.5rem;
 }
-.detail-row {
+
+.payment-info__detail-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
   background: var(--color-bg-primary);
   padding: 0.6rem 0.8rem;
-  border-radius: 0.6rem;
+  border-radius: var(--radius-md);
   transition: background 0.2s;
 }
-.detail-row strong {
+.payment-info__detail-row strong {
   font-weight: 600;
-  color: var(--color-text-primary);
-  min-width: 100px;
-}
-.detail-row span,
-.detail-row code {
-  font-size: 0.9rem;
   color: var(--color-text-secondary);
+  min-width: 100px;
+  font-size: 0.85rem;
 }
-.detail-row code {
+.payment-info__detail-row span,
+.payment-info__detail-row code {
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+.payment-info__detail-row code {
   background: var(--color-border);
   padding: 0.2rem 0.5rem;
   border-radius: 0.4rem;
   font-family: monospace;
   direction: ltr;
-  display: inline-block;
-  word-break: break-all;
 }
 
-/* ===== زر النسخ ===== */
-.copy-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-accent);
-  padding: 0.3rem;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 0.4rem;
-  transition: all 0.2s;
-}
-.copy-btn:hover {
-  background: rgba(79, 70, 229, 0.1);
-  transform: scale(1.05);
-}
+/* ========== الأزرار (مطابقة لـ TransferForm) ========== */
 
-/* ===== رابط الدفع الإلكتروني ===== */
-.payment-link {
+/* زر التحميل (مثل زر الإرسال) */
+.payment-info__download-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  background: var(--color-accent);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--color-accent);
   color: white;
-  padding: 0.5rem 1.2rem;
-  border-radius: 2rem;
-  text-decoration: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  width: auto;
+  margin-top: 0.75rem;
+}
+.payment-info__download-btn:hover {
+  background-color: var(--color-accent-hover);
+  transform: translateY(-2px);
+}
+.payment-info__download-btn:active {
+  transform: scale(0.98);
+}
+
+/* زر النسخ (مثل زر ثانوي) */
+.payment-info__copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  background-color: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  cursor: pointer;
   transition: all 0.2s;
+}
+.payment-info__copy-btn:hover {
+  background-color: var(--color-accent);
+  color: white;
+  transform: translateY(-2px);
+}
+.payment-info__copy-btn:active {
+  transform: scale(0.97);
+}
+
+/* الرابط الإلكتروني (مثل زر أساسي) */
+.payment-info__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-accent);
+  color: white;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 250px;
   margin-top: 0.5rem;
 }
-.payment-link:hover {
-  opacity: 0.9;
+.payment-info__link:hover {
+  background-color: var(--color-accent-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
+.payment-info__link:active {
+  transform: scale(0.98);
+}
 
-/* ===== حالة التحميل ===== */
-.loading {
+/* حالة التحميل */
+.payment-info__loading {
   text-align: center;
   padding: 2rem;
-  font-size: 0.9rem;
   color: var(--color-text-secondary);
 }
 
-/* ===== استجابة للشاشات المتوسطة (تابلت) ===== */
+/* استجابة للشاشات الصغيرة */
 @media (max-width: 768px) {
-  .payment-info {
-    padding: 1.2rem;
+  .payment-info__card {
+    padding: 1rem;
     max-width: 100%;
   }
-  .payment-info h3 {
+  .payment-info__title {
     font-size: 1.2rem;
   }
-  .qr-image img {
-    max-width: 130px;
+  .payment-info__qr-image {
+    max-width: 150px;
   }
-  .detail-row strong {
+  .payment-info__detail-row strong {
     min-width: 80px;
-    font-size: 0.85rem;
-  }
-  .detail-row span,
-  .detail-row code {
-    font-size: 0.8rem;
   }
 }
 
-/* ===== استجابة للجوال ===== */
 @media (max-width: 480px) {
-  .payment-info {
-    padding: 1rem;
-  }
-  .detail-row {
+  .payment-info__detail-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.3rem;
   }
-  .detail-row strong {
+  .payment-info__detail-row strong {
     min-width: auto;
   }
-  .copy-btn {
+  .payment-info__copy-btn {
     align-self: flex-start;
   }
-  .payment-link {
-    width: 100%;
-    justify-content: center;
+  .payment-info__link {
+    max-width: 100%;
+  }
+}
+
+/* دعم الوضع الداكن */
+.dark .payment-info__qr-image {
+  background: var(--color-bg-primary);
+}
+.dark .payment-info__detail-row {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================
+   صفحة معلومات الدفع - تصميم متجاوب
+   ======================================== */
+
+.payment-info-page {
+  width: 100%;
+  padding: 0.5rem !important;
+      min-height: 75vh !important;
+  animation: fadeIn 0.3s ease;
+  direction: rtl;
+  min-height: calc(100vh - 4rem); /* تأخذ ارتفاع مناسب تحت الهيدر */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* إذا أردت أن لا يتم توسيط العنصر عمودياً، استبدل display: flex بـ block */
+.payment-info-page .payment-info {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

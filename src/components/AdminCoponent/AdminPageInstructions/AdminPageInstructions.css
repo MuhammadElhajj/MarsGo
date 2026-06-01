@@ -1,0 +1,261 @@
+/* ========================================
+   إدارة تعليمات الصفحات - FULL WIDTH + RESPONSIVE (بطاقات)
+   ======================================== */
+
+/* الحاوية الرئيسية - عرض كامل بدون أي قيود */
+.admin-page-instructions {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  animation: fadeIn 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* العنوان الرئيسي */
+.admin-page-instructions h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+/* نموذج الإضافة والتعديل - عرض كامل */
+.instructions-form {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.instructions-form:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.instructions-form .input-group {
+  margin-bottom: 1rem;
+}
+
+.lines-input {
+  margin-bottom: 1rem;
+}
+
+.lines-input label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.lines-input .input-group {
+  margin-bottom: 0.5rem;
+}
+
+/* ===== قائمة التعليمات الحالية ===== */
+.instructions-list {
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.instructions-list h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  border-right: 3px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+/* شبكة البطاقات - عمود واحد بعرض 100% */
+.instructions-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+/* البطاقة الواحدة */
+.instruction-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+  width: 100%;
+  overflow: hidden;
+}
+
+.instruction-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* رأس البطاقة (اسم الصفحة والحالة) */
+.instruction-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.instruction-card__page {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.1);
+  padding: 0.25rem 0.8rem;
+  border-radius: 2rem;
+  display: inline-block;
+}
+
+/* حالة النشاط */
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+.status-badge.inactive {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* محتوى البطاقة (الأسطر) */
+.instruction-card__content {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.instruction-card__lines {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.instruction-card__line {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  padding-right: 0.8rem;
+  border-right: 3px solid var(--color-accent);
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* أزرار الإجراءات في أسفل البطاقة */
+.instruction-card__actions {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  background: rgba(0, 0, 0, 0.02);
+  flex-wrap: wrap;
+}
+
+.instruction-card__actions .btn {
+  width: auto;
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* ===== استجابة كاملة ===== */
+@media (max-width: 768px) {
+  .admin-page-instructions h2 {
+    font-size: 1.4rem;
+  }
+  .instructions-form {
+    padding: 1rem;
+  }
+  .instruction-card__header {
+    
+    align-items: flex-start;
+  }
+  .instruction-card__page {
+    font-size: 1rem;
+  }
+  .instruction-card__line {
+    font-size: 0.8rem;
+  }
+  .instruction-card__actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .instruction-card__actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page-instructions h2 {
+    font-size: 1.2rem;
+  }
+  .instructions-list h3 {
+    font-size: 1.1rem;
+  }
+  .instruction-card__header {
+    padding: 0.8rem;
+  }
+  .instruction-card__content {
+    padding: 0.8rem;
+  }
+  .instruction-card__actions {
+    padding: 0.8rem;
+  }
+  .instruction-card__line {
+    font-size: 0.75rem;
+  }
+}
+
+/* ===== دعم الوضع الداكن ===== */
+.dark .status-badge.active {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+.dark .status-badge.inactive {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+.dark .instruction-card {
+  border-color: var(--color-border);
+}
+.dark .instruction-card__header {
+  background: rgba(255, 255, 255, 0.03);
+}
+.dark .instruction-card__actions {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* حركة الظهور */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

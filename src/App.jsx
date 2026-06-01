@@ -23,7 +23,7 @@ const AdManagementPage = lazy(() => import("./pages/Admin/AdManagementPage"));
 const AdminGamesPage = lazy(() => import("./pages/Admin/AdminGames"));
 import AdminPaymentSettingsPage from './pages/Admin/AdminPaymentSettingsPage';
 const AdminNavLinksPage = lazy(() => import("./pages/Admin/AdminNavLinks"));
-
+const AdminPageInstructions = lazy(() => import('./components/AdminCoponent/AdminPageInstructions/AdminPageInstructions'));
 // الصفحات الجديدة لنظام شحن الألعاب (متعددة الصفحات)
 const GamesList = lazy(() => import('./pages/User/Gaming/GamesList'));
 const PackagesList = lazy(() => import('./pages/User/Gaming/PackagesList'));
@@ -74,7 +74,8 @@ function App() {
           <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
-          <Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />
+          
+          <Route path="page-instructions" element={<AdminPageInstructions />} /><Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />
           <Route path="ads" element={<AdManagementPage />} />
           <Route path="navigation" element={<AdminNavLinksPage />} />
           <Route path="users" element={<AdminUsersPage />} />

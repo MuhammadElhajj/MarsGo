@@ -1,69 +1,60 @@
-/* .transfer-page {
-  animation: fadeIn 0.3s ease;
-}
+/* ========================================
+   صفحة تحويل شام كاش - تصميم متجاوب بالكامل (محدث)
+   ======================================== */
 
-.transfer-page__heading {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-  color: var(--color-accent);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.payment-button-container {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-} */
- /* ===== الصفحة الرئيسية – عرض كامل ===== */
+/* الحاوية الرئيسية */
 .transfer-page {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1rem;
   animation: fadeIn 0.3s ease;
 }
 
-/* ===== العنوان الرئيسي ===== */
+/* العنوان الرئيسي بتدرج لوني حديث */
 .transfer-page__heading {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-text-primary), var(--color-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   border-right: 4px solid var(--color-accent);
   padding-right: 1rem;
 }
 
-/* ===== حاوية زر الدفع ===== */
+/* حاوية زر الدفع */
 .payment-button-container {
   margin-top: 2rem;
   display: flex;
   justify-content: center;
 }
 
-/* ===== النموذج وقائمة الطلبات (إن وجدت) – توحيد مع بقية الصفحات ===== */
-.transfer-page .transfer-form {
+/* ===== بطاقات النموذج وقائمة الطلبات ===== */
+.transfer-page .transfer-form,
+.transfer-page .orders-list {
   background: var(--color-bg-secondary);
-  padding: 1.5rem;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
   width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.transfer-page .transfer-form:hover,
+.transfer-page .orders-list:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.transfer-page .transfer-form {
+  padding: 1.5rem;
   max-width: 650px;
-  transition: all 0.3s;
 }
 
 .transfer-page .orders-list {
-  background: var(--color-bg-secondary);
   padding: 1.5rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
   overflow-x: auto;
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 
 /* ===== تحسين حقول الإدخال ===== */
@@ -87,7 +78,7 @@
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-/* ===== رسائل النجاح والخطأ في النموذج ===== */
+/* ===== رسائل النجاح والخطأ ===== */
 .transfer-form__success,
 .transfer-form__error {
   padding: 0.75rem 1rem;
@@ -106,7 +97,7 @@
   border-right-color: #ef4444;
 }
 
-/* ===== جدول الطلبات (إن وجد) – متجاوب مع تمرير أفقي ===== */
+/* ===== جدول الطلبات ===== */
 .transfer-page .orders-list table {
   width: 100%;
   min-width: 500px;
@@ -127,11 +118,10 @@
   background-color: rgba(79, 70, 229, 0.05);
 }
 
-/* ===== استجابة للشاشات المتوسطة (تابلت) ===== */
+/* ========================================
+   استجابة للشاشات المختلفة
+   ======================================== */
 @media (max-width: 900px) {
-  .transfer-page {
-    padding: 1rem;
-  }
   .transfer-page__heading {
     font-size: 1.5rem;
   }
@@ -144,15 +134,23 @@
   }
 }
 
-/* ===== استجابة للجوال ===== */
+@media (max-width: 768px) {
+  .transfer-page__heading {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  .transfer-page .transfer-form {
+    padding: 1rem;
+  }
+  .transfer-page .orders-list {
+    padding: 1rem;
+  }
+}
+
 @media (max-width: 640px) {
   .transfer-page__heading {
     font-size: 1.3rem;
     border-right-width: 3px;
-  }
-  .transfer-page .transfer-form,
-  .transfer-page .orders-list {
-    padding: 1rem;
   }
   .transfer-page input,
   .transfer-page select,
@@ -166,7 +164,64 @@
   }
 }
 
+@media (max-width: 480px) {
+  .transfer-page__heading {
+    font-size: 1.2rem;
+  }
+  .transfer-page .transfer-form {
+    padding: 0.75rem;
+  }
+  .transfer-page .orders-list {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 250px) {
+  .transfer-page__heading {
+    font-size: 1rem;
+    text-align: center;
+    border-right: none;
+    padding-right: 0;
+  }
+  .transfer-page .transfer-form,
+  .transfer-page .orders-list {
+    padding: 0.5rem;
+  }
+  .transfer-page .orders-list th,
+  .transfer-page .orders-list td {
+    font-size: 0.7rem;
+    word-break: break-word;
+  }
+}
+
+/* ========================================
+   دعم الوضع الداكن
+   ======================================== */
+.dark .transfer-page .transfer-form,
+.dark .transfer-page .orders-list {
+  border-color: var(--color-border);
+}
+.dark .transfer-form__success {
+  background-color: #064e3b;
+  color: #a7f3d0;
+  border-right-color: #10b981;
+}
+.dark .transfer-form__error {
+  background-color: #7f1d1d;
+  color: #fecaca;
+  border-right-color: #ef4444;
+}
+
+/* ========================================
+   حركة الظهور
+   ======================================== */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

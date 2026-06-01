@@ -16,6 +16,7 @@
     "daisyui": "^5.5.19",
     "date-fns": "^4.1.0",
     "firebase": "^12.14.0",
+    "imagekit-javascript": "^4.0.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-firebase-hooks": "^5.1.1",

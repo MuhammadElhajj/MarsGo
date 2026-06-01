@@ -5,6 +5,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Button from "../../GeneralComponents/Button/Button";
 import Input from "../../GeneralComponents/Input/Input";
 import ImageUpload from "../../GeneralComponents/ImageUpload/ImageUpload";
+import PaymentButton from "../../GeneralComponents/PaymentButton/PaymentButton"; // استيراد
 import "./TransferForm.css";
 
 export default function TransferForm() {
@@ -14,7 +15,6 @@ export default function TransferForm() {
     shamCashPhone: "",
     amount: "",
   });
-  // تغيير الأسماء: idImageBase64, receiptImageBase64 (بدلاً من idImageUrl)
   const [idImageBase64, setIdImageBase64] = useState("");
   const [receiptImageBase64, setReceiptImageBase64] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -46,8 +46,8 @@ export default function TransferForm() {
         recipientName: formData.recipientName,
         shamCashPhone: formData.shamCashPhone,
         amount: parseFloat(formData.amount),
-        idImage: idImageBase64,          // تخزين base64
-        receiptImage: receiptImageBase64, // تخزين base64
+        idImage: idImageBase64,
+        receiptImage: receiptImageBase64,
         status: "pending_verification",
         createdAt: serverTimestamp(),
       });
@@ -103,7 +103,9 @@ export default function TransferForm() {
           required
         />
 
-        {/* مكون رفع صورة الهوية - بدون uploadPath، نستخدم onUploadComplete الذي يعيد base64 */}
+        {/* ✅ زر الدفع قبل رفع الصور */}
+        <PaymentButton text="ادفع هنا" variant="primary" />
+
         <ImageUpload
           label="صورة هوية المستلم"
           onUploadComplete={(base64) => setIdImageBase64(base64)}
@@ -125,4 +127,3 @@ export default function TransferForm() {
     </div>
   );
 }
-
