@@ -98,7 +98,7 @@ export default function MyOrdersPage() {
       </div>
 
       {/* يتم تحميل الجدول (أو رسالة "لا توجد طلبات") فقط عندما يمرر المستخدم إلى هذا القسم */}
-      <LazyOnScroll fallback={<div className="orders-table-placeholder">⬇️ انتظر قليلاً... يتم تحميل الطلبات عند التمرير</div>}>
+     
         {orders.length === 0 ? (
           <div className="empty-orders">📭 لا توجد طلبات حتى الآن</div>
         ) : (
@@ -129,7 +129,7 @@ export default function MyOrdersPage() {
             </table>
           </div>
         )}
-      </LazyOnScroll>
+   
     </div>
   );
 }
