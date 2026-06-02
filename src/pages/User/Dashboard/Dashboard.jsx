@@ -6,10 +6,11 @@ import useStats from "../../../hooks/useStats";
 import useUserStats from "../../../hooks/useUserStats";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import StoreIntro from "../../../components/UserComponents/StoreIntro/StoreIntro";
-import LazyOnScroll from "../../../components/GeneralComponents/LazyOnScroll/LazyOnScroll"; // ✅ المكون الجديد
+// استيراد LazyOnScroll ليس مستخدماً بعد الآن
+// import LazyOnScroll from "../../../components/GeneralComponents/LazyOnScroll/LazyOnScroll";
 import './Dashboard.css';
 
-// Lazy imports (باقي المكونات)
+// Lazy imports (كما هي)
 const HowItWorks = lazy(() => import("../../../components/UserComponents/HowItWorks/HowItWorks"));
 const AdSpace = lazy(() => import("../../../components/UserComponents/AdSpace/AdSpace"));
 const UserStatsGrid = lazy(() => import("../../../components/UserComponents/UserStatsGrid/UserStatsGrid"));
@@ -30,33 +31,32 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" dir="rtl">
-      {/* StoreIntro يظهر فوراً بدون تأخير */}
       <StoreIntro />
 
-      {/* ✅ كل مكون من المكونات التالية سيتم تحميله فقط عند التمرير إليه */}
-      <LazyOnScroll>
+      {/* تم تعطيل LazyOnScroll: نستخدم Suspense مباشرة */}
+      <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
         <HowItWorks page="dashboard" />
-      </LazyOnScroll>
+      </Suspense>
 
       <h3 className="dashboard__services-title">مساحة إعلانية</h3>
-      <LazyOnScroll>
+      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
         <AdSpace />
-      </LazyOnScroll>
+      </Suspense>
 
       <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
-      <LazyOnScroll>
+      <Suspense fallback={<Loading text="جاري تحميل الإحصائيات..." />}>
         <UserStatsGrid stats={userStats} loading={userStatsLoading} />
-      </LazyOnScroll>
+      </Suspense>
 
       <div className="dashboard__services">
         <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
-        <LazyOnScroll>
+        <Suspense fallback={<Loading text="جاري تحميل الخدمات..." />}>
           <ServicesGrid />
-        </LazyOnScroll>
+        </Suspense>
       </div>
 
       <h3 className="dashboard__services-title">آخر العمليات</h3>
-      <LazyOnScroll>
+      <Suspense fallback={<Loading text="جاري تحميل آخر العمليات..." />}>
         <OrdersList 
           orderType="all" 
           title="آخر العمليات" 
@@ -64,7 +64,7 @@ export default function Dashboard() {
           showViewAll={true}
           onViewAll={handleViewAllOrders}
         />
-      </LazyOnScroll>
+      </Suspense>
     </div>
   );
 }
