@@ -1,15 +1,15 @@
 // src/pages/User/Gaming/CheckoutPage.jsx
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import { db } from '../../../firebase';
+import { useAuth } from '../../../../context/AuthContext';
+import { db } from '../../../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import Button from '../../../components/GeneralComponents/Button/Button';
-import Input from '../../../components/GeneralComponents/Input/Input';
-import ImageUpload from '../../../components/GeneralComponents/ImageUpload/ImageUpload';
-import PaymentButton from '../../../components/GeneralComponents/PaymentButton/PaymentButton';
-import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
-import './GamingPage.css';
+import Button from '../../../GeneralComponents/Button/Button';
+import Input from '../../../GeneralComponents/Input/Input';
+import ImageUpload from '../../../GeneralComponents/ImageUpload/ImageUpload';
+import PaymentButton from '../../../GeneralComponents/PaymentButton/PaymentButton';
+import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton';
+import './CheckoutPage.css';
 
 export default function CheckoutPage() {
   const { userData } = useAuth();

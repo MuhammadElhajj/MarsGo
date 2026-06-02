@@ -1,0 +1,62 @@
+/* src/components/UserComponents/UserOrdersTable/UserOrdersTable.css */
+.user-orders-table {
+  margin: 2rem 0;
+  width: 100%;
+}
+
+.user-orders-table__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  border-right: 3px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+.user-orders-table__wrapper {
+  overflow-x: auto;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-orders-table__table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+.user-orders-table__table th,
+.user-orders-table__table td {
+  padding: 0.75rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.user-orders-table__table th {
+  background: var(--color-bg-primary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-pending_verification { background: #fef3c7; color: #92400e; }
+.status-awaiting_customer_resubmit { background: #e0e7ff; color: #3730a3; }
+.status-verified_pending_execution { background: #d1fae5; color: #065f46; }
+.status-completed { background: #dbeafe; color: #1e40af; }
+.status-rejected { background: #fee2e2; color: #b91c1c; }
+
+.user-orders-empty {
+  text-align: center;
+  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+}

@@ -373,3 +373,14 @@
     font-size: 0.75rem;
   }
 }
+
+.verifier-orders__readonly {
+  background: var(--color-bg-primary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+  width: 100%;
+  border: 1px dashed var(--color-border);
+}

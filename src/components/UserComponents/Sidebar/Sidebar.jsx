@@ -6,7 +6,8 @@ import './Sidebar.css';
 export default function Sidebar({ isOpen, onClose }) {
   const { userData } = useAuth();
   const location = useLocation();
-  const [servicesOpen, setServicesOpen] = useState(false);
+  // const [servicesOpen, setServicesOpen] = useState(false);
+  const [servicesOpen, setServicesOpen] = useState(true);
 
   const linkClass = (path) =>
     `sidebar__link ${location.pathname === path ? "sidebar__link--active" : ""}`;
@@ -71,7 +72,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {userData?.role === "verifier" && (
             <li>
               <Link to="/verifier" className={`${linkClass("/verifier")} sidebar__link--verifier`} onClick={handleLinkClick}>
-                <span className="sidebar__icon">🔍</span>
+                {/* <span className="sidebar__icon">🔍</span> */}
                 لوحة التدقيق
               </Link>
             </li>
@@ -79,7 +80,7 @@ export default function Sidebar({ isOpen, onClose }) {
           {userData?.role === "admin" && (
             <li>
               <Link to="/admin" className={`${linkClass("/admin")} sidebar__link--admin`} onClick={handleLinkClick}>
-                <span className="sidebar__icon">⚙️</span>
+                {/* <span className="sidebar__icon">⚙️</span> */}
                 لوحة الإدارة
               </Link>
             </li>

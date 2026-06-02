@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
             name: firebaseUser.displayName || "مستخدم جديد",
             email: firebaseUser.email,
             role: "customer",
+              verifierType: "basic", // إضافة هذا الحقل
             avatar: firebaseUser.photoURL || "",
             createdAt: new Date(),
           };

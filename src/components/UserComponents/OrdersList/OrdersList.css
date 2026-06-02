@@ -60,3 +60,27 @@
   padding: 2rem;
   color: var(--color-text-secondary);
 }
+
+.orders-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.orders-list__view-all-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: transform 0.2s;
+}
+.orders-list__view-all-btn:hover {
+  transform: translateX(-3px);
+  text-decoration: underline;
+}

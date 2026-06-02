@@ -1,9 +1,11 @@
+// src/pages/User/MyOrders/MyOrdersPage.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import Loading from '../../../components/GeneralComponents/Loading/Loading';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
+import LazyOnScroll from '../../../components/GeneralComponents/LazyOnScroll/LazyOnScroll';
 import './MyOrdersPage.css';
 
 const orderTypes = {
@@ -36,12 +38,7 @@ export default function MyOrdersPage() {
     setLoading(true);
     setError('');
     try {
-      // نحاول أولاً بدون orderBy لتجنب مشكلة الفهرس
-      let q = query(
-        collection(db, 'orders'),
-        where('userId', '==', userData.uid)
-      );
-      // نحاول إضافة orderBy إذا كان الفهرس موجوداً، وإلا نتعامل مع الخطأ
+      let q = query(collection(db, 'orders'), where('userId', '==', userData.uid));
       try {
         q = query(q, orderBy('createdAt', 'desc'));
       } catch (err) {
@@ -50,7 +47,6 @@ export default function MyOrdersPage() {
       const snapshot = await getDocs(q);
       let allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      // ترتيب يدوي إذا لم ينجح orderBy
       if (!snapshot.docs.length || !snapshot.docs[0].data().createdAt) {
         allOrders.sort((a, b) => {
           const dateA = a.createdAt?.toDate?.() || new Date(0);
@@ -92,6 +88,7 @@ export default function MyOrdersPage() {
         <div></div>
       </div>
 
+      {/* أزرار الفلترة تظهر فوراً */}
       <div className="filter-buttons">
         <button className={filterType === 'all' ? 'active' : ''} onClick={() => handleFilterChange('all')}>الكل</button>
         <button className={filterType === 'gaming' ? 'active' : ''} onClick={() => handleFilterChange('gaming')}>🎮 ألعاب</button>
@@ -100,36 +97,39 @@ export default function MyOrdersPage() {
         <button className={filterType === 'exchange' ? 'active' : ''} onClick={() => handleFilterChange('exchange')}>🔄 صرافة</button>
       </div>
 
-      {orders.length === 0 ? (
-        <div className="empty-orders">📭 لا توجد طلبات حتى الآن</div>
-      ) : (
-        <div className="orders-table-wrapper">
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>رقم الطلب</th><th>النوع</th><th>التفاصيل</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map(order => (
-                <tr key={order.id}>
-                  <td>{order.id.slice(-6)}</td>
-                  <td>{orderTypes[order.type] || order.type}</td>
-                  <td>
-                    {order.type === 'gaming' && `${order.gameName} - ${order.packageName} (${order.playerId})`}
-                    {order.type === 'transfer' && `${order.recipientName} - ${order.shamCashPhone}`}
-                    {order.type === 'crypto' && `${order.tradeType === 'buy' ? 'شراء' : 'بيع'} ${order.amount} USDT`}
-                    {order.type === 'exchange' && `${order.exchangeType === 'buy_dollar' ? 'شراء دولار' : 'بيع دولار'} - ${order.amount}`}
-                    </td>
-                  <td>{order.finalPrice || order.amount} {order.currency === 'USD' ? '$' : order.currency || 'USD'}</td>
-                  <td><span className={`status-badge status-${order.status}`}>{statusLabels[order.status] || order.status}</span></td>
-                  <td>{order.createdAt?.toDate?.().toLocaleDateString('ar-SY') || '—'}</td>
+      {/* يتم تحميل الجدول (أو رسالة "لا توجد طلبات") فقط عندما يمرر المستخدم إلى هذا القسم */}
+      <LazyOnScroll fallback={<div className="orders-table-placeholder">⬇️ انتظر قليلاً... يتم تحميل الطلبات عند التمرير</div>}>
+        {orders.length === 0 ? (
+          <div className="empty-orders">📭 لا توجد طلبات حتى الآن</div>
+        ) : (
+          <div className="orders-table-wrapper">
+            <table className="orders-table">
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th><th>النوع</th><th>التفاصيل</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {orders.map(order => (
+                  <tr key={order.id}>
+                    <td>{order.id.slice(-6)}</td>
+                    <td>{orderTypes[order.type] || order.type}</td>
+                    <td>
+                      {order.type === 'gaming' && `${order.gameName} - ${order.packageName} (${order.playerId})`}
+                      {order.type === 'transfer' && `${order.recipientName} - ${order.shamCashPhone}`}
+                      {order.type === 'crypto' && `${order.tradeType === 'buy' ? 'شراء' : 'بيع'} ${order.amount} USDT`}
+                      {order.type === 'exchange' && `${order.exchangeType === 'buy_dollar' ? 'شراء دولار' : 'بيع دولار'} - ${order.amount}`}
+                    </td>
+                    <td>{order.finalPrice || order.amount} {order.currency === 'USD' ? '$' : order.currency || 'USD'}</td>
+                    <td><span className={`status-badge status-${order.status}`}>{statusLabels[order.status] || order.status}</span></td>
+                    <td>{order.createdAt?.toDate?.().toLocaleDateString('ar-SY') || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </LazyOnScroll>
     </div>
   );
 }

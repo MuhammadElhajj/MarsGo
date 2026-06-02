@@ -30,6 +30,13 @@ export default function VerifierSidebar({ isOpen, onClose }) {
               تدقيق الطلبات
             </Link>
           </li>
+         
+<li>
+  <Link to="/verifier/archive" className={linkClass('/verifier/archive')} onClick={handleLinkClick}>
+    <span className="verifier-sidebar__icon">📦</span>
+    أرشيف الطلبات
+  </Link>
+</li>
         </ul>
       </nav>
     </aside>

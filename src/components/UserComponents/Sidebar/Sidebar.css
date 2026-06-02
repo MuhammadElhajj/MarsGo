@@ -82,11 +82,13 @@
 }
 
 .sidebar__link--verifier {
-  color: #059669;
+  background: #059669;
+    color: #1f2937;
 }
 
 .sidebar__link--admin {
-  color: #2563eb;
+     color: #1f2937;
+    background: #ffb0b0;
 }
 
 /* ===== زر الإغلاق (يظهر فقط في الجوال) ===== */

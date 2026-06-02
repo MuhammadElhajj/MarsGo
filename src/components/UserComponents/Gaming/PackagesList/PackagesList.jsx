@@ -1,10 +1,11 @@
-// src/pages/User/Gaming/PackagesList.jsx
+// src/components/UserComponents/Gaming/PackagesList/PackagesList.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGames } from '../../../context/GamesContext';
-import Loading from '../../../components/GeneralComponents/Loading/Loading';
-import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
-import './GamingPage.css';
+import { useGames } from '../../../../context/GamesContext';
+import Loading from '../../../GeneralComponents/Loading/Loading';
+import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton';
+import PackageCard from '../PackageCard/PackageCard'; // ✅ المسار الصحيح
+import './PackagesList.css';
 
 export default function PackagesList() {
   const { gameId } = useParams();
@@ -42,23 +43,9 @@ export default function PackagesList() {
         {packages.length === 0 ? (
           <p>لا توجد باقات لهذه اللعبة حالياً</p>
         ) : (
-          packages.map(pkg => {
-            const finalPrice = pkg.discount ? (pkg.price * (1 - pkg.discount / 100)).toFixed(2) : pkg.price;
-            return (
-              <div key={pkg.id} className="package-card" onClick={() => handlePackageClick(pkg)}>
-                <div className="package-card__info">
-                  <h4 className="package-card__title">{pkg.name}</h4>
-                  {pkg.type === 'royalPass' && <span className="package-card__badge">رويال باس</span>}
-                  {pkg.type === 'direct' && <span className="package-card__badge">مباشر</span>}
-                </div>
-                <div className="package-card__price">
-                  <span className="package-card__amount">{finalPrice} {pkg.currency === 'USD' ? '$' : 'ل.س'}</span>
-                  {pkg.discount && <span className="package-card__old-price">{pkg.price} {pkg.currency === 'USD' ? '$' : 'ل.س'}</span>}
-                  {pkg.discount && <span className="package-card__discount">خصم {pkg.discount}%</span>}
-                </div>
-              </div>
-            );
-          })
+          packages.map(pkg => (
+            <PackageCard key={pkg.id} pkg={pkg} onSelect={handlePackageClick} />
+          ))
         )}
       </div>
     </div>

@@ -1,0 +1,59 @@
+/* src/components/UserComponents/Gaming/PackageCard/PackageCard.css */
+.package-card {
+  background: var(--color-bg-secondary);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--color-border);
+}
+
+.package-card:hover {
+  border-color: var(--color-accent);
+  transform: translateX(-3px);
+}
+
+.package-card__info {
+  text-align: right;
+}
+
+.package-card__title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.package-card__badge {
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+.package-card__price {
+  text-align: left;
+}
+
+.package-card__amount {
+  font-weight: 700;
+  color: var(--color-accent);
+  font-size: 0.9rem;
+}
+
+.package-card__old-price {
+  font-size: 0.65rem;
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+  margin-right: 0.3rem;
+}
+
+.package-card__discount {
+  font-size: 0.65rem;
+  color: #10b981;
+}

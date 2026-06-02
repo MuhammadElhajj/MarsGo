@@ -1,16 +1,19 @@
+// src/components/UserComponents/Header/Header.jsx
 import { useAuth } from "../../../context/AuthContext";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase";
 import Avatar from "../../GeneralComponents/Avatar/Avatar";
 import Search from "../../GeneralComponents/Search/Search";
 import ThemeToggle from '../../GeneralComponents/ThemeToggle/ThemeToggle';
-import { FiMenu, FiLogOut } from 'react-icons/fi';  // ✅ أيقونات React
+import { FiMenu, FiLogOut } from 'react-icons/fi';
+import { useTheme } from '../../../context/ThemeContext'; // ✅ استيراد الثيم
 import './Header.css';
-import Logo from "../../../assets/logo-dark.png";
-
+import LogoDark from "../../../assets/logo-dark.png";
+import LogoLight from "../../../assets/logo-light.png";
 
 export default function Header({ onToggleSidebar }) {
   const { userData } = useAuth();
+  const { isDark } = useTheme(); // ✅ معرفة الوضع الحالي
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -19,19 +22,18 @@ export default function Header({ onToggleSidebar }) {
   return (
     <header className="header">
       <div className="header__left">
-        {/* ✅ زر القائمة بأيقونة React بدلاً من الـ spans */}
         <button className="header__hamburger" onClick={onToggleSidebar} aria-label="القائمة">
           <FiMenu size={22} />
         </button>
-         <img src={Logo} alt="Logo" className='header-Logo--img'/>
-                     
-         {/* <h1 className="header__brand">MarsGo</h1> */}
+       <img 
+  src={isDark ? LogoDark : LogoLight} 
+  alt="Logo" 
+  className='header-Logo--img'
+/>
       </div>
-
       <div className="header__center">
         <Search placeholder="ابحث عن طلب..." />
       </div>
-
       <div className="header__right">
         <div className="header__user">
           <ThemeToggle />

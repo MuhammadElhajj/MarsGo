@@ -24,10 +24,8 @@ const AdminGamesPage = lazy(() => import("./pages/Admin/AdminGames"));
 import AdminPaymentSettingsPage from './pages/Admin/AdminPaymentSettingsPage';
 const AdminNavLinksPage = lazy(() => import("./pages/Admin/AdminNavLinks"));
 const AdminPageInstructions = lazy(() => import('./components/AdminCoponent/AdminPageInstructions/AdminPageInstructions'));
-// الصفحات الجديدة لنظام شحن الألعاب (متعددة الصفحات)
-const GamesList = lazy(() => import('./pages/User/Gaming/GamesList'));
-const PackagesList = lazy(() => import('./pages/User/Gaming/PackagesList'));
-const CheckoutPage = lazy(() => import('./pages/User/Gaming/CheckoutPage'));
+import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
+const GamingPage = lazy(() => import('./pages/User/Gaming/GamingPage'));
 
 const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettingsPage"));
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
@@ -35,7 +33,7 @@ const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 // صفحات المدقق
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
-
+const ArchiveOrders = lazy(() => import("./components/VerifierComponents/ArchiveOrders/ArchiveOrders"));
 function App() {
   const { user, userData, loading } = useAuth();
 
@@ -54,9 +52,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/transfer" element={<TransferPage />} />
           {/* تم استبدال مسار gaming القديم بالمسارات الجديدة */}
-          <Route path="/gaming" element={<GamesList />} />
-          <Route path="/gaming/game/:gameId" element={<PackagesList />} />
-          <Route path="/gaming/checkout/:gameId/:packageId" element={<CheckoutPage />} />
+ <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
           <Route path="/payment-info" element={<PaymentInfoPage />} />
@@ -74,7 +70,7 @@ function App() {
           <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
-          
+          <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} /><Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />
           <Route path="ads" element={<AdManagementPage />} />
           <Route path="navigation" element={<AdminNavLinksPage />} />
@@ -86,6 +82,7 @@ function App() {
           path="/verifier"
           element={userData?.role === 'verifier' ? <VerifierLayout /> : <Navigate to="/dashboard" />}
         >
+          <Route path="archive" element={<ArchiveOrders />} />
           <Route index element={<VerifierDashboard />} />
           <Route path="orders" element={<VerifierOrdersPage />} />
         </Route>
