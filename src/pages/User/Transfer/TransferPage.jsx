@@ -1,8 +1,8 @@
 // src/pages/User/Transfer/TransferPage.jsx
 import { Suspense, lazy } from 'react';
 import TransferForm from "../../../components/UserComponents/TransferForm/TransferForm";
-import LazyOnScroll from "../../../components/GeneralComponents/LazyOnScroll/LazyOnScroll";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
+import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import "./TransferPage.css";
 
 // تحميل المكونات بشكل lazy
@@ -12,20 +12,25 @@ const OrdersList = lazy(() => import("../../../components/UserComponents/OrdersL
 export default function TransferPage() {
   return (
     <div className="transfer-page" dir="rtl">
+      {/* زر الرجوع */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GoBackButton text="رجوع إلى لوحة التحكم" />
+      </div>
+
       <h2 className="transfer-page__heading">خدمة التحويل عبر شام كاش</h2>
-      
-      {/* HowItWorks يظهر عند التمرير */}
-     
+
+      {/* HowItWorks - يتم تحميله بشكل lazy */}
+      <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
         <HowItWorks page="transfer" />
-     
+      </Suspense>
 
       {/* TransferForm يظهر فوراً (بدون تأخير) لأنه الجزء الأساسي */}
       <TransferForm />
 
-      {/* قائمة الطلبات تظهر عند التمرير */}
-     
+      {/* قائمة الطلبات يتم تحميلها بشكل lazy */}
+      <Suspense fallback={<Loading text="جاري تحميل الطلبات..." />}>
         <OrdersList orderType="transfer" title="طلبات التحويل السابقة" limitCount={10} />
-  
+      </Suspense>
     </div>
   );
 }

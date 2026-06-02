@@ -6,6 +6,8 @@ import Button from '../../../components/GeneralComponents/Button/Button';
 import Input from '../../../components/GeneralComponents/Input/Input';
 import ImageUpload from '../../../components/GeneralComponents/ImageUpload/ImageUpload';
 import Loading from '../../../components/GeneralComponents/Loading/Loading';
+import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
+import HowItWorks from '../../../components/UserComponents/HowItWorks/HowItWorks';
 import './ExchangePage.css';
 
 const OrdersList = lazy(() => import('../../../components/UserComponents/OrdersList/OrdersList'));
@@ -59,7 +61,16 @@ export default function ExchangePage() {
 
   return (
     <div className="exchange-page" dir="rtl">
+      {/* زر الرجوع */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GoBackButton text="رجوع إلى لوحة التحكم" />
+      </div>
+
       <h2 className="exchange-page__title">صرافة شام كاش</h2>
+
+      {/* مكون التعليمات خاص بصفحة الصرافة */}
+      <HowItWorks page="exchange" />
+
       <div className="exchange-page__form">
         {success && <div className="exchange-page__success">تم تقديم طلب الصرافة بنجاح!</div>}
         {error && <div className="exchange-page__error">{error}</div>}

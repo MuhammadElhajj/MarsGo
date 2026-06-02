@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { db } from '../../../firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore'; // أزلنا orderBy, limit
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import Input from '../../../components/GeneralComponents/Input/Input';
+import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
+import HowItWorks from '../../../components/UserComponents/HowItWorks/HowItWorks';
 import './CryptoPage.css';
 
 export default function CryptoPage() {
@@ -24,7 +26,6 @@ export default function CryptoPage() {
       return;
     }
     try {
-      // جلب طلبات المستخدم الحالي فقط من نوع crypto
       const q = query(
         collection(db, 'orders'),
         where('userId', '==', userData.uid),
@@ -32,7 +33,6 @@ export default function CryptoPage() {
       );
       const snap = await getDocs(q);
       let ordersList = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // ترتيب يدوي تنازلي حسب createdAt (إذا كان الحقل موجوداً)
       ordersList.sort((a, b) => {
         const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
         const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
@@ -49,7 +49,7 @@ export default function CryptoPage() {
 
   useEffect(() => {
     fetchOrders();
-  }, [userData]); // إعادة الجلب عند تغير المستخدم
+  }, [userData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,13 +68,13 @@ export default function CryptoPage() {
         amount: parseFloat(amount),
         price: parseFloat(price),
         paymentMethod,
-        status: 'pending_verification', // استخدم نفس نظام الحالات المستخدم في باقي الأقسام
+        status: 'pending_verification',
         createdAt: serverTimestamp(),
       });
       setSuccess(true);
       setAmount('');
       setPrice('');
-      fetchOrders(); // إعادة تحميل الطلبات بعد الإضافة
+      fetchOrders();
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
@@ -86,7 +86,16 @@ export default function CryptoPage() {
 
   return (
     <div className="crypto-page" dir="rtl">
+      {/* زر الرجوع */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GoBackButton text="رجوع إلى لوحة التحكم" />
+      </div>
+
       <h2 className="crypto-page__title">العملات الرقمية</h2>
+
+      {/* مكون التعليمات خاص بصفحة العملات الرقمية */}
+      <HowItWorks page="crypto" />
+
       <div className="crypto-page__notice">
         هذه الخدمة قيد الترخيص - يمكنك تقديم طلبات وسيتم تفعيل المطابقة عند توفر التراخيص.
       </div>
@@ -153,7 +162,7 @@ export default function CryptoPage() {
                   <td>{order.price} $</td>
                   <td>{order.paymentMethod}</td>
                   <td>{order.status === 'pending_verification' ? 'قيد التدقيق' : order.status}</td>
-                </tr>
+                 </tr>
               ))}
             </tbody>
           </table>

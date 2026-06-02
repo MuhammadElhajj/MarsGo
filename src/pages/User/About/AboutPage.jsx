@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase';
+import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import './AboutPage.css';
 
 export default function AboutPage() {
@@ -25,6 +26,11 @@ export default function AboutPage() {
 
   return (
     <div className="about-page" dir="rtl">
+      {/* زر الرجوع */}
+      <div style={{ marginBottom: '1rem' }}>
+        <GoBackButton text="رجوع إلى لوحة التحكم" />
+      </div>
+
       {/* القسم البطولي */}
       <div className="about-hero">
         <h1>منصة MarsGo</h1>

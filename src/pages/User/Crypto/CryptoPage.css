@@ -130,7 +130,7 @@
 /* ===== استجابة للشاشات المتوسطة (تابلت) ===== */
 @media (max-width: 900px) {
   .crypto-page {
-    padding: 1rem;
+    padding: 0;
   }
   .crypto-page__title {
     font-size: 1.5rem;
