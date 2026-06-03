@@ -108,7 +108,7 @@ export default function StoreIntro() {
           منصتك الأولى للخدمات المالية الرقمية في سوريا. تحويل أموال، شحن ألعاب، بطاقات رقمية،
           وتداول العملات الرقمية بأمان وسرعة عبر نظام شام كاش.
         </p>
-        <div className="store-intro__highlights">
+        {/* <div className="store-intro__highlights">
           <div className="store-intro__highlight-item">
             <span className="store-intro__icon">⚡</span>
             <span>تحويل سريع وآمن</span>
@@ -125,7 +125,7 @@ export default function StoreIntro() {
             <span className="store-intro__icon">₿</span>
             <span>عملات رقمية قريباً</span>
           </div>
-        </div>
+        </div> */}
       </div>
       <div className="store-intro__stats-mini">
         <span className="store-intro__stat">+{realStats.users} مستخدم</span>

@@ -98,3 +98,50 @@
   top: 4rem; /* تحت الهيدر مباشرة */
   z-index: 15;
 }
+
+
+
+
+/* تحديث */
+/* ===== شريط البحث المخصص للجوال ===== */
+.layout__search-mobile {
+  display: none; /* مخفي على الشاشات الكبيرة */
+  width: 100%;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  box-sizing: border-box;
+}
+
+/* في الجوال: نظهره أسفل النافيغيشن بار مباشرة دون أي مسافات */
+@media (max-width: 768px) {
+  .layout__search-mobile {
+    display: block;
+    position: sticky;
+    /* top: calc(4rem + 50px); تحت الهيدر (4rem) + شريط التنقل (50px) */
+    z-index: 20;
+    background-color: var(--color-bg-primary);
+    padding: 0; /* ✅ إزالة أي padding */
+    margin: 0;
+  }
+  
+  /* ✅ جعل الـ search-container داخل layout ممتد بالكامل */
+  .layout__search-mobile .search-container {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0;
+  }
+  
+  /* ✅ حقل الإدخال يأخذ العرض الكامل مع إزالة أي حدود جانبية */
+  .layout__search-mobile .search-input-wrapper {
+    width: 100%;
+  }
+  
+  .layout__search-mobile .search-input {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}

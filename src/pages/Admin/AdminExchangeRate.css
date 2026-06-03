@@ -1,0 +1,26 @@
+.admin-exchange-rate {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.admin-exchange-rate h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-accent);
+}
+
+.admin-exchange-rate__form {
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-exchange-rate__note {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}

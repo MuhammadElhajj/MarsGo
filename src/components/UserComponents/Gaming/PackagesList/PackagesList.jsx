@@ -1,53 +1,75 @@
+// // components/UserComponents/Gaming/PackagesList/PackagesList.jsx (معدل)
+// import { useState, useEffect } from 'react';
+// import { useParams, useNavigate } from 'react-router-dom';
+// import { useGames } from '../../../../context/GamesContext';
+// import PackagesListView from '../../../Generic/PackagesListView/PackagesListView';
+
+// export default function PackagesList() {
+//   const { gameId } = useParams();
+//   const { games, fetchPackages } = useGames();
+//   const [game, setGame] = useState(null);
+//   const [packages, setPackages] = useState([]);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const load = async () => {
+//       const foundGame = games.find(g => g.id === gameId);
+//       setGame(foundGame);
+//       const pkgs = await fetchPackages(gameId);
+//       setPackages(pkgs);
+//     };
+//     load();
+//   }, [gameId, games]);
+
+//   const handlePackageSelect = (pkg) => {
+//     navigate(`/gaming/checkout/${gameId}/${pkg.id}`, { state: { game, package: pkg } });
+//   };
+
+//   if (!game) return null;
+
+//   return (
+//     <PackagesListView
+//       parentName={game.name}
+//       packages={packages}
+//       onPackageSelect={handlePackageSelect}
+//     />
+//   );
+// }
+
 // src/components/UserComponents/Gaming/PackagesList/PackagesList.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGames } from '../../../../context/GamesContext';
-import Loading from '../../../GeneralComponents/Loading/Loading';
-import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton';
-import PackageCard from '../PackageCard/PackageCard'; // ✅ المسار الصحيح
-import './PackagesList.css';
+import PackagesListView from '../../../Generic/PackagesListView/PackagesListView';
 
 export default function PackagesList() {
   const { gameId } = useParams();
-  const navigate = useNavigate();
   const { games, fetchPackages } = useGames();
   const [game, setGame] = useState(null);
   const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadGameAndPackages = async () => {
+    const load = async () => {
       const foundGame = games.find(g => g.id === gameId);
-      if (foundGame) setGame(foundGame);
+      setGame(foundGame);
       const pkgs = await fetchPackages(gameId);
       setPackages(pkgs);
-      setLoading(false);
     };
-    loadGameAndPackages();
-  }, [gameId, games, fetchPackages]);
+    load();
+  }, [gameId, games]);
 
-  const handlePackageClick = (pkg) => {
-    navigate(`/gaming/checkout/${gameId}/${pkg.id}`, { state: { game, package: pkg } });
+  const handlePackageSelect = (pkg) => {
+    navigate('/gaming/checkout', { state: { item: game, package: pkg } });
   };
 
-  if (loading) return <Loading text="جاري تحميل الباقات..." />;
-  if (!game) return <div>اللعبة غير موجودة</div>;
+  if (!game) return <div>جاري التحميل...</div>;
 
   return (
-    <div className="gaming-page" dir="rtl">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <GoBackButton text="رجوع إلى الألعاب" />
-      </div>
-      <h2 className="gaming-page__title">باقات {game.name}</h2>
-      <div className="packages-grid">
-        {packages.length === 0 ? (
-          <p>لا توجد باقات لهذه اللعبة حالياً</p>
-        ) : (
-          packages.map(pkg => (
-            <PackageCard key={pkg.id} pkg={pkg} onSelect={handlePackageClick} />
-          ))
-        )}
-      </div>
-    </div>
+    <PackagesListView
+      parentName={game.name}
+      packages={packages}
+      onPackageSelect={handlePackageSelect}
+    />
   );
 }

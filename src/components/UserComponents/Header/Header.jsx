@@ -10,7 +10,7 @@ import { useTheme } from '../../../context/ThemeContext'; // ✅ استيراد 
 import './Header.css';
 import LogoDark from "../../../assets/logo-dark.png";
 import LogoLight from "../../../assets/logo-light.png";
-
+import CurrencyToggle from '../../GeneralComponents/CurrencyToggle/CurrencyToggle';
 export default function Header({ onToggleSidebar }) {
   const { userData } = useAuth();
   const { isDark } = useTheme(); // ✅ معرفة الوضع الحالي
@@ -36,6 +36,7 @@ export default function Header({ onToggleSidebar }) {
       </div>
       <div className="header__right">
         <div className="header__user">
+         <CurrencyToggle />
           <ThemeToggle />
           <Avatar
             src={userData?.avatar}

@@ -15,6 +15,7 @@ const ExchangePage = lazy(() => import("./pages/User/Exchange/ExchangePage"));
 const AboutPage = lazy(() => import("./pages/User/About/AboutPage"));
 const PaymentInfoPage  = lazy(() => import("./pages/User/PaymentPage/PaymentPage"));
 const MyOrdersPage = lazy(() => import('./pages/User/MyOrders/MyOrdersPage'));
+const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 // صفحات المدير
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
@@ -26,10 +27,10 @@ const AdminNavLinksPage = lazy(() => import("./pages/Admin/AdminNavLinks"));
 const AdminPageInstructions = lazy(() => import('./components/AdminCoponent/AdminPageInstructions/AdminPageInstructions'));
 import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
 const GamingPage = lazy(() => import('./pages/User/Gaming/GamingPage'));
-
+const AdminExchangeRate = lazy(() => import('./pages/Admin/AdminExchangeRate'));
 const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettingsPage"));
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
-
+const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
 // صفحات المدقق
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
@@ -50,7 +51,8 @@ function App() {
         {/* مسارات العميل */}
         <Route element={user ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/transfer" element={<TransferPage />} />
+          
+          <Route path="/apps/*" element={<AppsPage />} />   {/* ✅ استدعاء واحد فقط */}<Route path="/transfer" element={<TransferPage />} />
           {/* تم استبدال مسار gaming القديم بالمسارات الجديدة */}
  <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/crypto" element={<CryptoPage />} />
@@ -70,9 +72,12 @@ function App() {
           <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
+         
+         <Route path="apps" element={<AdminApps />} />
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} /><Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />
-          <Route path="ads" element={<AdManagementPage />} />
+         
+         <Route path="exchange-rate" element={<AdminExchangeRate />} /> <Route path="ads" element={<AdManagementPage />} />
           <Route path="navigation" element={<AdminNavLinksPage />} />
           <Route path="users" element={<AdminUsersPage />} />
         </Route>

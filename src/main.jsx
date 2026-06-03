@@ -10,6 +10,9 @@ import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import { ServicesProvider } from './context/ServicesContext';
 import { GamesProvider } from './context/GamesContext';
 import { NavLinksProvider } from './context/NavLinksContext';
+import { AppsProvider } from './context/AppsContext';
+import { ExchangeRateProvider } from './context/ExchangeRateContext'; // تأكد من المسار الصحيح
+import { CurrencyProvider } from './context/CurrencyContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -21,7 +24,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
            <ServicesProvider>   {/* <-- أضف هذا */}
             <GamesProvider>   {/* <-- أضف هذا */}
                   <NavLinksProvider>
-  <App />
+  <AppsProvider>
+<ExchangeRateProvider>
+  <CurrencyProvider>
+    <App />
+  </CurrencyProvider>
+</ExchangeRateProvider>
+
+</AppsProvider>
 </NavLinksProvider>
                 </GamesProvider>
         </ServicesProvider>

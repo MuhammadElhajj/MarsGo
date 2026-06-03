@@ -12,29 +12,44 @@ export function usePaymentSettings() {
 export function PaymentSettingsProvider({ children }) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const docRef = doc(db, 'paymentSettings', 'default');
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setSettings(docSnap.data());
-      } else {
-        const defaultData = {
-          qrImageBase64: '',
-          accountNumber: '',
-          accountName: '',
-          bankName: '',
-          link: '',
-          updatedAt: new Date().toISOString(),
-        };
-        setDoc(docRef, defaultData);
-        setSettings(defaultData);
+    const unsubscribe = onSnapshot(docRef, 
+      async (docSnap) => {
+        setError(null);
+        if (docSnap.exists()) {
+          setSettings(docSnap.data());
+        } else {
+          // إنشاء وثيقة افتراضية إذا لم تكن موجودة
+          const defaultData = {
+            qrImageBase64: '',
+            accountNumber: '',
+            accountName: '',
+            bankName: '',
+            link: '',
+            updatedAt: new Date().toISOString(),
+          };
+          try {
+            await setDoc(docRef, defaultData);
+            console.log('✅ تم إنشاء إعدادات الدفع الافتراضية');
+            setSettings(defaultData);
+          } catch (err) {
+            console.error('❌ فشل إنشاء إعدادات الدفع:', err);
+            setError(err.message);
+            // يمكن وضع بيانات وهمية للعرض المؤقت
+            setSettings(defaultData);
+          }
+        }
+        setLoading(false);
+      },
+      (err) => {
+        console.error('❌ خطأ في الاستماع لإعدادات الدفع:', err);
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    }, (error) => {
-      console.error('خطأ في جلب إعدادات الدفع:', error);
-      setLoading(false);
-    });
+    );
     return () => unsubscribe();
   }, []);
 
@@ -46,12 +61,12 @@ export function PaymentSettingsProvider({ children }) {
     } catch (err) {
       toast.error('فشل التحديث: ' + err.message);
       console.error(err);
+      throw err;
     }
   };
 
-  // ✅ هذا السطر كان مفقوداً
   return (
-    <PaymentSettingsContext.Provider value={{ settings, loading, updateSettings }}>
+    <PaymentSettingsContext.Provider value={{ settings, loading, error, updateSettings }}>
       {children}
     </PaymentSettingsContext.Provider>
   );

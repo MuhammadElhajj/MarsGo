@@ -33,6 +33,15 @@ export default function Dashboard() {
     <div className="dashboard" dir="rtl">
       <StoreIntro />
 
+      
+      <div className="dashboard__services">
+        <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
+        <Suspense fallback={<Loading text="جاري تحميل الخدمات..." />}>
+          <ServicesGrid />
+        </Suspense>
+      </div>
+      
+
       {/* تم تعطيل LazyOnScroll: نستخدم Suspense مباشرة */}
       <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
         <HowItWorks page="dashboard" />
@@ -48,12 +57,6 @@ export default function Dashboard() {
         <UserStatsGrid stats={userStats} loading={userStatsLoading} />
       </Suspense>
 
-      <div className="dashboard__services">
-        <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
-        <Suspense fallback={<Loading text="جاري تحميل الخدمات..." />}>
-          <ServicesGrid />
-        </Suspense>
-      </div>
 
       <h3 className="dashboard__services-title">آخر العمليات</h3>
       <Suspense fallback={<Loading text="جاري تحميل آخر العمليات..." />}>

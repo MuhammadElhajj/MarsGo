@@ -3,6 +3,7 @@ export const availableRoutes = [
   { path: "/dashboard", label: "لوحة التحكم" },
   { path: "/transfer", label: "تحويل شام كاش" },
   { path: "/gaming", label: "شحن الألعاب" },
+  { path: "/apps", label: "شحن التطبيقات" },        // ✅ تمت الإضافة
   { path: "/crypto", label: "العملات الرقمية" },
   { path: "/exchange", label: "صرافة شام كاش" },
   { path: "/about", label: "من نحن" },

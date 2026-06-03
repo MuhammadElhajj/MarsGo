@@ -1,19 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-// import { FiSearch } from 'react-icons/fi'; // ✅ استيراد الأيقونة
-// import { FaSearch } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
+import { useServices } from '../../../context/ServicesContext';
+import { useGames } from '../../../context/GamesContext';
+import { useApps } from '../../../context/AppsContext';
+import { useNavLinks } from '../../../context/NavLinksContext';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
 import './Search.css';
 
-export default function Search({ placeholder = "ابحث عن طلب، خدمة..." }) {
+export default function Search({ placeholder = "ابحث عن خدمة، لعبة، تطبيق، طلب..." }) {
+  const { userData } = useAuth();
+  const { services } = useServices();
+  const { games } = useGames();
+  const { apps } = useApps();
+  const { links: navLinks } = useNavLinks();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
-  const { userData } = useAuth();
 
   // إغلاق النتائج عند الضغط خارج المربع
   useEffect(() => {
@@ -26,57 +33,121 @@ export default function Search({ placeholder = "ابحث عن طلب، خدمة.
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // البحث في الطلبات
+  // البحث في جميع الأقسام
   useEffect(() => {
-    if (!userData?.uid) {
-      setResults([]);
-      return;
-    }
-
     if (!searchTerm.trim() || searchTerm.length < 2) {
       setResults([]);
       return;
     }
 
-    const searchOrders = async () => {
+    const searchAll = async () => {
       setLoading(true);
-      try {
-        const ordersRef = collection(db, 'orders');
-        const q = query(
-          ordersRef,
-          where('userId', '==', userData.uid),
-          orderBy('createdAt', 'desc'),
-          limit(50)
-        );
-        const snapshot = await getDocs(q);
-        const userOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        const filtered = userOrders.filter(order => {
-          const searchLower = searchTerm.toLowerCase();
-          if (order.id.toLowerCase().includes(searchLower)) return true;
-          if (order.recipientName && order.recipientName.toLowerCase().includes(searchLower)) return true;
-          if (order.customerName && order.customerName.toLowerCase().includes(searchLower)) return true;
-          if (order.type && order.type.toLowerCase().includes(searchLower)) return true;
-          if (order.status && order.status.toLowerCase().includes(searchLower)) return true;
-          if (order.amount && order.amount.toString().includes(searchLower)) return true;
-          return false;
-        });
-        
-        setResults(filtered.slice(0, 10));
-      } catch (error) {
-        console.error('خطأ في البحث:', error);
-        setResults([]);
-      } finally {
-        setLoading(false);
+      const searchLower = searchTerm.toLowerCase();
+      const allResults = [];
+
+      // 1. خدمات المتجر
+      services.forEach(service => {
+        if (service.name?.toLowerCase().includes(searchLower) ||
+            service.description?.toLowerCase().includes(searchLower)) {
+          allResults.push({
+            id: `service-${service.id}`,
+            type: 'service',
+            title: service.name,
+            subtitle: service.description || 'خدمة',
+            link: service.link,
+            icon: service.icon || '🔧',
+          });
+        }
+      });
+
+      // 2. الألعاب
+      games.forEach(game => {
+        if (game.name?.toLowerCase().includes(searchLower)) {
+          allResults.push({
+            id: `game-${game.id}`,
+            type: 'game',
+            title: game.name,
+            subtitle: game.note || 'لعبة',
+            link: `/gaming/game/${game.id}`,
+            icon: '🎮',
+          });
+        }
+      });
+
+      // 3. التطبيقات
+      apps.forEach(app => {
+        if (app.name?.toLowerCase().includes(searchLower)) {
+          allResults.push({
+            id: `app-${app.id}`,
+            type: 'app',
+            title: app.name,
+            subtitle: app.note || 'تطبيق',
+            link: `/apps/app/${app.id}`,
+            icon: '📱',
+          });
+        }
+      });
+
+      // 4. روابط التنقل
+      navLinks.forEach(link => {
+        if (link.name?.toLowerCase().includes(searchLower)) {
+          allResults.push({
+            id: `nav-${link.id}`,
+            type: 'nav',
+            title: link.name,
+            subtitle: link.url,
+            link: link.url,
+            icon: link.icon || '🔗',
+            isExternal: link.isExternal,
+          });
+        }
+      });
+
+      // 5. طلبات المستخدم (فقط إذا كان مسجلاً)
+      if (userData?.uid) {
+        try {
+          const ordersRef = collection(db, 'orders');
+          const q = query(ordersRef, where('userId', '==', userData.uid), orderBy('createdAt', 'desc'), limit(50));
+          const snapshot = await getDocs(q);
+          const userOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+          const filteredOrders = userOrders.filter(order => {
+            if (order.id.toLowerCase().includes(searchLower)) return true;
+            if (order.recipientName?.toLowerCase().includes(searchLower)) return true;
+            if (order.customerName?.toLowerCase().includes(searchLower)) return true;
+            if (order.type?.toLowerCase().includes(searchLower)) return true;
+            if (order.status?.toLowerCase().includes(searchLower)) return true;
+            return false;
+          });
+
+          filteredOrders.forEach(order => {
+            allResults.push({
+              id: `order-${order.id}`,
+              type: 'order',
+              title: `طلب #${order.id.slice(-8)}`,
+              subtitle: `${order.type === 'transfer' ? 'تحويل' : order.type === 'gaming' ? 'شحن ألعاب' : order.type} - ${getStatusLabel(order.status)}`,
+              link: '/my-orders',
+              icon: '📄',
+            });
+          });
+        } catch (err) {
+          console.error('خطأ في جلب الطلبات للبحث:', err);
+        }
       }
+
+      // ترتيب النتائج
+      allResults.sort((a, b) => a.title.localeCompare(b.title));
+      // ✅ عرض أول 3 نتائج فقط في جميع الأجهزة
+      setResults(allResults.slice(0, 3));
+      setLoading(false);
     };
 
     const debounce = setTimeout(() => {
-      searchOrders();
-    }, 500);
+      searchAll();
+    }, 300);
 
     return () => clearTimeout(debounce);
-  }, [searchTerm, userData?.uid]);
+  }, [searchTerm, services, games, apps, navLinks, userData]);
 
   const getTypeLabel = (type) => {
     const types = {
@@ -99,15 +170,9 @@ export default function Search({ placeholder = "ابحث عن طلب، خدمة.
     return statuses[status] || status;
   };
 
-  if (!userData?.uid) {
-    return null;
-  }
-
   return (
     <div className="search-container" ref={searchRef}>
       <div className="search-input-wrapper">
-        {/* ✅ استبدال الأيقونة النصية بـ FiSearch */}
-        {/* <FaSearch className="search-icon" size={16} /> */}
         <input
           type="text"
           className="search-input"
@@ -134,28 +199,25 @@ export default function Search({ placeholder = "ابحث عن طلب، خدمة.
                 <button onClick={() => setShowResults(false)}>إغلاق</button>
               </div>
               <ul className="search-results-list">
-                {results.map((order) => (
-                  <li key={order.id} className="search-result-item">
-                    <Link to="/transfer" onClick={() => setShowResults(false)}>
-                      <div className="search-result-info">
-                        <span className="search-result-id">#{order.id.slice(-8)}</span>
-                        <span className={`search-result-status status-${order.status}`}>
-                          {getStatusLabel(order.status)}
-                        </span>
-                      </div>
-                      <div className="search-result-details">
-                        <span className="search-result-type">{getTypeLabel(order.type)}</span>
-                        {order.recipientName && (
-                          <span className="search-result-name">{order.recipientName}</span>
-                        )}
-                        {order.amount && (
-                          <span className="search-result-amount">{order.amount} $</span>
-                        )}
-                      </div>
-                      <div className="search-result-date">
-                        {order.createdAt?.toDate?.().toLocaleDateString('ar-SY') || '—'}
-                      </div>
-                    </Link>
+                {results.map((item) => (
+                  <li key={item.id} className="search-result-item">
+                    {item.isExternal ? (
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" onClick={() => setShowResults(false)}>
+                        <div className="search-result-info">
+                          <span className="search-result-icon">{item.icon}</span>
+                          <span className="search-result-title">{item.title}</span>
+                        </div>
+                        <div className="search-result-subtitle">{item.subtitle}</div>
+                      </a>
+                    ) : (
+                      <Link to={item.link} onClick={() => setShowResults(false)}>
+                        <div className="search-result-info">
+                          <span className="search-result-icon">{item.icon}</span>
+                          <span className="search-result-title">{item.title}</span>
+                        </div>
+                        <div className="search-result-subtitle">{item.subtitle}</div>
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
