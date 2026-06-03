@@ -1,9 +1,23 @@
 // src/components/UserComponents/Gaming/PackageCard/PackageCard.jsx
 import './PackageCard.css';
 
-export default function PackageCard({ pkg, onSelect }) {
-  const { name, price, currency, discount, type, imageBase64, note } = pkg;
-  const finalPrice = discount ? (price * (1 - discount / 100)).toFixed(2) : price;
+export default function PackageCard({ pkg, onSelect, customBadge = null }) {
+  // ✅ التأكد من أن price رقمي لتجنب الأخطاء
+  const priceValue = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
+  const discountValue = pkg.discount || 0;
+  const finalPrice = discountValue ? (priceValue * (1 - discountValue / 100)).toFixed(2) : priceValue;
+
+  const { name, currency, type, imageBase64, note } = pkg;
+
+  // ✅ تحديد النص المعروض للشارة (badge)
+  let badgeText = null;
+  if (customBadge) {
+    badgeText = customBadge;
+  } else if (type === 'royalPass') {
+    badgeText = 'رويال باس';
+  } else if (type === 'direct') {
+    badgeText = 'مباشر';
+  }
 
   return (
     <div className="package-card" onClick={() => onSelect(pkg)}>
@@ -17,18 +31,17 @@ export default function PackageCard({ pkg, onSelect }) {
       <div className="package-card__info">
         <h4 className="package-card__title">{name}</h4>
         {note && <p className="package-card__note">{note}</p>}
-        {type === 'royalPass' && <span className="package-card__badge">رويال باس</span>}
-        {type === 'direct' && <span className="package-card__badge">مباشر</span>}
+        {badgeText && <span className="package-card__badge">{badgeText}</span>}
         <div className="package-card__price">
           <span className="package-card__amount">
             {finalPrice} {currency === 'USD' ? '$' : 'ل.س'}
           </span>
-          {discount > 0 && (
+          {discountValue > 0 && (
             <>
               <span className="package-card__old-price">
-                {price} {currency === 'USD' ? '$' : 'ل.س'}
+                {priceValue} {currency === 'USD' ? '$' : 'ل.س'}
               </span>
-              <span className="package-card__discount">خصم {discount}%</span>
+              <span className="package-card__discount">خصم {discountValue}%</span>
             </>
           )}
         </div>

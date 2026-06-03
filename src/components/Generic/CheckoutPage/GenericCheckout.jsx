@@ -114,7 +114,6 @@
 //     </div>
 //   );
 // }
-
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
@@ -127,12 +126,15 @@ import Input from '../../GeneralComponents/Input/Input';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
 import PaymentButton from '../../GeneralComponents/PaymentButton/PaymentButton';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
+import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
+import { useNotifications } from '../../../context/NotificationContext'; // ✅ استيراد الإشعارات
 import './GenericCheckout.css';
 
 export default function GenericCheckout({ orderType, redirectPath }) {
   const { userData } = useAuth();
   const { rate } = useExchangeRate();
   const { currency } = useCurrency();
+  const { addNotification } = useNotifications(); // ✅ جلب دالة إضافة الإشعار
   const navigate = useNavigate();
   const location = useLocation();
   const { item, package: pkg } = location.state || {};
@@ -141,7 +143,7 @@ export default function GenericCheckout({ orderType, redirectPath }) {
   const [receiptImageBase64, setReceiptImageBase64] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  // ✅ تم إزالة success لأننا نستخدم الإشعارات المنبثقة
 
   if (!item || !pkg) {
     return (
@@ -163,12 +165,15 @@ export default function GenericCheckout({ orderType, redirectPath }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // ✅ منع الإرسال المتعدد
+    if (loading) return;
+    
     setError('');
     if (!playerId) return setError('يرجى إدخال المعرف (ID اللاعب أو رقم الحساب)');
     if (!receiptImageBase64) return setError('يرجى رفع إيصال الدفع');
     setLoading(true);
     try {
-      await addDoc(collection(db, 'orders'), {
+      const docRef = await addDoc(collection(db, 'orders'), {
         userId: userData.uid,
         customerName: userData.name || '',
         type: orderType,
@@ -176,7 +181,7 @@ export default function GenericCheckout({ orderType, redirectPath }) {
         itemName: item.name,
         packageId: pkg.id,
         packageName: pkg.name,
-        priceUSD: priceUSD,           // السعر الأساسي بالدولار
+        priceUSD: priceUSD,
         finalPriceUSD: finalPriceUSD,
         exchangeRateAtPurchase: rate || null,
         currencyUsed: currency,
@@ -185,13 +190,25 @@ export default function GenericCheckout({ orderType, redirectPath }) {
         status: 'pending_verification',
         createdAt: serverTimestamp(),
       });
-      setSuccess(true);
+      
+      // ✅ إضافة إشعار للمستخدم
+      await addNotification(
+        userData.uid,
+        '📦 طلب جديد',
+        `طلب #${docRef.id.slice(-6)} - ${item.name} - ${pkg.name} قيد المراجعة`,
+        'order_created',
+        docRef.id,
+        '/my-orders'
+      );
+      
+      // ✅ إشعار نجاح منبثق
+      showToast('✅ تم إرسال طلبك بنجاح! سنقوم بمراجعته قريباً.', 'success', 4000);
       setPlayerId('');
       setReceiptImageBase64('');
       setTimeout(() => navigate(redirectPath || '/dashboard'), 3000);
     } catch (err) {
       console.error(err);
-      setError('حدث خطأ أثناء إرسال الطلب');
+      showToast('❌ حدث خطأ أثناء إرسال الطلب: ' + err.message, 'error', 5000);
     } finally {
       setLoading(false);
     }
@@ -227,7 +244,6 @@ export default function GenericCheckout({ orderType, redirectPath }) {
           <Button type="submit" disabled={loading || !receiptImageBase64}>
             {loading ? 'جاري الإرسال...' : 'إرسال الطلب'}
           </Button>
-          {success && <p className="generic-checkout__success">✅ تم إرسال طلبك بنجاح! جاري تحويلك...</p>}
           {error && <p className="generic-checkout__error">❌ {error}</p>}
         </form>
       </div>

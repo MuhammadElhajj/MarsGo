@@ -41,7 +41,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGames } from '../../../../context/GamesContext';
 import PackagesListView from '../../../Generic/PackagesListView/PackagesListView';
-
+import './PackagesList.css';
 export default function PackagesList() {
   const { gameId } = useParams();
   const { games, fetchPackages } = useGames();

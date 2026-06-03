@@ -117,8 +117,8 @@ export default function AboutPage() {
       <div className="about-contact">
         <h3>تواصل معنا</h3>
         <div className="contact-details">
-          <p>📧 support@marsgo.sy</p>
-          <p>📞 +963 123 456 789</p>
+          <p>📧 nezaralrfaye</p>
+          <p>📞 +963 939 454 690</p>
           <p>📍 سوريا - دمشق</p>
         </div>
         <p style={{ marginTop: '1rem', fontSize: '0.8rem', opacity: 0.8 }}>

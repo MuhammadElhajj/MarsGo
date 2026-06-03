@@ -1,0 +1,97 @@
+/* تنسيق الإشعارات المخصصة (اختياري، لزيادة التخصيص) */
+.toast-notification {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  box-shadow: var(--shadow-lg);
+  border-right: 4px solid;
+  min-width: 250px;
+  max-width: 400px;
+  direction: rtl;
+}
+
+.toast-notification--success {
+  border-right-color: #10b981;
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.toast-notification--error {
+  border-right-color: #ef4444;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.toast-notification--loading {
+  border-right-color: #f59e0b;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.toast-notification--info {
+  border-right-color: #3b82f6;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.toast-notification__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.toast-notification__message {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.toast-notification__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-notification__close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* تنسيقات react-hot-toast الافتراضية يمكن تخصيصها أيضاً */
+:root {
+  --toast-bg: var(--color-bg-secondary);
+  --toast-color: var(--color-text-primary);
+}
+
+/* دعم الوضع الداكن */
+.dark .toast-notification--success {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+.dark .toast-notification--error {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.dark .toast-notification--loading {
+  background: #78350f;
+  color: #fde68a;
+}
+
+.dark .toast-notification--info {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}

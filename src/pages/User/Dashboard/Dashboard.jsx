@@ -16,6 +16,7 @@ const AdSpace = lazy(() => import("../../../components/UserComponents/AdSpace/Ad
 const UserStatsGrid = lazy(() => import("../../../components/UserComponents/UserStatsGrid/UserStatsGrid"));
 const ServicesGrid = lazy(() => import("../../../components/UserComponents/ServicesGrid/ServicesGrid"));
 const OrdersList = lazy(() => import("../../../components/UserComponents/OrdersList/OrdersList"));
+const SpendingProgress = lazy(() => import("../../../components/UserComponents/SpendingProgress/SpendingProgress"));
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -33,6 +34,7 @@ export default function Dashboard() {
     <div className="dashboard" dir="rtl">
 
       <StoreIntro />
+      <SpendingProgress />
 
       
       <div className="dashboard__services">

@@ -42,7 +42,7 @@ export default function SpendingProgress() {
             تحتاج إلى <strong>{formatPrice(remaining)}</strong> إضافية للوصول إلى المستوى {nextTier.level}
           </div>
         ) : (
-          <div className="spending-progress__max">✨ لقد وصلت إلى أعلى مستوى ولاء! ✨</div>
+          <div className="spending-progress__max">لقد وصلت إلى أعلى مستوى ولاء!</div>
         )}
       </div>
     </div>

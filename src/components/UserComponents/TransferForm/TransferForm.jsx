@@ -5,11 +5,14 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Button from "../../GeneralComponents/Button/Button";
 import Input from "../../GeneralComponents/Input/Input";
 import ImageUpload from "../../GeneralComponents/ImageUpload/ImageUpload";
-import PaymentButton from "../../GeneralComponents/PaymentButton/PaymentButton"; // استيراد
+import PaymentButton from "../../GeneralComponents/PaymentButton/PaymentButton";
+import { showToast } from "../../GeneralComponents/ToastNotification/ToastNotification";
+import { useNotifications } from "../../../context/NotificationContext"; // ✅ استيراد نظام الإشعارات
 import "./TransferForm.css";
 
 export default function TransferForm() {
   const { userData } = useAuth();
+  const { addNotification } = useNotifications(); // ✅ دالة إضافة إشعار
   const [formData, setFormData] = useState({
     recipientName: "",
     shamCashPhone: "",
@@ -27,6 +30,9 @@ export default function TransferForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // ✅ منع الإرسال المتعدد
+    if (uploading) return;
+    
     setError("");
     setSuccess(false);
 
@@ -39,7 +45,7 @@ export default function TransferForm() {
 
     setUploading(true);
     try {
-      await addDoc(collection(db, "orders"), {
+      const docRef = await addDoc(collection(db, "orders"), {
         userId: userData?.uid || "",
         customerName: userData?.name || "",
         type: "transfer",
@@ -52,13 +58,29 @@ export default function TransferForm() {
         createdAt: serverTimestamp(),
       });
 
+      // ✅ إضافة إشعار للمستخدم
+      await addNotification(
+        userData?.uid,
+        "💸 طلب تحويل جديد",
+        `طلب تحويل إلى ${formData.recipientName} بمبلغ ${formData.amount} $ قيد المراجعة`,
+        "order_created",
+        docRef.id,
+        "/my-orders"
+      );
+
+      // ✅ إشعار نجاح منبثق
+      showToast("✅ تم تقديم طلب التحويل بنجاح! سنقوم بمراجعته قريباً.", "success", 4000);
+      
       setSuccess(true);
       setFormData({ recipientName: "", shamCashPhone: "", amount: "" });
       setIdImageBase64("");
       setReceiptImageBase64("");
+      // إخفاء رسالة النجاح بعد 3 ثوانٍ
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
       setError("حدث خطأ أثناء إرسال الطلب. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.");
+      showToast("❌ فشل إرسال الطلب: " + err.message, "error", 5000);
     } finally {
       setUploading(false);
     }
@@ -69,7 +91,7 @@ export default function TransferForm() {
       <h3 className="transfer-form__title">تقديم طلب تحويل عبر شام كاش</h3>
       {success && (
         <div className="transfer-form__success">
-          تم تقديم الطلب بنجاح! حالة الطلب: قيد التدقيق.
+          ✅ تم تقديم الطلب بنجاح! حالة الطلب: قيد التدقيق.
         </div>
       )}
       {error && <div className="transfer-form__error">{error}</div>}
@@ -103,7 +125,6 @@ export default function TransferForm() {
           required
         />
 
-        {/* ✅ زر الدفع قبل رفع الصور */}
         <PaymentButton text="ادفع هنا" variant="primary" />
 
         <ImageUpload

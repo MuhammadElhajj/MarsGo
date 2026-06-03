@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; // ✅ إضافة Toaster للإشعارات
 import { useAuth } from "./context/AuthContext";
 import Layout from "./layouts/UserLayout/Layout";
 import AdminLayout from "./layouts/AdminLayout/AdminLayout"
@@ -15,6 +16,7 @@ const ExchangePage = lazy(() => import("./pages/User/Exchange/ExchangePage"));
 const AboutPage = lazy(() => import("./pages/User/About/AboutPage"));
 const PaymentInfoPage  = lazy(() => import("./pages/User/PaymentPage/PaymentPage"));
 const MyOrdersPage = lazy(() => import('./pages/User/MyOrders/MyOrdersPage'));
+const NotificationsPage = lazy(() => import("./pages/User/Notifications/NotificationsPage"));
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 // صفحات المدير
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -43,6 +45,30 @@ function App() {
 
   return (
     <Suspense fallback={<Loading />}>
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: 'var(--color-bg-secondary)',
+            color: 'var(--color-text-primary)',
+            borderRadius: 'var(--radius-md)',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: 'white',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: 'white',
+            },
+          },
+        }}
+      />
       <Routes>
         <Route
           path="/login"
@@ -60,6 +86,7 @@ function App() {
           <Route path="/exchange" element={<ExchangePage />} />
           <Route path="/payment-info" element={<PaymentInfoPage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
+       <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<AboutPage />} />
         </Route>
 

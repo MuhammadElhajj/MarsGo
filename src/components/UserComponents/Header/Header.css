@@ -388,7 +388,7 @@
 
 @media (max-width: 768px) {
   .header {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem;
   }
   .header__hamburger {
     display: flex;  /* ✅ إظهار زر القائمة في الجوال */

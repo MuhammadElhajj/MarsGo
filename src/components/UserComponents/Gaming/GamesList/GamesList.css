@@ -1,4 +1,4 @@
-/* GamesList.css - تنسيقات قائمة الألعاب (بدون تنسيقات الكارد) */
+/* GamesList.css - تنسيقات قائمة الألعاب (بدون تنسيقات الكارد)
 .games-grid {
   display: grid;
   gap: 0.8rem;
@@ -25,4 +25,4 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
   }
-}
+} */

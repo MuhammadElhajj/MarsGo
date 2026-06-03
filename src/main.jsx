@@ -13,6 +13,16 @@ import { NavLinksProvider } from './context/NavLinksContext';
 import { AppsProvider } from './context/AppsContext';
 import { ExchangeRateProvider } from './context/ExchangeRateContext'; // تأكد من المسار الصحيح
 import { CurrencyProvider } from './context/CurrencyContext';
+import { NotificationProvider } from './context/NotificationContext';
+
+// داخل التسلسل:
+<AuthProvider>
+  <NotificationProvider>
+    <PaymentSettingsProvider>
+      {/* باقي السياقات */}
+    </PaymentSettingsProvider>
+  </NotificationProvider>
+</AuthProvider>
 import { TickerProvider } from './context/TickerContext';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -27,8 +37,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <AppsProvider>
 <ExchangeRateProvider>
   <CurrencyProvider>
-<TickerProvider>   {/* <-- إضافة هذا */}
+<TickerProvider>  
+  <NotificationProvider>{/* <-- إضافة هذا */}
       <App />
+      </NotificationProvider> 
     </TickerProvider>
   </CurrencyProvider>
 </ExchangeRateProvider>

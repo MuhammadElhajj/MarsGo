@@ -1,0 +1,37 @@
+.support-button {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  background-color: #25D366;
+  color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  text-decoration: none;
+}
+
+.support-button:hover {
+  transform: scale(1.08);
+  background-color: #128C7E;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* للجوال يمكن تصغير الحجم قليلاً */
+@media (max-width: 768px) {
+  .support-button {
+    width: 48px;
+    height: 48px;
+    bottom: 1rem;
+    left: 1rem;
+  }
+  .support-button svg {
+    width: 24px;
+    height: 24px;
+  }
+}
