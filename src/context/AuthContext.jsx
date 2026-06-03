@@ -1,3 +1,67 @@
+// import { createContext, useContext, useEffect, useState } from "react";
+// import { onAuthStateChanged } from "firebase/auth";
+// import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+// import { auth, db } from "../firebase";
+
+// const AuthContext = createContext();
+
+// export function AuthProvider({ children }) {
+//   const [user, setUser] = useState(null);
+//   const [userData, setUserData] = useState(null);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+//       if (firebaseUser) {
+//         const userRef = doc(db, "users", firebaseUser.uid);
+//         const docSnap = await getDoc(userRef);
+//         let data;
+//         if (docSnap.exists()) {
+//           data = docSnap.data();
+//         } else {
+//           data = {
+//             name: firebaseUser.displayName || "مستخدم جديد",
+//             email: firebaseUser.email,
+//             role: "customer",
+//               verifierType: "basic", // إضافة هذا الحقل
+//             avatar: firebaseUser.photoURL || "",
+//             createdAt: new Date(),
+//           };
+//           await setDoc(userRef, data);
+//         }
+//         // إضافة uid إلى الكائن
+//         data.uid = firebaseUser.uid;
+//         setUserData(data);
+//         setUser(firebaseUser);
+//       } else {
+//         setUser(null);
+//         setUserData(null);
+//       }
+//       setLoading(false);
+//     });
+//     return unsubscribe;
+//   }, []);
+
+//   // دالة لتحديث بيانات المستخدم في الـ state و Firestore
+//   const updateUserData = async (updates) => {
+//     if (!user) return;
+//     try {
+//       const userRef = doc(db, "users", user.uid);
+//       await updateDoc(userRef, updates);
+//       setUserData(prev => ({ ...prev, ...updates }));
+//       return true;
+//     } catch (error) {
+//       console.error("Error updating user data:", error);
+//       return false;
+//     }
+//   };
+
+//   const value = { user, userData, loading, updateUserData };
+//   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+// }
+
+// export const useAuth = () => useContext(AuthContext);
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
@@ -9,10 +73,22 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // ✅ التحقق من البريد الإلكتروني
+        if (!firebaseUser.emailVerified) {
+          // البريد غير مفعل: نخزن المستخدم لكن لا نجلب البيانات
+          setUser(firebaseUser);
+          setUserData(null);
+          setEmailVerified(false);
+          setLoading(false);
+          return;
+        }
+
+        // البريد مفعل: نجلب البيانات من Firestore
         const userRef = doc(db, "users", firebaseUser.uid);
         const docSnap = await getDoc(userRef);
         let data;
@@ -23,26 +99,26 @@ export function AuthProvider({ children }) {
             name: firebaseUser.displayName || "مستخدم جديد",
             email: firebaseUser.email,
             role: "customer",
-              verifierType: "basic", // إضافة هذا الحقل
+            verifierType: "basic",
             avatar: firebaseUser.photoURL || "",
             createdAt: new Date(),
           };
           await setDoc(userRef, data);
         }
-        // إضافة uid إلى الكائن
         data.uid = firebaseUser.uid;
         setUserData(data);
         setUser(firebaseUser);
+        setEmailVerified(true);
       } else {
         setUser(null);
         setUserData(null);
+        setEmailVerified(false);
       }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
 
-  // دالة لتحديث بيانات المستخدم في الـ state و Firestore
   const updateUserData = async (updates) => {
     if (!user) return;
     try {
@@ -56,7 +132,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const value = { user, userData, loading, updateUserData };
+  const value = { user, userData, loading, emailVerified, updateUserData };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
