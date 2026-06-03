@@ -30,6 +30,7 @@ const GamingPage = lazy(() => import('./pages/User/Gaming/GamingPage'));
 const AdminExchangeRate = lazy(() => import('./pages/Admin/AdminExchangeRate'));
 const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettingsPage"));
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
+const AdminTicker = lazy(() => import('./pages/Admin/AdminTicker'));
 const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
 // صفحات المدقق
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
@@ -72,7 +73,7 @@ function App() {
           <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
-         
+         <Route path="ticker" element={<AdminTicker />} />
          <Route path="apps" element={<AdminApps />} />
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} /><Route path="/admin/payment-settings" element={<AdminPaymentSettingsPage />} />

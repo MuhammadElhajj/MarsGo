@@ -31,6 +31,11 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" dir="rtl">
+
+       {/* <h3 className="dashboard__services-title">مساحة إعلانية</h3> */}
+      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
+        <AdSpace />
+      </Suspense>
       <StoreIntro />
 
       
@@ -47,10 +52,10 @@ export default function Dashboard() {
         <HowItWorks page="dashboard" />
       </Suspense>
 
-      <h3 className="dashboard__services-title">مساحة إعلانية</h3>
+      {/* <h3 className="dashboard__services-title">مساحة إعلانية</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
         <AdSpace />
-      </Suspense>
+      </Suspense> */}
 
       <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإحصائيات..." />}>

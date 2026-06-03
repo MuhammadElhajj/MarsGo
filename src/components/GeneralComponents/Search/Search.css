@@ -263,7 +263,7 @@
 }
 
 .search-no-results span {
-  font-size: 2rem;
+  font-size: 1rem;
   display: block;
   margin-bottom: 0.5rem;
   opacity: 0.6;
@@ -276,14 +276,14 @@
   }
   
   .search-results {
-    position: fixed;
-    top: auto;
-    right: 0;
+    position: absolute;  /* بدلاً من fixed */
+    top: 100%;          /* تظهر أسفل الحقل مباشرة */
     left: 0;
-    bottom: 0;
+    right: 0;
+    bottom: auto;       /* إزالة bottom: 0 */
     max-height: 70vh;
-    border-radius: 1.25rem 1.25rem 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+   
+    
   }
   
   .search-result-details {
@@ -300,3 +300,4 @@
     line-height: 1.3;
   }
 }
+

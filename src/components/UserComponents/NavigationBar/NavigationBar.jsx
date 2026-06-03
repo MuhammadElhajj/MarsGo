@@ -1,35 +1,74 @@
-import { Link } from 'react-router-dom';
-import { useNavLinks } from '../../../context/NavLinksContext';
+// components/UserComponents/NavigationBar/NavigationBar.jsx
+import { useTicker } from '../../../context/TickerContext';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import './NavigationBar.css';
 
 export default function NavigationBar() {
-  const { links, loading } = useNavLinks();
-  if (loading) return null; // أو شريط تحميل صغير
-  if (links.length === 0) return null;
+  const { settings, loading } = useTicker();
+  const [clones, setClones] = useState([]);
+  const wrapperRef = useRef(null);
+  const originalRef = useRef(null);
+
+  if (loading) return null;
+  if (!settings?.isActive) return null;
+
+  const { segments, speed = 60, direction = 'right-to-left' } = settings;
+  const animationName = direction === 'right-to-left' ? 'marquee-rtl' : 'marquee-ltr';
+
+  // بناء المحتوى من المقاطع
+  const renderContent = (key) => (
+    <div key={key} className="ticker-content">
+      {segments.map((seg, idx) => (
+        <span key={`${key}-${idx}`} className="ticker-segment" style={{
+          color: seg.color,
+          fontWeight: seg.fontWeight,
+          fontFamily: seg.fontFamily,
+        }}>
+          {seg.text}
+        </span>
+      ))}
+    </div>
+  );
+
+  // حساب عدد النسخ اللازمة لملء العرض مرتين
+  const updateClones = useCallback(() => {
+    if (!originalRef.current || !wrapperRef.current) return;
+    const originalWidth = originalRef.current.offsetWidth;
+    const containerWidth = wrapperRef.current.parentElement.offsetWidth;
+    if (originalWidth === 0) return;
+    // عدد النسخ المطلوب لتغطية العرض مرتين على الأقل
+    const copiesNeeded = Math.ceil((containerWidth * 2) / originalWidth);
+    const clonesArray = [];
+    for (let i = 1; i <= copiesNeeded; i++) {
+      clonesArray.push(renderContent(`clone-${i}`));
+    }
+    setClones(clonesArray);
+  }, [segments]);
+
+  useEffect(() => {
+    updateClones();
+    window.addEventListener('resize', updateClones);
+    return () => window.removeEventListener('resize', updateClones);
+  }, [updateClones]);
+
+  // تعيين متغير CSS لسرعة الحركة ديناميكياً
+  useEffect(() => {
+    if (wrapperRef.current) {
+      wrapperRef.current.style.setProperty('--marquee-duration', `${speed}s`);
+    }
+  }, [speed]);
 
   return (
-    <nav className="navigation-bar">
-      <div className="navigation-bar__container">
-        {links.filter(link => link.isActive !== false).map(link => (
-          link.isExternal ? (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="navigation-bar__link"
-            >
-              {link.icon && <span className="nav-icon">{link.icon}</span>}
-              <span>{link.name}</span>
-            </a>
-          ) : (
-            <Link key={link.id} to={link.url} className="navigation-bar__link">
-              {link.icon && <span className="nav-icon">{link.icon}</span>}
-              <span>{link.name}</span>
-            </Link>
-          )
-        ))}
+    <div className="navigation-bar ticker-bar">
+      <div 
+        ref={wrapperRef}
+        className="ticker-wrapper" 
+        style={{ animation: `${animationName} var(--marquee-duration, 60s) linear infinite` }}
+      >
+        {renderContent('original')}
+        {clones}
       </div>
-    </nav>
+    </div>
   );
 }
+

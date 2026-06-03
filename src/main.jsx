@@ -13,7 +13,7 @@ import { NavLinksProvider } from './context/NavLinksContext';
 import { AppsProvider } from './context/AppsContext';
 import { ExchangeRateProvider } from './context/ExchangeRateContext'; // تأكد من المسار الصحيح
 import { CurrencyProvider } from './context/CurrencyContext';
-
+import { TickerProvider } from './context/TickerContext';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -27,7 +27,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <AppsProvider>
 <ExchangeRateProvider>
   <CurrencyProvider>
-    <App />
+<TickerProvider>   {/* <-- إضافة هذا */}
+      <App />
+    </TickerProvider>
   </CurrencyProvider>
 </ExchangeRateProvider>
 
