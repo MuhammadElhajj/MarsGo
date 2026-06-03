@@ -42,6 +42,8 @@ export default function AdminApps() {
     discount: 0,
     type: 'normal',
     order: 0,
+    imageBase64: '',   // ✅ جديد
+    note: '',          // ✅ جديد
   });
 
   const handleSelectApp = async (app) => {
@@ -123,6 +125,8 @@ export default function AdminApps() {
         discount: pkg.discount || 0,
         type: pkg.type || 'normal',
         order: pkg.order || 0,
+        imageBase64: pkg.imageBase64 || '',   // ✅
+        note: pkg.note || '',                 // ✅
       });
     } else {
       setEditingPackage(null);
@@ -133,6 +137,8 @@ export default function AdminApps() {
         discount: 0,
         type: 'normal',
         order: packages.length,
+        imageBase64: '',
+        note: '',
       });
     }
     setShowPackageModal(true);
@@ -148,6 +154,8 @@ export default function AdminApps() {
       discount: Number(formPackage.discount),
       type: formPackage.type,
       order: Number(formPackage.order),
+      imageBase64: formPackage.imageBase64,   // ✅
+      note: formPackage.note,                 // ✅
     };
     if (editingPackage) {
       await updatePackage(selectedApp.id, editingPackage.id, data);
@@ -217,8 +225,8 @@ export default function AdminApps() {
                         <Button onClick={() => handleSelectApp(app)} variant="secondary">
                           {selectedApp?.id === app.id ? 'مختارة' : 'إدارة الباقات'}
                         </Button>
-                       </td>
-                     </tr>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -327,6 +335,18 @@ export default function AdminApps() {
             <form onSubmit={handlePackageSubmit} className="modal-form">
               <Input label="اسم الباقة *" value={formPackage.name} onChange={e => setFormPackage({...formPackage, name: e.target.value})} required />
               <Input label="السعر *" type="number" step="0.01" value={formPackage.price} onChange={e => setFormPackage({...formPackage, price: e.target.value})} required />
+
+              <div className="form-field">
+                <label>صورة الباقة (اختياري)</label>
+                <ImageUpload
+                  onUploadComplete={(base64) => setFormPackage({...formPackage, imageBase64: base64})}
+                  maxSizeMB={0.5}
+                />
+                {formPackage.imageBase64 && <img src={formPackage.imageBase64} alt="معاينة" className="preview-img" />}
+              </div>
+
+              <Input label="ملاحظة (تظهر تحت اسم الباقة)" value={formPackage.note} onChange={e => setFormPackage({...formPackage, note: e.target.value})} />
+
               <div className="form-field">
                 <label>العملة</label>
                 <select value={formPackage.currency} onChange={e => setFormPackage({...formPackage, currency: e.target.value})}>

@@ -32,10 +32,6 @@ export default function Dashboard() {
   return (
     <div className="dashboard" dir="rtl">
 
-       {/* <h3 className="dashboard__services-title">مساحة إعلانية</h3> */}
-      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
-        <AdSpace />
-      </Suspense>
       <StoreIntro />
 
       
@@ -46,16 +42,17 @@ export default function Dashboard() {
         </Suspense>
       </div>
       
-
+      <h3 className="dashboard__services-title">مساحة إعلانية</h3>
+      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
+        <AdSpace />
+      </Suspense>
+      
       {/* تم تعطيل LazyOnScroll: نستخدم Suspense مباشرة */}
       <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
         <HowItWorks page="dashboard" />
       </Suspense>
 
-      {/* <h3 className="dashboard__services-title">مساحة إعلانية</h3>
-      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
-        <AdSpace />
-      </Suspense> */}
+
 
       <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإحصائيات..." />}>

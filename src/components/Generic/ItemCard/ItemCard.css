@@ -183,6 +183,7 @@
   .game-card {
     padding: 0.5rem;
     gap: 0.6rem;
+    margin-bottom: 10px;
   }
   .game-card__image {
     width: 55px;
@@ -201,3 +202,8 @@
     padding: 0.15rem 0.5rem;
   }
 }
+
+ .game-card {
+   
+    margin-bottom: 7px !important;
+ }

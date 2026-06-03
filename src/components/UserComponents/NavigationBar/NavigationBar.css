@@ -1,184 +1,116 @@
-/* إعادة ضبط موقع الشريط ليكون أسفل الهيدر مباشرة */
+/* شريط الأخبار المتحرك - حل دائري متصل بدون تقطيع */
 .navigation-bar.ticker-bar {
-   background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary, #1e1e2f);
+  color: var(--color-text-primary, #ffffff);
   overflow: hidden;
   white-space: nowrap;
-  padding: 0.5rem 0;
-  position: relative;
-
-  width: 100%;
-  margin: 0;
-  top: 0;
-  z-index: 25;
-  /* ✅ إضافة ارتفاع ثابت لضمان المساحة */
-  min-height: 2.5rem;
-}
-
-/* ✅ تغيير الحاوية لتسمح بالتكرار */
-.ticker-wrapper {
-  display: inline-block;
-  white-space: nowrap;
-  will-change: transform;
-  /* ✅ إزالة width: auto ووضعها تلقائي حسب المحتوى */
-  animation-duration: inherit;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-/* ✅ العنصر المتكرر (يتم إنشاؤه بواسطة React أو يمكن تكراره في CSS)
-   نضيف عنصرًا وهميًا قبل/بعد لضمان التكرار البصري، ولكن الأفضل استخدام JS لتكرار المحتوى
-   لحل سريع: نجعل الشريط يعتمد على JS لتكرار النص */
-.ticker-content {
-  display: inline-block;
-  white-space: nowrap;
-  font-size: 1rem;
-  /* ✅ إزالة padding-right: 100% واستبدالها بهوامش طبيعية */
-  padding-right: 0;
-}
-
-/* ✅ حل مباشر: نضيف سطرين من النص باستخدام CSS pseudo-element */
-.ticker-content::after {
-  content: attr(data-text);
-  display: inline-block;
-  white-space: nowrap;
-  margin-right: 2rem;
-}
-
-.ticker-segment {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-  display: inline-block;
-}
-
-/* حركات الـ marquee */
-@keyframes marquee-rtl {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
-}
-
-@keyframes marquee-ltr {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(0%); }
-}
-
-/* للجوال */
-@media (max-width: 768px) {
-  .ticker-content {
-    font-size: 0.85rem;
-  }
-  .navigation-bar.ticker-bar {
-    padding: 0.35rem 0;
-  }
-}
-.navigation-bar.ticker-bar {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
   position: relative;
   width: 100%;
-  margin: 0;
   top: 0;
   z-index: 25;
-  min-height: 2.5rem;
+  min-height: 3rem;
+  box-sizing: border-box;
 }
 
+/* الحاوية المتحركة (محتوى + نسخ) */
 .ticker-wrapper {
   display: inline-flex;
   white-space: nowrap;
   will-change: transform;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+  width: auto;
 }
 
+/* إمكانية إيقاف الحركة عند المرور بالماوس */
+.ticker-wrapper.pause-on-hover:hover {
+  animation-play-state: paused;
+}
+
+/* كل قطعة محتوى (أصلية أو نسخة) */
 .ticker-content {
   display: inline-flex;
   white-space: nowrap;
-  font-size: 1rem;
-  gap: 0.5rem;
-}
-
-.ticker-segment {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-  display: inline-block;
-}
-
-@keyframes marquee-rtl-dynamic {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes marquee-ltr-dynamic {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-
-@media (max-width: 768px) {
-  .ticker-content {
-    font-size: 0.85rem;
-  }
-  .navigation-bar.ticker-bar {
-    padding: 0.35rem 0;
-  }
-}
-
-.navigation-bar.ticker-bar {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 0.5rem 0;
-  position: relative;
-  width: 100%;
-  margin: 0;
-  top: 0;
-  z-index: 25;
-  min-height: 2.5rem;
-}
-
-.ticker-wrapper {
-  display: inline-flex;
-  white-space: nowrap;
-  will-change: transform;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-
-.ticker-content {
-  display: inline-flex;
-  white-space: nowrap;
-  font-size: 1rem;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
   flex-shrink: 0;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
 }
 
+/* الجزء النصي الواحد */
 .ticker-segment {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
   display: inline-block;
-  flex-shrink: 0;
+  margin: 0 0.2rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  white-space: nowrap; /* مهم جداً لمنع التفاف النص داخل المقطع */
+  word-break: keep-all;
+  text-decoration: none;
 }
 
-/* الحركة من اليمين إلى اليسار: تبدأ من 0% وتنتهي عند -50% فقط
-   لأننا نكرر النص حتى يملأ العرض مرتين، -50% تنقلنا بالضبط لنهاية النسخة الأولى */
+/* فاصل اختياري بين المقاطع (يمكن إضافته عبر CSS) */
+.ticker-segment:not(:last-child)::after {
+  content: "•";
+  margin: 0 0.5rem;
+  opacity: 0.6;
+  font-weight: normal;
+}
+
+/* إذا كنت تريد إزالة الفاصل الافتراضي يمكن إلغاء التعليق أعلاه */
+/* أو يمكن إضافة فاصل يدوي داخل segments مباشرة */
+
+/* تعريف حركة right-to-left (من اليمين لليسار) */
 @keyframes marquee-rtl {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
+/* تعريف حركة left-to-right (من اليسار لليمين) */
 @keyframes marquee-ltr {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0%); }
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
 }
 
+/* تحسينات للأجهزة المحمولة */
 @media (max-width: 768px) {
-  .ticker-content {
-    font-size: 0.85rem;
-  }
   .navigation-bar.ticker-bar {
-    padding: 0.35rem 0;
+    padding: 0.5rem 0;
+    min-height: 2.5rem;
   }
+  
+  .ticker-content {
+    gap: 0.4rem;
+    padding: 0 0.25rem;
+  }
+  
+  .ticker-segment {
+    font-size: 0.85rem;
+    margin: 0 0.1rem;
+  }
+  
+  .ticker-segment:not(:last-child)::after {
+    margin: 0 0.3rem;
+  }
+}
+
+/* تحسينات للشاشات الكبيرة جداً */
+@media (min-width: 1920px) {
+  .ticker-segment {
+    font-size: 1.1rem;
+  }
+}
+
+/* إمكانية تخصيص سرعة الحركة ديناميكياً عبر JS */
+:root {
+  --marquee-duration: 60s;
 }
