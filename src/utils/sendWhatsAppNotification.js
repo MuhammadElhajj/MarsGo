@@ -1,9 +1,4 @@
 
-// دالة مساعدة لتحويل Base64 إلى Blob
-// src/utils/sendWhatsAppNotification.js
-// إرسال إشعارات عبر Telegram Bot API (يدعم النص والصور)
-
-// إرسال رسالة نصية فقط
 export async function sendTelegramMessage(chatId, message) {
   const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
   if (!botToken) return false;
@@ -22,28 +17,25 @@ export async function sendTelegramMessage(chatId, message) {
   }
 }
 
-// إرسال صورة + نص (caption)
+// إرسال صورة + نص إلى chat_id واحد
 export async function sendTelegramPhoto(chatId, photoBase64, caption) {
   const botToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
   if (!botToken) return false;
-  
-  // تحويل base64 إلى Blob
   const blob = dataURItoBlob(photoBase64);
   const formData = new FormData();
   formData.append('chat_id', chatId);
   formData.append('photo', blob, 'receipt.jpg');
   if (caption) formData.append('caption', caption);
   formData.append('parse_mode', 'Markdown');
-
   const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
   try {
     const res = await fetch(url, { method: 'POST', body: formData });
     const data = await res.json();
     if (res.ok && data.ok) {
-      console.log('✅ Photo sent to Telegram');
+      // console.log(`✅ Photo sent to ${chatId}`);
       return true;
     } else {
-      console.error('❌ Telegram photo send failed:', data);
+      console.error(`❌ Photo send failed to ${chatId}:`, data);
       return false;
     }
   } catch (err) {
@@ -64,23 +56,28 @@ function dataURItoBlob(dataURI) {
   return new Blob([ab], { type: mimeString });
 }
 
-// الدالة الرئيسية (تُستخدم في صفحات الطلب) - تدعم صورة اختيارية
+// الدالة الرئيسية: ترسل إلى جميع المستلمين المحددين في VITE_TELEGRAM_RECIPIENT_IDS
 export async function sendWhatsAppNotification(phoneNumber, message, photoBase64 = null) {
-  const adminChatId = import.meta.env.VITE_TELEGRAM_CHAT_ID;
-  if (!adminChatId) {
-    console.warn('⚠️ Missing admin chat ID');
+  const recipients = import.meta.env.VITE_TELEGRAM_RECIPIENT_IDS;
+  if (!recipients) {
+    console.warn('⚠️ No recipients defined (VITE_TELEGRAM_RECIPIENT_IDS)');
     return false;
   }
-  if (photoBase64) {
-    // إرسال الصورة + النص كـ caption
-    return await sendTelegramPhoto(adminChatId, photoBase64, message);
-  } else {
-    // إرسال نص فقط
-    return await sendTelegramMessage(adminChatId, message);
+  const chatIds = recipients.split(',').map(id => id.trim());
+  let allSuccess = true;
+  for (const chatId of chatIds) {
+    let success;
+    if (photoBase64) {
+      success = await sendTelegramPhoto(chatId, photoBase64, message);
+    } else {
+      success = await sendTelegramMessage(chatId, message);
+    }
+    if (!success) allSuccess = false;
   }
+  return allSuccess;
 }
 
-// دالة تنسيق الرسالة (كما هي)
+// دالة تنسيق الرسالة (كما هي، مع دعم نوع 'apps')
 export function formatOrderMessage(orderData, orderId, type) {
   const shortId = orderId.slice(-6);
   const date = new Date().toLocaleString('ar-SY');
@@ -97,9 +94,9 @@ export function formatOrderMessage(orderData, orderId, type) {
   }
 
   if (type === 'apps') {
-  return `📦 *طلب شحن تطبيق جديد* 📦
+    return `📦 *طلب شحن تطبيق جديد* 📦
 🆔 رقم الطلب: #${shortId}
-🎮 اللعبة: ${orderData.itemName}
+📱 التطبيق: ${orderData.itemName}
 📦 الباقة: ${orderData.packageName}
 🆔 معرف الحساب: ${orderData.playerId}
 💰 المبلغ: ${orderData.finalPriceUSD || orderData.finalPrice} ${orderData.currencyUsed === 'USD' ? '$' : (orderData.currency || 'USD')}

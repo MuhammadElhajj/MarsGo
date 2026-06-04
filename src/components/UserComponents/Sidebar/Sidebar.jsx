@@ -76,6 +76,7 @@ export default function Sidebar({ isOpen, onClose }) {
               </ul>
             )}
           </li>
+         <li><Link to="/profile" className={linkClass("/profile")} onClick={handleLinkClick}>ملفي الشخصي</Link></li>
           <li><Link to="/my-orders" className={linkClass("/my-orders")} onClick={handleLinkClick}>طلباتي</Link></li>
           <li><Link to="/about" className={linkClass("/about")} onClick={handleLinkClick}>من نحن</Link></li>
           {userData?.role === "verifier" && (

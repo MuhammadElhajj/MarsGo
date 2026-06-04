@@ -1,0 +1,459 @@
+/* ProfilePage.css - التصميم مع تبديل الجهات لـ RTL */
+
+.profile-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ========== الهيدر: زر الرجوع في اليمين، العنوان في اليسار ========== */
+.profile-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-page__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+  border-right: 4px solid var(--color-accent);
+  padding-right: 1rem;
+  order: 2; /* لضمان ظهوره في اليسار عند استخدام space-between مع RTL */
+}
+
+/* زر الرجوع يبقى في اليمين */
+.profile-page__header .go-back-btn {
+  order: 1;
+}
+
+/* ========== كارد الأفاتار - صورة في اليمين، نص في اليسار ========== */
+.profile-page__avatar-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  transition: transform 0.2s;
+}
+.profile-page__avatar-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.profile-page__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  /* في RTL، الصورة تظهر في اليمين تلقائياً لأنها العنصر الأول */
+}
+
+.profile-page__avatar-image {
+  flex-shrink: 0;
+}
+
+/* حجم الأفاتار كبير */
+.profile-page__avatar-image .avatar--xl {
+  width: 100px;
+  height: 100px;
+  font-size: 2.5rem;
+}
+
+.profile-page__avatar-info {
+  flex: 1;
+}
+
+.profile-page__name {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: var(--color-text-primary);
+}
+
+.profile-page__email {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  word-break: break-all;
+}
+
+/* ========== الشبكة (3 أعمدة) ========== */
+.profile-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.profile-page__card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.2rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.profile-page__card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.profile-page__card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+  border-right: 3px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+/* المعلومات الداخلية */
+.profile-page__info {
+  flex: 1;
+}
+
+.profile-page__info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.profile-page__info-row:last-child {
+  border-bottom: none;
+}
+.profile-page__info-row span {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.profile-page__info-row strong {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* حقل الواتساب */
+.profile-page__whatsapp-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.profile-page__whatsapp-input .input-group {
+  width: 100%;
+}
+.profile-page__whatsapp-input .btn {
+  width: 100%;
+}
+.profile-page__whatsapp-note {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+/* ========== استجابة ========== */
+@media (max-width: 1024px) {
+  .profile-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-page__grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-page__title {
+    font-size: 1.4rem;
+  }
+  .profile-page__avatar-row {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .profile-page__name {
+    font-size: 1.6rem;
+  }
+  .profile-page__email {
+    font-size: 0.9rem;
+  }
+  /* في الجوال، الترتيب العمودي لا يحتاج تبديل جهات */
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 0.25rem;
+  }
+  .profile-page__title {
+    font-size: 1.2rem;
+  }
+  .profile-page__avatar-card {
+    padding: 1rem;
+  }
+}
+
+/* تحميل */
+.profile-page__loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* دعم الوضع الداكن */
+.dark .profile-page__avatar-card,
+.dark .profile-page__card {
+  border: 1px solid var(--color-border);
+}
+
+/* أيقونة الحفظ */
+.profile-page__saved-badge {
+  display: inline-block;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.8rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.4rem;
+  margin-right: 0.5rem;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+/* عند تعطيل الحقل (وضع القراءة فقط) */
+.input--readonly {
+  background-color: var(--color-bg-primary);
+  cursor: default;
+  opacity: 0.9;
+}
+
+/* أزرار الواتساب في صف */
+.profile-page__whatsapp-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.profile-page__whatsapp-buttons .btn {
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .profile-page__whatsapp-buttons {
+    flex-direction: column;
+  }
+}
+
+/* علامة صح بجانب العنوان */
+.profile-page__saved-badge {
+  display: inline-block;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 18px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* مجموعة أزرار الواتساب */
+.profile-page__whatsapp-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.profile-page__whatsapp-buttons .btn {
+  flex: 1;
+}
+
+/* تنسيق الحقل عند تعطيله (وضع القراءة فقط) */
+.input--readonly {
+  background-color: var(--color-bg-primary);
+  cursor: default;
+  opacity: 0.8;
+}
+
+/* ProfilePage.css - إضافة تنسيقات الكروت الجديدة */
+
+.profile-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+/* كارد قد يمتد على عمودين إذا أردنا (اختياري) */
+.profile-page__card--wide {
+  grid-column: span 1; /* افتراضي، يمكن تعديله لاحقاً */
+}
+
+/* إجمالي الإنفاق */
+.profile-page__total-spent {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.profile-page__total-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+}
+.profile-page__total-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+.profile-page__completed-count {
+  font-size: 0.8rem;
+  color: #10b981;
+  margin-top: 0.5rem;
+}
+
+/* الإشعارات */
+.profile-page__notifications {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.profile-page__unread-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.profile-page__badge {
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.profile-page__link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+}
+.profile-page__link:hover {
+  transform: translateX(-3px);
+  text-decoration: underline;
+}
+
+/* آخر الطلبات */
+.profile-page__recent-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.profile-page__order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.profile-page__order-id {
+  font-weight: 700;
+  color: var(--color-accent);
+  font-family: monospace;
+}
+.profile-page__order-type {
+  color: var(--color-text-secondary);
+}
+.profile-page__order-amount {
+  font-weight: 600;
+}
+.profile-page__order-status {
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.status-pending_verification { background: #fef3c7; color: #92400e; }
+.status-awaiting_customer_resubmit { background: #e0e7ff; color: #3730a3; }
+.status-verified_pending_execution { background: #d1fae5; color: #065f46; }
+.status-completed { background: #dbeafe; color: #1e40af; }
+.status-rejected { background: #fee2e2; color: #b91c1c; }
+
+.profile-page__empty {
+  text-align: center;
+  padding: 1rem;
+  color: var(--color-text-secondary);
+}
+.profile-page__loading-small {
+  text-align: center;
+  padding: 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+/* علامة صح */
+.profile-page__saved-badge {
+  display: inline-block;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 18px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* أزرار الواتساب */
+.profile-page__whatsapp-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.profile-page__whatsapp-buttons .btn {
+  flex: 1;
+}
+.input--readonly {
+  background-color: var(--color-bg-primary);
+  cursor: default;
+  opacity: 0.8;
+}
+
+/* استجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+  .profile-page__grid {
+    gap: 1rem;
+  }
+  .profile-page__order-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

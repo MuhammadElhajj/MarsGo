@@ -10,7 +10,7 @@ export default function CurrencyToggle() {
       {currency === 'USD' ? (
         <FiDollarSign size={18} />
       ) : (
-        <span className="currency-syp">ل.س</span>
+        <span className="currency-syp">S.P</span>
       )}
     </button>
   );

@@ -37,9 +37,11 @@ export default function Header({ onToggleSidebar }) {
       </div>
       <div className="header__right">
         <div className="header__user">
-            <NotificationBell />
          <CurrencyToggle />
+            <NotificationBell />
+         
           <ThemeToggle />
+          <span className="header__name">{userData?.name}</span>
           <Avatar
             src={userData?.avatar}
             alt={userData?.name}
@@ -47,7 +49,6 @@ export default function Header({ onToggleSidebar }) {
             name={userData?.name}
             size="md"
           />
-          <span className="header__name">{userData?.name}</span>
           <button 
             className="header__logout-icon" 
             onClick={handleLogout}

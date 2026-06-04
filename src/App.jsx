@@ -146,6 +146,10 @@ const AboutPage = lazy(() => import("./pages/User/About/AboutPage"));
 const PaymentInfoPage  = lazy(() => import("./pages/User/PaymentPage/PaymentPage"));
 const MyOrdersPage = lazy(() => import('./pages/User/MyOrders/MyOrdersPage'));
 const NotificationsPage = lazy(() => import("./pages/User/Notifications/NotificationsPage"));
+const ProfilePage = lazy(() => import('./components/UserComponents/Profile/ProfilePage'));
+
+// داخل Routes تحت Layout (بعد /about مثلاً)
+<Route path="/profile" element={<ProfilePage />} />
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 // صفحات المدير
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -213,7 +217,8 @@ function App() {
           <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
-          <Route path="/crypto" element={<CryptoPage />} />
+        
+        <Route path="/profile" element={<ProfilePage />} />  <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
           <Route path="/payment-info" element={<PaymentInfoPage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
