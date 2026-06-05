@@ -1,8 +1,8 @@
-// src/pages/User/Apps/AppPackages.jsx
+// src/components/UserComponents/App/AppPackages/AppPackages.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApps } from '../../../context/AppsContext';
-import CatalogList from '../../../components/Generic/CatalogList/CatalogList';
+import { useApps } from '../../../../context/AppsContext';        // ✅ 4 مستويات لأعلى
+import CatalogList from '../../../../components/Generic/CatalogList/CatalogList';
 
 export default function AppPackages() {
   const { appId } = useParams();
