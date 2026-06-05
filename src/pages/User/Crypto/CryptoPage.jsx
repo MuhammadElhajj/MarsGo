@@ -1,22 +1,15 @@
+// src/pages/User/Crypto/CryptoPage.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { db } from '../../../firebase';
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
-import Button from '../../../components/GeneralComponents/Button/Button';
-import Input from '../../../components/GeneralComponents/Input/Input';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import UnifiedCheckout from '../../../components/Generic/UnifiedCheckout/UnifiedCheckout';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import HowItWorks from '../../../components/UserComponents/HowItWorks/HowItWorks';
 import './CryptoPage.css';
 
 export default function CryptoPage() {
   const { userData } = useAuth();
-  const [tradeType, setTradeType] = useState('buy');
-  const [amount, setAmount] = useState('');
-  const [price, setPrice] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('شام كاش');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
 
@@ -41,7 +34,6 @@ export default function CryptoPage() {
       setOrders(ordersList);
     } catch (err) {
       console.error('خطأ في جلب طلبات العملات الرقمية:', err);
-      setError('حدث خطأ في تحميل الطلبات');
     } finally {
       setOrdersLoading(false);
     }
@@ -50,39 +42,6 @@ export default function CryptoPage() {
   useEffect(() => {
     fetchOrders();
   }, [userData]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    if (!amount || !price) {
-      setError('يرجى إدخال المبلغ والسعر');
-      return;
-    }
-    setLoading(true);
-    try {
-      await addDoc(collection(db, 'orders'), {
-        userId: userData.uid,
-        customerName: userData.name || '',
-        type: 'crypto',
-        tradeType,
-        amount: parseFloat(amount),
-        price: parseFloat(price),
-        paymentMethod,
-        status: 'pending_verification',
-        createdAt: serverTimestamp(),
-      });
-      setSuccess(true);
-      setAmount('');
-      setPrice('');
-      fetchOrders();
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      console.error(err);
-      setError('فشل إرسال الطلب: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="crypto-page" dir="rtl">
@@ -100,48 +59,14 @@ export default function CryptoPage() {
         هذه الخدمة قيد الترخيص - يمكنك تقديم طلبات وسيتم تفعيل المطابقة عند توفر التراخيص.
       </div>
 
-      <div className="crypto-page__form">
-        {success && <div className="crypto-page__success">تم إضافة طلبك بنجاح!</div>}
-        {error && <div className="crypto-page__error">{error}</div>}
-        <form onSubmit={handleSubmit}>
-          <div className="crypto-page__field">
-            <label>نوع العملية</label>
-            <select value={tradeType} onChange={e => setTradeType(e.target.value)}>
-              <option value="buy">شراء</option>
-              <option value="sell">بيع</option>
-            </select>
-          </div>
-          <Input
-            label="الكمية (USDT)"
-            type="number"
-            step="any"
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
-            required
-          />
-          <Input
-            label="السعر المطلوب (دولار/يورو)"
-            type="number"
-            step="any"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
-            required
-          />
-          <Input
-            label="طريقة الدفع"
-            value={paymentMethod}
-            onChange={e => setPaymentMethod(e.target.value)}
-            required
-          />
-          <Button type="submit" disabled={loading}>
-            {loading ? 'جاري...' : 'إضافة الطلب'}
-          </Button>
-        </form>
-      </div>
+      {/* ✅ نموذج الدفع الموحد */}
+      <UnifiedCheckout serviceType="crypto" redirectPath="/dashboard" />
 
       <div className="crypto-page__orders">
         <h3>طلباتي في العملات الرقمية</h3>
-        {ordersLoading ? <p>جاري التحميل...</p> : orders.length === 0 ? (
+        {ordersLoading ? (
+          <p>جاري التحميل...</p>
+        ) : orders.length === 0 ? (
           <p>لا توجد طلبات عملات رقمية حتى الآن</p>
         ) : (
           <table className="crypto-page__table">
@@ -162,7 +87,7 @@ export default function CryptoPage() {
                   <td>{order.price} $</td>
                   <td>{order.paymentMethod}</td>
                   <td>{order.status === 'pending_verification' ? 'قيد التدقيق' : order.status}</td>
-                 </tr>
+                </tr>
               ))}
             </tbody>
           </table>

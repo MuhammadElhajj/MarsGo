@@ -1,9 +1,10 @@
-.admin-games {
+/* src/components/AdminCoponent/AdminCatalog/AdminCatalog.css */
+.admin-catalog {
   width: 100%;
   padding: 0;
 }
 
-.admin-games__header {
+.admin-catalog__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -12,39 +13,44 @@
   gap: 1rem;
 }
 
-.admin-games__header h2 {
+.admin-catalog__header h2 {
   margin: 0;
   font-size: 1.8rem;
 }
 
-.admin-games__content {
+.admin-catalog__content {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-/* قائمة الألعاب */
-.games-table-wrapper, .packages-table-wrapper {
+/* قائمة العناصر (ألعاب/تطبيقات) */
+.items-table-wrapper,
+.packages-table-wrapper {
   overflow-x: auto;
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
-.games-table, .packages-table {
+.items-table,
+.packages-table {
   width: 100%;
   border-collapse: collapse;
   min-width: 600px;
 }
 
-.games-table th, .games-table td,
-.packages-table th, .packages-table td {
+.items-table th,
+.items-table td,
+.packages-table th,
+.packages-table td {
   padding: 0.75rem;
   text-align: right;
   border-bottom: 1px solid var(--color-border);
 }
 
-.games-table th, .packages-table th {
+.items-table th,
+.packages-table th {
   background: var(--color-bg-primary);
   font-weight: 600;
 }
@@ -53,7 +59,7 @@
   background: rgba(79, 70, 229, 0.05);
 }
 
-.game-thumb {
+.item-thumb {
   width: 40px;
   height: 40px;
   object-fit: cover;
@@ -82,7 +88,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,7 +137,8 @@
   font-weight: 500;
   color: var(--color-text-secondary);
 }
-.form-field select, .form-field input[type="checkbox"] {
+.form-field select,
+.form-field input[type="checkbox"] {
   width: auto;
 }
 .checkbox label {
@@ -157,7 +164,7 @@
 
 /* استجابة */
 @media (max-width: 768px) {
-  .admin-games__header {
+  .admin-catalog__header {
     flex-direction: column;
     align-items: flex-start;
   }

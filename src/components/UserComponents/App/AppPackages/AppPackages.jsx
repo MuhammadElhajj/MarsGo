@@ -1,8 +1,8 @@
-// pages/User/Apps/AppPackages.jsx
+// src/pages/User/Apps/AppPackages.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApps } from '../../../../context/AppsContext';
-import PackagesListView from '../../../Generic/PackagesListView/PackagesListView';
+import { useApps } from '../../../context/AppsContext';
+import CatalogList from '../../../components/Generic/CatalogList/CatalogList';
 
 export default function AppPackages() {
   const { appId } = useParams();
@@ -22,17 +22,18 @@ export default function AppPackages() {
   }, [appId, apps]);
 
   const handlePackageSelect = (pkg) => {
-    // ✅ استخدام المسار /apps/checkout بدون معرّفات، مع تمرير العنصر والباقة عبر state
     navigate('/apps/checkout', { state: { item: app, package: pkg } });
   };
 
   if (!app) return null;
 
   return (
-    <PackagesListView
-      parentName={app.name}
-      packages={packages}
-      onPackageSelect={handlePackageSelect}
+    <CatalogList
+      items={packages}
+      onItemClick={handlePackageSelect}
+      title={`باقات ${app.name}`}
+      showBackButton={true}
+      showPrice={true}
     />
   );
 }

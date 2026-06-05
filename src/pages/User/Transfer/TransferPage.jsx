@@ -1,6 +1,6 @@
 // src/pages/User/Transfer/TransferPage.jsx
 import { Suspense, lazy } from 'react';
-import TransferForm from "../../../components/UserComponents/TransferForm/TransferForm";
+import UnifiedCheckout from '../../../components/Generic/UnifiedCheckout/UnifiedCheckout'; // ✅ تغيير
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import "./TransferPage.css";
@@ -24,8 +24,8 @@ export default function TransferPage() {
         <HowItWorks page="transfer" />
       </Suspense>
 
-      {/* TransferForm يظهر فوراً (بدون تأخير) لأنه الجزء الأساسي */}
-      <TransferForm />
+      {/* ✅ استخدام UnifiedCheckout بدلاً من TransferForm */}
+      <UnifiedCheckout serviceType="transfer" redirectPath="/dashboard" />
 
       {/* قائمة الطلبات يتم تحميلها بشكل lazy */}
       <Suspense fallback={<Loading text="جاري تحميل الطلبات..." />}>

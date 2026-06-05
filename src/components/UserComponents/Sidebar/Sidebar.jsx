@@ -72,7 +72,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 <li><Link to="/gaming" className={linkClass("/gaming")} onClick={handleLinkClick}>شحن ألعاب</Link></li>
                 <li><Link to="/apps" className={linkClass("/apps")} onClick={handleLinkClick}>تطبيقات</Link></li>
                 {/* <li><Link to="/transfer" className={linkClass("/transfer")} onClick={handleLinkClick}>تحويل دولي</Link></li> */}
-            {/* {**}    <li><Link to="/exchange" className={linkClass("/exchange")} onClick={handleLinkClick}>صرافة شام كاش</Link></li> */}
+               {/* <li><Link to="/exchange" className={linkClass("/exchange")} onClick={handleLinkClick}>صرافة شام كاش</Link></li> */}
               </ul>
             )}
           </li>

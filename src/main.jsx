@@ -14,7 +14,7 @@ import { AppsProvider } from './context/AppsContext';
 import { ExchangeRateProvider } from './context/ExchangeRateContext'; // تأكد من المسار الصحيح
 import { CurrencyProvider } from './context/CurrencyContext';
 import { NotificationProvider } from './context/NotificationContext';
-
+import { SiteConfigProvider } from './context/SiteConfigContext';
 // داخل التسلسل:
 <AuthProvider>
   <NotificationProvider>
@@ -39,7 +39,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <CurrencyProvider>
 <TickerProvider>  
   <NotificationProvider>{/* <-- إضافة هذا */}
-      <App />
+          <SiteConfigProvider>   {/* ✅ أضف هذا */}
+                              <App />
+                            </SiteConfigProvider>
       </NotificationProvider> 
     </TickerProvider>
   </CurrencyProvider>
