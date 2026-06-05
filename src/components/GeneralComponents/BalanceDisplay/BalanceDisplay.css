@@ -1,0 +1,38 @@
+/* src/components/GeneralComponents/BalanceDisplay/BalanceDisplay.css */
+.balance-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;     /* ✅ توسيط المحتوى */
+  gap: 0.3rem;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 0.3rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  white-space: nowrap;
+  min-width: 110px;           /* ✅ عرض ثابت لتجنب الاهتزاز */
+  flex-shrink: 0;             /* ✅ منع التقلص */
+  transition: none;           /* ✅ منع أي تأثيرات حركة مفاجئة */
+}
+
+.balance-display--compact {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  min-width: 90px;            /* ✅ للنسخة المدمجة */
+}
+
+.balance-display__icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;             /* ✅ الأيقونة لا تتقلص */
+}
+
+.balance-display__amount {
+  direction: ltr;
+  white-space: nowrap;        /* ✅ منع التفاف النص */
+}
+
+.balance-display--loading {
+  opacity: 0.6;
+  font-style: italic;
+}

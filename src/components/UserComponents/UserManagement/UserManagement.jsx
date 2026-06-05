@@ -63,7 +63,10 @@ export default function UserManagement() {
                 <td>{u.email}</td>
                 <td>
                   <span className={`user-management__role user-management__role--${u.role}`}>
-                    {u.role === 'admin' ? 'مدير' : u.role === 'verifier' ? 'مدقق' : 'زبون'}
+                    {u.role === 'admin' && 'مدير'}
+                    {u.role === 'verifier' && 'مدقق'}
+                    {u.role === 'finance_verifier' && 'مدقق مالي'}
+                    {u.role === 'customer' && 'زبون'}
                   </span>
                 </td>
                 <td>
@@ -81,6 +84,13 @@ export default function UserManagement() {
                       className="user-management__btn"
                     >
                       مدقق
+                    </Button>
+                    <Button
+                      onClick={() => changeRole(u.id, 'finance_verifier')}
+                      disabled={u.role === 'finance_verifier' || actionLoading === u.id}
+                      className="user-management__btn"
+                    >
+                      مدقق مالي
                     </Button>
                     <Button
                       onClick={() => changeRole(u.id, 'customer')}

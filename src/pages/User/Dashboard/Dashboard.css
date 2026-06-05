@@ -88,3 +88,52 @@
   margin: 1rem 0 0.5rem;
   color: var(--color-text-primary);
 }
+
+
+
+/* صف الرصيد وزر الإيداع */
+.dashboard__balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* تنسيق زر الإيداع ليكون بحجم مناسب */
+.topup-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  min-width: 120px;
+  justify-content: center;
+}
+
+/* تنسيق عرض الرصيد ليكون بحجم مناسب */
+.balance-display {
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  min-width: 130px;
+  justify-content: center;
+}
+
+/* للشاشات الصغيرة جداً (اقل من 450px): الأزرار فوق بعضها */
+@media (max-width: 450px) {
+  .dashboard__balance-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .dashboard__balance-row > * {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .topup-btn,
+  .balance-display {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

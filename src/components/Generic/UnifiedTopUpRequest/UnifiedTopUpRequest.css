@@ -1,0 +1,22 @@
+.unified-topup {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.unified-topup__title {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+.unified-topup__form {
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+.unified-topup__field {
+  margin-bottom: 1rem;
+}
+.unified-topup__field label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}

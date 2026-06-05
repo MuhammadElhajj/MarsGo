@@ -8,6 +8,8 @@ import ThemeToggle from '../../GeneralComponents/ThemeToggle/ThemeToggle';
 import { FiMenu, FiLogOut } from 'react-icons/fi';
 import { useTheme } from '../../../context/ThemeContext'; // ✅ استيراد الثيم
 import './Header.css';
+import BalanceDisplay from '../../GeneralComponents/BalanceDisplay/BalanceDisplay';
+import { useBalance } from '../../../context/BalanceContext';
 import LogoDark from "../../../assets/logo-dark.png";
 import LogoLight from "../../../assets/logo-light.png";
 import CurrencyToggle from '../../GeneralComponents/CurrencyToggle/CurrencyToggle';
@@ -15,7 +17,7 @@ import NotificationBell from '../../GeneralComponents/NotificationBell/Notificat
 export default function Header({ onToggleSidebar }) {
   const { userData } = useAuth();
   const { isDark } = useTheme(); // ✅ معرفة الوضع الحالي
-
+const { balance, loading: balanceLoading } = useBalance();
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -37,7 +39,6 @@ export default function Header({ onToggleSidebar }) {
       </div>
       <div className="header__right">
         <div className="header__user">
-         <CurrencyToggle />
             <NotificationBell />
          
           <ThemeToggle />

@@ -407,3 +407,25 @@
 .header-Logo--img {
   width: 100px;
 }
+
+
+@media (max-width: 768px) {
+  /* القواعد الموجودة حالياً */
+  .header {
+    padding: 0.5rem 1rem;
+  }
+  .header__hamburger {
+    display: flex;
+  }
+  .header__center {
+    display: none;
+  }
+  .header__name {
+    display: none;
+  }
+  .header__user {
+    gap: 0.5rem;
+  }
+  
+
+}

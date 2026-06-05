@@ -1,16 +1,28 @@
+// src/components/GeneralComponents/CurrencyToggle/CurrencyToggle.jsx
 import { useCurrency } from '../../../context/CurrencyContext';
-import { FiDollarSign } from 'react-icons/fi';
+import { FiDollarSign, FiTrendingUp } from 'react-icons/fi';
 import './CurrencyToggle.css';
 
-export default function CurrencyToggle() {
+export default function CurrencyToggle({ className = '', showLabel = false }) {
   const { currency, toggleCurrency } = useCurrency();
 
   return (
-    <button className="currency-toggle" onClick={toggleCurrency} aria-label="تبديل العملة">
+    <button
+      className={`currency-toggle ${className}`}
+      onClick={toggleCurrency}
+      aria-label={`تحويل العملة إلى ${currency === 'USD' ? 'ليرة سورية' : 'دولار أمريكي'}`}
+      title={`العملة الحالية: ${currency === 'USD' ? 'دولار أمريكي' : 'ليرة سورية'}`}
+    >
       {currency === 'USD' ? (
-        <FiDollarSign size={18} />
+        <>
+           <span className="currency-syp-icon">دولار امريكي</span>
+          {showLabel && <span>USD</span>}
+        </>
       ) : (
-        <span className="currency-syp">S.P</span>
+        <>
+          <span className="currency-syp-icon">ليرة سورية</span>
+          {showLabel && <span>SYP</span>}
+        </>
       )}
     </button>
   );

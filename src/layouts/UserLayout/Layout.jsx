@@ -19,7 +19,7 @@ export default function Layout() {
       <Header onToggleSidebar={toggleSidebar} />
       
       {/* شريط التنقل أسفل الهيدر وفوق المحتوى الرئيسي */}
-      <NavigationBar />
+      {/* <NavigationBar /> */}
       
       {/* ✅ شريط البحث المخصص للجوال (يظهر فقط على الشاشات الصغيرة) */}
       <div className="layout__search-mobile">

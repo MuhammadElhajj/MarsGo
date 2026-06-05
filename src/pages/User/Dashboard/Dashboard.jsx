@@ -18,6 +18,10 @@ const ServicesGrid = lazy(() => import("../../../components/UserComponents/Servi
 const OrdersList = lazy(() => import("../../../components/UserComponents/OrdersList/OrdersList"));
 const SpendingProgress = lazy(() => import("../../../components/UserComponents/SpendingProgress/SpendingProgress"));
 
+// ✅ مكونات الرصيد والإيداع (لازي لود)
+const BalanceDisplay = lazy(() => import('../../../components/GeneralComponents/BalanceDisplay/BalanceDisplay'));
+const TopUpButton = lazy(() => import('../../../components/GeneralComponents/TopUpButton/TopUpButton'));
+
 export default function Dashboard() {
   const { userData } = useAuth();
   const { stats, loading: statsLoading } = useStats();
@@ -32,8 +36,19 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" dir="rtl">
-
+    {/* ✅ صف الرصيد وزر الإيداع */}
+      <div className="dashboard__balance-row">
+        <Suspense fallback={<div className="balance-placeholder" style={{width: '100px', height: '36px', background: 'rgba(79,70,229,0.1)', borderRadius: '2rem'}}>...</div>}>
+          <BalanceDisplay />
+        </Suspense>
+        <Suspense fallback={<div className="topup-placeholder" style={{width: '100px', height: '36px', background: 'rgba(79,70,229,0.1)', borderRadius: '2rem'}}>...</div>}>
+          <TopUpButton />
+        </Suspense>
+      </div>
       <StoreIntro />
+
+  
+
       <SpendingProgress />
 
       

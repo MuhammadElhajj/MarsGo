@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Loading from "../../GeneralComponents/Loading/Loading";
 import Avatar from "../../GeneralComponents/Avatar/Avatar";
+import CurrencyToggle from "../../GeneralComponents/CurrencyToggle/CurrencyToggle"; // ✅ استيراد زر تغيير العملة
 import './Sidebar.css';
 
 const SpendingProgress = lazy(() => import('../SpendingProgress/SpendingProgress'));
@@ -56,6 +57,11 @@ export default function Sidebar({ isOpen, onClose }) {
         </Suspense>
       </div>
 
+      {/* ✅ زر تغيير العملة - بنمط السايد بار */}
+      <div className="sidebar__currency-toggle">
+        <CurrencyToggle variant="sidebar" showLabel={true} />
+      </div>
+
       <nav>
         <ul className="sidebar__list">
           <li><Link to="/dashboard" className={linkClass("/dashboard")} onClick={handleLinkClick}>لوحة التحكم</Link></li>
@@ -68,7 +74,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </button>
             {servicesOpen && (
               <ul className="sidebar__sublist">
-                <li><Link to="/crypto" className={linkClass("/crypto")} onClick={handleLinkClick}>عملات رقمية</Link></li>
+                {/* <li><Link to="/crypto" className={linkClass("/crypto")} onClick={handleLinkClick}>عملات رقمية</Link></li> */}
                 <li><Link to="/gaming" className={linkClass("/gaming")} onClick={handleLinkClick}>شحن ألعاب</Link></li>
                 <li><Link to="/apps" className={linkClass("/apps")} onClick={handleLinkClick}>تطبيقات</Link></li>
                 {/* <li><Link to="/transfer" className={linkClass("/transfer")} onClick={handleLinkClick}>تحويل دولي</Link></li> */}
@@ -84,6 +90,9 @@ export default function Sidebar({ isOpen, onClose }) {
           )}
           {userData?.role === "admin" && (
             <li><Link to="/admin" className={`${linkClass("/admin")} sidebar__link--admin`} onClick={handleLinkClick}>لوحة الإدارة</Link></li>
+          )}
+          {userData?.role === "finance_verifier" && (
+            <li><Link to="/finance-verifier" className={linkClass("/finance-verifier")} onClick={handleLinkClick}>💰 تدقيق طلبات الشحن</Link></li>
           )}
         </ul>
       </nav>
