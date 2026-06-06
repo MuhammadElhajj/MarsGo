@@ -77,7 +77,7 @@ export default function Dashboard() {
       </Suspense>
 
 
-      <h3 className="dashboard__services-title">آخر العمليات</h3>
+      {/* <h3 className="dashboard__services-title">آخر العمليات</h3>
       <Suspense fallback={<Loading text="جاري تحميل آخر العمليات..." />}>
         <OrdersList 
           orderType="all" 
@@ -86,7 +86,7 @@ export default function Dashboard() {
           showViewAll={true}
           onViewAll={handleViewAllOrders}
         />
-      </Suspense>
+      </Suspense> */}
     </div>
   );
 }

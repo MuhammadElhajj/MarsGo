@@ -15,12 +15,12 @@ const TransferPage = lazy(() => import("./pages/User/Transfer/TransferPage"));
 const CryptoPage = lazy(() => import("./pages/User/Crypto/CryptoPage"));
 const ExchangePage = lazy(() => import("./pages/User/Exchange/ExchangePage"));
 const AboutPage = lazy(() => import("./pages/User/About/AboutPage"));
-const PaymentInfoPage = lazy(() => import("./pages/User/PaymentPage/PaymentPage"));
 const MyOrdersPage = lazy(() => import("./pages/User/MyOrders/MyOrdersPage"));
 const NotificationsPage = lazy(() => import("./pages/User/Notifications/NotificationsPage"));
 const ProfilePage = lazy(() => import("./components/UserComponents/Profile/ProfilePage"));
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 const GamingPage = lazy(() => import("./pages/User/Gaming/GamingPage"));
+const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
 
 // ==================== صفحات المدير (Admin) ====================
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -35,17 +35,16 @@ const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettin
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
-import AdminPaymentSettingsPage from './pages/Admin/AdminPaymentSettingsPage';
 import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
+const AdminTopUpSettings = lazy(() => import('./pages/Admin/AdminTopUpSettings/AdminTopUpSettings'));
 
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
 const ArchiveOrders = lazy(() => import("./components/VerifierComponents/ArchiveOrders/ArchiveOrders"));
 
-// ==================== صفحة المدقق المالي (Finance Verifier) ====================
-const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/TopUpRequests"));
-const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
+// ==================== صفحة المدقق المالي ====================
+const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/FinanceTopUpRequests"));
 
 function App() {
   const { user, userData, loading, emailVerified } = useAuth();
@@ -73,13 +72,13 @@ function App() {
         }}
       />
       <Routes>
-        {/* صفحة تسجيل الدخول - تعرض إذا لم يكن المستخدم مسجلاً أو بريده غير مفعل */}
+        {/* صفحة تسجيل الدخول */}
         <Route
           path="/login"
           element={(!user || (user && !emailVerified)) ? <Login /> : <Navigate to="/dashboard" />}
         />
 
-        {/* مسارات العميل (تتطلب تسجيل الدخول وتفعيل البريد) */}
+        {/* مسارات العميل */}
         <Route element={(user && emailVerified) ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/apps/*" element={<AppsPage />} />
@@ -88,14 +87,13 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
-          <Route path="/payment-info" element={<PaymentInfoPage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/TopUpPage" element={<TopUpPage />} />
+          <Route path="/topup" element={<TopUpPage />} /> {/* ✅ تصحيح المسار */}
         </Route>
 
-        {/* مسارات المدير (تتطلب دور admin وتفعيل البريد) */}
+        {/* مسارات المدير */}
         <Route
           path="/admin"
           element={(user && emailVerified && userData?.role === 'admin') ? <AdminLayout /> : <Navigate to="/dashboard" />}
@@ -109,14 +107,15 @@ function App() {
           <Route path="apps" element={<AdminApps />} />
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} />
-          <Route path="payment-settings" element={<AdminPaymentSettingsPage />} />
           <Route path="exchange-rate" element={<AdminExchangeRate />} />
           <Route path="ads" element={<AdManagementPage />} />
           <Route path="navigation" element={<AdminNavLinksPage />} />
           <Route path="users" element={<AdminUsersPage />} />
+          {/* ✅ مسار إعدادات الإيداع - تم تصحيح المسار وإزالة المسافات */}
+          <Route path="topup-settings" element={<AdminTopUpSettings />} />
         </Route>
 
-        {/* مسارات المدقق العادي (تتطلب دور verifier وتفعيل البريد) */}
+        {/* مسارات المدقق العادي */}
         <Route
           path="/verifier"
           element={(user && emailVerified && userData?.role === 'verifier') ? <VerifierLayout /> : <Navigate to="/dashboard" />}
@@ -126,7 +125,7 @@ function App() {
           <Route path="orders" element={<VerifierOrdersPage />} />
         </Route>
 
-        {/* مسار المدقق المالي (منفصل، يتطلب دور finance_verifier) */}
+        {/* مسار المدقق المالي */}
         <Route
           path="/finance-verifier"
           element={
@@ -140,7 +139,7 @@ function App() {
           }
         />
 
-        {/* أي مسار غير معروف يُحوَّل إلى لوحة التحكم */}
+        {/* أي مسار غير معروف */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Suspense>

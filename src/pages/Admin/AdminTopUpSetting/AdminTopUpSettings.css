@@ -1,0 +1,185 @@
+/* src/pages/Admin/AdminTopUpSettings.css */
+.admin-topup-settings {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.admin-topup-settings h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.admin-topup-settings__desc {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+/* بطاقة كل طريقة دفع */
+.method-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.method-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.method-card__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+/* زر التبديل (Toggle) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--color-accent);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+/* محتوى البطاقة */
+.method-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--color-text-secondary);
+}
+
+.form-field select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* رفع QR */
+.qr-upload label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--color-text-secondary);
+}
+
+.qr-preview {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.qr-preview img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.remove-qr {
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  font-size: 0.7rem;
+}
+
+/* الإعدادات العامة */
+.general-settings {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-border);
+}
+
+.general-settings h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  border-right: 3px solid var(--color-accent);
+  padding-right: 0.5rem;
+}
+
+.general-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.general-row > * {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* زر الحفظ */
+.admin-topup-settings__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.admin-topup-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}

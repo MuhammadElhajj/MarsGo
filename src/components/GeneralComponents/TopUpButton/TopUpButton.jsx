@@ -6,9 +6,9 @@ export default function TopUpButton({ className = '' }) {
   const navigate = useNavigate();
 
   return (
-    <button className={`topup-btn ${className}`} onClick={() => navigate('/TopUpPage ')}>
+    <button className={`topup-btn ${className}`} onClick={() => navigate('/topup')}>
       <FiPlusCircle size={18} />
-      <span>شحن الرصيد</span>
+      <span>شحن الرصيد ( ايداع )</span>
     </button>
   );
 }

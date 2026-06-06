@@ -96,3 +96,12 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+
+
+
+.image-upload .preview img {
+  max-width: 80px;
+  max-height: 80px;
+  object-fit: cover;
+}

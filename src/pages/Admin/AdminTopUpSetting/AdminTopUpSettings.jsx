@@ -1,57 +1,43 @@
-// src/pages/Admin/AdminTopUpSettings/AdminTopUpSettings.jsx
+// src/pages/Admin/AdminTopUpSettings.jsx
 import { useState, useEffect } from 'react';
-import { useTopUpSettings } from '../../../context/TopUpSettingsContext';
-import Button from '../../../components/GeneralComponents/Button/Button';
-import Input from '../../../components/GeneralComponents/Input/Input';
-import ImageUpload from '../../../components/GeneralComponents/ImageUpload/ImageUpload';
+import { useTopUpSettings } from '../../contexts/TopUpSettingsContext';
+import Button from '../../components/GeneralComponents/Button/Button';
+import Input from '../../components/GeneralComponents/Input/Input';
+import ImageUpload from '../../components/GeneralComponents/ImageUpload/ImageUpload';
 import './AdminTopUpSettings.css';
 
 export default function AdminTopUpSettings() {
   const { settings, loading, updateSettings } = useTopUpSettings();
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [initializing, setInitializing] = useState(true);
 
   // تهيئة النموذج عند تحميل الإعدادات
   useEffect(() => {
-    if (!loading) {
-      if (settings) {
-        // إذا كانت الإعدادات موجودة، نستخدمها
-        setForm({
-          usdt: {
-            enabled: settings.usdt?.enabled ?? true,
-            address: settings.usdt?.address || '',
-            qrCode: settings.usdt?.qrCode || '',
-            network: settings.usdt?.network || 'TRC20',
-          },
-          shamCash: {
-            enabled: settings.shamCash?.enabled ?? true,
-            accountName: settings.shamCash?.accountName || '',
-            accountNumber: settings.shamCash?.accountNumber || '',
-            qrCode: settings.shamCash?.qrCode || '',
-          },
-          siretelCash: {
-            enabled: settings.siretelCash?.enabled ?? true,
-            accountName: settings.siretelCash?.accountName || '',
-            accountNumber: settings.siretelCash?.accountNumber || '',
-            qrCode: settings.siretelCash?.qrCode || '',
-          },
-          minDeposit: settings.minDeposit ?? 3,
-          supportWhatsApp: settings.supportWhatsApp || '963939454690',
-        });
-      } else {
-        // ✅ إذا لم تكن الإعدادات موجودة، ننشئ نموذج افتراضي فارغ (لكي يتمكن المدير من إدخال البيانات)
-        setForm({
-          usdt: { enabled: true, address: '', qrCode: '', network: 'TRC20' },
-          shamCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '' },
-          siretelCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '' },
-          minDeposit: 3,
-          supportWhatsApp: '963939454690',
-        });
-      }
-      setInitializing(false);
+    if (settings && !form) {
+      setForm({
+        usdt: {
+          enabled: settings.usdt?.enabled ?? true,
+          address: settings.usdt?.address || '',
+          qrCode: settings.usdt?.qrCode || '',
+          network: settings.usdt?.network || 'TRC20',
+        },
+        shamCash: {
+          enabled: settings.shamCash?.enabled ?? true,
+          accountName: settings.shamCash?.accountName || '',
+          accountNumber: settings.shamCash?.accountNumber || '',
+          qrCode: settings.shamCash?.qrCode || '',
+        },
+        siretelCash: {
+          enabled: settings.siretelCash?.enabled ?? true,
+          accountName: settings.siretelCash?.accountName || '',
+          accountNumber: settings.siretelCash?.accountNumber || '',
+          qrCode: settings.siretelCash?.qrCode || '',
+        },
+        minDeposit: settings.minDeposit ?? 3,
+        supportWhatsApp: settings.supportWhatsApp || '963939454690',
+      });
     }
-  }, [settings, loading]);
+  }, [settings, form]);
 
   const handleMethodChange = (method, field, value) => {
     setForm(prev => ({
@@ -78,15 +64,15 @@ export default function AdminTopUpSettings() {
     setSaving(false);
   };
 
-  if (loading || initializing) return <div className="admin-topup-loading">جاري تحميل الإعدادات...</div>;
-  if (!form) return <div className="admin-topup-loading">لا يمكن تهيئة النموذج، يرجى تحديث الصفحة.</div>;
+  if (loading) return <div className="admin-topup-loading">جاري تحميل الإعدادات...</div>;
+  if (!form) return <div className="admin-topup-loading">جاري تهيئة النموذج...</div>;
 
   return (
     <div className="admin-topup-settings" dir="rtl">
       <h2>⚙️ إعدادات شحن الرصيد</h2>
       <p className="admin-topup-settings__desc">قم بتفعيل طرق الدفع وإدخال بيانات الحسابات ورفع QR Codes.</p>
 
-      {/* USDT Card */}
+      {/* ==================== USDT ==================== */}
       <div className="method-card">
         <div className="method-card__header">
           <h3>🇺🇸 USDT (تيثر)</h3>
@@ -115,7 +101,7 @@ export default function AdminTopUpSettings() {
             <ImageUpload onUploadComplete={(base64) => handleMethodChange('usdt', 'qrCode', base64)} maxSizeMB={0.5} />
             {form.usdt.qrCode && (
               <div className="qr-preview">
-                {/* <img src={form.usdt.qrCode} alt="QR" /> */}
+                <img src={form.usdt.qrCode} alt="QR" />
                 <button type="button" onClick={() => handleMethodChange('usdt', 'qrCode', '')} className="remove-qr">إزالة</button>
               </div>
             )}
@@ -123,7 +109,7 @@ export default function AdminTopUpSettings() {
         </div>
       </div>
 
-      {/* ShamCash Card */}
+      {/* ==================== شام كاش ==================== */}
       <div className="method-card">
         <div className="method-card__header">
           <h3>🏦 شام كاش</h3>
@@ -133,8 +119,18 @@ export default function AdminTopUpSettings() {
           </label>
         </div>
         <div className="method-card__body">
-          <Input label="اسم المستفيد" value={form.shamCash.accountName} onChange={(e) => handleMethodChange('shamCash', 'accountName', e.target.value)} placeholder="الاسم الكامل للمستفيد" />
-          <Input label="رقم الحساب / الهاتف" value={form.shamCash.accountNumber} onChange={(e) => handleMethodChange('shamCash', 'accountNumber', e.target.value)} placeholder="09XXXXXXXX" />
+          <Input
+            label="اسم المستفيد"
+            value={form.shamCash.accountName}
+            onChange={(e) => handleMethodChange('shamCash', 'accountName', e.target.value)}
+            placeholder="الاسم الكامل للمستفيد"
+          />
+          <Input
+            label="رقم الحساب / الهاتف"
+            value={form.shamCash.accountNumber}
+            onChange={(e) => handleMethodChange('shamCash', 'accountNumber', e.target.value)}
+            placeholder="09XXXXXXXX"
+          />
           <div className="qr-upload">
             <label>صورة QR Code (اختياري)</label>
             <ImageUpload onUploadComplete={(base64) => handleMethodChange('shamCash', 'qrCode', base64)} maxSizeMB={0.5} />
@@ -148,7 +144,7 @@ export default function AdminTopUpSettings() {
         </div>
       </div>
 
-      {/* SiretelCash Card */}
+      {/* ==================== سيريتل كاش ==================== */}
       <div className="method-card">
         <div className="method-card__header">
           <h3>📱 سيريتل كاش</h3>
@@ -158,14 +154,24 @@ export default function AdminTopUpSettings() {
           </label>
         </div>
         <div className="method-card__body">
-          <Input label="اسم المستفيد" value={form.siretelCash.accountName} onChange={(e) => handleMethodChange('siretelCash', 'accountName', e.target.value)} placeholder="الاسم الكامل للمستفيد" />
-          <Input label="رقم الحساب / الهاتف" value={form.siretelCash.accountNumber} onChange={(e) => handleMethodChange('siretelCash', 'accountNumber', e.target.value)} placeholder="09XXXXXXXX" />
+          <Input
+            label="اسم المستفيد"
+            value={form.siretelCash.accountName}
+            onChange={(e) => handleMethodChange('siretelCash', 'accountName', e.target.value)}
+            placeholder="الاسم الكامل للمستفيد"
+          />
+          <Input
+            label="رقم الحساب / الهاتف"
+            value={form.siretelCash.accountNumber}
+            onChange={(e) => handleMethodChange('siretelCash', 'accountNumber', e.target.value)}
+            placeholder="09XXXXXXXX"
+          />
           <div className="qr-upload">
             <label>صورة QR Code (اختياري)</label>
             <ImageUpload onUploadComplete={(base64) => handleMethodChange('siretelCash', 'qrCode', base64)} maxSizeMB={0.5} />
             {form.siretelCash.qrCode && (
               <div className="qr-preview">
-                {/* <img src={form.siretelCash.qrCode} alt="QR" /> */}
+                <img src={form.siretelCash.qrCode} alt="QR" />
                 <button type="button" onClick={() => handleMethodChange('siretelCash', 'qrCode', '')} className="remove-qr">إزالة</button>
               </div>
             )}
@@ -173,12 +179,24 @@ export default function AdminTopUpSettings() {
         </div>
       </div>
 
-      {/* General Settings */}
+      {/* ==================== الإعدادات العامة ==================== */}
       <div className="general-settings">
         <h3>الإعدادات العامة</h3>
         <div className="general-row">
-          <Input label="الحد الأدنى للإيداع (دولار أمريكي)" type="number" step="1" min="1" value={form.minDeposit} onChange={(e) => handleGeneralChange('minDeposit', parseInt(e.target.value) || 3)} />
-          <Input label="رقم واتساب الدعم (بدون + أو مسافات)" value={form.supportWhatsApp} onChange={(e) => handleGeneralChange('supportWhatsApp', e.target.value.replace(/\D/g, ''))} placeholder="963939454690" />
+          <Input
+            label="الحد الأدنى للإيداع (دولار أمريكي)"
+            type="number"
+            step="1"
+            min="1"
+            value={form.minDeposit}
+            onChange={(e) => handleGeneralChange('minDeposit', parseInt(e.target.value) || 3)}
+          />
+          <Input
+            label="رقم واتساب الدعم (بدون + أو مسافات)"
+            value={form.supportWhatsApp}
+            onChange={(e) => handleGeneralChange('supportWhatsApp', e.target.value.replace(/\D/g, ''))}
+            placeholder="963939454690"
+          />
         </div>
       </div>
 

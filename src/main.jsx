@@ -17,6 +17,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import { BalanceProvider } from './context/BalanceContext'; 
 import { NotificationProvider } from './context/NotificationContext';
 import { SiteConfigProvider } from './context/SiteConfigContext';
+
 // داخل التسلسل:
 <AuthProvider>
      
@@ -45,7 +46,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <NotificationProvider>{/* <-- إضافة هذا */}
           <SiteConfigProvider>   {/* ✅ أضف هذا */}
                            <TopUpSettingsProvider>  
+                            
                               <App />
+   
                                </TopUpSettingsProvider>  
                             </SiteConfigProvider>
       </NotificationProvider> 

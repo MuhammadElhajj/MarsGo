@@ -18,11 +18,11 @@ export default function AdminSidebar({ isOpen, onClose }) {
           <li><Link to="/admin" className={linkClass('/admin')} onClick={handleLinkClick}>📊 لوحة التحكم</Link></li>
           <li><Link to="/admin/orders" className={linkClass('/admin/orders')} onClick={handleLinkClick}>📋 إدارة الطلبات</Link></li>
           <li><Link to="/admin/users" className={linkClass('/admin/users')} onClick={handleLinkClick}>👥 إدارة المستخدمين</Link></li>
-          <li><Link to="/admin/payment-settings" className={linkClass('/admin/payment-settings')}>💳 إعدادات الدفع</Link></li>
+          {/* <li><Link to="/admin/payment-settings" className={linkClass('/admin/games')} onClick={handleLinkClick}>🎮 إدارة الألعاب</Link></li> */}
           <li><Link to="/admin/games" className={linkClass('/admin/games')} onClick={handleLinkClick}>🎮 إدارة الألعاب</Link></li>
           <li><Link to="/admin/apps" className={linkClass('/admin/apps')} onClick={handleLinkClick}>📱 إدارة التطبيقات</Link></li>
           <li><Link to="/admin/ads" className={linkClass('/admin/ads')} onClick={handleLinkClick}>📢 إدارة الإعلانات</Link></li>
-         
+         <li><Link to="/admin/topup-settings" className={linkClass('/admin/topup-settings')} onClick={handleLinkClick}>💰 إعدادات الإيداع</Link></li>
     
 <li><Link to="/admin/ticker" className={linkClass('/admin/ticker')} onClick={handleLinkClick}>📢 شريط الأخبار</Link></li> <li><Link to="/admin/services" className={linkClass('/admin/services')} onClick={handleLinkClick}>🔧 إدارة الخدمات</Link></li>
           <li><Link to="/admin/page-instructions" className={linkClass('/admin/page-instructions')} onClick={handleLinkClick}>📖 تعليمات الصفحات</Link></li>
