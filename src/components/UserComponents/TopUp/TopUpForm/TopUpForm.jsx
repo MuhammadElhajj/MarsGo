@@ -1,7 +1,7 @@
 import Button from '../../../GeneralComponents/Button/Button';
 import Input from '../../../GeneralComponents/Input/Input';
 import ImageUpload from '../../../GeneralComponents/ImageUpload/ImageUpload';
-
+import './TopUpForm.css';
 export default function TopUpForm({
   amount,
   setAmount,

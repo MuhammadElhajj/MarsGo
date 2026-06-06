@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import Button from '../../../GeneralComponents/Button/Button';
-
+import "./WhatsappWarning.css"
 export default function WhatsappWarning() {
   const navigate = useNavigate();
   return (

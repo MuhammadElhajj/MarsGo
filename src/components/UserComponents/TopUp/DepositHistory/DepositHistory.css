@@ -1,0 +1,94 @@
+.deposit-history {
+  margin: 2rem 0;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.deposit-history__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  border-right: 4px solid var(--color-accent);
+  padding-right: 0.75rem;
+  color: var(--color-text-primary);
+}
+
+.deposit-history__table-wrapper {
+  overflow-x: auto;
+}
+
+.deposit-history__table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+.deposit-history__table th,
+.deposit-history__table td {
+  padding: 0.75rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+
+.deposit-history__table th {
+  background: var(--color-bg-primary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.deposit-id {
+  font-weight: 600;
+  color: var(--color-accent);
+  font-family: monospace;
+}
+
+.deposit-status {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.deposit-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.deposit-status--approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.deposit-status--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.deposit-history__empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.deposit-history-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .deposit-history__table th,
+  .deposit-history__table td {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.3rem;
+  }
+  .deposit-status {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+  }
+}

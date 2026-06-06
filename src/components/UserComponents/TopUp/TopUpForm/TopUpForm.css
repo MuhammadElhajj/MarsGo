@@ -1,0 +1,21 @@
+.topup-page__form {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  border: 1px solid var(--color-border);
+}
+
+/* حقل المبلغ – عند وجود خطأ */
+.amount-input-group .input-error {
+  border: 2px solid #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.input-error-message {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}

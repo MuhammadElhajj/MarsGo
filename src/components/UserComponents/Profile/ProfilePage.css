@@ -457,3 +457,49 @@
     align-items: flex-start;
   }
 }
+
+/* تنسيق قسم الرصيد وزر الإيداع */
+.profile-page__balance-section {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.balance-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.balance-icon {
+  font-size: 1.2rem;
+  color: var(--color-accent);
+}
+
+/* على الشاشات الصغيرة ، نجعل المحتوى عمودياً */
+@media (max-width: 640px) {
+  .profile-page__avatar-row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-page__avatar-info {
+    text-align: center;
+  }
+
+  .balance-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .balance-container > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-page__balance-section {
+    width: 100%;
+  }
+}

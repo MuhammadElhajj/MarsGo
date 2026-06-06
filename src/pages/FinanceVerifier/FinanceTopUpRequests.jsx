@@ -1,189 +1,188 @@
-// src/pages/FinanceVerifier/FinanceTopUpRequests.jsx
+// src/pages/Admin/AdminTopUpSettings.jsx (معدل)
 import { useState, useEffect } from 'react';
-import { db } from '../../firebase';
-import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-import { useBalance } from '../../context/BalanceContext';
-import { useTopUpSettings } from '../../context/TopUpSettingsContext';
-import { useNotifications } from '../../context/NotificationContext';
+import { useTopUpSettings } from '../../contexts/TopUpSettingsContext';
 import Button from '../../components/GeneralComponents/Button/Button';
-import { showToast } from '../../components/GeneralComponents/ToastNotification/ToastNotification';
-import './FinanceTopUpRequests.css';
+import Input from '../../components/GeneralComponents/Input/Input';
+import ImageUpload from '../../components/GeneralComponents/ImageUpload/ImageUpload';
+import './AdminTopUpSettings.css';
 
-export default function FinanceTopUpRequests() {
-  const { addBalance } = useBalance();
-  const { settings, loading: settingsLoading } = useTopUpSettings();
-  const { addNotification } = useNotifications();
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [imagePreview, setImagePreview] = useState(null); // لعرض الصورة في مودال
+export default function AdminTopUpSettings() {
+  const { settings, loading, updateSettings } = useTopUpSettings();
+  const [form, setForm] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'topUpRequests'), where('status', '==', 'pending'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const reqs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRequests(reqs);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleApprove = async (request) => {
-    try {
-      const success = await addBalance(request.userId, request.amount);
-      if (!success) throw new Error('فشل إضافة الرصيد');
-
-      await updateDoc(doc(db, 'topUpRequests', request.id), {
-        status: 'approved',
-        approvedAt: new Date(),
-      });
-
-      await addNotification(
-        request.userId,
-        '💰 تم شحن رصيدك',
-        `تم إضافة ${request.amount} $ إلى رصيدك بنجاح. رقم الطلب: #${request.id.slice(-6)}`,
-        'topup_completed',
-        request.id,
-        '/profile'
-      );
-
-      showToast(`✅ تمت إضافة ${request.amount} $ إلى رصيد المستخدم`, 'success');
-    } catch (error) {
-      console.error(error);
-      showToast('فشل قبول الطلب', 'error');
+    if (!loading) {
+      if (settings) {
+        setForm({
+          usdt: {
+            enabled: settings.usdt?.enabled ?? true,
+            address: settings.usdt?.address || '',
+            qrCode: settings.usdt?.qrCode || '',
+            network: settings.usdt?.network || 'TRC20',
+          },
+          shamCash: {
+            enabled: settings.shamCash?.enabled ?? true,
+            accountName: settings.shamCash?.accountName || '',
+            accountNumber: settings.shamCash?.accountNumber || '',
+            qrCode: settings.shamCash?.qrCode || '',
+          },
+          siretelCash: {
+            enabled: settings.siretelCash?.enabled ?? true,
+            accountName: settings.siretelCash?.accountName || '',
+            accountNumber: settings.siretelCash?.accountNumber || '',
+            qrCode: settings.siretelCash?.qrCode || '',
+          },
+          minDeposit: settings.minDeposit ?? 3,
+          supportWhatsApp: settings.supportWhatsApp || '963939454690',
+        });
+      } else {
+        setForm({
+          usdt: { enabled: true, address: '', qrCode: '', network: 'TRC20' },
+          shamCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '' },
+          siretelCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '' },
+          minDeposit: 3,
+          supportWhatsApp: '963939454690',
+        });
+      }
+      setInitializing(false);
     }
+  }, [settings, loading]);
+
+  const handleMethodChange = (method, field, value) => {
+    setForm(prev => ({
+      ...prev,
+      [method]: { ...prev[method], [field]: value }
+    }));
   };
 
-  const handleReject = async (request) => {
-    try {
-      await updateDoc(doc(db, 'topUpRequests', request.id), {
-        status: 'rejected',
-        rejectedAt: new Date(),
-      });
-
-      await addNotification(
-        request.userId,
-        '❌ تم رفض طلب شحن الرصيد',
-        `طلب شحن الرصيد بقيمة ${request.amount} $ تم رفضه. يرجى مراجعة الدعم الفني.`,
-        'topup_rejected',
-        request.id,
-        '/profile'
-      );
-
-      showToast('❌ تم رفض الطلب وإشعار المستخدم', 'success');
-    } catch (error) {
-      console.error(error);
-      showToast('فشل رفض الطلب', 'error');
-    }
+  const handleToggle = (method, enabled) => {
+    setForm(prev => ({
+      ...prev,
+      [method]: { ...prev[method], enabled }
+    }));
   };
 
-  const getBeneficiaryInfo = (method) => {
-    const info = settings[method];
-    if (!info) return null;
-    if (method === 'usdt') {
-      return (
-        <>
-          <p><strong>🔗 الشبكة:</strong> {info.network || 'TRC20'}</p>
-          <p><strong>🏦 عنوان المحفظة:</strong> <code>{info.address || '—'}</code></p>
-          {info.qrCode && <img src={info.qrCode} alt="QR" className="beneficiary-qr" />}
-        </>
-      );
-    } else {
-      return (
-        <>
-          <p><strong>👤 اسم المستفيد:</strong> {info.accountName || '—'}</p>
-          <p><strong>📞 رقم الحساب/الهاتف:</strong> {info.accountNumber || '—'}</p>
-          {info.qrCode && <img src={info.qrCode} alt="QR" className="beneficiary-qr" />}
-        </>
-      );
-    }
+  const handleGeneralChange = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  if (loading || settingsLoading) return <div className="admin-topup-loading">جاري تحميل طلبات الشحن...</div>;
+  const handleSave = async () => {
+    if (!form) return;
+    setSaving(true);
+    await updateSettings(form);
+    setSaving(false);
+  };
+
+  if (loading || initializing) return <div className="admin-topup-loading">جاري تحميل الإعدادات...</div>;
+  if (!form) return <div className="admin-topup-loading">لا يمكن تهيئة النموذج، يرجى تحديث الصفحة.</div>;
 
   return (
-    <div className="finance-topup" dir="rtl">
-      <h2>💰 طلبات شحن الرصيد</h2>
+    <div className="admin-topup-settings" dir="rtl">
+      <h2>⚙️ إعدادات شحن الرصيد</h2>
+      <p className="admin-topup-settings__desc">قم بتفعيل طرق الدفع وإدخال بيانات الحسابات ورفع QR Codes (اختياري).</p>
 
-      {/* معلومات حسابات المستفيد */}
-      <div className="beneficiary-info-section">
-        <h3>معلومات حسابات الإيداع</h3>
-        <div className="beneficiary-cards">
-          {settings?.usdt?.enabled && (
-            <div className="beneficiary-card">
-              <h4>🇺🇸 USDT (تيثر)</h4>
-              {getBeneficiaryInfo('usdt')}
-            </div>
-          )}
-          {settings?.shamCash?.enabled && (
-            <div className="beneficiary-card">
-              <h4>🏦 شام كاش</h4>
-              {getBeneficiaryInfo('shamCash')}
-            </div>
-          )}
-          {settings?.siretelCash?.enabled && (
-            <div className="beneficiary-card">
-              <h4>📱 سيريتل كاش</h4>
-              {getBeneficiaryInfo('siretelCash')}
-            </div>
-          )}
+      {/* USDT Card */}
+      <div className="method-card">
+        <div className="method-card__header">
+          <h3>🇺🇸 USDT (تيثر)</h3>
+          <label className="toggle-switch">
+            <input type="checkbox" checked={form.usdt.enabled} onChange={(e) => handleToggle('usdt', e.target.checked)} />
+            <span className="toggle-slider"></span>
+          </label>
+        </div>
+        <div className="method-card__body">
+          <Input
+            label="عنوان المحفظة (Address)"
+            value={form.usdt.address}
+            onChange={(e) => handleMethodChange('usdt', 'address', e.target.value)}
+            placeholder="TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+          />
+          <div className="form-field">
+            <label>الشبكة</label>
+            <select value={form.usdt.network} onChange={(e) => handleMethodChange('usdt', 'network', e.target.value)}>
+              <option value="TRC20">TRC20 (Tron) - موصى به</option>
+              <option value="BEP20">BEP20 (BSC)</option>
+              <option value="ERC20">ERC20 (Ethereum)</option>
+            </select>
+          </div>
+          <div className="qr-upload">
+            <label>صورة QR Code (اختياري)</label>
+            <ImageUpload onUploadComplete={(base64) => handleMethodChange('usdt', 'qrCode', base64)} maxSizeMB={0.5} />
+            {form.usdt.qrCode && (
+              <div className="qr-preview">
+                <img src={form.usdt.qrCode} alt="QR" className="qr-preview-img" />
+                <button type="button" onClick={() => handleMethodChange('usdt', 'qrCode', '')} className="remove-qr">إزالة</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* قائمة الطلبات */}
-      {requests.length === 0 ? (
-        <p className="finance-topup__empty">لا توجد طلبات معلقة</p>
-      ) : (
-        <div className="finance-topup__list">
-          {requests.map(req => (
-            <div key={req.id} className="finance-topup__card">
-              <div className="request-header">
-                <span className="request-id">طلب #{req.id.slice(-6)}</span>
-                <span className="request-status pending">قيد المراجعة</span>
-              </div>
-              <div className="request-details">
-                <p><strong>👤 المستخدم:</strong> {req.userName || req.userId}</p>
-                <p><strong>💰 المبلغ:</strong> {req.amount} $</p>
-                <p><strong>🏦 طريقة الدفع:</strong> {req.paymentMethod}</p>
-                <p><strong>📄 رقم العملية:</strong> {req.transactionNumber || '—'}</p>
-                <p><strong>✍️ اسم المرسل:</strong> {req.senderName || '—'}</p>
-                <p><strong>📅 التاريخ:</strong> {req.createdAt?.toDate().toLocaleString()}</p>
-              </div>
-              {req.receiptImage && (
-                <div className="receipt-preview">
-                  <button onClick={() => setImagePreview(req.receiptImage)}>🧾 عرض إيصال الدفع</button>
-                </div>
-              )}
-              <div className="finance-topup__actions">
-                <Button onClick={() => handleApprove(req)}>✅ قبول وإضافة الرصيد</Button>
-                <Button variant="danger" onClick={() => handleReject(req)}>❌ رفض</Button>
-              </div>
-            </div>
-          ))}
+      {/* ShamCash Card */}
+      <div className="method-card">
+        <div className="method-card__header">
+          <h3>🏦 شام كاش</h3>
+          <label className="toggle-switch">
+            <input type="checkbox" checked={form.shamCash.enabled} onChange={(e) => handleToggle('shamCash', e.target.checked)} />
+            <span className="toggle-slider"></span>
+          </label>
         </div>
-      )}
-
-      {/* مودال عرض الصورة */}
-   {/* مودال عرض الصورة */}
-{imagePreview && (
-  <div className="image-preview-overlay" onClick={() => setImagePreview(null)}>
-    <div className="image-preview-modal" onClick={(e) => e.stopPropagation()}>
-      <div className="image-preview-header">
-        <span className="image-preview-title">🖼️ صورة إيصال الإيداع</span>
-        <button className="close-preview" onClick={() => setImagePreview(null)}>✕ إغلاق</button>
+        <div className="method-card__body">
+          <Input label="اسم المستفيد" value={form.shamCash.accountName} onChange={(e) => handleMethodChange('shamCash', 'accountName', e.target.value)} placeholder="الاسم الكامل للمستفيد" />
+          <Input label="رقم الحساب / الهاتف" value={form.shamCash.accountNumber} onChange={(e) => handleMethodChange('shamCash', 'accountNumber', e.target.value)} placeholder="09XXXXXXXX" />
+          <div className="qr-upload">
+            <label>صورة QR Code (اختياري)</label>
+            <ImageUpload onUploadComplete={(base64) => handleMethodChange('shamCash', 'qrCode', base64)} maxSizeMB={0.5} />
+            {form.shamCash.qrCode && (
+              <div className="qr-preview">
+                <img src={form.shamCash.qrCode} alt="QR" className="qr-preview-img" />
+                <button type="button" onClick={() => handleMethodChange('shamCash', 'qrCode', '')} className="remove-qr">إزالة</button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="image-preview-body">
-        <img src={imagePreview} alt="إيصال الدفع" />
-      </div>
-    </div>
-  </div>
-)}
 
-      {/* زر واتساب للدعم */}
-      <div className="support-footer">
-        <p>📢 لدعم أسرع، يمكنك التواصل مع المدقق المالي عبر واتساب:</p>
-        <a href="https://wa.me/963939454690" target="_blank" rel="noopener noreferrer" className="whatsapp-support-btn">
-          📱 تواصل مع الدعم
-        </a>
+      {/* SiretelCash Card */}
+      <div className="method-card">
+        <div className="method-card__header">
+          <h3>📱 سيريتل كاش</h3>
+          <label className="toggle-switch">
+            <input type="checkbox" checked={form.siretelCash.enabled} onChange={(e) => handleToggle('siretelCash', e.target.checked)} />
+            <span className="toggle-slider"></span>
+          </label>
+        </div>
+        <div className="method-card__body">
+          <Input label="اسم المستفيد" value={form.siretelCash.accountName} onChange={(e) => handleMethodChange('siretelCash', 'accountName', e.target.value)} placeholder="الاسم الكامل للمستفيد" />
+          <Input label="رقم الحساب / الهاتف" value={form.siretelCash.accountNumber} onChange={(e) => handleMethodChange('siretelCash', 'accountNumber', e.target.value)} placeholder="09XXXXXXXX" />
+          <div className="qr-upload">
+            <label>صورة QR Code (اختياري)</label>
+            <ImageUpload onUploadComplete={(base64) => handleMethodChange('siretelCash', 'qrCode', base64)} maxSizeMB={0.5} />
+            {form.siretelCash.qrCode && (
+              <div className="qr-preview">
+                <img src={form.siretelCash.qrCode} alt="QR" className="qr-preview-img" />
+                <button type="button" onClick={() => handleMethodChange('siretelCash', 'qrCode', '')} className="remove-qr">إزالة</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* General Settings */}
+      <div className="general-settings">
+        <h3>الإعدادات العامة</h3>
+        <div className="general-row">
+          <Input label="الحد الأدنى للإيداع (دولار أمريكي)" type="number" step="1" min="1" value={form.minDeposit} onChange={(e) => handleGeneralChange('minDeposit', parseInt(e.target.value) || 3)} />
+          <Input label="رقم واتساب الدعم (بدون + أو مسافات)" value={form.supportWhatsApp} onChange={(e) => handleGeneralChange('supportWhatsApp', e.target.value.replace(/\D/g, ''))} placeholder="963939454690" />
+        </div>
+      </div>
+
+      <div className="admin-topup-settings__actions">
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? 'جاري الحفظ...' : '💾 حفظ الإعدادات'}
+        </Button>
       </div>
     </div>
   );
