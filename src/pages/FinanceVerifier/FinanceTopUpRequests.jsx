@@ -1,10 +1,10 @@
 // src/pages/Admin/AdminTopUpSettings.jsx (معدل)
 import { useState, useEffect } from 'react';
-import { useTopUpSettings } from '../../contexts/TopUpSettingsContext';
+import { useTopUpSettings } from '../../context/TopUpSettingsContext';
 import Button from '../../components/GeneralComponents/Button/Button';
 import Input from '../../components/GeneralComponents/Input/Input';
 import ImageUpload from '../../components/GeneralComponents/ImageUpload/ImageUpload';
-import './AdminTopUpSettings.css';
+import './FinanceTopUpRequests.css';
 
 export default function AdminTopUpSettings() {
   const { settings, loading, updateSettings } = useTopUpSettings();

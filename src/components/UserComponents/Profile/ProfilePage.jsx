@@ -272,7 +272,7 @@ import Loading from '../../../components/GeneralComponents/Loading/Loading';
 import './ProfilePage.css';
 
 // Lazy load DepositHistory
-const DepositHistory = lazy(() => import('../../../components/UserComponents/TopUp/DepositHistory'));
+const DepositHistory = lazy(() => import('../../../components/UserComponents/TopUp/DepositHistory/DepositHistory'));
 
 export default function ProfilePage() {
   const { userData, updateUserData } = useAuth();
