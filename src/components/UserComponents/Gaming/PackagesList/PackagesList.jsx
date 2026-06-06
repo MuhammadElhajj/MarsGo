@@ -1,3 +1,4 @@
+// src/components/UserComponents/Gaming/PackagesList/PackagesList.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGames } from '../../../../context/GamesContext';
@@ -33,6 +34,9 @@ export default function PackagesList() {
       title={`باقات ${game.name}`}
       showBackButton={true}
       showPrice={true}
+      type="package"
+      parentId={game.id}        // ✅ تمرير معرف اللعبة الأصل
+      parentType="game"         // ✅ نوع الأصل (game / app)
     />
   );
 }

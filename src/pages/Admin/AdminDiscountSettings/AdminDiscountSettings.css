@@ -1,0 +1,4 @@
+.admin-discount-settings { max-width: 800px; margin: 0 auto; }
+.section { background: var(--color-bg-secondary); border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; }
+.items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; align-items: center; }
+.item-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }

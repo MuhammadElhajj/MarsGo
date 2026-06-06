@@ -1,5 +1,5 @@
 import { useGames } from '../../../../context/GamesContext';
-import CatalogList from '../../../Generic/CatalogList/CatalogList';  // ✅ استيراد القائمة وليس الكارد
+import CatalogList from '../../../Generic/CatalogList/CatalogList';
 import { useNavigate } from 'react-router-dom';
 
 export default function GamesList() {
@@ -7,7 +7,7 @@ export default function GamesList() {
   const navigate = useNavigate();
 
   const handleGameClick = (game) => {
-    navigate(`/gaming/game/${game.id}`);   // ✅ تنتقل إلى صفحة الباقات الخاصة باللعبة
+    navigate(`/gaming/game/${game.id}`);
   };
 
   if (loading) return <div>جاري تحميل الألعاب...</div>;
@@ -19,6 +19,7 @@ export default function GamesList() {
       title="اختر اللعبة"
       showBackButton={true}
       backButtonText="رجوع إلى لوحة التحكم"
+      type="game"   // ✅ إضافة نوع العنصر
     />
   );
 }

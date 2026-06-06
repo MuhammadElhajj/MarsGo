@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import Button from '../../GeneralComponents/Button/Button';
+import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import './UserManagement.css';
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(null);
+  const [roleActionLoading, setRoleActionLoading] = useState(null);
+  const [typeActionLoading, setTypeActionLoading] = useState(null);
 
   const fetchUsers = async () => {
     try {
@@ -15,6 +17,7 @@ export default function UserManagement() {
       setUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (err) {
       console.error(err);
+      showToast('فشل تحميل المستخدمين', 'error');
     } finally {
       setLoading(false);
     }
@@ -25,14 +28,36 @@ export default function UserManagement() {
   }, []);
 
   const changeRole = async (userId, newRole) => {
-    setActionLoading(userId);
+    setRoleActionLoading(userId);
     try {
       await updateDoc(doc(db, 'users', userId), { role: newRole });
-      fetchUsers();
+      // تحديث محلي سريع
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+      showToast('تم تغيير الدور بنجاح', 'success');
     } catch (err) {
       console.error(err);
+      showToast('فشل تغيير الدور', 'error');
     } finally {
-      setActionLoading(null);
+      setRoleActionLoading(null);
+    }
+  };
+
+  const changeCustomerType = async (userId, newType) => {
+    const user = users.find(u => u.id === userId);
+    const oldType = user?.customerType || 'customer';
+    if (oldType === newType) return; // لا حاجة للتحديث
+
+    setTypeActionLoading(userId);
+    try {
+      await updateDoc(doc(db, 'users', userId), { customerType: newType });
+      // تحديث محلي سريع
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, customerType: newType } : u));
+      showToast(`تم تغيير نوع العميل إلى ${newType === 'merchant' ? 'تاجر' : 'عادي'}`, 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('فشل تحديث نوع العميل', 'error');
+    } finally {
+      setTypeActionLoading(null);
     }
   };
 
@@ -48,62 +73,78 @@ export default function UserManagement() {
               <th>المستخدم</th>
               <th>البريد الإلكتروني</th>
               <th>الدور الحالي</th>
+              <th>نوع العميل</th>
               <th>الإجراءات</th>
             </tr>
           </thead>
           <tbody>
-            {users.map(u => (
-              <tr key={u.id}>
-                <td>
-                  <div className="user-management__user-info">
-                    <img src={u.avatar || '/default-avatar.png'} alt={u.name} className="user-management__avatar" />
-                    <span>{u.name}</span>
-                  </div>
-                </td>
-                <td>{u.email}</td>
-                <td>
-                  <span className={`user-management__role user-management__role--${u.role}`}>
-                    {u.role === 'admin' && 'مدير'}
-                    {u.role === 'verifier' && 'مدقق'}
-                    {u.role === 'finance_verifier' && 'مدقق مالي'}
-                    {u.role === 'customer' && 'زبون'}
-                  </span>
-                </td>
-                <td>
-                  <div className="user-management__actions">
-                    <Button
-                      onClick={() => changeRole(u.id, 'admin')}
-                      disabled={u.role === 'admin' || actionLoading === u.id}
-                      className="user-management__btn"
+            {users.map(u => {
+              const isRoleLoading = roleActionLoading === u.id;
+              const isTypeLoading = typeActionLoading === u.id;
+              return (
+                <tr key={u.id}>
+                  <td>
+                    <div className="user-management__user-info">
+                      <img src={u.avatar || '/default-avatar.png'} alt={u.name} className="user-management__avatar" />
+                      <span>{u.name}</span>
+                    </div>
+                   </td>
+                  <td>{u.email}</td>
+                  <td>
+                    <span className={`user-management__role user-management__role--${u.role}`}>
+                      {u.role === 'admin' && 'مدير'}
+                      {u.role === 'verifier' && 'مدقق'}
+                      {u.role === 'finance_verifier' && 'مدقق مالي'}
+                      {u.role === 'customer' && 'زبون'}
+                    </span>
+                   </td>
+                  <td>
+                    <select
+                      value={u.customerType || 'customer'}
+                      onChange={(e) => changeCustomerType(u.id, e.target.value)}
+                      disabled={isTypeLoading}
+                      className="customer-type-select"
                     >
-                      مدير
-                    </Button>
-                    <Button
-                      onClick={() => changeRole(u.id, 'verifier')}
-                      disabled={u.role === 'verifier' || actionLoading === u.id}
-                      className="user-management__btn"
-                    >
-                      مدقق
-                    </Button>
-                    <Button
-                      onClick={() => changeRole(u.id, 'finance_verifier')}
-                      disabled={u.role === 'finance_verifier' || actionLoading === u.id}
-                      className="user-management__btn"
-                    >
-                      مدقق مالي
-                    </Button>
-                    <Button
-                      onClick={() => changeRole(u.id, 'customer')}
-                      disabled={u.role === 'customer' || actionLoading === u.id}
-                      variant="danger"
-                      className="user-management__btn"
-                    >
-                      زبون
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      <option value="customer">زبون عادي</option>
+                      <option value="merchant">تاجر</option>
+                    </select>
+                   </td>
+                  <td>
+                    <div className="user-management__actions">
+                      <Button
+                        onClick={() => changeRole(u.id, 'admin')}
+                        disabled={u.role === 'admin' || isRoleLoading}
+                        className="user-management__btn"
+                      >
+                        مدير
+                      </Button>
+                      <Button
+                        onClick={() => changeRole(u.id, 'verifier')}
+                        disabled={u.role === 'verifier' || isRoleLoading}
+                        className="user-management__btn"
+                      >
+                        مدقق
+                      </Button>
+                      <Button
+                        onClick={() => changeRole(u.id, 'finance_verifier')}
+                        disabled={u.role === 'finance_verifier' || isRoleLoading}
+                        className="user-management__btn"
+                      >
+                        مدقق مالي
+                      </Button>
+                      <Button
+                        onClick={() => changeRole(u.id, 'customer')}
+                        disabled={u.role === 'customer' || isRoleLoading}
+                        variant="danger"
+                        className="user-management__btn"
+                      >
+                        زبون
+                      </Button>
+                    </div>
+                   </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

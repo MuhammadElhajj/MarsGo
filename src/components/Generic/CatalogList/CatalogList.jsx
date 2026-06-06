@@ -11,7 +11,8 @@ export default function CatalogList({
   backButtonText = "رجوع",
   onBackClick,
   showPrice = false,
-  customBadge = null
+  customBadge = null,
+  type = 'item'        // ✅ إضافة prop type
 }) {
   if (!items || items.length === 0) {
     return <p className="catalog-list__empty">لا توجد عناصر لعرضها</p>;
@@ -33,6 +34,7 @@ export default function CatalogList({
             onSelect={onItemClick}
             showPrice={showPrice}
             customBadge={customBadge}
+            type={type}          // ✅ تمرير type إلى CatalogCard
           />
         ))}
       </div>

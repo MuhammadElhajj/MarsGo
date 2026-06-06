@@ -1,0 +1,28 @@
+.admin-merchant-settings {
+  max-width: 550px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.admin-merchant-settings h2 {
+  margin-bottom: 1.5rem;
+  color: var(--color-accent);
+  font-size: 1.8rem;
+}
+.admin-merchant-settings .card {
+  background: var(--color-bg-secondary);
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+.admin-merchant-settings .note {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0.8rem 0 1.2rem;
+  line-height: 1.5;
+}
+.admin-merchant-settings-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}

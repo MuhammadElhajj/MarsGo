@@ -1,5 +1,7 @@
 // src/components/Generic/CatalogCard/CatalogCard.jsx
 import './CatalogCard.css';
+import useProductDiscount from '../../../hooks/useProductDiscount';
+import PriceDisplay from '../PriceDisplay/PriceDisplay'; // ✅ استيراد مكون عرض السعر
 
 export default function CatalogCard({ 
   item,           // العنصر (game, app, package)
@@ -19,17 +21,29 @@ export default function CatalogCard({
     unavailableReason = '',
     price = null,
     discount = 0,
-    currency = 'USD'
+    currency = 'USD',
+    id
   } = item || {};
 
+  // تحديد نوع المنتج للخصم العام (فقط للألعاب والتطبيقات)
+  const productType = (type === 'game' || type === 'app') ? type : null;
+  // جلب الخصم العام (إن وجد) باستخدام الهوك
+  const { discountPercent: categoryDiscount = 0 } = useProductDiscount(productType, id) || {};
+  
+  // الخصم النهائي = أقصى قيمة بين خصم العنصر والخصم العام
+  const finalDiscount = Math.max(discount, categoryDiscount);
+  
   const isUnavailable = isAvailable === false;
   
-  // حساب السعر النهائي إذا كان موجوداً
-  let finalPrice = null;
+  // حساب السعر الأصلي والنهائي (بالدولار)
+  let originalPriceUSD = null;
+  let finalPriceUSD = null;
   if (price !== null && price !== undefined) {
     const priceNum = typeof price === 'number' ? price : parseFloat(price);
-    const discountNum = typeof discount === 'number' ? discount : parseFloat(discount) || 0;
-    finalPrice = discountNum > 0 ? (priceNum * (1 - discountNum / 100)).toFixed(2) : priceNum.toFixed(2);
+    originalPriceUSD = priceNum;
+    finalPriceUSD = finalDiscount > 0 
+      ? priceNum * (1 - finalDiscount / 100)
+      : priceNum;
   }
 
   // نصوص الحالة قابلة للتخصيص
@@ -78,15 +92,13 @@ export default function CatalogCard({
         <span className={`catalog-card__status status-${isAvailable ? 'available' : 'unavailable'}`}>
           {isAvailable ? labels.available : labels.unavailable}
         </span>
-        {shouldShowPrice && finalPrice !== null && (
-          <div className="catalog-card__price">
-            <span className="catalog-card__amount">
-              {finalPrice} {currency === 'USD' ? '$' : currency === 'SYP' ? 'ل.س' : currency}
-            </span>
-            {discount > 0 && (
-              <span className="catalog-card__discount">-{discount}%</span>
-            )}
-          </div>
+        {shouldShowPrice && finalPriceUSD !== null && (
+          <PriceDisplay
+            originalPrice={originalPriceUSD}
+            finalPrice={finalPriceUSD}
+            currency={currency}
+            discountPercent={finalDiscount}
+          />
         )}
         {shouldShowBadge && customBadge && (
           <span className="catalog-card__badge">{customBadge}</span>

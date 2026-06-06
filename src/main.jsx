@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';  // ✅ يجب أن يكون موجوداً
 import { PaymentSettingsProvider } from './context/PaymentSettingsContext';
 import './index.css';
+import { DiscountProvider } from './context/DiscountContext';
 import { TopUpSettingsProvider } from './context/TopUpSettingsContext';
 import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import { ServicesProvider } from './context/ServicesContext';
@@ -17,7 +18,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import { BalanceProvider } from './context/BalanceContext'; 
 import { NotificationProvider } from './context/NotificationContext';
 import { SiteConfigProvider } from './context/SiteConfigContext';
-
+import { MerchantDiscountProvider } from './context/MerchantDiscountContext'; // ✅ إضافة الاستيراد
 // داخل التسلسل:
 <AuthProvider>
      
@@ -46,9 +47,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <NotificationProvider>{/* <-- إضافة هذا */}
           <SiteConfigProvider>   {/* ✅ أضف هذا */}
                            <TopUpSettingsProvider>  
-                            
+                               <MerchantDiscountProvider> 
+                                <DiscountProvider>
                               <App />
-   
+                              </DiscountProvider>
+      </MerchantDiscountProvider> 
                                </TopUpSettingsProvider>  
                             </SiteConfigProvider>
       </NotificationProvider> 
