@@ -1,6 +1,5 @@
 .whatsapp-warning-box {
   background: linear-gradient(135deg, #fff9e6, #fff3cd);
-  border-right: 5px solid #f59e0b;
   border-radius: var(--radius-lg);
   padding: 1.2rem;
   margin: 1rem 0;

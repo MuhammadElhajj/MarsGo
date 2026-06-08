@@ -44,10 +44,10 @@ export default function TopUpMethods({ methods, selectedMethod, onSelectMethod, 
         {selectedMethod === 'usdt' && (
           <>
             <div className="detail-row">
-              <strong>🔗 الشبكة:</strong> {currentMethod?.network || 'TRC20'}
+              <strong> الشبكة:</strong> {currentMethod?.network || 'TRC20'}
             </div>
             <div className="detail-row">
-              <strong>🏦 عنوان المحفظة:</strong>
+              <strong> عنوان المحفظة:</strong>
               <div className="detail-value-wrapper">
                 <code className="detail-value">{currentMethod?.address || '—'}</code>
                 {currentMethod?.address && (
@@ -79,11 +79,11 @@ export default function TopUpMethods({ methods, selectedMethod, onSelectMethod, 
         {(selectedMethod === 'shamCash' || selectedMethod === 'siretelCash') && (
           <>
             <div className="detail-row">
-              <strong>👤 اسم المستفيد:</strong>
+              <strong> اسم المستفيد:</strong>
               <span className="detail-value">{currentMethod?.accountName || '—'}</span>
             </div>
             <div className="detail-row">
-              <strong>📞 رقم الحساب/الهاتف:</strong>
+              <strong> رقم الحساب/الهاتف:</strong>
               <div className="detail-value-wrapper">
                 <code className="detail-value">{currentMethod?.accountNumber || '—'}</code>
                 {currentMethod?.accountNumber && (
@@ -105,7 +105,7 @@ export default function TopUpMethods({ methods, selectedMethod, onSelectMethod, 
                   onClick={() => downloadQR(currentMethod.qrCode)}
                   title="تحميل QR Code"
                 >
-                  <FiDownload /> تحميل QR
+                
                 </button>
               </div>
             )}

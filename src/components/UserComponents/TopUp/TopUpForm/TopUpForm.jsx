@@ -1,7 +1,7 @@
 import Button from '../../../GeneralComponents/Button/Button';
 import Input from '../../../GeneralComponents/Input/Input';
-import ImageUpload from '../../../GeneralComponents/ImageUpload/ImageUpload';
 import './TopUpForm.css';
+
 export default function TopUpForm({
   amount,
   setAmount,
@@ -11,8 +11,6 @@ export default function TopUpForm({
   setTransactionNumber,
   senderName,
   setSenderName,
-  receiptImage,
-  setReceiptImage,
   loading,
   onSubmit,
 }) {
@@ -50,12 +48,6 @@ export default function TopUpForm({
           value={senderName}
           onChange={(e) => setSenderName(e.target.value)}
           required
-        />
-        <ImageUpload
-          label="إيصال الدفع (صورة)"
-          onUploadComplete={setReceiptImage}
-          maxSizeMB={0.5}
-          disabled={loading}
         />
         <Button type="submit" disabled={loading}>
           {loading ? 'جاري الإرسال...' : 'تقديم طلب ايداع'}

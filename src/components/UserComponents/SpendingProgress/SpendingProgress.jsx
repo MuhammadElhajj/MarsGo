@@ -21,12 +21,12 @@ export default function SpendingProgress() {
           {currentTier && (
             <>
               <span>المستوى {currentTier.level}</span>
-              {!nextTier && <span className="badge">الحد الأقصى</span>}
+              {/* {!nextTier && <span className="badge">الحد الأقصى</span>} */}
             </>
           )}
         </div>
         <div className="spending-progress__total">
-          إجمالي إنفاقك: <strong>{formatPrice(totalSpent)}</strong>
+           انفاقي: <strong>{formatPrice(totalSpent)}</strong>
         </div>
       </div>
       <div className="spending-progress__bar-container">

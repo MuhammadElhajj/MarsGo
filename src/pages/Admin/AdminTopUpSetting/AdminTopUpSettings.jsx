@@ -4,6 +4,7 @@ import { useTopUpSettings } from '../../contexts/TopUpSettingsContext';
 import Button from '../../components/GeneralComponents/Button/Button';
 import Input from '../../components/GeneralComponents/Input/Input';
 import ImageUpload from '../../components/GeneralComponents/ImageUpload/ImageUpload';
+import { FiSettings, FiDollarSign, FiHome, FiSmartphone, FiSave, FiGrid, FiImage } from 'react-icons/fi';
 import './AdminTopUpSettings.css';
 
 export default function AdminTopUpSettings() {
@@ -11,27 +12,23 @@ export default function AdminTopUpSettings() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // تهيئة النموذج عند تحميل الإعدادات
   useEffect(() => {
     if (settings && !form) {
       setForm({
         usdt: {
           enabled: settings.usdt?.enabled ?? true,
-          address: settings.usdt?.address || '',
-          qrCode: settings.usdt?.qrCode || '',
-          network: settings.usdt?.network || 'TRC20',
+          logoImage: settings.usdt?.logoImage || '',
+          displayName: settings.usdt?.displayName || 'USDT (تيثر)',
         },
         shamCash: {
           enabled: settings.shamCash?.enabled ?? true,
-          accountName: settings.shamCash?.accountName || '',
-          accountNumber: settings.shamCash?.accountNumber || '',
-          qrCode: settings.shamCash?.qrCode || '',
+          logoImage: settings.shamCash?.logoImage || '',
+          displayName: settings.shamCash?.displayName || 'شام كاش',
         },
         siretelCash: {
           enabled: settings.siretelCash?.enabled ?? true,
-          accountName: settings.siretelCash?.accountName || '',
-          accountNumber: settings.siretelCash?.accountNumber || '',
-          qrCode: settings.siretelCash?.qrCode || '',
+          logoImage: settings.siretelCash?.logoImage || '',
+          displayName: settings.siretelCash?.displayName || 'سيريتل كاش',
         },
         minDeposit: settings.minDeposit ?? 3,
         supportWhatsApp: settings.supportWhatsApp || '963939454690',
@@ -69,13 +66,13 @@ export default function AdminTopUpSettings() {
 
   return (
     <div className="admin-topup-settings" dir="rtl">
-      <h2>⚙️ إعدادات شحن الرصيد</h2>
-      <p className="admin-topup-settings__desc">قم بتفعيل طرق الدفع وإدخال بيانات الحسابات ورفع QR Codes.</p>
+      <h2><FiSettings style={{ marginLeft: '0.5rem' }} /> إعدادات شحن الرصيد</h2>
+      <p className="admin-topup-settings__desc">قم بتفعيل طرق الدفع وأضف شعار التطبيق واسمه الذي سيظهر للمستخدم.</p>
 
-      {/* ==================== USDT ==================== */}
+      {/* USDT */}
       <div className="method-card">
         <div className="method-card__header">
-          <h3>🇺🇸 USDT (تيثر)</h3>
+          <h3><FiDollarSign style={{ marginLeft: '0.5rem' }} /> USDT (تيثر)</h3>
           <label className="toggle-switch">
             <input type="checkbox" checked={form.usdt.enabled} onChange={(e) => handleToggle('usdt', e.target.checked)} />
             <span className="toggle-slider"></span>
@@ -83,36 +80,28 @@ export default function AdminTopUpSettings() {
         </div>
         <div className="method-card__body">
           <Input
-            label="عنوان المحفظة (Address)"
-            value={form.usdt.address}
-            onChange={(e) => handleMethodChange('usdt', 'address', e.target.value)}
-            placeholder="TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            label="اسم التطبيق الذي سيظهر للمستخدم"
+            value={form.usdt.displayName}
+            onChange={(e) => handleMethodChange('usdt', 'displayName', e.target.value)}
+            placeholder="مثال: USDT (تيثر)"
           />
-          <div className="form-field">
-            <label>الشبكة</label>
-            <select value={form.usdt.network} onChange={(e) => handleMethodChange('usdt', 'network', e.target.value)}>
-              <option value="TRC20">TRC20 (Tron) - موصى به</option>
-              <option value="BEP20">BEP20 (BSC)</option>
-              <option value="ERC20">ERC20 (Ethereum)</option>
-            </select>
-          </div>
           <div className="qr-upload">
-            <label>صورة QR Code (اختياري)</label>
-            <ImageUpload onUploadComplete={(base64) => handleMethodChange('usdt', 'qrCode', base64)} maxSizeMB={0.5} />
-            {form.usdt.qrCode && (
+            <label><FiImage style={{ marginLeft: '0.3rem' }} /> شعار التطبيق (صورة)</label>
+            <ImageUpload onUploadComplete={(base64) => handleMethodChange('usdt', 'logoImage', base64)} maxSizeMB={0.5} />
+            {form.usdt.logoImage && (
               <div className="qr-preview">
-                <img src={form.usdt.qrCode} alt="QR" />
-                <button type="button" onClick={() => handleMethodChange('usdt', 'qrCode', '')} className="remove-qr">إزالة</button>
+                <img src={form.usdt.logoImage} alt="شعار USDT" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                <button type="button" onClick={() => handleMethodChange('usdt', 'logoImage', '')} className="remove-qr">إزالة</button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ==================== شام كاش ==================== */}
+      {/* شام كاش */}
       <div className="method-card">
         <div className="method-card__header">
-          <h3>🏦 شام كاش</h3>
+          <h3><FiHome style={{ marginLeft: '0.5rem' }} /> شام كاش</h3>
           <label className="toggle-switch">
             <input type="checkbox" checked={form.shamCash.enabled} onChange={(e) => handleToggle('shamCash', e.target.checked)} />
             <span className="toggle-slider"></span>
@@ -120,34 +109,28 @@ export default function AdminTopUpSettings() {
         </div>
         <div className="method-card__body">
           <Input
-            label="اسم المستفيد"
-            value={form.shamCash.accountName}
-            onChange={(e) => handleMethodChange('shamCash', 'accountName', e.target.value)}
-            placeholder="الاسم الكامل للمستفيد"
-          />
-          <Input
-            label="رقم الحساب / الهاتف"
-            value={form.shamCash.accountNumber}
-            onChange={(e) => handleMethodChange('shamCash', 'accountNumber', e.target.value)}
-            placeholder="09XXXXXXXX"
+            label="اسم التطبيق الذي سيظهر للمستخدم"
+            value={form.shamCash.displayName}
+            onChange={(e) => handleMethodChange('shamCash', 'displayName', e.target.value)}
+            placeholder="مثال: شام كاش"
           />
           <div className="qr-upload">
-            <label>صورة QR Code (اختياري)</label>
-            <ImageUpload onUploadComplete={(base64) => handleMethodChange('shamCash', 'qrCode', base64)} maxSizeMB={0.5} />
-            {form.shamCash.qrCode && (
+            <label><FiImage style={{ marginLeft: '0.3rem' }} /> شعار التطبيق (صورة)</label>
+            <ImageUpload onUploadComplete={(base64) => handleMethodChange('shamCash', 'logoImage', base64)} maxSizeMB={0.5} />
+            {form.shamCash.logoImage && (
               <div className="qr-preview">
-                <img src={form.shamCash.qrCode} alt="QR" />
-                <button type="button" onClick={() => handleMethodChange('shamCash', 'qrCode', '')} className="remove-qr">إزالة</button>
+                <img src={form.shamCash.logoImage} alt="شعار شام كاش" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                <button type="button" onClick={() => handleMethodChange('shamCash', 'logoImage', '')} className="remove-qr">إزالة</button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ==================== سيريتل كاش ==================== */}
+      {/* سيريتل كاش */}
       <div className="method-card">
         <div className="method-card__header">
-          <h3>📱 سيريتل كاش</h3>
+          <h3><FiSmartphone style={{ marginLeft: '0.5rem' }} /> سيريتل كاش</h3>
           <label className="toggle-switch">
             <input type="checkbox" checked={form.siretelCash.enabled} onChange={(e) => handleToggle('siretelCash', e.target.checked)} />
             <span className="toggle-slider"></span>
@@ -155,33 +138,27 @@ export default function AdminTopUpSettings() {
         </div>
         <div className="method-card__body">
           <Input
-            label="اسم المستفيد"
-            value={form.siretelCash.accountName}
-            onChange={(e) => handleMethodChange('siretelCash', 'accountName', e.target.value)}
-            placeholder="الاسم الكامل للمستفيد"
-          />
-          <Input
-            label="رقم الحساب / الهاتف"
-            value={form.siretelCash.accountNumber}
-            onChange={(e) => handleMethodChange('siretelCash', 'accountNumber', e.target.value)}
-            placeholder="09XXXXXXXX"
+            label="اسم التطبيق الذي سيظهر للمستخدم"
+            value={form.siretelCash.displayName}
+            onChange={(e) => handleMethodChange('siretelCash', 'displayName', e.target.value)}
+            placeholder="مثال: سيريتل كاش"
           />
           <div className="qr-upload">
-            <label>صورة QR Code (اختياري)</label>
-            <ImageUpload onUploadComplete={(base64) => handleMethodChange('siretelCash', 'qrCode', base64)} maxSizeMB={0.5} />
-            {form.siretelCash.qrCode && (
+            <label><FiImage style={{ marginLeft: '0.3rem' }} /> شعار التطبيق (صورة)</label>
+            <ImageUpload onUploadComplete={(base64) => handleMethodChange('siretelCash', 'logoImage', base64)} maxSizeMB={0.5} />
+            {form.siretelCash.logoImage && (
               <div className="qr-preview">
-                <img src={form.siretelCash.qrCode} alt="QR" />
-                <button type="button" onClick={() => handleMethodChange('siretelCash', 'qrCode', '')} className="remove-qr">إزالة</button>
+                <img src={form.siretelCash.logoImage} alt="شعار سيريتل كاش" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                <button type="button" onClick={() => handleMethodChange('siretelCash', 'logoImage', '')} className="remove-qr">إزالة</button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ==================== الإعدادات العامة ==================== */}
+      {/* الإعدادات العامة */}
       <div className="general-settings">
-        <h3>الإعدادات العامة</h3>
+        <h3><FiGrid style={{ marginLeft: '0.5rem' }} /> الإعدادات العامة</h3>
         <div className="general-row">
           <Input
             label="الحد الأدنى للإيداع (دولار أمريكي)"
@@ -202,7 +179,8 @@ export default function AdminTopUpSettings() {
 
       <div className="admin-topup-settings__actions">
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'جاري الحفظ...' : '💾 حفظ الإعدادات'}
+          <FiSave style={{ marginLeft: '0.5rem' }} />
+          {saving ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
         </Button>
       </div>
     </div>
