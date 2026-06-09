@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// src/pages/User/TopUp/TopUpPage.jsx
+import { useState, useCallback, useMemo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useBalance } from '../../../context/BalanceContext';
 import { useTopUpSettings } from '../../../context/TopUpSettingsContext';
@@ -39,9 +40,104 @@ export default function TopUpPage() {
     isMaintenance,
   } = useTopUpValidation(settings, amount, selectedMethod, currency, rate);
 
-  if (settingsLoading) return <div>جاري تحميل طرق الدفع...</div>;
+  // تحسين الأداء: استخدام useMemo لقائمة طرق الدفع
+  const methods = useMemo(() => {
+    if (!settings) return [];
+    return [
+      { id: 'usdt', name: 'USDT', icon: '', enabled: settings.usdt?.enabled },
+      { id: 'shamCash', name: 'شام كاش', icon: '', enabled: settings.shamCash?.enabled },
+      { id: 'siretelCash', name: 'سيريتل كاش', icon: '', enabled: settings.siretelCash?.enabled },
+    ].filter(m => m.enabled);
+  }, [settings]);
 
-  // حالة عدم وجود إعدادات
+  const currentMethod = useMemo(() => settings?.[selectedMethod], [settings, selectedMethod]);
+  const supportWhatsApp = useMemo(() => settings?.supportWhatsApp || '963939454690', [settings]);
+  
+  const maintenanceMessage = useMemo(() => {
+    if (!currentMethod?.address && !currentMethod?.accountNumber) {
+      return '🚧 عذراً، خدمة شحن الرصيد غير متاحة حالياً بسبب تحديث معلومات التحويل. يرجى المحاولة لاحقاً.';
+    }
+    return '🚧 معلومات التحويل لهذه الطريقة غير مكتملة، يرجى تجربة طريقة دفع أخرى أو الاتصال بالدعم.';
+  }, [currentMethod]);
+
+  // تحسين الأداء: استخدام useCallback لدالة إرسال الطلب
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+
+    if (!hasWhatsapp) {
+      showToast('يرجى إضافة رقم واتساب في ملفك الشخصي أولاً', 'error', 5000);
+      return;
+    }
+    if (isMaintenance) {
+      showToast('خدمة شحن الرصيد في صيانة حالياً، يرجى المحاولة لاحقاً', 'error');
+      return;
+    }
+    const amountNum = parseFloat(amount);
+    if (!amount || amountNum < minDepositUSD) {
+      showToast(`الحد الأدنى للإيداع هو ${getMinDepositDisplay()}`, 'error');
+      return;
+    }
+    if (!transactionNumber) {
+      showToast('يرجى إدخال رقم العملية', 'error');
+      return;
+    }
+    if (!senderName) {
+      showToast('يرجى إدخال اسم المرسل', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const docRef = await addDoc(collection(db, 'topUpRequests'), {
+        userId: userData.uid,
+        userName: userData.name,
+        amount: amountNum,
+        paymentMethod: selectedMethod,
+        transactionNumber,
+        senderName,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
+
+      await addNotification(
+        userData.uid,
+        '💰 طلب شحن رصيد',
+        `تم تقديم طلب شحن بقيمة ${amount} $ بنجاح. رقم الطلب: #${docRef.id.slice(-6)} سيتم مراجعته قريباً.`,
+        'order_created',
+        docRef.id,
+        '/profile'
+      );
+
+      try {
+        const depositMessage = formatDepositMessage(
+          {
+            amount: amountNum,
+            userName: userData.name,
+            paymentMethod: selectedMethod,
+            transactionNumber,
+            senderName, // ✅ إضافة اسم المرسل إلى الرسالة
+          },
+          docRef.id
+        );
+        await sendTelegramDepositMessage(depositMessage, docRef.id);
+      } catch (telegramErr) {
+        console.error('❌ فشل إرسال إشعار التلغرام:', telegramErr);
+      }
+
+      showToast('✅ تم إرسال طلب الشحن، سيتم مراجعته قريباً', 'success');
+      setAmount('');
+      setTransactionNumber('');
+      setSenderName('');
+    } catch (error) {
+      console.error(error);
+      showToast('فشل إرسال الطلب', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [hasWhatsapp, isMaintenance, amount, minDepositUSD, getMinDepositDisplay, transactionNumber, senderName, userData, selectedMethod, addNotification]);
+
+  if (settingsLoading) return <div className="topup-page-loading" aria-live="polite">جاري تحميل طرق الدفع...</div>;
+
   if (!settings) {
     return (
       <div className="topup-page" dir="rtl">
@@ -62,85 +158,6 @@ export default function TopUpPage() {
       </div>
     );
   }
-
-  const methods = [
-    { id: 'usdt', name: 'USDT', icon: '', enabled: settings.usdt?.enabled },
-    { id: 'shamCash', name: 'شام كاش', icon: '', enabled: settings.shamCash?.enabled },
-    { id: 'siretelCash', name: 'سيريتل كاش', icon: '', enabled: settings.siretelCash?.enabled },
-  ].filter(m => m.enabled);
-
-  const currentMethod = settings[selectedMethod];
-  const supportWhatsApp = settings.supportWhatsApp || '963939454690';
-  const maintenanceMessage = !currentMethod?.address && !currentMethod?.accountNumber
-    ? '🚧 عذراً، خدمة شحن الرصيد غير متاحة حالياً بسبب تحديث معلومات التحويل. يرجى المحاولة لاحقاً.'
-    : '🚧 معلومات التحويل لهذه الطريقة غير مكتملة، يرجى تجربة طريقة دفع أخرى أو الاتصال بالدعم.';
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!hasWhatsapp) {
-      showToast(' يرجى إضافة رقم واتساب في ملفك الشخصي أولاً', 'error', 5000);
-      return;
-    }
-    if (isMaintenance) {
-      return showToast('خدمة شحن الرصيد في صيانة حالياً، يرجى المحاولة لاحقاً', 'error');
-    }
-    if (!amount || parseFloat(amount) < minDepositUSD) {
-      return showToast(`الحد الأدنى للإيداع هو ${getMinDepositDisplay()}`, 'error');
-    }
-    if (!transactionNumber) return showToast('يرجى إدخال رقم العملية', 'error');
-    if (!senderName) return showToast('يرجى إدخال اسم المرسل', 'error');
-
-    setLoading(true);
-    try {
-      // ✅ إزالة receiptImage من البيانات المرسلة إلى Firestore
-      const docRef = await addDoc(collection(db, 'topUpRequests'), {
-        userId: userData.uid,
-        userName: userData.name,
-        amount: parseFloat(amount),
-        paymentMethod: selectedMethod,
-        transactionNumber,
-        senderName,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      });
-
-      await addNotification(
-        userData.uid,
-        '💰 طلب شحن رصيد',
-        `تم تقديم طلب شحن بقيمة ${amount} $ بنجاح. رقم الطلب: #${docRef.id.slice(-6)} سيتم مراجعته قريباً.`,
-        'order_created',
-        docRef.id,
-        '/profile'
-      );
-
-      try {
-        const depositMessage = formatDepositMessage(
-          {
-            amount: parseFloat(amount),
-            userName: userData.name,
-            paymentMethod: selectedMethod,
-            transactionNumber,
-          },
-          docRef.id
-        );
-        // ✅ تمرير requestId كمعامل ثانٍ
-        await sendTelegramDepositMessage(depositMessage, docRef.id);
-      } catch (telegramErr) {
-        console.error('❌ فشل إرسال إشعار التلغرام:', telegramErr);
-      }
-
-      showToast('✅ تم إرسال طلب الشحن، سيتم مراجعته قريباً', 'success');
-      setAmount('');
-      setTransactionNumber('');
-      setSenderName('');
-    } catch (error) {
-      console.error(error);
-      showToast('فشل إرسال الطلب', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="topup-page" dir="rtl">
@@ -176,7 +193,7 @@ export default function TopUpPage() {
           <div className="support-note">
             <p>للإيداع السريع والتواصل مع الدعم الفني:</p>
             <a href={`https://wa.me/${supportWhatsApp}`} target="_blank" rel="noopener noreferrer" className="whatsapp-support-btn">
-            تواصل عبر واتساب للدعم
+              تواصل عبر واتساب للدعم
             </a>
           </div>
 

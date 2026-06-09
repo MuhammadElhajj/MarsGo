@@ -65,9 +65,9 @@ export default function Dashboard() {
       </Suspense>
       
       {/* تم تعطيل LazyOnScroll: نستخدم Suspense مباشرة */}
-      <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
+      {/* <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
         <HowItWorks page="dashboard" />
-      </Suspense>
+      </Suspense> */}
 
 
 

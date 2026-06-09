@@ -14,6 +14,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
       <button className="admin-sidebar__close-btn" onClick={onClose}>✕</button>
       <nav>
         <ul className="admin-sidebar__list">
+         <li><Link to="/admin/external-store-import" className={linkClass('/admin/external-store-import')} onClick={handleLinkClick}>📦 استيراد من المتجر الخارجي</Link></li>
           <li><Link to="/admin/verifiers" className={linkClass('/admin/verifiers')} onClick={handleLinkClick}>🔑 إدارة المدققين</Link></li>
           <li><Link to="/admin" className={linkClass('/admin')} onClick={handleLinkClick}>📊 لوحة التحكم</Link></li>
           <li><Link to="/admin/orders" className={linkClass('/admin/orders')} onClick={handleLinkClick}>📋 إدارة الطلبات</Link></li>

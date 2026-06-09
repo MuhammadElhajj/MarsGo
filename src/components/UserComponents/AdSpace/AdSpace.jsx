@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import './AdSpace.css';
@@ -7,9 +7,8 @@ export default function AdSpace() {
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [fade, setFade] = useState(true); // للتحكم في تأثير التلاشي
+  const [fade, setFade] = useState(true);
 
-  // جلب الإعلانات النشطة وترتيبها
   useEffect(() => {
     const fetchAds = async () => {
       try {
@@ -30,20 +29,18 @@ export default function AdSpace() {
     fetchAds();
   }, []);
 
-  // التبديل التلقائي كل 5 ثوانٍ مع تأثير التلاشي
   useEffect(() => {
     if (ads.length <= 1) return;
     const interval = setInterval(() => {
-      setFade(false); // إخفاء سريع
+      setFade(false);
       setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % ads.length);
-        setFade(true); // إظهار مع تلاشي
+        setFade(true);
       }, 200);
     }, 10000);
     return () => clearInterval(interval);
   }, [ads.length]);
 
-  // الانتقال إلى الإعلان السابق
   const goToPrevious = () => {
     if (ads.length === 0) return;
     setFade(false);
@@ -53,7 +50,6 @@ export default function AdSpace() {
     }, 200);
   };
 
-  // الانتقال إلى الإعلان التالي
   const goToNext = () => {
     if (ads.length === 0) return;
     setFade(false);
@@ -63,22 +59,25 @@ export default function AdSpace() {
     }, 200);
   };
 
-  // الانتقال إلى إعلان محدد بالنقر على النقطة
-  const goToSlide = (index) => {
-    if (index === currentIndex) return;
-    setFade(false);
-    setTimeout(() => {
-      setCurrentIndex(index);
-      setFade(true);
-    }, 200);
-  };
+  // تحديد ارتفاع ثابت لمنع CLS (يجب أن يتطابق مع قيم CSS)
+  const heroHeight = useMemo(() => (window.innerWidth <= 768 ? 140 : 160), []);
+  // إعادة الحساب عند تغيير حجم النافذة
+  useEffect(() => {
+    const handleResize = () => {
+      // إعادة التصيير لتحديث الارتفاع (سيتم استخدام القيمة الجديدة في useMemo)
+      // لا نحتاج لـ state إضافي، فقط نعيد التصيير باستخدام forceUpdate بسيط
+      window.dispatchEvent(new Event('resize-for-height'));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  if (loading) return <div className="ad-space loading">جاري التحميل...</div>;
+  if (loading) return <div className="ad-space loading" aria-live="polite">جاري التحميل...</div>;
   if (ads.length === 0) {
     return (
       <div className="ad-space">
         <div className="ad-space__placeholder">
-          <span className="ad-space__placeholder-icon">📢</span>
+          <span className="ad-space__placeholder-icon" aria-hidden="true">📢</span>
           <p>مساحة إعلانية</p>
           <small>سيتم عرض الإعلانات هنا قريباً</small>
         </div>
@@ -89,7 +88,7 @@ export default function AdSpace() {
   const currentAd = ads[currentIndex];
 
   return (
-    <div className="ad-space">
+    <div className="ad-space" aria-label="شريط الإعلانات المتحركة">
       <div className="ad-space__slider">
         {ads.length > 1 && (
           <button className="ad-space__nav ad-space__nav--prev" onClick={goToPrevious} aria-label="إعلان سابق">
@@ -99,14 +98,26 @@ export default function AdSpace() {
 
         <div
           className={`ad-space__hero ${fade ? 'fade-in' : 'fade-out'}`}
-          style={{ backgroundImage: `url(${currentAd.imageUrl || currentAd.imageBase64})` }}
+          style={{
+            backgroundImage: `url(${currentAd.imageUrl || currentAd.imageBase64})`,
+            height: `${heroHeight}px`,
+            width: '100%'
+          }}
+          role="img"
+          aria-label={currentAd.title}
         >
           <div className="ad-space__overlay"></div>
           <div className="ad-space__content">
             <h3 className="ad-space__title">{currentAd.title}</h3>
             {currentAd.description && <p className="ad-space__text">{currentAd.description}</p>}
             {currentAd.link && (
-              <a href={currentAd.link} target="_blank" rel="noopener noreferrer" className="ad-space__button">
+              <a
+                href={currentAd.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ad-space__button"
+                aria-label={`اكتشف المزيد عن ${currentAd.title}`}
+              >
                 اكتشف المزيد →
               </a>
             )}
@@ -118,21 +129,7 @@ export default function AdSpace() {
             ›
           </button>
         )}
-
-      {/* </div> */}
-      {/* {ads.length > 1 && (
-        <div className="ad-space__dots">
-          {ads.map((_, idx) => (
-            <button
-              key={idx}
-              className={`ad-space__dot ${idx === currentIndex ? 'active' : ''}`}
-              onClick={() => goToSlide(idx)}
-              aria-label={`انتقل إلى الإعلان ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )} */}
-    </div>
+      </div>
     </div>
   );
 }

@@ -5,10 +5,12 @@ import './ServicesGrid.css';
 export default function ServicesGrid() {
   const { services, loading } = useServices();
 
+  // ✅ إذا كان لا يزال جارٍ التحميل، نظهر رسالة التحميل
   if (loading) {
-    return <div className="services-grid-loading">جاري تحميل الخدمات...</div>;
+    return <div className="services-grid-loading" aria-live="polite">جاري تحميل الخدمات...</div>;
   }
 
+  // ✅ بعد انتهاء التحميل، إذا كانت المصفوفة فارغة نعرض رسالة "لا توجد خدمات"
   if (!services.length) {
     return (
       <div className="services-grid-empty">
@@ -20,10 +22,10 @@ export default function ServicesGrid() {
   return (
     <div className="services-grid">
       {services.map((service) => {
-        // ✅ التصحيح: استخدم bgImageBase64 بدلاً من backgroundImageBase64
-        // ✅ استخدم bgColor بدلاً من backgroundColor
-        const bgStyle = service.bgImageBase64
-          ? { backgroundImage: `url(${service.bgImageBase64})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        // دعم bgImageBase64 أو bgImageUrl (من Firebase Storage)
+        const bgImage = service.bgImageUrl || service.bgImageBase64;
+        const bgStyle = bgImage
+          ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
           : { backgroundColor: service.bgColor || 'var(--color-accent)' };
 
         return (
@@ -32,10 +34,11 @@ export default function ServicesGrid() {
             to={service.isActive ? service.link : '#'}
             className={`service-card ${!service.isActive ? 'service-card--coming-soon' : ''}`}
             style={bgStyle}
+            aria-label={service.name}
           >
             <div className="service-card__overlay"></div>
             <div className="service-card__content">
-              <div className="service-card__icon">{service.icon || ''}</div>
+              <div className="service-card__icon" aria-hidden="true">{service.icon || '🔹'}</div>
               <h3 className="service-card__title">{service.name}</h3>
               <p className="service-card__description">{service.description || 'خدمة رقمية متكاملة'}</p>
               {!service.isActive && (

@@ -1,5 +1,5 @@
 // src/components/Generic/UnifiedCheckout/UnifiedCheckout.jsx
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useBalance } from '../../../context/BalanceContext';
@@ -13,15 +13,11 @@ import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotifi
 import { useNotifications } from '../../../context/NotificationContext';
 import { sendWhatsAppNotification, formatOrderMessage } from '../../../utils/sendWhatsAppNotification';
 import Loading from '../../GeneralComponents/Loading/Loading';
-import useFinalPrice from '../../../hooks/useFinalPrice'; // ✅ استيراد الهوك الجديد
+import useFinalPrice from '../../../hooks/useFinalPrice';
+import { createStoreOrder } from '../../../services/apiStoreService'; // ✅ استدعاء خدمة API المتجر
 import './UnifiedCheckout.css';
 
-// استيراد النماذج بشكل lazy
 const GamingAppsForm = lazy(() => import('./forms/GamingAppsForm'));
-// سيتم تفعيلها لاحقاً عند الحاجة
-// const TransferForm = lazy(() => import('./forms/TransferForm'));
-// const CryptoForm = lazy(() => import('./forms/CryptoForm'));
-// const ExchangeForm = lazy(() => import('./forms/ExchangeForm'));
 
 export default function UnifiedCheckout({ serviceType, redirectPath }) {
   const { userData } = useAuth();
@@ -51,34 +47,27 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
   if (needsItemAndPackage && (!item || !pkg)) {
     return (
       <div className="unified-checkout" dir="rtl">
-        <GoBackButton text="رجوع" onClick={() => navigate(redirectPath || '/dashboard')} />
-        <p className="unified-checkout__error">⚠️ لم يتم تحديد خدمة أو باقة. الرجاء اختيار الخدمة أولاً.</p>
+        <GoBackButton text="رجوع" onClick={() => navigate(redirectPath || '/dashboard')} aria-label="رجوع إلى الصفحة السابقة" />
+        <p className="unified-checkout__error" role="alert">⚠️ لم يتم تحديد خدمة أو باقة. الرجاء اختيار الخدمة أولاً.</p>
       </div>
     );
   }
 
-  // تحديد نوع المنتج للخصم العام (فقط للألعاب والتطبيقات)
   const productType = (serviceType === 'gaming') ? 'game' : (serviceType === 'apps') ? 'app' : null;
   
-  // حساب السعر باستخدام الهوك الموحد (يجمع الخصم العام وخصم الباقة وخصم التاجر)
-  let requiredAmountUSD = 0;
-  let displayPrice = '';
-  let priceUSD = 0;
-  let packageDiscount = 0;
+  // حساب السعر باستخدام useMemo لتجنب إعادة الحساب غير الضروري
+  const { priceUSD, packageDiscount } = useMemo(() => {
+    if (needsItemAndPackage && pkg) {
+      const rawPrice = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
+      return { priceUSD: rawPrice, packageDiscount: pkg.discount || 0 };
+    }
+    return { priceUSD: 0, packageDiscount: 0 };
+  }, [needsItemAndPackage, pkg]);
 
-  if (needsItemAndPackage && pkg) {
-    priceUSD = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
-    packageDiscount = pkg.discount || 0;
-    // استدعاء الهوك خارج الشرط (لكن يجب أن يكون في نفس الترتيب دائماً)
-    // سنستخدمه بعد قليل، لكن لا يمكن استدعاؤه داخل if.
-    // لذلك سنستدعيه بشكل ثابت ثم نستخدم النتيجة.
-  }
-
-  // استدعاء الهوك (يجب أن يكون خارج أي شرط ودائماً بنفس الترتيب)
-  // نمرر قيماً افتراضية آمنة إذا لم تكن الخدمة من النوع المناسب
   const hookProductId = (needsItemAndPackage && item?.id) ? item.id : null;
   const hookOriginalPrice = (needsItemAndPackage && pkg) ? priceUSD : 0;
   const hookItemDiscount = (needsItemAndPackage && pkg) ? packageDiscount : 0;
+  
   const { finalPrice: computedPrice, discountPercent: computedDiscount } = useFinalPrice(
     productType,
     hookProductId,
@@ -86,23 +75,28 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
     hookItemDiscount
   );
 
-  if (needsItemAndPackage && pkg) {
-    requiredAmountUSD = computedPrice;
-    displayPrice = currency === 'USD'
-      ? `${requiredAmountUSD.toFixed(2)} $`
-      : rate ? `${(requiredAmountUSD * rate).toFixed(0).toLocaleString()} ل.س` : '...';
-  } else if (serviceType === 'transfer') {
-    requiredAmountUSD = parseFloat(amount) || 0;
-    displayPrice = `${requiredAmountUSD} $`;
-  } else if (serviceType === 'crypto') {
-    requiredAmountUSD = parseFloat(price) || 0;
-    displayPrice = `${requiredAmountUSD} $`;
-  } else if (serviceType === 'exchange') {
-    requiredAmountUSD = parseFloat(amount) || 0;
-    displayPrice = `${requiredAmountUSD} $`;
-  }
+  // حساب requiredAmountUSD و displayPrice باستخدام useMemo
+  const { requiredAmountUSD, displayPrice } = useMemo(() => {
+    if (needsItemAndPackage && pkg) {
+      const amountUSD = computedPrice;
+      const priceDisplay = currency === 'USD'
+        ? `${amountUSD.toFixed(2)} $`
+        : rate ? `${(amountUSD * rate).toFixed(0).toLocaleString()} ل.س` : '...';
+      return { requiredAmountUSD: amountUSD, displayPrice: priceDisplay };
+    } else if (serviceType === 'transfer') {
+      const val = parseFloat(amount) || 0;
+      return { requiredAmountUSD: val, displayPrice: `${val} $` };
+    } else if (serviceType === 'crypto') {
+      const val = parseFloat(price) || 0;
+      return { requiredAmountUSD: val, displayPrice: `${val} $` };
+    } else if (serviceType === 'exchange') {
+      const val = parseFloat(amount) || 0;
+      return { requiredAmountUSD: val, displayPrice: `${val} $` };
+    }
+    return { requiredAmountUSD: 0, displayPrice: '' };
+  }, [needsItemAndPackage, pkg, computedPrice, currency, rate, serviceType, amount, price]);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     if (serviceType === 'gaming' || serviceType === 'apps') {
       if (!playerId) return 'يرجى إدخال المعرف (ID اللاعب أو رقم الحساب)';
     } else if (serviceType === 'transfer') {
@@ -113,9 +107,9 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
       if (!amount || !rateExchange) return 'يرجى ملء جميع الحقول';
     }
     return null;
-  };
+  }, [serviceType, playerId, recipientName, shamCashPhone, amount, price, rateExchange]);
 
-  const getFormData = () => {
+  const getFormData = useCallback(() => {
     switch (serviceType) {
       case 'gaming':
       case 'apps':
@@ -129,9 +123,9 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
       default:
         return {};
     }
-  };
+  }, [serviceType, playerId, requiredAmountUSD, recipientName, shamCashPhone, amount, tradeType, price, paymentMethod, exchangeType, rateExchange]);
 
-  const buildOrderData = (formData) => {
+  const buildOrderData = useCallback((formData, externalResult = null) => {
     let orderData = {
       userId: userData.uid,
       customerName: userData.name || '',
@@ -155,7 +149,13 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
           exchangeRateAtPurchase: rate || null,
           currencyUsed: currency,
           playerId: formData.playerId,
-          discountApplied: computedDiscount, // تسجيل نسبة الخصم المطبقة
+          discountApplied: computedDiscount,
+          ...(externalResult && {
+            externalOrderId: externalResult.order_id,
+            externalStatus: externalResult.status,
+            externalPrice: externalResult.price,
+            externalData: externalResult.data,
+          }),
         };
         break;
       case 'transfer':
@@ -185,9 +185,9 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
         break;
     }
     return orderData;
-  };
+  }, [userData, serviceType, item, pkg, requiredAmountUSD, rate, currency, computedDiscount]);
 
-  const sendNotifications = async (orderId, formData) => {
+  const sendNotifications = useCallback(async (orderId, formData) => {
     let orderMessageData = {};
     switch (serviceType) {
       case 'gaming':
@@ -221,32 +221,58 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
       orderId,
       '/my-orders'
     );
-  };
+  }, [serviceType, item, pkg, currency, userData, addNotification]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (loading) return;
     setError('');
 
     const validationError = validateForm();
-    if (validationError) return setError(validationError);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     if (balance < requiredAmountUSD) {
-      return setError(`رصيدك غير كافٍ. المطلوب: ${requiredAmountUSD.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
+      setError(`رصيدك غير كافٍ. المطلوب: ${requiredAmountUSD.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
+      return;
     }
 
     setLoading(true);
     try {
-      const deducted = await deductBalance(requiredAmountUSD);
-      if (!deducted) throw new Error('فشل خصم الرصيد');
+      let externalResult = null;
+
+      // ✅ للألعاب والتطبيقات: استدعاء API المتجر أولاً (صاروخ)
+      if (serviceType === 'gaming' || serviceType === 'apps') {
+        if (!pkg.externalProductId) {
+          throw new Error('هذه الباقة غير مرتبطة بمتجر خارجي، يرجى مراجعة الإدارة.');
+        }
+        const orderUuid = crypto.randomUUID();
+        const anyKey = pkg.externalAnyKey || '';
+        externalResult = await createStoreOrder({
+          productId: pkg.externalProductId,
+          quantity: 1,
+          playerId,
+          anyKey,
+          orderUuid,
+        });
+        // بعد نجاح الطلب الخارجي، نخصم الرصيد
+        const deducted = await deductBalance(requiredAmountUSD);
+        if (!deducted) throw new Error('فشل خصم الرصيد');
+      } else {
+        // باقي الخدمات: خصم الرصيد أولاً
+        const deducted = await deductBalance(requiredAmountUSD);
+        if (!deducted) throw new Error('فشل خصم الرصيد');
+      }
 
       const formData = getFormData();
-      const orderData = buildOrderData(formData);
+      const orderData = buildOrderData(formData, externalResult);
       const docRef = await addDoc(collection(db, 'orders'), orderData);
 
       await sendNotifications(docRef.id, formData);
 
-      showToast(`✅ تم تنفيذ طلبك بنجاح! تم خصم ${requiredAmountUSD.toFixed(2)} $ من رصيدك.`, 'success', 4000);
+      showToast(`✅ تم تنفيذ طلبك بنجاح!`, 'success', 3000);
 
       // إعادة تعيين الحقول
       if (serviceType === 'gaming' || serviceType === 'apps') setPlayerId('');
@@ -254,15 +280,15 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
       if (serviceType === 'crypto') { setAmount(''); setPrice(''); }
       if (serviceType === 'exchange') { setAmount(''); setRateExchange(''); }
 
-      setTimeout(() => navigate(redirectPath || '/dashboard'), 3000);
+      setTimeout(() => navigate(redirectPath || '/dashboard'), 1500);
     } catch (err) {
       console.error(err);
-      showToast('❌ حدث خطأ أثناء معالجة الطلب: ' + err.message, 'error', 5000);
+      showToast(`❌ فشل الطلب: ${err.message}`, 'error', 5000);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, validateForm, balance, requiredAmountUSD, deductBalance, getFormData, buildOrderData, sendNotifications, serviceType, navigate, redirectPath, playerId, pkg]);
 
   const renderForm = () => {
     switch (serviceType) {
@@ -270,7 +296,6 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
       case 'apps':
         return <GamingAppsForm playerId={playerId} setPlayerId={setPlayerId} displayPrice={displayPrice} pkg={pkg} balance={balance} />;
       case 'transfer':
-        // return <TransferForm ... />; سيتم تفعيلها لاحقاً
         return <p>نموذج التحويل قيد التطوير</p>;
       case 'crypto':
         return <p>نموذج العملات الرقمية قيد التطوير</p>;
@@ -284,7 +309,7 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
   return (
     <div className="unified-checkout" dir="rtl">
       <div style={{ marginBottom: '1rem' }}>
-        <GoBackButton text="رجوع" />
+        <GoBackButton text="رجوع" aria-label="رجوع إلى الصفحة السابقة" />
       </div>
       <h2 className="unified-checkout__title">إتمام عملية الشراء</h2>
       <div className="unified-checkout__form">
@@ -305,7 +330,7 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
             {loading ? 'جاري التنفيذ...' : `تأكيد الطلب (${requiredAmountUSD.toFixed(2)} $)`}
           </Button>
 
-          {error && <p className="unified-checkout__error">❌ {error}</p>}
+          {error && <p className="unified-checkout__error" role="alert">❌ {error}</p>}
         </form>
       </div>
     </div>

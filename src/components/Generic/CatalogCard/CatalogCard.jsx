@@ -4,18 +4,18 @@ import useFinalPrice from '../../../hooks/useFinalPrice';
 import PriceDisplay from '../PriceDisplay/PriceDisplay';
 
 export default function CatalogCard({ 
-  item,           // العنصر (game, app, package)
-  type = 'item',  // 'game', 'app', 'package', 'item'
-  onSelect,       // دالة عند الضغط
+  item,           
+  type = 'item',  
+  onSelect,       
   showPrice = false,
   showBadge = false,
   customBadge = null,
-  customLabels = {},  // مثلاً { available: 'نشط', unavailable: 'غير نشط' }
+  customLabels = {},  
 }) {
-  // استخراج البيانات مع قيم افتراضية آمنة
   const {
     name = 'بدون اسم',
     imageBase64 = '',
+    imageUrl = '',
     note = '',
     isAvailable = true,
     unavailableReason = '',
@@ -25,10 +25,8 @@ export default function CatalogCard({
     id
   } = item || {};
 
-  // تحديد نوع المنتج للخصم العام (فقط للألعاب والتطبيقات)
   const productType = (type === 'game' || type === 'app') ? type : null;
   
-  // حساب السعر النهائي باستخدام الهوك الجديد (يجمع خصم العنصر، خصم الفئة، خصم التاجر)
   let originalPriceUSD = null;
   let finalPriceUSD = null;
   let finalDiscount = 0;
@@ -36,7 +34,6 @@ export default function CatalogCard({
   if (price !== null && price !== undefined) {
     const priceNum = typeof price === 'number' ? price : parseFloat(price);
     originalPriceUSD = priceNum;
-    // استدعاء الهوك (قيم آمنة)
     const { finalPrice, discountPercent } = useFinalPrice(
       productType,
       id,
@@ -49,14 +46,12 @@ export default function CatalogCard({
 
   const isUnavailable = isAvailable === false;
   
-  // نصوص الحالة قابلة للتخصيص
   const labels = {
-    available: customLabels.available || 'متاحة',
-    unavailable: customLabels.unavailable || 'غير متاحة',
+    available: customLabels.available || 'متاح',
+    unavailable: customLabels.unavailable || 'غير متاح',
     ...customLabels
   };
 
-  // تحديد إظهار السعر تلقائياً للباقات إذا لم يُمرر showPrice صراحة
   const shouldShowPrice = showPrice || type === 'package';
   const shouldShowBadge = showBadge || customBadge !== null;
 
@@ -66,6 +61,9 @@ export default function CatalogCard({
     }
   };
 
+  const imgSrc = imageUrl || imageBase64;
+  const imageSize = type === 'package' ? 70 : 80;
+
   return (
     <div 
       className={`catalog-card ${isUnavailable ? 'catalog-card--unavailable' : ''} catalog-card--${type}`}
@@ -73,12 +71,19 @@ export default function CatalogCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
+      aria-label={name}
     >
-      <div className="catalog-card__image">
-        {imageBase64 ? (
-          <img src={imageBase64} alt={name} loading="lazy" />
+      <div className="catalog-card__image" style={{ width: imageSize, height: imageSize }}>
+        {imgSrc ? (
+          <img 
+            src={imgSrc} 
+            alt={name} 
+            loading="lazy"
+            width={imageSize}
+            height={imageSize}
+          />
         ) : (
-          <div className="catalog-card__placeholder">
+          <div className="catalog-card__placeholder" aria-hidden="true">
             {type === 'game' && '🎮'}
             {type === 'app' && '📱'}
             {type === 'package' && '📦'}
@@ -87,14 +92,28 @@ export default function CatalogCard({
         )}
       </div>
       <div className="catalog-card__info">
-        <h3 className="catalog-card__title">{name}</h3>
+        {/* الصف العلوي: الاسم + الحالة والشارة */}
+        <div className="catalog-card__header-row">
+          <h3 className="catalog-card__title">{name}</h3>
+          <div className="catalog-card__status-group">
+            <span className={`catalog-card__status status-${isAvailable ? 'available' : 'unavailable'}`}>
+              {isAvailable ? labels.available : labels.unavailable}
+            </span>
+            {shouldShowBadge && customBadge && (
+              <span className="catalog-card__badge">{customBadge}</span>
+            )}
+          </div>
+        </div>
+        
+        {/* الملاحظة (إن وجدت) */}
         {note && <p className="catalog-card__note">{note}</p>}
+        
+        {/* سبب عدم التوفر (إن كان المنتج غير متاح) */}
         {isUnavailable && unavailableReason && (
           <p className="catalog-card__unavailable-reason">⚠️ {unavailableReason}</p>
         )}
-        <span className={`catalog-card__status status-${isAvailable ? 'available' : 'unavailable'}`}>
-          {isAvailable ? labels.available : labels.unavailable}
-        </span>
+        
+        {/* السعر (إن أردت إظهاره) */}
         {shouldShowPrice && finalPriceUSD !== null && (
           <PriceDisplay
             originalPrice={originalPriceUSD}
@@ -102,9 +121,6 @@ export default function CatalogCard({
             currency={currency}
             discountPercent={finalDiscount}
           />
-        )}
-        {shouldShowBadge && customBadge && (
-          <span className="catalog-card__badge">{customBadge}</span>
         )}
       </div>
     </div>

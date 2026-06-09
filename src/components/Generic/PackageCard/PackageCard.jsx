@@ -1,31 +1,59 @@
 // src/components/UserComponents/Gaming/PackageCard/PackageCard.jsx
+import { useMemo } from 'react';
 import './PackageCard.css';
 
 export default function PackageCard({ pkg, onSelect, customBadge = null }) {
-  // ✅ التأكد من أن price رقمي لتجنب الأخطاء
-  const priceValue = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
-  const discountValue = pkg.discount || 0;
-  const finalPrice = discountValue ? (priceValue * (1 - discountValue / 100)).toFixed(2) : priceValue;
+  const {
+    name,
+    currency,
+    type,
+    imageBase64,
+    imageUrl,      // ✅ دعم الصور من Firebase Storage
+    note,
+    price,
+    discount = 0,
+  } = pkg || {};
 
-  const { name, currency, type, imageBase64, note } = pkg;
+  // ✅ حساب السعر النهائي باستخدام useMemo لمنع إعادة الحساب غير الضروري
+  const { priceValue, finalPrice, discountValue } = useMemo(() => {
+    const rawPrice = typeof price === 'number' ? price : parseFloat(price);
+    const disc = discount || 0;
+    const final = disc ? (rawPrice * (1 - disc / 100)).toFixed(2) : rawPrice;
+    return { priceValue: rawPrice, finalPrice: final, discountValue: disc };
+  }, [price, discount]);
 
   // ✅ تحديد النص المعروض للشارة (badge)
-  let badgeText = null;
-  if (customBadge) {
-    badgeText = customBadge;
-  } else if (type === 'royalPass') {
-    badgeText = 'رويال باس';
-  } else if (type === 'direct') {
-    badgeText = 'مباشر';
-  }
+  const badgeText = useMemo(() => {
+    if (customBadge) return customBadge;
+    if (type === 'royalPass') return 'رويال باس';
+    if (type === 'direct') return 'مباشر';
+    return null;
+  }, [customBadge, type]);
+
+  // ✅ مصدر الصورة (يفضل رابط Firebase ثم base64)
+  const imgSrc = imageUrl || imageBase64;
+  const imageSize = 70; // حجم ثابت للصورة
 
   return (
-    <div className="package-card" onClick={() => onSelect(pkg)}>
-      <div className="package-card__image">
-        {imageBase64 ? (
-          <img src={imageBase64} alt={name} />
+    <div 
+      className="package-card" 
+      onClick={() => onSelect(pkg)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(pkg); }}
+      aria-label={name}
+    >
+      <div className="package-card__image" style={{ width: imageSize, height: imageSize }}>
+        {imgSrc ? (
+          <img 
+            src={imgSrc} 
+            alt={name} 
+            loading="lazy"        // ✅ تحميل كسول
+            width={imageSize}
+            height={imageSize}
+          />
         ) : (
-          <div className="package-card__placeholder">📦</div>
+          <div className="package-card__placeholder" aria-hidden="true">📦</div>
         )}
       </div>
       <div className="package-card__info">

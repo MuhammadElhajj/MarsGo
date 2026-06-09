@@ -29,7 +29,6 @@ export async function sendTelegramDepositMessage(message, requestId) {
   const chatIds = recipients.split(',').map(id => id.trim());
   let allSuccess = true;
 
-  // أزرار تفاعلية (تأكيد / رفض) مع تمرير معرف الطلب
   const inlineKeyboard = {
     inline_keyboard: [
       [
@@ -99,7 +98,7 @@ export async function sendTelegramDepositPhoto(caption, photoBase64) {
 
 /**
  * تنسيق رسالة طلب الإيداع
- * @param {object} depositData - بيانات الطلب (amount, userName, paymentMethod, transactionNumber)
+ * @param {object} depositData - بيانات الطلب (amount, userName, paymentMethod, transactionNumber, senderName)
  * @param {string} requestId - معرف الطلب
  * @returns {string}
  */
@@ -119,5 +118,6 @@ export function formatDepositMessage(depositData, requestId) {
 👤 العميل: ${depositData.userName}
 🏦 طريقة الدفع: ${methodName}
 📄 رقم العملية: ${depositData.transactionNumber || '—'}
+📛 اسم المرسل: ${depositData.senderName || '—'}
 📅 التاريخ: ${date}`;
 }

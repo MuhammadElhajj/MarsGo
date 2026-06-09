@@ -72,29 +72,25 @@ export function GamesProvider({ children }) {
 
   // إضافة لعبة جديدة (تدعم imageBase64 أو imageUrl)
   const addGame = async (gameData) => {
-    // استخراج الصورة المؤقتة إن وجدت
     const { imageBase64, imageUrl, ...restData } = gameData;
-    const tempImageBase64 = imageBase64 || (imageUrl ? null : null); // إذا أرسل imageUrl فقط نتعامل معه
+    const tempImageBase64 = imageBase64 || (imageUrl ? null : null);
 
     try {
-      // 1. إنشاء المستند أولاً بدون الصورة النهائية
       const docRef = await addDoc(collection(db, 'games'), {
         ...restData,
-        imageUrl: null, // سيتم تحديثه لاحقاً
+        imageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
       const gameId = docRef.id;
 
-      // 2. رفع الصورة إن وجدت
       let finalImageUrl = null;
       if (tempImageBase64) {
         finalImageUrl = await uploadGameImage(gameId, tempImageBase64);
       } else if (imageUrl) {
-        finalImageUrl = imageUrl; // إذا كان الرابط موجوداً (مثلاً من تعديل)
+        finalImageUrl = imageUrl;
       }
 
-      // 3. تحديث المستند بالرابط
       if (finalImageUrl) {
         await updateDoc(doc(db, 'games', gameId), { imageUrl: finalImageUrl });
       }
@@ -116,15 +112,12 @@ export function GamesProvider({ children }) {
     let newImageUrl = imageUrl;
 
     try {
-      // إذا كانت هناك صورة جديدة بصيغة base64 نرفعها
       if (imageBase64) {
-        // حذف الصورة القديمة إن وجدت
         if (oldGame?.imageUrl) {
           await deleteImage(oldGame.imageUrl);
         }
         newImageUrl = await uploadGameImage(gameId, imageBase64);
       } else if (imageUrl && imageUrl !== oldGame?.imageUrl) {
-        // إذا تم تغيير الرابط إلى رابط جديد (من مصدر آخر) نحذف القديم
         if (oldGame?.imageUrl) {
           await deleteImage(oldGame.imageUrl);
         }
@@ -148,24 +141,20 @@ export function GamesProvider({ children }) {
   // حذف لعبة (مع حذف صورتها وصور جميع باقاتها من Storage)
   const deleteGame = async (gameId) => {
     try {
-      // 1. حذف صورة اللعبة من Storage
       const game = games.find(g => g.id === gameId);
       if (game?.imageUrl) {
         await deleteImage(game.imageUrl);
       }
 
-      // 2. جلب الباقات وحذف صورها
       const packagesSnap = await getDocs(collection(db, 'games', gameId, 'packages'));
       for (const pkgDoc of packagesSnap.docs) {
         const pkgData = pkgDoc.data();
         if (pkgData.imageUrl) {
           await deleteImage(pkgData.imageUrl);
         }
-        // حذف الباقة
         await deleteDoc(doc(db, 'games', gameId, 'packages', pkgDoc.id));
       }
 
-      // 3. حذف اللعبة
       await deleteDoc(doc(db, 'games', gameId));
       toast.success('تم حذف اللعبة وجميع باقاتها');
       await fetchGames();
@@ -176,17 +165,18 @@ export function GamesProvider({ children }) {
     }
   };
 
-  // إضافة باقة إلى لعبة (مع رفع صورة)
+  // ✅ إضافة باقة إلى لعبة (مع دعم الحقول الجديدة externalProductId, externalAnyKey)
   const addPackage = async (gameId, packageData) => {
-    const { imageBase64, imageUrl, ...restData } = packageData;
+    const { imageBase64, imageUrl, externalProductId, externalAnyKey, ...restData } = packageData;
 
     try {
-      // إنشاء الباقة أولاً
       const docRef = await addDoc(collection(db, 'games', gameId, 'packages'), {
         ...restData,
         imageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        externalProductId: externalProductId ? Number(externalProductId) : null,
+        externalAnyKey: externalAnyKey || '',
       });
       const packageId = docRef.id;
 
@@ -210,9 +200,8 @@ export function GamesProvider({ children }) {
     }
   };
 
-  // تحديث باقة (مع معالجة الصورة)
+  // ✅ تحديث باقة (مع دعم الحقول الجديدة)
   const updatePackage = async (gameId, packageId, packageData) => {
-    // جلب الباقة القديمة (للحصول على الصورة القديمة) – نستخدم fetchPackages للحصول عليها إذا لزم الأمر
     let oldImageUrl = null;
     try {
       const packages = await fetchPackages(gameId);
@@ -220,7 +209,7 @@ export function GamesProvider({ children }) {
       oldImageUrl = oldPkg?.imageUrl;
     } catch (e) { /* تجاهل */ }
 
-    const { imageBase64, imageUrl, ...restData } = packageData;
+    const { imageBase64, imageUrl, externalProductId, externalAnyKey, ...restData } = packageData;
     let newImageUrl = imageUrl;
 
     try {
@@ -236,6 +225,8 @@ export function GamesProvider({ children }) {
         ...restData,
         ...(newImageUrl && { imageUrl: newImageUrl }),
         updatedAt: new Date(),
+        externalProductId: externalProductId ? Number(externalProductId) : null,
+        externalAnyKey: externalAnyKey || '',
       });
       toast.success('تم تحديث الباقة بنجاح');
     } catch (err) {
@@ -248,7 +239,6 @@ export function GamesProvider({ children }) {
   // حذف باقة (مع حذف صورتها)
   const deletePackage = async (gameId, packageId) => {
     try {
-      // جلب الباقة لمعرفة رابط الصورة
       const packages = await fetchPackages(gameId);
       const pkg = packages.find(p => p.id === packageId);
       if (pkg?.imageUrl) {

@@ -36,6 +36,7 @@ const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
 import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
+import ExternalStoreImport from './pages/Admin/ExternalStoreImport/ExternalStoreImport';
 // ✅ المسار الصحيح لـ AdminTopUpSettings (داخل المجلد الفرعي)
 const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/AdminTopUpSettings"));
 const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
@@ -104,7 +105,8 @@ function App() {
           <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
-          <Route path="ticker" element={<AdminTicker />} />
+      
+      <Route path="external-store-import" element={<ExternalStoreImport />} />    <Route path="ticker" element={<AdminTicker />} />
           <Route path="apps" element={<AdminApps />} />
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} />

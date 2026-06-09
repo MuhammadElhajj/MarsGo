@@ -153,9 +153,9 @@ export function AppsProvider({ children }) {
     }
   };
 
-  // إضافة باقة إلى تطبيق
+  // ✅ إضافة باقة إلى تطبيق (مع دعم الحقول الجديدة)
   const addPackage = async (appId, packageData) => {
-    const { imageBase64, imageUrl, ...restData } = packageData;
+    const { imageBase64, imageUrl, externalProductId, externalAnyKey, ...restData } = packageData;
 
     try {
       const docRef = await addDoc(collection(db, 'apps', appId, 'packages'), {
@@ -163,6 +163,8 @@ export function AppsProvider({ children }) {
         imageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        externalProductId: externalProductId ? Number(externalProductId) : null,
+        externalAnyKey: externalAnyKey || '',
       });
       const packageId = docRef.id;
 
@@ -186,7 +188,7 @@ export function AppsProvider({ children }) {
     }
   };
 
-  // تحديث باقة
+  // ✅ تحديث باقة (مع دعم الحقول الجديدة)
   const updatePackage = async (appId, packageId, packageData) => {
     let oldImageUrl = null;
     try {
@@ -195,7 +197,7 @@ export function AppsProvider({ children }) {
       oldImageUrl = oldPkg?.imageUrl;
     } catch (e) { /* تجاهل */ }
 
-    const { imageBase64, imageUrl, ...restData } = packageData;
+    const { imageBase64, imageUrl, externalProductId, externalAnyKey, ...restData } = packageData;
     let newImageUrl = imageUrl;
 
     try {
@@ -211,6 +213,8 @@ export function AppsProvider({ children }) {
         ...restData,
         ...(newImageUrl && { imageUrl: newImageUrl }),
         updatedAt: new Date(),
+        externalProductId: externalProductId ? Number(externalProductId) : null,
+        externalAnyKey: externalAnyKey || '',
       });
       toast.success('تم تحديث الباقة بنجاح');
     } catch (err) {

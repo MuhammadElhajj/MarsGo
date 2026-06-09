@@ -1,4 +1,5 @@
 // src/components/Generic/CatalogList/CatalogList.jsx
+import { useMemo } from 'react';
 import CatalogCard from '../CatalogCard/CatalogCard';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
 import './CatalogList.css';
@@ -12,11 +13,25 @@ export default function CatalogList({
   onBackClick,
   showPrice = false,
   customBadge = null,
-  type = 'item'        // ✅ إضافة prop type
+  type = 'item'
 }) {
   if (!items || items.length === 0) {
     return <p className="catalog-list__empty">لا توجد عناصر لعرضها</p>;
   }
+
+  // ✅ تحسين الأداء: استخدام useMemo لمنع إعادة إنشاء البطاقات إذا لم تتغير items
+  const renderedCards = useMemo(() => {
+    return items.map(item => (
+      <CatalogCard
+        key={item.id}
+        item={item}
+        onSelect={onItemClick}
+        showPrice={showPrice}
+        customBadge={customBadge}
+        type={type}
+      />
+    ));
+  }, [items, onItemClick, showPrice, customBadge, type]);
 
   return (
     <div className="catalog-list" dir="rtl">
@@ -27,16 +42,7 @@ export default function CatalogList({
       )}
       {title && <h2 className="catalog-list__title">{title}</h2>}
       <div className="catalog-list__grid">
-        {items.map(item => (
-          <CatalogCard
-            key={item.id}
-            item={item}
-            onSelect={onItemClick}
-            showPrice={showPrice}
-            customBadge={customBadge}
-            type={type}          // ✅ تمرير type إلى CatalogCard
-          />
-        ))}
+        {renderedCards}
       </div>
     </div>
   );

@@ -38,7 +38,7 @@ export default function AdminCatalog({
     order: 0,
   });
 
-  // نموذج الباقة – استخدم imageUrl بدلاً من imageBase64
+  // نموذج الباقة – أضف الحقول الجديدة
   const [formPackage, setFormPackage] = useState({
     name: '',
     price: '',
@@ -48,6 +48,8 @@ export default function AdminCatalog({
     order: 0,
     imageUrl: '',
     note: '',
+    externalProductId: '',   // معرف المنتج في API الخارجي
+    externalAnyKey: '',      // مفتاح إضافي (مثل سيرفر موبايل ليجند)
   });
 
   const handleSelectItem = async (item) => {
@@ -87,7 +89,7 @@ export default function AdminCatalog({
     e.preventDefault();
     const data = {
       name: formItem.name,
-      imageUrl: formItem.imageUrl,   // ✅ إرسال الرابط وليس base64
+      imageUrl: formItem.imageUrl,
       note: formItem.note,
       isAvailable: formItem.isAvailable,
       unavailableReason: formItem.unavailableReason,
@@ -128,8 +130,10 @@ export default function AdminCatalog({
         discount: pkg.discount || 0,
         type: pkg.type || (packageTypeOptions[0] || 'normal'),
         order: pkg.order || 0,
-        imageUrl: pkg.imageUrl || '',    // ✅ استخدم imageUrl
+        imageUrl: pkg.imageUrl || '',
         note: pkg.note || '',
+        externalProductId: pkg.externalProductId || '',
+        externalAnyKey: pkg.externalAnyKey || '',
       });
     } else {
       setEditingPackage(null);
@@ -142,6 +146,8 @@ export default function AdminCatalog({
         order: packages.length,
         imageUrl: '',
         note: '',
+        externalProductId: '',
+        externalAnyKey: '',
       });
     }
     setShowPackageModal(true);
@@ -157,8 +163,10 @@ export default function AdminCatalog({
       discount: Number(formPackage.discount),
       type: formPackage.type,
       order: Number(formPackage.order),
-      imageUrl: formPackage.imageUrl,   // ✅ إرسال الرابط
+      imageUrl: formPackage.imageUrl,
       note: formPackage.note,
+      externalProductId: formPackage.externalProductId ? Number(formPackage.externalProductId) : null,
+      externalAnyKey: formPackage.externalAnyKey || '',
     };
     if (editingPackage) {
       await updatePackage(selectedItem.id, editingPackage.id, data);
@@ -321,6 +329,23 @@ export default function AdminCatalog({
               <div className="form-field"><label>العملة</label><select value={formPackage.currency} onChange={e => setFormPackage({...formPackage, currency: e.target.value})}><option value="USD">دولار أمريكي ($)</option><option value="SYP">ليرة سورية (ل.س)</option></select></div>
               <Input label="نسبة الخصم" type="number" step="0.1" value={formPackage.discount} onChange={e => setFormPackage({...formPackage, discount: e.target.value})} />
               <div className="form-field"><label>نوع الباقة</label><select value={formPackage.type} onChange={e => setFormPackage({...formPackage, type: e.target.value})}>{packageTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+              
+              {/* ✅ الحقول الجديدة لربط API المتجر */}
+              <Input 
+                label="معرف المنتج في المتجر الخارجي (externalProductId)" 
+                type="number" 
+                value={formPackage.externalProductId} 
+                onChange={e => setFormPackage({...formPackage, externalProductId: e.target.value})} 
+                placeholder="مثال: 2054"
+                helperText="مطلوب للطلبات التلقائية عبر API"
+              />
+              <Input 
+                label="مفتاح إضافي (anyKey) - لمنتجات موبايل ليجند" 
+                value={formPackage.externalAnyKey} 
+                onChange={e => setFormPackage({...formPackage, externalAnyKey: e.target.value})} 
+                placeholder="السيرفر أو أي قيمة إضافية"
+              />
+              
               <Input label="ترتيب الظهور" type="number" value={formPackage.order} onChange={e => setFormPackage({...formPackage, order: parseInt(e.target.value) || 0})} />
               <div className="modal-actions">
                 <Button type="submit">حفظ</Button>
