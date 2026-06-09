@@ -99,7 +99,7 @@ export default function AdSpace() {
 
         <div
           className={`ad-space__hero ${fade ? 'fade-in' : 'fade-out'}`}
-          style={{ backgroundImage: `url(${currentAd.imageBase64})` }}
+          style={{ backgroundImage: `url(${currentAd.imageUrl || currentAd.imageBase64})` }}
         >
           <div className="ad-space__overlay"></div>
           <div className="ad-space__content">

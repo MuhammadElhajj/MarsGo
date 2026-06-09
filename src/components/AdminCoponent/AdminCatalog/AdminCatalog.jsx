@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
-import './AdminCatalog.css'; // سننشئه بنفس نمط القديم
+import './AdminCatalog.css';
 
 export default function AdminCatalog({
   type,                     // 'games' أو 'apps'
@@ -28,17 +28,17 @@ export default function AdminCatalog({
   const [editingItem, setEditingItem] = useState(null);
   const [editingPackage, setEditingPackage] = useState(null);
 
-  // نموذج العنصر (لعبة أو تطبيق)
+  // نموذج العنصر (لعبة أو تطبيق) – استخدم imageUrl بدلاً من imageBase64
   const [formItem, setFormItem] = useState({
     name: '',
-    imageBase64: '',
+    imageUrl: '',
     note: '',
     isAvailable: true,
     unavailableReason: '',
     order: 0,
   });
 
-  // نموذج الباقة
+  // نموذج الباقة – استخدم imageUrl بدلاً من imageBase64
   const [formPackage, setFormPackage] = useState({
     name: '',
     price: '',
@@ -46,7 +46,7 @@ export default function AdminCatalog({
     discount: 0,
     type: packageTypeOptions[0] || 'normal',
     order: 0,
-    imageBase64: '',
+    imageUrl: '',
     note: '',
   });
 
@@ -63,7 +63,7 @@ export default function AdminCatalog({
       setEditingItem(item);
       setFormItem({
         name: item.name || '',
-        imageBase64: item.imageBase64 || '',
+        imageUrl: item.imageUrl || '',
         note: item.note || '',
         isAvailable: item.isAvailable !== false,
         unavailableReason: item.unavailableReason || '',
@@ -73,7 +73,7 @@ export default function AdminCatalog({
       setEditingItem(null);
       setFormItem({
         name: '',
-        imageBase64: '',
+        imageUrl: '',
         note: '',
         isAvailable: true,
         unavailableReason: '',
@@ -87,7 +87,7 @@ export default function AdminCatalog({
     e.preventDefault();
     const data = {
       name: formItem.name,
-      imageBase64: formItem.imageBase64,
+      imageUrl: formItem.imageUrl,   // ✅ إرسال الرابط وليس base64
       note: formItem.note,
       isAvailable: formItem.isAvailable,
       unavailableReason: formItem.unavailableReason,
@@ -106,8 +106,6 @@ export default function AdminCatalog({
       await addItem(data);
     }
     setShowItemModal(false);
-    // إعادة تحميل القائمة الرئيسية عن طريق تحديث الـ context (الـ parent هو من يمرر items)
-    // لكن parent هو من يستدعي context ويجلب البيانات، فهو يتغير تلقائياً.
   };
 
   const handleDeleteItem = async (item) => {
@@ -130,7 +128,7 @@ export default function AdminCatalog({
         discount: pkg.discount || 0,
         type: pkg.type || (packageTypeOptions[0] || 'normal'),
         order: pkg.order || 0,
-        imageBase64: pkg.imageBase64 || '',
+        imageUrl: pkg.imageUrl || '',    // ✅ استخدم imageUrl
         note: pkg.note || '',
       });
     } else {
@@ -142,7 +140,7 @@ export default function AdminCatalog({
         discount: 0,
         type: packageTypeOptions[0] || 'normal',
         order: packages.length,
-        imageBase64: '',
+        imageUrl: '',
         note: '',
       });
     }
@@ -159,7 +157,7 @@ export default function AdminCatalog({
       discount: Number(formPackage.discount),
       type: formPackage.type,
       order: Number(formPackage.order),
-      imageBase64: formPackage.imageBase64,
+      imageUrl: formPackage.imageUrl,   // ✅ إرسال الرابط
       note: formPackage.note,
     };
     if (editingPackage) {
@@ -206,7 +204,7 @@ export default function AdminCatalog({
                 <tbody>
                   {items.map(item => (
                     <tr key={item.id} className={selectedItem?.id === item.id ? 'selected-row' : ''}>
-                      <td>{item.imageBase64 ? <img src={item.imageBase64} alt={item.name} className="item-thumb" /> : <span>📦</span>}</td>
+                      <td>{item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="item-thumb" /> : <span>📦</span>}</td>
                       <td>{item.name}</td>
                       <td><span className={`status-badge ${item.isAvailable ? 'available' : 'unavailable'}`}>{item.isAvailable ? 'متاحة' : 'غير متاحة'}</span></td>
                       <td>{item.order}</td>
@@ -277,8 +275,12 @@ export default function AdminCatalog({
               <Input label={`اسم ${itemLabel} *`} value={formItem.name} onChange={e => setFormItem({...formItem, name: e.target.value})} required />
               <div className="form-field">
                 <label>صورة {itemLabel}</label>
-                <ImageUpload onUploadComplete={(base64) => setFormItem({...formItem, imageBase64: base64})} maxSizeMB={0.5} />
-                {formItem.imageBase64 && <img src={formItem.imageBase64} alt="معاينة" className="preview-img" />}
+                <ImageUpload 
+                  onUploadComplete={(url) => setFormItem({...formItem, imageUrl: url})} 
+                  maxSizeMB={0.5} 
+                  storagePath={`${type}/${editingItem?.id || 'temp'}`}
+                />
+                {formItem.imageUrl && <img src={formItem.imageUrl} alt="معاينة" className="preview-img" />}
               </div>
               <Input label="ملاحظة (تظهر تحت الاسم)" value={formItem.note} onChange={e => setFormItem({...formItem, note: e.target.value})} />
               <div className="form-field checkbox">
@@ -306,7 +308,15 @@ export default function AdminCatalog({
             <form onSubmit={handlePackageSubmit} className="modal-form">
               <Input label="اسم الباقة *" value={formPackage.name} onChange={e => setFormPackage({...formPackage, name: e.target.value})} required />
               <Input label="السعر *" type="number" step="0.01" value={formPackage.price} onChange={e => setFormPackage({...formPackage, price: e.target.value})} required />
-              <div className="form-field"><label>صورة الباقة</label><ImageUpload onUploadComplete={(base64) => setFormPackage({...formPackage, imageBase64: base64})} maxSizeMB={0.5} />{formPackage.imageBase64 && <img src={formPackage.imageBase64} alt="معاينة" className="preview-img" />}</div>
+              <div className="form-field">
+                <label>صورة الباقة</label>
+                <ImageUpload 
+                  onUploadComplete={(url) => setFormPackage({...formPackage, imageUrl: url})} 
+                  maxSizeMB={0.5} 
+                  storagePath={`${type}/${selectedItem?.id}/packages/${editingPackage?.id || 'temp'}`}
+                />
+                {formPackage.imageUrl && <img src={formPackage.imageUrl} alt="معاينة" className="preview-img" />}
+              </div>
               <Input label="ملاحظة الباقة" value={formPackage.note} onChange={e => setFormPackage({...formPackage, note: e.target.value})} />
               <div className="form-field"><label>العملة</label><select value={formPackage.currency} onChange={e => setFormPackage({...formPackage, currency: e.target.value})}><option value="USD">دولار أمريكي ($)</option><option value="SYP">ليرة سورية (ل.س)</option></select></div>
               <Input label="نسبة الخصم" type="number" step="0.1" value={formPackage.discount} onChange={e => setFormPackage({...formPackage, discount: e.target.value})} />

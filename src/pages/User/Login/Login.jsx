@@ -1,12 +1,14 @@
+
+
 // import { useState, useEffect } from 'react';
-// import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+// import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from 'firebase/auth';
 // import { auth } from '../../../firebase';
 // import { useNavigate } from 'react-router-dom';
 // import { useStoreSettings } from '../../../context/StoreSettingsContext';
 // import './Login.css';
 // import Logo1 from "../../../assets/logo-light.png";
 
-// // صورة افتراضية مدمجة (Base64) - يمكنك استبدالها بأي صورة تريدها
+// // صورة افتراضية مدمجة (Base64)
 // const DEFAULT_PHONE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 350'%3E%3Crect width='200' height='350' fill='%234f46e5'/%3E%3Ccircle cx='100' cy='120' r='40' fill='%23ffffff' opacity='0.8'/%3E%3Crect x='60' y='180' width='80' height='10' rx='5' fill='%23ffffff' opacity='0.6'/%3E%3Crect x='50' y='210' width='100' height='10' rx='5' fill='%23ffffff' opacity='0.4'/%3E%3Crect x='70' y='240' width='60' height='10' rx='5' fill='%23ffffff' opacity='0.3'/%3E%3Ctext x='100' y='300' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EMarsGo%3C/text%3E%3C/svg%3E";
 
 // export default function Login() {
@@ -22,17 +24,15 @@
 //   const [name, setName] = useState('');
 //   const [error, setError] = useState('');
 //   const [loading, setLoading] = useState(false);
+//   const [pendingVerificationEmail, setPendingVerificationEmail] = useState(''); // لتخزين البريد المرسل إليه رابط التفعيل
 //   const navigate = useNavigate();
 
 //   useEffect(() => {
-//     // إذا لم توجد صورة في الإعدادات، نعرض الافتراضية فوراً
 //     if (!loginPhoneImage) {
 //       setImageLoading(false);
 //       setShowDefault(true);
 //       return;
 //     }
-
-//     // محاولة تحميل الصورة من الرابط
 //     const img = new Image();
 //     img.onload = () => {
 //       setImageLoading(false);
@@ -47,19 +47,55 @@
 //     img.src = loginPhoneImage;
 //   }, [loginPhoneImage]);
 
+//   // إعادة إرسال رابط التحقق
+//   const resendVerificationEmail = async () => {
+//     const user = auth.currentUser;
+//     if (user && !user.emailVerified) {
+//       await sendEmailVerification(user);
+//       setError('✅ تم إعادة إرسال رابط التفعيل، تفقد بريدك الإلكتروني.');
+//     } else if (pendingVerificationEmail) {
+//       // حالة نادرة: حاول تسجيل الدخول لكن البريد غير مفعل ونريد إعادة الإرسال
+//       // نحتاج إلى تسجيل الدخول مؤقتاً؟ الأسهل نطلب منه تسجيل الدخول مرة أخرى.
+//       setError('الرجاء تسجيل الدخول أولاً ثم طلب إعادة الإرسال.');
+//     }
+//   };
+
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
 //     setError('');
 //     setLoading(true);
 //     try {
 //       if (isRegister) {
-//         await createUserWithEmailAndPassword(auth, email, password);
+//         // 1. إنشاء الحساب
+//         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+//         // 2. إرسال رابط التحقق
+//         await sendEmailVerification(userCredential.user);
+//         // 3. عرض رسالة والتوقف عن التوجيه
+//         setError('✅ تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك (قد تجده في spam).');
+//         setPendingVerificationEmail(email);
+//         setLoading(false);
+//         return; // لا توجيه
 //       } else {
-//         await signInWithEmailAndPassword(auth, email, password);
+//         // تسجيل الدخول
+//         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+//         // التحقق من تفعيل البريد
+//         if (!userCredential.user.emailVerified) {
+//           await signOut(auth); // تسجيل خروج فوري
+//           setError('❌ بريدك الإلكتروني غير مفعل. يرجى تفعيله أولاً (راجع بريدك).');
+//           setPendingVerificationEmail(email);
+//           setLoading(false);
+//           return;
+//         }
+//         // كل شيء على ما يرام
+//         navigate('/dashboard');
 //       }
-//       navigate('/dashboard');
 //     } catch (err) {
-//       setError(err.code === 'auth/email-already-in-use' ? 'البريد مسجل مسبقاً' : 'فشل العملية');
+//       let msg = 'فشل العملية';
+//       if (err.code === 'auth/email-already-in-use') msg = 'البريد مسجل مسبقاً';
+//       else if (err.code === 'auth/user-not-found') msg = 'لا يوجد حساب بهذا البريد';
+//       else if (err.code === 'auth/wrong-password') msg = 'كلمة المرور غير صحيحة';
+//       else if (err.code === 'auth/too-many-requests') msg = 'محاولات كثيرة، حاول لاحقاً';
+//       setError(msg);
 //     } finally {
 //       setLoading(false);
 //     }
@@ -69,7 +105,14 @@
 //     const provider = new GoogleAuthProvider();
 //     setLoading(true);
 //     try {
-//       await signInWithPopup(auth, provider);
+//       const result = await signInWithPopup(auth, provider);
+//       // Google accounts عادة ما تكون مفعلة تلقائياً، لكن نتحقق احتياطاً
+//       if (!result.user.emailVerified) {
+//         await signOut(auth);
+//         setError('❌ بريدك الإلكتروني غير مفعل (حساب Google). يرجى التحقق من بريدك.');
+//         setLoading(false);
+//         return;
+//       }
 //       navigate('/dashboard');
 //     } catch (err) {
 //       setError('فشل تسجيل الدخول بحساب Google');
@@ -84,13 +127,11 @@
 //         {/* العمود الأيسر – صورة الهاتف */}
 //         <div className="login-phone">
 //           <div className="phone-mockup">
-//             {/* أثناء التحميل وعند وجود صورة من Firestore */}
 //             {loginPhoneImage && imageLoading && !showDefault && (
 //               <div className="phone-loading">
 //                 <div className="spinner-small"></div>
 //               </div>
 //             )}
-//             {/* الصورة النهائية: إما من Firestore أو الافتراضية */}
 //             {(!imageLoading || showDefault) && (
 //               <img
 //                 src={showDefault ? DEFAULT_PHONE_IMAGE : loginPhoneImage}
@@ -106,7 +147,6 @@
 //         <div className="login-form-container">
 //           <div className="login-card">
 //             <div className="login-logo">
-              
 //               <img src={Logo1} alt="Logo" className='Login-Logo--img'/>
 //               <h1 className="login-title">تسجيل الدخول</h1>
 //             </div>
@@ -147,6 +187,13 @@
 //                 {loading ? 'جاري...' : isRegister ? 'إنشاء حساب' : 'تسجيل الدخول'}
 //               </button>
 //             </form>
+
+//             {/* عرض زر إعادة الإرسال إذا كان هناك بريد معلق غير مفعل */}
+//             {pendingVerificationEmail && error?.includes('غير مفعل') && (
+//               <button onClick={resendVerificationEmail} className="login-submit" style={{ marginTop: '10px', background: '#f59e0b' }}>
+//                 إعادة إرسال رابط التفعيل
+//               </button>
+//             )}
 
 //             <div className="login-divider">
 //               <span className="divider-text">أو</span>
@@ -198,9 +245,11 @@
 //   );
 // }
 
+
 import { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '../../../firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
 import { useStoreSettings } from '../../../context/StoreSettingsContext';
 import './Login.css';
@@ -208,6 +257,12 @@ import Logo1 from "../../../assets/logo-light.png";
 
 // صورة افتراضية مدمجة (Base64)
 const DEFAULT_PHONE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 350'%3E%3Crect width='200' height='350' fill='%234f46e5'/%3E%3Ccircle cx='100' cy='120' r='40' fill='%23ffffff' opacity='0.8'/%3E%3Crect x='60' y='180' width='80' height='10' rx='5' fill='%23ffffff' opacity='0.6'/%3E%3Crect x='50' y='210' width='100' height='10' rx='5' fill='%23ffffff' opacity='0.4'/%3E%3Crect x='70' y='240' width='60' height='10' rx='5' fill='%23ffffff' opacity='0.3'/%3E%3Ctext x='100' y='300' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EMarsGo%3C/text%3E%3C/svg%3E";
+
+// دالة فحص قوة كلمة المرور
+const isStrongPassword = (password) => {
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return regex.test(password);
+};
 
 export default function Login() {
   const { settings } = useStoreSettings();
@@ -222,8 +277,13 @@ export default function Login() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [pendingVerificationEmail, setPendingVerificationEmail] = useState(''); // لتخزين البريد المرسل إليه رابط التفعيل
+  const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
+
+  // تهيئة Functions (نفترض أنك قمت بنشرها)
+  const functions = getFunctions();
+  const sendVerificationCode = httpsCallable(functions, 'sendVerificationCode');
+  const checkEmailVerified = httpsCallable(functions, 'checkEmailVerified');
 
   useEffect(() => {
     if (!loginPhoneImage) {
@@ -245,16 +305,13 @@ export default function Login() {
     img.src = loginPhoneImage;
   }, [loginPhoneImage]);
 
-  // إعادة إرسال رابط التحقق
-  const resendVerificationEmail = async () => {
-    const user = auth.currentUser;
-    if (user && !user.emailVerified) {
-      await sendEmailVerification(user);
-      setError('✅ تم إعادة إرسال رابط التفعيل، تفقد بريدك الإلكتروني.');
-    } else if (pendingVerificationEmail) {
-      // حالة نادرة: حاول تسجيل الدخول لكن البريد غير مفعل ونريد إعادة الإرسال
-      // نحتاج إلى تسجيل الدخول مؤقتاً؟ الأسهل نطلب منه تسجيل الدخول مرة أخرى.
-      setError('الرجاء تسجيل الدخول أولاً ثم طلب إعادة الإرسال.');
+  const handlePasswordChange = (e) => {
+    const newPass = e.target.value;
+    setPassword(newPass);
+    if (isRegister && newPass && !isStrongPassword(newPass)) {
+      setPasswordError('يجب أن تحتوي كلمة المرور على 8 محارف على الأقل، حرف كبير، حرف صغير، رقم، ورمز خاص (@$!%*?&)');
+    } else {
+      setPasswordError('');
     }
   };
 
@@ -262,40 +319,65 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    try {
-      if (isRegister) {
-        // 1. إنشاء الحساب
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // 2. إرسال رابط التحقق
-        await sendEmailVerification(userCredential.user);
-        // 3. عرض رسالة والتوقف عن التوجيه
-        setError('✅ تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك (قد تجده في spam).');
-        setPendingVerificationEmail(email);
+
+    if (isRegister) {
+      // فحص قوة كلمة المرور قبل إنشاء الحساب
+      if (!isStrongPassword(password)) {
+        setError('كلمة المرور غير قوية. الرجاء اتباع المتطلبات المذكورة.');
         setLoading(false);
-        return; // لا توجيه
-      } else {
-        // تسجيل الدخول
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        // التحقق من تفعيل البريد
-        if (!userCredential.user.emailVerified) {
-          await signOut(auth); // تسجيل خروج فوري
-          setError('❌ بريدك الإلكتروني غير مفعل. يرجى تفعيله أولاً (راجع بريدك).');
-          setPendingVerificationEmail(email);
-          setLoading(false);
-          return;
-        }
-        // كل شيء على ما يرام
-        navigate('/dashboard');
+        return;
       }
-    } catch (err) {
-      let msg = 'فشل العملية';
-      if (err.code === 'auth/email-already-in-use') msg = 'البريد مسجل مسبقاً';
-      else if (err.code === 'auth/user-not-found') msg = 'لا يوجد حساب بهذا البريد';
-      else if (err.code === 'auth/wrong-password') msg = 'كلمة المرور غير صحيحة';
-      else if (err.code === 'auth/too-many-requests') msg = 'محاولات كثيرة، حاول لاحقاً';
-      setError(msg);
-    } finally {
-      setLoading(false);
+      if (!name.trim()) {
+        setError('الرجاء إدخال الاسم الكامل');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // 1. إنشاء الحساب (البريد الإلكتروني سيظل غير مفعل)
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 2. إرسال كود التفعيل عبر Cloud Function
+        const result = await sendVerificationCode({ email: user.email, uid: user.uid });
+        if (result.data.success) {
+          // 3. تخزين البريد مؤقتاً (يمكن استخدام sessionStorage أو state)
+          sessionStorage.setItem('pendingVerificationEmail', email);
+          // 4. الانتقال إلى صفحة إدخال الكود
+          navigate('/verify-code', { state: { email, uid: user.uid } });
+        } else {
+          throw new Error(result.data.message || 'فشل إرسال كود التفعيل');
+        }
+      } catch (err) {
+        let msg = 'فشل إنشاء الحساب';
+        if (err.code === 'auth/email-already-in-use') msg = 'البريد مسجل مسبقاً';
+        else if (err.message) msg = err.message;
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // تسجيل الدخول
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        // التحقق من حالة التفعيل عبر Firestore (باستخدام Cloud Function)
+        const verResult = await checkEmailVerified({ uid: user.uid });
+        if (verResult.data.verified) {
+          navigate('/dashboard');
+        } else {
+          // لم يتم التفعيل بعد: إرسال كود جديد
+          await sendVerificationCode({ email: user.email, uid: user.uid });
+          navigate('/verify-code', { state: { email: user.email, uid: user.uid } });
+        }
+      } catch (err) {
+        let msg = 'فشل تسجيل الدخول';
+        if (err.code === 'auth/user-not-found') msg = 'لا يوجد حساب بهذا البريد';
+        else if (err.code === 'auth/wrong-password') msg = 'كلمة المرور غير صحيحة';
+        else if (err.code === 'auth/too-many-requests') msg = 'محاولات كثيرة، حاول لاحقاً';
+        setError(msg);
+        setLoading(false);
+      }
     }
   };
 
@@ -304,14 +386,14 @@ export default function Login() {
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, provider);
-      // Google accounts عادة ما تكون مفعلة تلقائياً، لكن نتحقق احتياطاً
-      if (!result.user.emailVerified) {
-        await signOut(auth);
-        setError('❌ بريدك الإلكتروني غير مفعل (حساب Google). يرجى التحقق من بريدك.');
-        setLoading(false);
-        return;
+      const user = result.user;
+      const verResult = await checkEmailVerified({ uid: user.uid });
+      if (verResult.data.verified) {
+        navigate('/dashboard');
+      } else {
+        await sendVerificationCode({ email: user.email, uid: user.uid });
+        navigate('/verify-code', { state: { email: user.email, uid: user.uid } });
       }
-      navigate('/dashboard');
     } catch (err) {
       setError('فشل تسجيل الدخول بحساب Google');
     } finally {
@@ -375,24 +457,18 @@ export default function Login() {
                   type="password"
                   placeholder="كلمة المرور"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   required
-                  minLength={6}
                 />
               </div>
+              {passwordError && <div className="login-error" style={{background: '#fef3c7', color: '#92400e'}}>{passwordError}</div>}
               {error && <div className="login-error">{error}</div>}
               <button type="submit" className="login-submit" disabled={loading}>
                 {loading ? 'جاري...' : isRegister ? 'إنشاء حساب' : 'تسجيل الدخول'}
               </button>
             </form>
 
-            {/* عرض زر إعادة الإرسال إذا كان هناك بريد معلق غير مفعل */}
-            {pendingVerificationEmail && error?.includes('غير مفعل') && (
-              <button onClick={resendVerificationEmail} className="login-submit" style={{ marginTop: '10px', background: '#f59e0b' }}>
-                إعادة إرسال رابط التفعيل
-              </button>
-            )}
-
+            {/* تم إزالة زر إعادة الإرسال القديم لأنه لم يعد مستخدماً */}
             <div className="login-divider">
               <span className="divider-text">أو</span>
             </div>

@@ -11,7 +11,7 @@ export default function AdManagement() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ title: '', description: '', link: '', imageBase64: '', order: 0 });
+  const [form, setForm] = useState({ title: '', description: '', link: '', imageUrl: '', order: 0 });
   const [uploading, setUploading] = useState(false);
 
   const fetchAds = async () => {
@@ -31,7 +31,7 @@ export default function AdManagement() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ title: '', description: '', link: '', imageBase64: '', order: 0 });
+    setForm({ title: '', description: '', link: '', imageUrl: '', order: 0 });
     setModalOpen(true);
   };
 
@@ -41,14 +41,14 @@ export default function AdManagement() {
       title: ad.title || '',
       description: ad.description || '',
       link: ad.link || '',
-      imageBase64: ad.imageBase64 || ad.imageUrl || '', // دعم الحقل القديم
+      imageUrl: ad.imageUrl || ad.imageBase64 || '', // دعم الحقل القديم مؤقتاً
       order: ad.order || 0,
     });
     setModalOpen(true);
   };
 
-  const handleImageComplete = (base64) => {
-    setForm(prev => ({ ...prev, imageBase64: base64 }));
+  const handleImageComplete = (url) => {
+    setForm(prev => ({ ...prev, imageUrl: url }));
   };
 
   const handleSubmit = async (e) => {
@@ -63,7 +63,7 @@ export default function AdManagement() {
         title: form.title,
         description: form.description || '',
         link: form.link || '',
-        imageBase64: form.imageBase64 || '',
+        imageUrl: form.imageUrl || '',
         order: Number(form.order),
         updatedAt: new Date(),
       };
@@ -128,7 +128,9 @@ export default function AdManagement() {
               {ads.map(ad => (
                 <tr key={ad.id}>
                   <td>
-                    {ad.imageBase64 ? (
+                    {ad.imageUrl ? (
+                      <img src={ad.imageUrl} alt={ad.title} className="ad-management__thumb" />
+                    ) : ad.imageBase64 ? ( // دعم قديم
                       <img src={ad.imageBase64} alt={ad.title} className="ad-management__thumb" />
                     ) : '📢'}
                   </td>
@@ -170,11 +172,12 @@ export default function AdManagement() {
                 onUploadComplete={handleImageComplete}
                 maxSizeMB={0.5}
                 disabled={uploading}
+                storagePath="ads"
               />
-              {form.imageBase64 && !uploading && (
+              {form.imageUrl && !uploading && (
                 <div className="ad-modal__current-image">
-                  <img src={form.imageBase64} alt="الصورة الحالية" />
-                  <button type="button" onClick={() => setForm({...form, imageBase64: ''})}>حذف الصورة</button>
+                  <img src={form.imageUrl} alt="الصورة الحالية" />
+                  <button type="button" onClick={() => setForm({...form, imageUrl: ''})}>حذف الصورة</button>
                 </div>
               )}
 

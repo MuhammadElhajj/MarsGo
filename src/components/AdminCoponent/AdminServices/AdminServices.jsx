@@ -23,7 +23,7 @@ export default function AdminServices() {
     link: availableRoutes[0].path,
     icon: '🔹',
     bgColor: '#4f46e5',
-    bgImageBase64: '',
+    bgImageUrl: '',
     order: 0,
     isComingSoon: false,
     isActive: true,
@@ -34,7 +34,7 @@ export default function AdminServices() {
     setEditing(null);
     setForm({
       name: '', description: '', note: '', link: availableRoutes[0].path, icon: '🔹',
-      bgColor: '#4f46e5', bgImageBase64: '', order: services.length, isComingSoon: false, isActive: true,
+      bgColor: '#4f46e5', bgImageUrl: '', order: services.length, isComingSoon: false, isActive: true,
     });
     setModalOpen(true);
   };
@@ -45,13 +45,14 @@ export default function AdminServices() {
       name: service.name, description: service.description || '', note: service.note || '',
       link: service.link || availableRoutes[0].path,
       icon: service.icon || '🔹', bgColor: service.bgColor || '#4f46e5',
-      bgImageBase64: service.bgImageBase64 || '', order: service.order, isComingSoon: service.isComingSoon || false,
+      bgImageUrl: service.bgImageUrl || service.bgImageBase64 || '', // دعم قديم
+      order: service.order, isComingSoon: service.isComingSoon || false,
       isActive: service.isActive !== false,
     });
     setModalOpen(true);
   };
 
-  const handleImageComplete = (base64) => setForm(prev => ({ ...prev, bgImageBase64: base64 }));
+  const handleImageComplete = (url) => setForm(prev => ({ ...prev, bgImageUrl: url }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,8 +63,8 @@ export default function AdminServices() {
       note: form.note,
       link: form.link,
       icon: form.icon,
-      bgColor: form.bgImageBase64 ? '' : form.bgColor,
-      bgImageBase64: form.bgImageBase64,
+      bgColor: form.bgImageUrl ? '' : form.bgColor, // إذا وجدت صورة نلغي اللون
+      bgImageUrl: form.bgImageUrl,
       order: Number(form.order),
       isComingSoon: form.isComingSoon,
       isActive: form.isActive,
@@ -180,8 +181,11 @@ export default function AdminServices() {
                 onUploadComplete={handleImageComplete}
                 maxSizeMB={0.5}
                 disabled={uploading}
+                storagePath="services"
               />
-              {form.bgImageBase64 && <img src={form.bgImageBase64} alt="معاينة" style={{maxWidth: '100px', marginTop: '0.5rem'}} />}
+              {form.bgImageUrl && !uploading && (
+                <img src={form.bgImageUrl} alt="معاينة" style={{maxWidth: '100px', marginTop: '0.5rem'}} />
+              )}
 
               <Input label="ترتيب الظهور" type="number" value={form.order} onChange={e => setForm({...form, order: parseInt(e.target.value) || 0})} />
               

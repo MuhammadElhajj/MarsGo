@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { uploadImage, deleteImage } from '../utils/uploadImage';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 
@@ -46,17 +47,50 @@ export function AppsProvider({ children }) {
     }
   };
 
+  // دالة مساعدة لرفع صورة التطبيق
+  const uploadAppImage = async (appId, base64Image) => {
+    if (!base64Image) return null;
+    const path = `apps/${appId}/main_${Date.now()}.jpg`;
+    const url = await uploadImage(base64Image, path);
+    return url;
+  };
+
+  // دالة مساعدة لرفع صورة الباقة
+  const uploadPackageImage = async (appId, packageId, base64Image) => {
+    if (!base64Image) return null;
+    const path = `apps/${appId}/packages/${packageId}/main_${Date.now()}.jpg`;
+    const url = await uploadImage(base64Image, path);
+    return url;
+  };
+
   // إضافة تطبيق جديد
   const addApp = async (appData) => {
+    const { imageBase64, imageUrl, ...restData } = appData;
+    const tempImageBase64 = imageBase64 || (imageUrl ? null : null);
+
     try {
       const docRef = await addDoc(collection(db, 'apps'), {
-        ...appData,
+        ...restData,
+        imageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const appId = docRef.id;
+
+      let finalImageUrl = null;
+      if (tempImageBase64) {
+        finalImageUrl = await uploadAppImage(appId, tempImageBase64);
+      } else if (imageUrl) {
+        finalImageUrl = imageUrl;
+      }
+
+      if (finalImageUrl) {
+        await updateDoc(doc(db, 'apps', appId), { imageUrl: finalImageUrl });
+      }
+
       toast.success('تمت إضافة التطبيق بنجاح');
       await fetchApps();
-      return docRef.id;
+      return appId;
     } catch (err) {
       console.error(err);
       toast.error('فشل إضافة التطبيق: ' + err.message);
@@ -66,9 +100,22 @@ export function AppsProvider({ children }) {
 
   // تحديث تطبيق
   const updateApp = async (appId, appData) => {
+    const oldApp = apps.find(a => a.id === appId);
+    const { imageBase64, imageUrl, ...restData } = appData;
+    let newImageUrl = imageUrl;
+
     try {
+      if (imageBase64) {
+        if (oldApp?.imageUrl) await deleteImage(oldApp.imageUrl);
+        newImageUrl = await uploadAppImage(appId, imageBase64);
+      } else if (imageUrl && imageUrl !== oldApp?.imageUrl) {
+        if (oldApp?.imageUrl) await deleteImage(oldApp.imageUrl);
+        newImageUrl = imageUrl;
+      }
+
       await updateDoc(doc(db, 'apps', appId), {
-        ...appData,
+        ...restData,
+        ...(newImageUrl && { imageUrl: newImageUrl }),
         updatedAt: new Date(),
       });
       toast.success('تم تحديث التطبيق بنجاح');
@@ -80,15 +127,21 @@ export function AppsProvider({ children }) {
     }
   };
 
-  // حذف تطبيق وجميع بقاته
+  // حذف تطبيق وجميع بقاته (مع حذف الصور)
   const deleteApp = async (appId) => {
     try {
-      // حذف الباقات أولاً
+      // حذف صورة التطبيق
+      const app = apps.find(a => a.id === appId);
+      if (app?.imageUrl) await deleteImage(app.imageUrl);
+
+      // حذف الباقات وصورها
       const packagesSnap = await getDocs(collection(db, 'apps', appId, 'packages'));
-      const deletePromises = packagesSnap.docs.map(pkgDoc =>
-        deleteDoc(doc(db, 'apps', appId, 'packages', pkgDoc.id))
-      );
-      await Promise.all(deletePromises);
+      for (const pkgDoc of packagesSnap.docs) {
+        const pkgData = pkgDoc.data();
+        if (pkgData.imageUrl) await deleteImage(pkgData.imageUrl);
+        await deleteDoc(doc(db, 'apps', appId, 'packages', pkgDoc.id));
+      }
+
       // حذف التطبيق
       await deleteDoc(doc(db, 'apps', appId));
       toast.success('تم حذف التطبيق وجميع بقاته');
@@ -102,14 +155,30 @@ export function AppsProvider({ children }) {
 
   // إضافة باقة إلى تطبيق
   const addPackage = async (appId, packageData) => {
+    const { imageBase64, imageUrl, ...restData } = packageData;
+
     try {
       const docRef = await addDoc(collection(db, 'apps', appId, 'packages'), {
-        ...packageData,
+        ...restData,
+        imageUrl: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+      const packageId = docRef.id;
+
+      let finalImageUrl = null;
+      if (imageBase64) {
+        finalImageUrl = await uploadPackageImage(appId, packageId, imageBase64);
+      } else if (imageUrl) {
+        finalImageUrl = imageUrl;
+      }
+
+      if (finalImageUrl) {
+        await updateDoc(doc(db, 'apps', appId, 'packages', packageId), { imageUrl: finalImageUrl });
+      }
+
       toast.success('تمت إضافة الباقة بنجاح');
-      return docRef.id;
+      return packageId;
     } catch (err) {
       console.error(err);
       toast.error('فشل إضافة الباقة: ' + err.message);
@@ -119,9 +188,28 @@ export function AppsProvider({ children }) {
 
   // تحديث باقة
   const updatePackage = async (appId, packageId, packageData) => {
+    let oldImageUrl = null;
     try {
+      const packages = await fetchPackages(appId);
+      const oldPkg = packages.find(p => p.id === packageId);
+      oldImageUrl = oldPkg?.imageUrl;
+    } catch (e) { /* تجاهل */ }
+
+    const { imageBase64, imageUrl, ...restData } = packageData;
+    let newImageUrl = imageUrl;
+
+    try {
+      if (imageBase64) {
+        if (oldImageUrl) await deleteImage(oldImageUrl);
+        newImageUrl = await uploadPackageImage(appId, packageId, imageBase64);
+      } else if (imageUrl && imageUrl !== oldImageUrl) {
+        if (oldImageUrl) await deleteImage(oldImageUrl);
+        newImageUrl = imageUrl;
+      }
+
       await updateDoc(doc(db, 'apps', appId, 'packages', packageId), {
-        ...packageData,
+        ...restData,
+        ...(newImageUrl && { imageUrl: newImageUrl }),
         updatedAt: new Date(),
       });
       toast.success('تم تحديث الباقة بنجاح');
@@ -132,9 +220,12 @@ export function AppsProvider({ children }) {
     }
   };
 
-  // حذف باقة
+  // حذف باقة (مع حذف صورتها)
   const deletePackage = async (appId, packageId) => {
     try {
+      const packages = await fetchPackages(appId);
+      const pkg = packages.find(p => p.id === packageId);
+      if (pkg?.imageUrl) await deleteImage(pkg.imageUrl);
       await deleteDoc(doc(db, 'apps', appId, 'packages', packageId));
       toast.success('تم حذف الباقة بنجاح');
     } catch (err) {

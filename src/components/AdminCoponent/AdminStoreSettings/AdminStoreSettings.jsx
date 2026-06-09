@@ -16,14 +16,15 @@ export default function AdminStoreSettings() {
   const [uploadingPhone, setUploadingPhone] = useState(false);
 
   // دالة حفظ صورة الخلفية
-  const handleBackgroundImageComplete = (base64) => {
-    setBackgroundPreview(base64);
+  const handleBackgroundImageComplete = (url) => {
+    setBackgroundPreview(url);
   };
 
   const handleSaveBackground = async () => {
     if (!backgroundPreview) return;
     setUploading(true);
-    await updateSettings({ backgroundImageBase64: backgroundPreview });
+    // استخدام الحقل الجديد backgroundImageUrl
+    await updateSettings({ backgroundImageUrl: backgroundPreview });
     setUploading(false);
     setBackgroundPreview('');
   };
@@ -31,20 +32,22 @@ export default function AdminStoreSettings() {
   const handleRemoveBackground = async () => {
     if (window.confirm('هل تريد إزالة خلفية صفحة الترحيب؟')) {
       setUploading(true);
-      await updateSettings({ backgroundImageBase64: '' });
+      // إرسال سلسلة فارغة لحذف الصورة
+      await updateSettings({ backgroundImageUrl: '' });
       setUploading(false);
     }
   };
 
   // دالة حفظ صورة الهاتف
-  const handlePhoneImageComplete = (base64) => {
-    setPhonePreview(base64);
+  const handlePhoneImageComplete = (url) => {
+    setPhonePreview(url);
   };
 
   const handleSavePhoneImage = async () => {
     if (!phonePreview) return;
     setUploadingPhone(true);
-    await updateSettings({ loginPhoneImage: phonePreview });
+    // استخدام الحقل الجديد loginPhoneImageUrl
+    await updateSettings({ loginPhoneImageUrl: phonePreview });
     setUploadingPhone(false);
     setPhonePreview('');
   };
@@ -52,7 +55,7 @@ export default function AdminStoreSettings() {
   const handleRemovePhoneImage = async () => {
     if (window.confirm('هل تريد إزالة صورة الهاتف من صفحة تسجيل الدخول؟')) {
       setUploadingPhone(true);
-      await updateSettings({ loginPhoneImage: '' });
+      await updateSettings({ loginPhoneImageUrl: '' });
       setUploadingPhone(false);
     }
   };
@@ -61,13 +64,13 @@ export default function AdminStoreSettings() {
 
   return (
     <div className="admin-store-settings">
-      {/* ========== القسم الأول: خلفية صفحة الترحيب (القديم) ========== */}
+      {/* ========== القسم الأول: خلفية صفحة الترحيب ========== */}
       <div className="settings-section">
         <h2>🎨 إعدادات خلفية صفحة الترحيب</h2>
         <div className="current-background">
           <p>الخلفية الحالية:</p>
-          {settings.backgroundImageBase64 ? (
-            <img src={settings.backgroundImageBase64} alt="الخلفية" />
+          {settings.backgroundImageUrl ? (
+            <img src={settings.backgroundImageUrl} alt="الخلفية" />
           ) : (
             <div className="no-image">لا توجد خلفية مخصصة (سيظهر لون افتراضي)</div>
           )}
@@ -78,6 +81,7 @@ export default function AdminStoreSettings() {
             onUploadComplete={handleBackgroundImageComplete}
             maxSizeMB={0.8}
             disabled={uploading || uploadingPhone}
+            storagePath="store/background"
           />
           {backgroundPreview && (
             <div className="preview">
@@ -90,7 +94,7 @@ export default function AdminStoreSettings() {
           <Button onClick={handleSaveBackground} disabled={uploading || !backgroundPreview}>
             {uploading ? 'جاري الحفظ...' : 'حفظ الصورة كخلفية'}
           </Button>
-          {settings.backgroundImageBase64 && (
+          {settings.backgroundImageUrl && (
             <Button variant="danger" onClick={handleRemoveBackground} disabled={uploading}>
               إزالة الخلفية
             </Button>
@@ -98,15 +102,15 @@ export default function AdminStoreSettings() {
         </div>
       </div>
 
-      {/* ========== القسم الثاني: صورة الهاتف لصفحة تسجيل الدخول (الجديد) ========== */}
+      {/* ========== القسم الثاني: صورة الهاتف لصفحة تسجيل الدخول ========== */}
       <div className="settings-section">
         <h2>📱 صورة الهاتف (صفحة تسجيل الدخول)</h2>
         <p className="section-desc">تظهر هذه الصورة في العمود الأيسر على الشاشات الكبيرة (مثل إنستغرام)</p>
         
         <div className="current-background">
           <p>الصورة الحالية:</p>
-          {settings.loginPhoneImage ? (
-            <img src={settings.loginPhoneImage} alt="صورة الهاتف" style={{ maxWidth: '200px', border: '1px solid #ddd', borderRadius: '12px' }} />
+          {settings.loginPhoneImageUrl ? (
+            <img src={settings.loginPhoneImageUrl} alt="صورة الهاتف" style={{ maxWidth: '200px', border: '1px solid #ddd', borderRadius: '12px' }} />
           ) : (
             <div className="no-image">لا توجد صورة مخصصة (سيظهر إطار فارغ أو نص افتراضي)</div>
           )}
@@ -118,6 +122,7 @@ export default function AdminStoreSettings() {
             onUploadComplete={handlePhoneImageComplete}
             maxSizeMB={0.5}
             disabled={uploading || uploadingPhone}
+            storagePath="store/phone"
           />
           {phonePreview && (
             <div className="preview">
@@ -131,7 +136,7 @@ export default function AdminStoreSettings() {
           <Button onClick={handleSavePhoneImage} disabled={uploadingPhone || !phonePreview}>
             {uploadingPhone ? 'جاري الحفظ...' : 'حفظ صورة الهاتف'}
           </Button>
-          {settings.loginPhoneImage && (
+          {settings.loginPhoneImageUrl && (
             <Button variant="danger" onClick={handleRemovePhoneImage} disabled={uploadingPhone}>
               إزالة الصورة
             </Button>
