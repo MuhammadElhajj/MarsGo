@@ -2,7 +2,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useApps } from "../../../context/AppsContext";
-import ItemsGrid from "../../../components/Generic/ItemsGrid/ItemsGrid";
+import CatalogList from "../../../components/Generic/CatalogList/CatalogList";
 import GoBackButton from "../../../components/GeneralComponents/GoBackButton/GoBackButton";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import UnifiedCheckout from "../../../components/Generic/UnifiedCheckout/UnifiedCheckout";
@@ -24,11 +24,13 @@ export default function AppsPage() {
       <Route
         index
         element={
-          <ItemsGrid
+          <CatalogList
             items={apps}
             onItemClick={handleAppClick}
             title="اختر التطبيق"
-            backButton={<GoBackButton text="رجوع إلى لوحة التحكم" />}
+            showBackButton={true}
+            backButtonText="رجوع إلى لوحة التحكم"
+            type="app"
           />
         }
       />

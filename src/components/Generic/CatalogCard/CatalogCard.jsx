@@ -1,7 +1,7 @@
 // src/components/Generic/CatalogCard/CatalogCard.jsx
 import './CatalogCard.css';
-import useProductDiscount from '../../../hooks/useProductDiscount';
-import PriceDisplay from '../PriceDisplay/PriceDisplay'; // ✅ استيراد مكون عرض السعر
+import useFinalPrice from '../../../hooks/useFinalPrice';
+import PriceDisplay from '../PriceDisplay/PriceDisplay';
 
 export default function CatalogCard({ 
   item,           // العنصر (game, app, package)
@@ -27,25 +27,28 @@ export default function CatalogCard({
 
   // تحديد نوع المنتج للخصم العام (فقط للألعاب والتطبيقات)
   const productType = (type === 'game' || type === 'app') ? type : null;
-  // جلب الخصم العام (إن وجد) باستخدام الهوك
-  const { discountPercent: categoryDiscount = 0 } = useProductDiscount(productType, id) || {};
   
-  // الخصم النهائي = أقصى قيمة بين خصم العنصر والخصم العام
-  const finalDiscount = Math.max(discount, categoryDiscount);
-  
-  const isUnavailable = isAvailable === false;
-  
-  // حساب السعر الأصلي والنهائي (بالدولار)
+  // حساب السعر النهائي باستخدام الهوك الجديد (يجمع خصم العنصر، خصم الفئة، خصم التاجر)
   let originalPriceUSD = null;
   let finalPriceUSD = null;
+  let finalDiscount = 0;
+  
   if (price !== null && price !== undefined) {
     const priceNum = typeof price === 'number' ? price : parseFloat(price);
     originalPriceUSD = priceNum;
-    finalPriceUSD = finalDiscount > 0 
-      ? priceNum * (1 - finalDiscount / 100)
-      : priceNum;
+    // استدعاء الهوك (قيم آمنة)
+    const { finalPrice, discountPercent } = useFinalPrice(
+      productType,
+      id,
+      priceNum,
+      discount || 0
+    );
+    finalPriceUSD = finalPrice;
+    finalDiscount = discountPercent;
   }
 
+  const isUnavailable = isAvailable === false;
+  
   // نصوص الحالة قابلة للتخصيص
   const labels = {
     available: customLabels.available || 'متاحة',

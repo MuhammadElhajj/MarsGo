@@ -1,3 +1,4 @@
+// src/context/MerchantDiscountContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
@@ -40,6 +41,14 @@ export function MerchantDiscountProvider({ children }) {
     return originalPriceUSD * (1 - discount);
   };
 
+  // ✅ الدالة الجديدة: ترجع نسبة خصم التاجر (0 إذا لم يكن تاجراً)
+  const getMerchantDiscountPercent = () => {
+    if (userData?.customerType === 'merchant') {
+      return discountPercent;
+    }
+    return 0;
+  };
+
   // دالة لتنسيق السعر المعروض (مع إظهار السعر الأصلي مشطوباً إذا كان تاجر)
   const formatPriceWithDiscount = (originalPriceUSD, currency = 'USD', rate = null) => {
     const isMerchant = userData?.customerType === 'merchant';
@@ -60,7 +69,13 @@ export function MerchantDiscountProvider({ children }) {
   };
 
   return (
-    <MerchantDiscountContext.Provider value={{ discountPercent, getDiscountedPrice, formatPriceWithDiscount, loading }}>
+    <MerchantDiscountContext.Provider value={{ 
+      discountPercent, 
+      getMerchantDiscountPercent,  // ✅ أضفناها هنا
+      getDiscountedPrice, 
+      formatPriceWithDiscount, 
+      loading 
+    }}>
       {children}
     </MerchantDiscountContext.Provider>
   );

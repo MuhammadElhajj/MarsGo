@@ -13,11 +13,12 @@ import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotifi
 import { useNotifications } from '../../../context/NotificationContext';
 import { sendWhatsAppNotification, formatOrderMessage } from '../../../utils/sendWhatsAppNotification';
 import Loading from '../../GeneralComponents/Loading/Loading';
-import useProductDiscount from '../../../hooks/useProductDiscount'; // ✅ استيراد هوك الخصم العام
+import useFinalPrice from '../../../hooks/useFinalPrice'; // ✅ استيراد الهوك الجديد
 import './UnifiedCheckout.css';
 
 // استيراد النماذج بشكل lazy
 const GamingAppsForm = lazy(() => import('./forms/GamingAppsForm'));
+// سيتم تفعيلها لاحقاً عند الحاجة
 // const TransferForm = lazy(() => import('./forms/TransferForm'));
 // const CryptoForm = lazy(() => import('./forms/CryptoForm'));
 // const ExchangeForm = lazy(() => import('./forms/ExchangeForm'));
@@ -46,10 +47,6 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
   const [exchangeType, setExchangeType] = useState('buy_dollar');
   const [rateExchange, setRateExchange] = useState('');
 
-  // ✅ جلب الخصم العام للعبة أو التطبيق (إن وجد)
-  const productType = (serviceType === 'gaming') ? 'game' : (serviceType === 'apps') ? 'app' : null;
-  const { discountPercent: categoryDiscount = 0 } = useProductDiscount(productType, item?.id);
-
   const needsItemAndPackage = ['gaming', 'apps'].includes(serviceType);
   if (needsItemAndPackage && (!item || !pkg)) {
     return (
@@ -60,16 +57,37 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
     );
   }
 
-  // حساب المبلغ المطلوب مع تطبيق الخصم النهائي
+  // تحديد نوع المنتج للخصم العام (فقط للألعاب والتطبيقات)
+  const productType = (serviceType === 'gaming') ? 'game' : (serviceType === 'apps') ? 'app' : null;
+  
+  // حساب السعر باستخدام الهوك الموحد (يجمع الخصم العام وخصم الباقة وخصم التاجر)
   let requiredAmountUSD = 0;
   let displayPrice = '';
+  let priceUSD = 0;
+  let packageDiscount = 0;
 
   if (needsItemAndPackage && pkg) {
-    const priceUSD = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
-    const packageDiscount = pkg.discount || 0;
-    // الخصم النهائي = أكبر قيمة بين خصم الباقة والخصم العام للفئة
-    const finalDiscount = Math.max(packageDiscount, categoryDiscount);
-    requiredAmountUSD = finalDiscount > 0 ? priceUSD * (1 - finalDiscount / 100) : priceUSD;
+    priceUSD = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
+    packageDiscount = pkg.discount || 0;
+    // استدعاء الهوك خارج الشرط (لكن يجب أن يكون في نفس الترتيب دائماً)
+    // سنستخدمه بعد قليل، لكن لا يمكن استدعاؤه داخل if.
+    // لذلك سنستدعيه بشكل ثابت ثم نستخدم النتيجة.
+  }
+
+  // استدعاء الهوك (يجب أن يكون خارج أي شرط ودائماً بنفس الترتيب)
+  // نمرر قيماً افتراضية آمنة إذا لم تكن الخدمة من النوع المناسب
+  const hookProductId = (needsItemAndPackage && item?.id) ? item.id : null;
+  const hookOriginalPrice = (needsItemAndPackage && pkg) ? priceUSD : 0;
+  const hookItemDiscount = (needsItemAndPackage && pkg) ? packageDiscount : 0;
+  const { finalPrice: computedPrice, discountPercent: computedDiscount } = useFinalPrice(
+    productType,
+    hookProductId,
+    hookOriginalPrice,
+    hookItemDiscount
+  );
+
+  if (needsItemAndPackage && pkg) {
+    requiredAmountUSD = computedPrice;
     displayPrice = currency === 'USD'
       ? `${requiredAmountUSD.toFixed(2)} $`
       : rate ? `${(requiredAmountUSD * rate).toFixed(0).toLocaleString()} ل.س` : '...';
@@ -132,11 +150,12 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
           itemName: item.name,
           packageId: pkg.id,
           packageName: pkg.name,
-          priceUSD: formData.requiredAmountUSD,
-          finalPriceUSD: formData.requiredAmountUSD,
+          priceUSD: requiredAmountUSD,
+          finalPriceUSD: requiredAmountUSD,
           exchangeRateAtPurchase: rate || null,
           currencyUsed: currency,
           playerId: formData.playerId,
+          discountApplied: computedDiscount, // تسجيل نسبة الخصم المطبقة
         };
         break;
       case 'transfer':
@@ -246,17 +265,17 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
   };
 
   const renderForm = () => {
-    const commonProps = { balance };
     switch (serviceType) {
       case 'gaming':
       case 'apps':
         return <GamingAppsForm playerId={playerId} setPlayerId={setPlayerId} displayPrice={displayPrice} pkg={pkg} balance={balance} />;
       case 'transfer':
-        return <TransferForm recipientName={recipientName} setRecipientName={setRecipientName} shamCashPhone={shamCashPhone} setShamCashPhone={setShamCashPhone} amount={amount} setAmount={setAmount} balance={balance} />;
+        // return <TransferForm ... />; سيتم تفعيلها لاحقاً
+        return <p>نموذج التحويل قيد التطوير</p>;
       case 'crypto':
-        return <CryptoForm tradeType={tradeType} setTradeType={setTradeType} amount={amount} setAmount={setAmount} price={price} setPrice={setPrice} paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} balance={balance} />;
+        return <p>نموذج العملات الرقمية قيد التطوير</p>;
       case 'exchange':
-        return <ExchangeForm exchangeType={exchangeType} setExchangeType={setExchangeType} amount={amount} setAmount={amount} rateExchange={rateExchange} setRateExchange={setRateExchange} balance={balance} />;
+        return <p>نموذج الصرافة قيد التطوير</p>;
       default:
         return null;
     }

@@ -124,8 +124,8 @@ export default function TopUpPage() {
           },
           docRef.id
         );
-        // ✅ إزالة المعامل الثاني (الصورة) لأن الدالة الآن ترسل نصاً فقط
-        await sendTelegramDepositMessage(depositMessage);
+        // ✅ تمرير requestId كمعامل ثانٍ
+        await sendTelegramDepositMessage(depositMessage, docRef.id);
       } catch (telegramErr) {
         console.error('❌ فشل إرسال إشعار التلغرام:', telegramErr);
       }

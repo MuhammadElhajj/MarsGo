@@ -1,5 +1,5 @@
 // src/utils/depositBot.js
-// دوال مساعدة لإرسال إشعارات طلبات الإيداع إلى تيلجرام (بدون polling)
+// دوال مساعدة لإرسال إشعارات طلبات الإيداع إلى تيلجرام (مع أزرار تفاعلية)
 
 /**
  * تحويل base64 إلى Blob (لإرسال الصور)
@@ -16,11 +16,12 @@ function dataURItoBlob(dataURI) {
 }
 
 /**
- * إرسال رسالة نصية إلى بوت الإيداع
+ * إرسال رسالة نصية مع أزرار إلى بوت الإيداع
  * @param {string} message - نص الرسالة
+ * @param {string} requestId - معرف طلب الإيداع (ضروري للأزرار)
  * @returns {Promise<boolean>}
  */
-export async function sendTelegramDepositMessage(message) {
+export async function sendTelegramDepositMessage(message, requestId) {
   const botToken = import.meta.env.VITE_TELEGRAM_DEPOSIT_BOT_TOKEN;
   const recipients = import.meta.env.VITE_TELEGRAM_DEPOSIT_RECIPIENT_IDS;
   if (!botToken || !recipients) return false;
@@ -28,13 +29,28 @@ export async function sendTelegramDepositMessage(message) {
   const chatIds = recipients.split(',').map(id => id.trim());
   let allSuccess = true;
 
+  // أزرار تفاعلية (تأكيد / رفض) مع تمرير معرف الطلب
+  const inlineKeyboard = {
+    inline_keyboard: [
+      [
+        { text: '✅ تأكيد الإيداع', callback_data: `approve_deposit_${requestId}` },
+        { text: '❌ رفض الإيداع', callback_data: `reject_deposit_${requestId}` }
+      ]
+    ]
+  };
+
   for (const chatId of chatIds) {
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' })
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: 'Markdown',
+          reply_markup: inlineKeyboard
+        })
       });
       const data = await res.json();
       if (!res.ok || !data.ok) allSuccess = false;
@@ -47,7 +63,7 @@ export async function sendTelegramDepositMessage(message) {
 }
 
 /**
- * إرسال رسالة مع صورة إلى بوت الإيداع
+ * إرسال رسالة مع صورة إلى بوت الإيداع (بدون أزرار، تُستخدم للإيصالات إذا احتجنا)
  * @param {string} caption - النص المرافق للصورة
  * @param {string} photoBase64 - الصورة بصيغة base64
  * @returns {Promise<boolean>}

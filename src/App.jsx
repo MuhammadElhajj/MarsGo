@@ -36,14 +36,14 @@ const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
 import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
-const AdminTopUpSettings = lazy(() => import('./pages/Admin/AdminTopUpSettings/AdminTopUpSettings'));
-const AdminDiscountSettings = lazy(() => import('./pages/Admin/AdminDiscountSettings/AdminDiscountSettings'));
+// ✅ المسار الصحيح لـ AdminTopUpSettings (داخل المجلد الفرعي)
+const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/AdminTopUpSettings"));
+const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
 const ArchiveOrders = lazy(() => import("./components/VerifierComponents/ArchiveOrders/ArchiveOrders"));
-// ... الاستيرادات الموجودة
-const AdminMerchantSettings = lazy(() => import('./pages/Admin/AdminMerchantSettings/AdminMerchantSettings'));
+const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
 // ==================== صفحة المدقق المالي ====================
 const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/FinanceTopUpRequests"));
 
@@ -91,7 +91,7 @@ function App() {
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/topup" element={<TopUpPage />} /> {/* ✅ تصحيح المسار */}
+          <Route path="/topup" element={<TopUpPage />} />
         </Route>
 
         {/* مسارات المدير */}
@@ -109,12 +109,11 @@ function App() {
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} />
           <Route path="exchange-rate" element={<AdminExchangeRate />} />
-        
-        <Route path="discounts" element={<AdminDiscountSettings />} />
-<Route path="merchant-settings" element={<AdminMerchantSettings />} />  <Route path="ads" element={<AdManagementPage />} />
-        <Route path="navigation" element={<AdminNavLinksPage />} />
+          <Route path="discounts" element={<AdminDiscountSettings />} />
+          <Route path="merchant-settings" element={<AdminMerchantSettings />} />
+          <Route path="ads" element={<AdManagementPage />} />
+          <Route path="navigation" element={<AdminNavLinksPage />} />
           <Route path="users" element={<AdminUsersPage />} />
-          {/* ✅ مسار إعدادات الإيداع - تم تصحيح المسار وإزالة المسافات */}
           <Route path="topup-settings" element={<AdminTopUpSettings />} />
         </Route>
 
