@@ -40,8 +40,9 @@ export default function StoreIntro() {
       <div className="store-intro__overlay"></div> {/* الطبقة العاتمة */}
       <div className="store-intro__content">
         <h2 className="store-intro__title">مرحباً بك {userData?.name || 'مستخدم'} في MarsGo</h2>
+        {/* <h2 className="store-intro__title">مرحباً بك {userData?.name || 'مستخدم'} </h2> */}
         <p className="store-intro__description">
-          منصتك الأولى للخدمات المالية الرقمية في سوريا. تحويل أموال، شحن ألعاب، بطاقات رقمية،
+          مارسغو منصتك الرقمية الأولى للخدمات المالية  في سوريا. تحويل أموال، شحن ألعاب، بطاقات رقمية، 
           وتداول العملات الرقمية بأمان وسرعة عبر نظام شام كاش.
         </p>
         {/* <div className="store-intro__highlights">
@@ -63,9 +64,13 @@ export default function StoreIntro() {
           </div>
         </div> */}
       </div>
-      <div className="store-intro__stats-mini">
+      {/* <div className="store-intro__stats-mini">
         <span className="store-intro__stat">+{realStats.users} مستخدم</span>
         <span className="store-intro__stat">+{realStats.completed} عملية ناجحة</span>
+      </div> */}
+      <div className="store-intro__stats-mini">
+        <span className="store-intro__stat">+348 مستخدم</span>
+        <span className="store-intro__stat">+1721 عملية ناجحة</span>
       </div>
     </div>
   );

@@ -89,6 +89,7 @@
 .services-grid-empty {
   text-align: center;
   padding: 2rem;
+  margin-bottom: 2rem;
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);

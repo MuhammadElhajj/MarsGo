@@ -10,10 +10,11 @@ export default function Footer() {
           <h4 className="footer__title">روابط سريعة</h4>
           <ul className="footer__links">
             <li><Link to="/dashboard">الرئيسية</Link></li>
-            <li><Link to="/transfer">تحويل دولي</Link></li>
+            {/* <li><Link to="/transfer">تحويل دولي</Link></li> */}
             <li><Link to="/gaming">شحن ألعاب</Link></li>
-            <li><Link to="/crypto">عملات رقمية</Link></li>
-            <li><Link to="/exchange">صرافة شام كاش</Link></li>
+            <li><Link to="/apps">شحن تطبيقات</Link></li>
+            {/* <li><Link to="/crypto">عملات رقمية</Link></li> */}
+            {/* <li><Link to="/exchange">صرافة شام كاش</Link></li> */}
             <li><Link to="/about">من نحن</Link></li>
           </ul>
         </div>

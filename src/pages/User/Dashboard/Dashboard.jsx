@@ -45,11 +45,12 @@ export default function Dashboard() {
           <TopUpButton />
         </Suspense>
       </div>
-      <StoreIntro />
+      <SpendingProgress />
+     
 
   
 
-      <SpendingProgress />
+      
 
       
       <div className="dashboard__services">
@@ -58,6 +59,7 @@ export default function Dashboard() {
           <ServicesGrid />
         </Suspense>
       </div>
+       <StoreIntro />
       
       <h3 className="dashboard__services-title">مساحة إعلانية</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
