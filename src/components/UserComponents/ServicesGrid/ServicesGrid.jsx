@@ -38,7 +38,7 @@ export default function ServicesGrid() {
           >
             <div className="service-card__overlay"></div>
             <div className="service-card__content">
-              <div className="service-card__icon" aria-hidden="true">{service.icon || '🔹'}</div>
+              {/* <div className="service-card__icon" aria-hidden="true">{service.icon || '🔹'}</div> */}
               <h3 className="service-card__title">{service.name}</h3>
               <p className="service-card__description">{service.description || 'خدمة رقمية متكاملة'}</p>
               {!service.isActive && (
