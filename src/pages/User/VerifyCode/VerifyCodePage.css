@@ -1,0 +1,259 @@
+/* ========== الحاوية الرئيسية ========== */
+.verify-code-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  direction: rtl;
+  gap: 2rem;
+  padding: 2rem 1rem;
+}
+
+/* ========== البطاقة (card) ========== */
+.verify-code-card {
+  background: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  padding: 32px 40px;
+  margin-bottom: 10px;
+  text-align: center;
+  max-width: 380px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ========== الرأس (العنوان والبريد) ========== */
+.verify-code-header {
+  margin-bottom: 24px;
+}
+
+.verify-code-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.verify-code-header p {
+  font-size: 14px;
+  color: #8e8e8e;
+  margin: 8px 0;
+}
+
+.verify-code-email {
+  font-weight: 600;
+  color: #0095f6;
+  background: #e8f0fe;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  margin-top: 8px;
+  font-size: 13px;
+  direction: ltr;
+  word-break: break-all;
+}
+
+/* ========== حقول الإدخال (حقل الكود) ========== */
+.input-group {
+  margin-bottom: 12px;
+}
+.input-group input {
+  width: 100%;
+  padding: 12px 12px;
+  background: #fafafa;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: monospace;
+  color: #262626;
+  transition: border 0.2s;
+  text-align: center;
+  letter-spacing: 4px;
+}
+.input-group input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+  background: #ffffff;
+}
+.input-group input::placeholder {
+  color: #8e8e8e;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: normal;
+}
+
+/* ========== زر التفعيل ========== */
+.verify-submit {
+  background: #0095f6;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.verify-submit:hover:not(:disabled) {
+  background: #1877f2;
+}
+.verify-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========== رسائل الخطأ والنجاح ========== */
+.verify-code-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.verify-code-success {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* ========== الأزرار السفلية (إعادة الإرسال والعودة) ========== */
+.verify-code-footer {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resend-btn,
+.back-to-login {
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 6px;
+}
+
+.resend-btn {
+  color: #0095f6;
+  font-weight: 600;
+}
+
+.back-to-login {
+  color: #8e8e8e;
+  border-top: 1px solid #dbdbdb;
+  padding-top: 12px;
+  width: 100%;
+}
+
+.resend-btn:hover,
+.back-to-login:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* ========== استجابة للشاشات المتوسطة والصغيرة ========== */
+@media (max-width: 768px) {
+  .verify-code-card {
+    padding: 24px 28px;
+  }
+  .verify-code-header h2 {
+    font-size: 20px;
+  }
+  .input-group input {
+    font-size: 14px;
+    letter-spacing: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .verify-code-card {
+    padding: 20px 16px;
+  }
+  .verify-code-header h2 {
+    font-size: 18px;
+  }
+  .verify-submit,
+  .resend-btn,
+  .back-to-login {
+    font-size: 13px;
+  }
+  .input-group input {
+    padding: 10px 12px;
+  }
+}
+
+/* ========== تحسين الجوال: عرض كامل ========== */
+@media (max-width: 991px) {
+  .verify-code-container {
+    padding: 1rem;
+    gap: 1rem;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+  .verify-code-card {
+    width: 100%;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* ========== دعم الوضع الداكن (إذا تم تفعيله) ========== */
+.dark .verify-code-container {
+  background-color: #1f2937;
+}
+.dark .verify-code-card {
+  background: #111827;
+  border-color: #374151;
+}
+.dark .verify-code-header h2,
+.dark .verify-code-header p,
+.dark .input-group input,
+.dark .resend-btn,
+.dark .back-to-login {
+  color: #f9fafb;
+}
+.dark .verify-code-email {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+.dark .input-group input {
+  background: #1f2937;
+  border-color: #374151;
+}
+.dark .input-group input:focus {
+  border-color: #a8a8a8;
+  background: #111827;
+}
+.dark .verify-submit {
+  background: #4f46e5;
+}
+.dark .verify-submit:hover:not(:disabled) {
+  background: #4338ca;
+}
+.dark .verify-code-error {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+.dark .verify-code-success {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+.dark .back-to-login {
+  border-top-color: #374151;
+}

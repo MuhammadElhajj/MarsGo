@@ -11,9 +11,12 @@ export default function ExchangeRateWidget() {
     <div className="exchange-rate-widget">
       <div className="exchange-rate-widget__icon">💵</div>
       <div className="exchange-rate-widget__info">
-        <span className="exchange-rate-widget__label">سعر الصرف </span>
+        <span className="exchange-rate-widget__label">سعر الصرف</span>
         <span className="exchange-rate-widget__value">{rate.toLocaleString()} ل.س</span>
       </div>
+      {/* <div className="live-indicator"> */}
+        <span className="live-dot live-indicator"></span>
+      {/* </div> */}
     </div>
   );
 }

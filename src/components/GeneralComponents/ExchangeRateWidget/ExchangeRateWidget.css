@@ -57,3 +57,67 @@
     font-size: 0.85rem;
   }
 }
+
+/* أضف هذا الكود إلى ملف ExchangeRateWidget.css */
+
+.exchange-rate-widget {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #2dd4bf20, #14b8a620);
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s;
+}
+
+/* المؤشر المباشر (Live) */
+.live-indicator {
+
+  gap: 0.35rem;
+  margin-right: auto; /* يدفع إلى اليسار في RTL */
+  direction: ltr;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #2bff00;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 1.2s infinite ease-in-out;
+  box-shadow: 0 0 4px #2bff00;
+}
+
+.live-text {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    background-color: #00fd37;
+    box-shadow: 0 0 6px #00fd37;
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+
+/* تعديلات الوضع الداكن */
+.dark .live-indicator {
+  background: rgba(255, 255, 255, 0.1);
+}
+.dark .live-text {
+  color: #cbd5e1;
+}

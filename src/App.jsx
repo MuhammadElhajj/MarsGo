@@ -21,6 +21,10 @@ const ProfilePage = lazy(() => import("./components/UserComponents/Profile/Profi
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 const GamingPage = lazy(() => import("./pages/User/Gaming/GamingPage"));
 const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/User/ForgotPassword/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/User/ResetPassword/ResetPasswordPage"));
+// ✅ صفحة إدخال كود التفعيل (جديدة)
+const VerifyCodePage = lazy(() => import("./pages/User/VerifyCode/VerifyCodePage"));
 
 // ==================== صفحات المدير (Admin) ====================
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -37,14 +41,15 @@ const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
 import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
 import ExternalStoreImport from './pages/Admin/ExternalStoreImport/ExternalStoreImport';
-// ✅ المسار الصحيح لـ AdminTopUpSettings (داخل المجلد الفرعي)
 const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/AdminTopUpSettings"));
 const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
+
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
 const ArchiveOrders = lazy(() => import("./components/VerifierComponents/ArchiveOrders/ArchiveOrders"));
 const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
+
 // ==================== صفحة المدقق المالي ====================
 const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/FinanceTopUpRequests"));
 
@@ -80,10 +85,15 @@ function App() {
           element={(!user || (user && !emailVerified)) ? <Login /> : <Navigate to="/dashboard" />}
         />
 
+        {/* ✅ صفحة إدخال كود التفعيل (غير محمية) */}
+        <Route path="/verify-code" element={<VerifyCodePage />} />
+
         {/* مسارات العميل */}
         <Route element={(user && emailVerified) ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/apps/*" element={<AppsPage />} />
+         
+         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+<Route path="/reset-password" element={<ResetPasswordPage />} /> <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
@@ -105,8 +115,8 @@ function App() {
           <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
-      
-      <Route path="external-store-import" element={<ExternalStoreImport />} />    <Route path="ticker" element={<AdminTicker />} />
+          <Route path="external-store-import" element={<ExternalStoreImport />} />
+          <Route path="ticker" element={<AdminTicker />} />
           <Route path="apps" element={<AdminApps />} />
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} />
