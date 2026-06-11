@@ -1,8 +1,8 @@
-// src/App.jsx
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./context/AuthContext";
+import { useAppStore } from "./store/store";
 import Layout from "./layouts/UserLayout/Layout";
 import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import VerifierLayout from "./layouts/VerifierLayout/VerifierLayout";
@@ -23,7 +23,6 @@ const GamingPage = lazy(() => import("./pages/User/Gaming/GamingPage"));
 const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/User/ForgotPassword/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/User/ResetPassword/ResetPasswordPage"));
-// ✅ صفحة إدخال كود التفعيل (جديدة)
 const VerifyCodePage = lazy(() => import("./pages/User/VerifyCode/VerifyCodePage"));
 
 // ==================== صفحات المدير (Admin) ====================
@@ -39,22 +38,33 @@ const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettin
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
-import AdminVerifiers from "./components/AdminCoponent/AdminVerifiers/AdminVerifiers";
-import ExternalStoreImport from './pages/Admin/ExternalStoreImport/ExternalStoreImport';
+const AdminVerifiers = lazy(() => import("./components/AdminCoponent/AdminVerifiers/AdminVerifiers"));
+const ExternalStoreImport = lazy(() => import("./pages/Admin/ExternalStoreImport/ExternalStoreImport"));
 const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/AdminTopUpSettings"));
 const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
+const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
 
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
 const ArchiveOrders = lazy(() => import("./components/VerifierComponents/ArchiveOrders/ArchiveOrders"));
-const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
 
 // ==================== صفحة المدقق المالي ====================
 const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/FinanceTopUpRequests"));
 
 function App() {
   const { user, userData, loading, emailVerified } = useAuth();
+  const listenToBalance = useAppStore((state) => state.listenToBalance);
+
+  // ✅ الاستماع لتغيرات الرصيد في الوقت الفعلي
+  useEffect(() => {
+    if (user?.uid) {
+      const unsubscribe = listenToBalance(user.uid);
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    }
+  }, [user, listenToBalance]);
 
   if (loading) return <Loading />;
 
@@ -85,15 +95,15 @@ function App() {
           element={(!user || (user && !emailVerified)) ? <Login /> : <Navigate to="/dashboard" />}
         />
 
-        {/* ✅ صفحة إدخال كود التفعيل (غير محمية) */}
+        {/* صفحة إدخال كود التفعيل */}
         <Route path="/verify-code" element={<VerifyCodePage />} />
 
         {/* مسارات العميل */}
         <Route element={(user && emailVerified) ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
-         
-         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-<Route path="/reset-password" element={<ResetPasswordPage />} /> <Route path="/apps/*" element={<AppsPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/profile" element={<ProfilePage />} />

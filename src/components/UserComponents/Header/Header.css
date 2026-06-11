@@ -429,3 +429,11 @@
   
 
 }
+
+
+/* إخفاء أيقونات المود والخروج في الجوال */
+@media (max-width: 768px) {
+  .header__desktop-actions {
+    display: none;
+  }
+}

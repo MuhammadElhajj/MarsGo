@@ -1,13 +1,10 @@
-// src/components/Generic/CatalogCard/PriceDisplay.jsx
 import { useMemo } from 'react';
-import { useExchangeRate } from '../../../context/ExchangeRateContext';
-import { useCurrency } from '../../../context/CurrencyContext';
+import { useAppStore } from '../../../store/store';
 
 export default function PriceDisplay({ originalPrice, finalPrice, currency, discountPercent }) {
-  const { rate } = useExchangeRate();
-  const { currency: userCurrency } = useCurrency();
+  const exchangeRate = useAppStore((state) => state.exchangeRate);
+  const userCurrency = useAppStore((state) => state.currency);
 
-  // ✅ تحسين الأداء: استخدام useMemo لمنع إعادة الحساب غير الضروري
   const { finalDisplay, originalDisplay } = useMemo(() => {
     let final = '';
     let original = null;
@@ -16,7 +13,7 @@ export default function PriceDisplay({ originalPrice, finalPrice, currency, disc
       final = `${finalPrice.toFixed(2)} $`;
       if (discountPercent > 0) original = `${originalPrice.toFixed(2)} $`;
     } else {
-      const sypRate = rate || 15000;
+      const sypRate = exchangeRate || 15000;
       const finalSYP = finalPrice * sypRate;
       final = `${Math.ceil(finalSYP).toLocaleString()} ل.س`;
       if (discountPercent > 0) {
@@ -26,9 +23,8 @@ export default function PriceDisplay({ originalPrice, finalPrice, currency, disc
     }
 
     return { finalDisplay: final, originalDisplay: original };
-  }, [userCurrency, finalPrice, discountPercent, originalPrice, rate]);
+  }, [userCurrency, finalPrice, discountPercent, originalPrice, exchangeRate]);
 
-  // ✅ إذا لم يكن هناك خصم و originalDisplay فارغ، لا داعي لعرض القسم القديم
   const hasDiscount = discountPercent > 0 && originalDisplay;
 
   return (

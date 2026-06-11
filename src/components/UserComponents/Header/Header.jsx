@@ -6,18 +6,16 @@ import Avatar from "../../GeneralComponents/Avatar/Avatar";
 import Search from "../../GeneralComponents/Search/Search";
 import ThemeToggle from '../../GeneralComponents/ThemeToggle/ThemeToggle';
 import { FiMenu, FiLogOut } from 'react-icons/fi';
-import { useTheme } from '../../../context/ThemeContext'; // ✅ استيراد الثيم
+import { useTheme } from '../../../context/ThemeContext';
 import './Header.css';
-import BalanceDisplay from '../../GeneralComponents/BalanceDisplay/BalanceDisplay';
-import { useBalance } from '../../../context/BalanceContext';
 import LogoDark from "../../../assets/logo-dark.png";
 import LogoLight from "../../../assets/logo-light.png";
 import CurrencyToggle from '../../GeneralComponents/CurrencyToggle/CurrencyToggle';
 import NotificationBell from '../../GeneralComponents/NotificationBell/NotificationBell';
+
 export default function Header({ onToggleSidebar }) {
   const { userData } = useAuth();
-  const { isDark } = useTheme(); // ✅ معرفة الوضع الحالي
-const { balance, loading: balanceLoading } = useBalance();
+  const { isDark } = useTheme();
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -28,20 +26,29 @@ const { balance, loading: balanceLoading } = useBalance();
         <button className="header__hamburger" onClick={onToggleSidebar} aria-label="القائمة">
           <FiMenu size={22} />
         </button>
-       <img 
-  src={isDark ? LogoDark : LogoLight} 
-  alt="Logo" 
-  className='header-Logo--img'
-/>
+        <img 
+          src={isDark ? LogoDark : LogoLight} 
+          alt="Logo" 
+          className='header-Logo--img'
+        />
       </div>
       <div className="header__center">
         <Search placeholder="ابحث عن طلب..." />
       </div>
       <div className="header__right">
         <div className="header__user">
-            <NotificationBell />
-         
-          <ThemeToggle />
+          <NotificationBell />
+          <div className="header__desktop-actions">
+            <ThemeToggle />
+            <button 
+              className="header__logout-icon" 
+              onClick={handleLogout}
+              aria-label="تسجيل الخروج"
+              title="تسجيل الخروج"
+            >
+              <FiLogOut size={18} />
+            </button>
+          </div>
           <span className="header__name">{userData?.name}</span>
           <Avatar
             src={userData?.avatar}
@@ -50,14 +57,6 @@ const { balance, loading: balanceLoading } = useBalance();
             name={userData?.name}
             size="md"
           />
-          <button 
-            className="header__logout-icon" 
-            onClick={handleLogout}
-            aria-label="تسجيل الخروج"
-            title="تسجيل الخروج"
-          >
-            <FiLogOut size={18} />
-          </button>
         </div>
       </div>
     </header>

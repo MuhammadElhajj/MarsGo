@@ -1,5 +1,4 @@
-import { useExchangeRate } from "../../../context/ExchangeRateContext";
-import { useCurrency } from "../../../context/CurrencyContext";
+import { useAppStore } from "../../../store/store";
 import useFormattedPrice from "../../../hooks/useFormattedPrice";
 import useUserSpending from "../../../hooks/useUserSpending";
 import "./SpendingProgress.css";
@@ -7,7 +6,7 @@ import "./SpendingProgress.css";
 export default function SpendingProgress() {
   const { totalSpent, currentTier, nextTier, progressPercent, loading } = useUserSpending();
   const { formatPrice } = useFormattedPrice();
-  const { currency } = useCurrency();
+  const currency = useAppStore((state) => state.currency);
 
   if (loading) return <div className="spending-progress loading">جاري تحميل مستوى الإنفاق...</div>;
 
@@ -16,17 +15,15 @@ export default function SpendingProgress() {
   return (
     <div className="spending-progress">
       <div className="spending-progress__header">
-        {/* <h3>🏆 مستوى الولاء</h3> */}
         <div className="spending-progress__level">
           {currentTier && (
             <>
               <span>المستوى {currentTier.level}</span>
-              {/* {!nextTier && <span className="badge">الحد الأقصى</span>} */}
             </>
           )}
         </div>
         <div className="spending-progress__total">
-           انفاقي: <strong>{formatPrice(totalSpent)}</strong>
+          انفاقي: <strong>{formatPrice(totalSpent)}</strong>
         </div>
       </div>
       <div className="spending-progress__bar-container">
@@ -36,7 +33,6 @@ export default function SpendingProgress() {
         ></div>
       </div>
       <div className="spending-progress__info">
-        
         {nextTier ? (
           <div className="spending-progress__next">
             تحتاج إلى <strong>{formatPrice(remaining)}</strong>  للوصول إلى المستوى {nextTier.level}

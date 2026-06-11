@@ -1,22 +1,36 @@
-// src/components/UserComponents/Gaming/PackagesList/PackagesList.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGames } from '../../../../context/GamesContext';
+import { useAppStore } from '../../../../store/store';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '../../../../firebase';
 import CatalogList from '../../../Generic/CatalogList/CatalogList';
 
 export default function PackagesList() {
   const { gameId } = useParams();
-  const { games, fetchPackages } = useGames();
+  const navigate = useNavigate();
+  const games = useAppStore((state) => state.games);
   const [game, setGame] = useState(null);
   const [packages, setPackages] = useState([]);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const foundGame = games.find(g => g.id === gameId);
-      setGame(foundGame);
-      const pkgs = await fetchPackages(gameId);
-      setPackages(pkgs);
+      if (!gameId) return;
+      // البحث عن اللعبة في الـ store (البيانات موجودة مسبقاً)
+      const foundGame = games?.find(g => g.id === gameId);
+      setGame(foundGame || null);
+
+      // جلب الباقات من Firestore
+      try {
+        const q = query(collection(db, 'games', gameId, 'packages'), orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+        const pkgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPackages(pkgs);
+      } catch (err) {
+        console.error('خطأ في جلب الباقات:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, [gameId, games]);
@@ -25,7 +39,8 @@ export default function PackagesList() {
     navigate('/gaming/checkout', { state: { item: game, package: pkg } });
   };
 
-  if (!game) return <div>جاري التحميل...</div>;
+  if (loading) return <div>جاري التحميل...</div>;
+  if (!game) return <div>اللعبة غير موجودة</div>;
 
   return (
     <CatalogList
@@ -35,8 +50,8 @@ export default function PackagesList() {
       showBackButton={true}
       showPrice={true}
       type="package"
-      parentId={game.id}        // ✅ تمرير معرف اللعبة الأصل
-      parentType="game"         // ✅ نوع الأصل (game / app)
+      parentId={game.id}
+      parentType="game"
     />
   );
 }

@@ -1,30 +1,22 @@
 // src/pages/User/Login/Login.jsx
-// هذا الملف مسؤول عن واجهة تسجيل الدخول وإنشاء حساب جديد.
-// يستخدم Firebase Authentication و Cloud Functions لإرسال كود التفعيل.
-
 import { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../../firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
-import { useStoreSettings } from '../../../context/StoreSettingsContext';
+import { useAppStore } from '../../../store/store';
 import './Login.css';
 import Logo1 from "../../../assets/logo-light.png";
 
-// ========== صورة افتراضية لصفحة تسجيل الدخول (تظهر في حال عدم وجود صورة مخصصة) ==========
+// ========== صورة افتراضية لصفحة تسجيل الدخول ==========
 const DEFAULT_PHONE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 350'%3E%3Crect width='200' height='350' fill='%234f46e5'/%3E%3Ccircle cx='100' cy='120' r='40' fill='%23ffffff' opacity='0.8'/%3E%3Crect x='60' y='180' width='80' height='10' rx='5' fill='%23ffffff' opacity='0.6'/%3E%3Crect x='50' y='210' width='100' height='10' rx='5' fill='%23ffffff' opacity='0.4'/%3E%3Crect x='70' y='240' width='60' height='10' rx='5' fill='%23ffffff' opacity='0.3'/%3E%3Ctext x='100' y='300' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EMarsGo%3C/text%3E%3C/svg%3E";
 
-// ========== دالة فحص قوة كلمة المرور (مخففة) ==========
-const isStrongPassword = (password) => {
-  // الشروط: طول 6 أحرف على الأقل
-  const regex = /^.{6,}$/;
-  return regex.test(password);
-};
+const isStrongPassword = (password) => /^.{6,}$/.test(password);
 
 export default function Login() {
-  // ========== إعدادات الصورة من المتجر ==========
-  const { settings } = useStoreSettings();
-  const loginPhoneImage = settings?.loginPhoneImage;
+  // ========== إعدادات صورة الهاتف من الـ store المركزي ==========
+  const storeSettings = useAppStore((state) => state.storeSettings);
+  const loginPhoneImage = storeSettings?.loginPhoneImageUrl; // تم تعديل الاسم من loginPhoneImage إلى loginPhoneImageUrl
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [showDefault, setShowDefault] = useState(false);
@@ -40,7 +32,7 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
 
-  // ========== تهيئة دوال Cloud Functions ==========
+  // ========== دوال Cloud Functions ==========
   const functions = getFunctions();
   const sendVerificationCode = httpsCallable(functions, 'sendVerificationCode');
   const checkEmailVerified = httpsCallable(functions, 'checkEmailVerified');
@@ -66,7 +58,6 @@ export default function Login() {
     img.src = loginPhoneImage;
   }, [loginPhoneImage]);
 
-  // ========== معالجة تغيير كلمة المرور ==========
   const handlePasswordChange = (e) => {
     const newPass = e.target.value;
     setPassword(newPass);
@@ -77,14 +68,12 @@ export default function Login() {
     }
   };
 
-  // ========== إرسال النموذج (تسجيل دخول / إنشاء حساب) ==========
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     if (isRegister) {
-      // --- تسجيل مستخدم جديد ---
       if (!isStrongPassword(password)) {
         setError('كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل');
         setLoading(false);
@@ -97,23 +86,13 @@ export default function Login() {
       }
 
       try {
-        // 1. إنشاء الحساب في Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-console.log("📧 Email being used for signup:", email);
-        // 2. تسجيل الخروج فوراً (لأن البريد لم يفعل بعد)
-        // await signOut(auth);
+        console.log("📧 Email being used for signup:", email);
 
-        // 3. طباعة البيانات المرسلة للتشخيص
-        console.log("📤 Sending verification code with:", { email: user.email, uid: user.uid });
-
-        // 4. استدعاء Cloud Function لإرسال كود التفعيل
         const result = await sendVerificationCode({ email: user.email, uid: user.uid });
-        
         if (result.data.success) {
-          // تخزين البريد مؤقتاً (اختياري)
           sessionStorage.setItem('pendingVerificationEmail', email);
-          // التوجيه إلى صفحة إدخال الكود
           navigate('/verify-code', { state: { email, uid: user.uid } });
         } else {
           throw new Error(result.data.message || 'فشل إرسال كود التفعيل');
@@ -122,7 +101,6 @@ console.log("📧 Email being used for signup:", email);
         let msg = 'فشل إنشاء الحساب';
         if (err.code === 'auth/email-already-in-use') msg = 'البريد مسجل مسبقاً';
         else if (err.message) msg = err.message;
-        // تحسين رسالة الخطأ عند فشل Cloud Function (مثل 400)
         if (err?.code?.startsWith('functions/')) {
           msg = err.message || 'خطأ في إرسال كود التفعيل، حاول مرة أخرى';
         }
@@ -131,7 +109,6 @@ console.log("📧 Email being used for signup:", email);
         setLoading(false);
       }
     } else {
-      // --- تسجيل الدخول لمستخدم موجود ---
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -139,7 +116,6 @@ console.log("📧 Email being used for signup:", email);
         if (verResult.data.verified) {
           navigate('/dashboard');
         } else {
-          // البريد لم يفعل: إرسال كود جديد والتوجيه إلى صفحة التحقق
           await sendVerificationCode({ email: user.email, uid: user.uid });
           navigate('/verify-code', { state: { email: user.email, uid: user.uid } });
         }
@@ -155,7 +131,6 @@ console.log("📧 Email being used for signup:", email);
     }
   };
 
-  // ========== تسجيل الدخول عبر Google ==========
   const handleGoogle = async () => {
     const provider = new GoogleAuthProvider();
     setLoading(true);
@@ -176,7 +151,6 @@ console.log("📧 Email being used for signup:", email);
     }
   };
 
-  // ========== عرض الواجهة ==========
   return (
     <div className="login-container">
       <div className="login-wrapper">

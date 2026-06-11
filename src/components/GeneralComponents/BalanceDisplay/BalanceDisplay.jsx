@@ -1,7 +1,5 @@
 // src/components/GeneralComponents/BalanceDisplay/BalanceDisplay.jsx
-import { useBalance } from '../../../context/BalanceContext';
-import { useCurrency } from '../../../context/CurrencyContext';
-import { useExchangeRate } from '../../../context/ExchangeRateContext';
+import { useAppStore } from '../../../store/store';
 import './BalanceDisplay.css';
 
 export default function BalanceDisplay({ 
@@ -10,26 +8,27 @@ export default function BalanceDisplay({
   showLoading = true,
   compact = false 
 }) {
-  const { balance, loading } = useBalance();
-  const { currency } = useCurrency();
-  const { rate } = useExchangeRate();
+  const balance = useAppStore((state) => state.balance);
+  const currency = useAppStore((state) => state.currency);
+  const exchangeRate = useAppStore((state) => state.exchangeRate);
+  
+  // يمكنك إضافة حالة تحميل إذا كنت تريدها في store.js، حالياً نعتبر أنها دائماً جاهزة
+  const loading = false; 
 
   if (loading && showLoading) {
     return <div className={`balance-display balance-display--loading ${className}`}>...</div>;
   }
 
-  // حساب القيمة المعروضة حسب العملة
   let displayValue, displayCurrency;
   if (currency === 'USD') {
     displayValue = balance.toFixed(2);
     displayCurrency = 'دولار امريكي';
   } else {
-    if (!rate) {
+    if (!exchangeRate) {
       displayValue = balance.toFixed(2);
       displayCurrency = '$ (سعر الصرف غير متاح)';
     } else {
-      // التقريب لأعلى (Ceil) لأقرب ليرة
-      const sypValue = Math.ceil(balance * rate);
+      const sypValue = Math.ceil(balance * exchangeRate);
       displayValue = sypValue.toLocaleString();
       displayCurrency = 'ليرة سورية جديدة';
     }

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import { useStoreSettings } from '../../../context/StoreSettingsContext';
+import { useAppStore } from '../../../store/store';
 import { collection, getCountFromServer, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import './StoreIntro.css';
 
 export default function StoreIntro() {
   const { userData } = useAuth();
-  const { settings: storeSettings } = useStoreSettings(); // جلب إعدادات المتجر
+  const storeSettings = useAppStore((state) => state.storeSettings); // جلب إعدادات المتجر من الـ store المركزي
   const [realStats, setRealStats] = useState({ users: 0, completed: 0 });
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useNotifications } from '../../../context/NotificationContext';
+import { useAppStore } from '../../../store/store';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import Loading from '../../../components/GeneralComponents/Loading/Loading';
@@ -6,10 +6,17 @@ import { Link } from 'react-router-dom';
 import './NotificationsPage.css';
 
 export default function NotificationsPage() {
-  const { notifications, loading, markAllAsRead, markAsRead } = useNotifications();
+  const notifications = useAppStore((state) => state.notifications);
+  const markAsRead = useAppStore((state) => state.markNotificationRead);
+  const markAllAsRead = useAppStore((state) => state.markAllNotificationsRead);
+  const loading = !notifications; // أو يمكن إضافة حالة تحميل منفصلة في الـ store
 
   const handleMarkAll = async () => {
     await markAllAsRead();
+  };
+
+  const handleMarkOne = async (id) => {
+    await markAsRead(id);
   };
 
   if (loading) return <Loading text="جاري تحميل الإشعارات..." />;
@@ -36,21 +43,14 @@ export default function NotificationsPage() {
               key={notif.id}
               className={`notification-item ${!notif.read ? 'unread' : ''}`}
               onClick={async () => {
-                if (!notif.read) await markAsRead(notif.id);
+                if (!notif.read) await handleMarkOne(notif.id);
                 if (notif.link) window.location.href = notif.link;
               }}
             >
-              <div className="notification-item__icon">
-                {/* {notif.type === 'order_created' && '📦'} */}
-                {/* {notif.type === 'order_verified' && '✅'}
-                {notif.type === 'order_completed' && '🎉'}
-                {notif.type === 'order_rejected' && '❌'}
-                {notif.type === 'order_resubmit' && '✏️'} */}
-              </div>
               <div className="notification-item__content">
                 <h4>{notif.title}</h4>
                 <p>{notif.message}</p>
-                <small>{notif.createdAt?.toDate().toLocaleString('ar-SY') || ''}</small>
+                <small>{notif.createdAt?.toDate ? notif.createdAt.toDate().toLocaleString('ar-SY') : new Date(notif.createdAt).toLocaleString('ar-SY')}</small>
               </div>
               {!notif.read && <div className="notification-item__unread-dot"></div>}
             </div>

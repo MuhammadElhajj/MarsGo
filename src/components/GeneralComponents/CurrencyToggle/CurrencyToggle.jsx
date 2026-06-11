@@ -1,10 +1,9 @@
-// src/components/GeneralComponents/CurrencyToggle/CurrencyToggle.jsx
-import { useCurrency } from '../../../context/CurrencyContext';
-import { FiDollarSign, FiTrendingUp } from 'react-icons/fi';
+import { useAppStore } from '../../../store/store';
 import './CurrencyToggle.css';
 
 export default function CurrencyToggle({ className = '', showLabel = false }) {
-  const { currency, toggleCurrency } = useCurrency();
+  const currency = useAppStore((state) => state.currency);
+  const toggleCurrency = useAppStore((state) => state.toggleCurrency);
 
   return (
     <button
@@ -15,7 +14,7 @@ export default function CurrencyToggle({ className = '', showLabel = false }) {
     >
       {currency === 'USD' ? (
         <>
-           <span className="currency-syp-icon">دولار امريكي</span>
+          <span className="currency-syp-icon">دولار امريكي</span>
           {showLabel && <span>USD</span>}
         </>
       ) : (
