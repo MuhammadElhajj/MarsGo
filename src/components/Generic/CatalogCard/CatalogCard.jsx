@@ -1,4 +1,3 @@
-// src/components/Generic/CatalogCard/CatalogCard.jsx
 import './CatalogCard.css';
 import useFinalPrice from '../../../hooks/useFinalPrice';
 import PriceDisplay from '../PriceDisplay/PriceDisplay';
@@ -73,14 +72,16 @@ export default function CatalogCard({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
       aria-label={name}
     >
-      <div className="catalog-card__image" style={{ width: imageSize, height: imageSize }}>
+      <div className="catalog-card__image" style={{ width: imageSize, height: imageSize, flexShrink: 0 }}>
         {imgSrc ? (
           <img 
             src={imgSrc} 
             alt={name} 
             loading="lazy"
+            decoding="async"           // ✅ تسريع فك الترميز
             width={imageSize}
             height={imageSize}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
           <div className="catalog-card__placeholder" aria-hidden="true">
@@ -92,7 +93,6 @@ export default function CatalogCard({
         )}
       </div>
       <div className="catalog-card__info">
-        {/* الصف العلوي: الاسم + الحالة والشارة */}
         <div className="catalog-card__header-row">
           <h3 className="catalog-card__title">{name}</h3>
           <div className="catalog-card__status-group">
@@ -104,16 +104,10 @@ export default function CatalogCard({
             )}
           </div>
         </div>
-        
-        {/* الملاحظة (إن وجدت) */}
         {note && <p className="catalog-card__note">{note}</p>}
-        
-        {/* سبب عدم التوفر (إن كان المنتج غير متاح) */}
         {isUnavailable && unavailableReason && (
           <p className="catalog-card__unavailable-reason">⚠️ {unavailableReason}</p>
         )}
-        
-        {/* السعر (إن أردت إظهاره) */}
         {shouldShowPrice && finalPriceUSD !== null && (
           <PriceDisplay
             originalPrice={originalPriceUSD}

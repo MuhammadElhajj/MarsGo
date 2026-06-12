@@ -121,3 +121,24 @@
 }
 
 /* باقي التنسيقات كما هي */
+
+
+.store-intro {
+  position: relative;
+  overflow: hidden;
+}
+.store-intro__bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.store-intro__overlay,
+.store-intro__content,
+.store-intro__stats-mini {
+  position: relative;
+  z-index: 1;
+}

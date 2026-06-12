@@ -21,7 +21,6 @@ export default function TopUpMethods({ methods, selectedMethod, onSelectMethod, 
     document.body.removeChild(link);
   };
 
-  // التحقق من وجود صورة صالحة
   const hasValidQR = currentMethod?.qrCode && currentMethod.qrCode.trim() !== '';
 
   return (
@@ -63,7 +62,13 @@ export default function TopUpMethods({ methods, selectedMethod, onSelectMethod, 
             </div>
             {hasValidQR && (
               <div className="qr-code">
-                <img src={currentMethod.qrCode} alt="QR Code" />
+                {/* ✅ تحسين صورة QR: lazy loading + async decoding */}
+                <img 
+                  src={currentMethod.qrCode} 
+                  alt="QR Code"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <button
                   className="download-qr-btn"
                   onClick={() => downloadQR(currentMethod.qrCode)}
@@ -99,13 +104,19 @@ export default function TopUpMethods({ methods, selectedMethod, onSelectMethod, 
             </div>
             {hasValidQR && (
               <div className="qr-code">
-                <img src={currentMethod.qrCode} alt="QR Code" />
+                {/* ✅ تحسين صورة QR: lazy loading + async decoding */}
+                <img 
+                  src={currentMethod.qrCode} 
+                  alt="QR Code"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <button
                   className="download-qr-btn"
                   onClick={() => downloadQR(currentMethod.qrCode)}
                   title="تحميل QR Code"
                 >
-                
+                  <FiDownload /> تحميل QR
                 </button>
               </div>
             )}

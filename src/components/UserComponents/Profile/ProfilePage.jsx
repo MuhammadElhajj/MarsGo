@@ -1,4 +1,3 @@
-
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -7,7 +6,7 @@ import {
   FaArrowLeft, FaDownload, FaHistory
 } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
-import { useNotifications } from '../../../context/NotificationContext';
+import { useAppStore } from '../../../store/store'; // ✅ استيراد الـ store المركزي
 import useUserStats from '../../../hooks/useUserStats';
 import useUserSpending from '../../../hooks/useUserSpending';
 import SpendingProgress from '../../../components/UserComponents/SpendingProgress/SpendingProgress';
@@ -31,8 +30,11 @@ export default function ProfilePage() {
   const { userData, updateUserData } = useAuth();
   const { stats, loading: statsLoading } = useUserStats();
   const { totalSpent, loading: spendingLoading } = useUserSpending();
-  const { unreadCount } = useNotifications();
   const { formatPrice } = useFormattedPrice();
+  
+  // ✅ استخدام الـ store المركزي بدلاً من السياقات المحذوفة
+  const unreadCount = useAppStore((state) => state.unreadCount);
+
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentOrdersLoading, setRecentOrdersLoading] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState(userData?.whatsappNumber || '');
@@ -128,7 +130,6 @@ export default function ProfilePage() {
         {/* قسم رصيد الحساب وزر الإيداع - يظهر أسفل الاسم والبريد مباشرة */}
         <div className="profile-page__balance-section">
           <div className="balance-container">
-            {/* <FaWallet className="balance-icon" /> */}
             <BalanceDisplay />
             <TopUpButton />
           </div>
@@ -157,7 +158,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-{/* رقم واتساب */}
+        {/* رقم واتساب */}
         <div className="profile-page__card">
           <h3>
             <FaWhatsapp /> رقم واتساب
@@ -222,8 +223,6 @@ export default function ProfilePage() {
             <Link to="/notifications" className="profile-page__link">عرض الإشعارات →</Link>
           </div>
         </div>
-
-        
       </div>
 
       {/* سجل الإيداعات */}
@@ -231,7 +230,7 @@ export default function ProfilePage() {
         <DepositHistory />
       </Suspense>
 
-      {/* آخر الطلبات (طلب الشحن) */}
+      {/* آخر الطلبات */}
       <div className="profile-page__orders-section">
         <div className="profile-page__card profile-page__card--wide">
           <h3><FaList /> آخر الطلبات</h3>
@@ -267,7 +266,6 @@ export default function ProfilePage() {
 
       {/* مستوى الولاء */}
       <div className="profile-page__card">
-        {/* <h3><FaTrophy /> مستوى الولاء</h3> */}
         <SpendingProgress />
       </div>
     </div>

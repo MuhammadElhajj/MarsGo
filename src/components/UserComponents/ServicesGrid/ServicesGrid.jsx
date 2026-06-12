@@ -48,9 +48,8 @@ export default function ServicesGrid() {
     <div className="services-grid">
       {services.map((service) => {
         const bgImage = service.bgImageUrl || service.bgImageBase64;
-        const bgStyle = bgImage
-          ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: service.bgColor || 'var(--color-accent)' };
+        // ✅ استخدام عنصر img مع lazy loading بدلاً من backgroundImage
+        const bgStyle = bgImage ? {} : { backgroundColor: service.bgColor || 'var(--color-accent)' };
 
         return (
           <Link
@@ -60,6 +59,25 @@ export default function ServicesGrid() {
             style={bgStyle}
             aria-label={service.name}
           >
+            {/* ✅ صورة خلفية مع lazy loading وتحسين الأداء */}
+            {bgImage && (
+              <img
+                src={bgImage}
+                alt={service.name}
+                className="service-card__bg-image"
+                loading="lazy"
+                decoding="async"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  zIndex: 0,
+                }}
+              />
+            )}
             <div className="service-card__overlay"></div>
             <div className="service-card__content">
               <h3 className="service-card__title">{service.name}</h3>

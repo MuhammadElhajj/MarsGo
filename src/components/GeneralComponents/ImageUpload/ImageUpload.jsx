@@ -5,21 +5,20 @@ import './ImageUpload.css';
 
 export default function ImageUpload({
   label = 'رفع صورة',
-  maxSizeMB = 0.3,        // تم تخفيض الحجم إلى 0.3 ميجابايت لتحسين الأداء
-  maxWidthOrHeight = 800, // تم تخفيض الأبعاد القصوى لتقليل حجم الصورة
+  maxSizeMB = 0.15,            // ✅ تم التخفيض إلى 150KB لتسريع التحميل
+  maxWidthOrHeight = 600,      // ✅ تم التخفيض إلى 600 بكسل (مناسب للشاشات الصغيرة والكبيرة)
   onUploadComplete,
   disabled = false,
   storagePath = 'temp',
-  convertToWebP = true,   // إضافة خيار التحويل إلى WebP (افتراضي true)
+  convertToWebP = true,        // تحويل إلى WebP
 }) {
   const [compressing, setCompressing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [fileName, setFileName] = useState('');
   const [preview, setPreview] = useState('');
-  const previewUrlRef = useRef(null); // لتخزين URL المعاينة وتحريرها
+  const previewUrlRef = useRef(null);
 
-  // تنظيف URL المعاينة عند إلغاء التحميل أو تغيير الملف
   useEffect(() => {
     return () => {
       if (previewUrlRef.current) {
@@ -32,7 +31,6 @@ export default function ImageUpload({
     const file = e.target.files[0];
     if (!file) return;
 
-    // تنظيف المعاينة السابقة
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = null;
@@ -52,28 +50,25 @@ export default function ImageUpload({
     try {
       setCompressing(true);
 
-      // إعدادات الضغط – تحويل إلى WebP إذا كان مفعلاً
+      // ✅ إعدادات ضغط أكثر صرامة للحصول على صور خفيفة
       const options = {
         maxSizeMB,
         maxWidthOrHeight,
         useWebWorker: true,
         fileType: convertToWebP ? 'image/webp' : file.type,
-        // جودة 0.8 للحصول على حجم أقل مع الحفاظ على جودة مقبولة
-        initialQuality: 0.8,
+        initialQuality: 0.75,   // ✅ جودة 75% (توازن بين الجودة والحجم)
       };
       const compressedFile = await imageCompression(file, options);
       
-      // توليد اسم ملف مناسب (مع امتداد webp إذا كان التحويل مفعلاً)
       const fileExtension = convertToWebP ? 'webp' : file.name.split('.').pop();
       const finalFileName = `${compressedFile.name.split('.')[0]}.${fileExtension}`;
       setFileName(finalFileName);
 
-      // معاينة الصورة (يتم إنشاء URL مؤقت)
+      // ✅ معاينة الصورة (سيتم تحميلها بشكل كسول)
       const previewUrl = URL.createObjectURL(compressedFile);
       previewUrlRef.current = previewUrl;
       setPreview(previewUrl);
 
-      // رفع الصورة إلى Firebase Storage
       setUploading(true);
       setCompressing(false);
 
@@ -105,6 +100,7 @@ export default function ImageUpload({
         {uploading && <span className="image-upload__status">جاري رفع الصورة...</span>}
         {preview && !compressing && !uploading && (
           <div className="preview">
+            {/* ✅ إضافة loading="lazy" للمعاينة */}
             <img src={preview} alt="معاينة" loading="lazy" />
           </div>
         )}
@@ -114,7 +110,7 @@ export default function ImageUpload({
         {error && <span className="image-upload__error">{error}</span>}
       </div>
       <small className="image-upload__hint">
-        أقصى حجم بعد الضغط: {maxSizeMB} ميجابايت (يتم التحويل إلى WebP للحصول على جودة عالية بحجم أقل)
+        ✅ أقصى حجم بعد الضغط: {maxSizeMB} ميجابايت (يتم التحويل إلى WebP لجودة عالية بحجم أقل)
       </small>
     </div>
   );

@@ -7,7 +7,7 @@ import './StoreIntro.css';
 
 export default function StoreIntro() {
   const { userData } = useAuth();
-  const storeSettings = useAppStore((state) => state.storeSettings); // جلب إعدادات المتجر من الـ store المركزي
+  const storeSettings = useAppStore((state) => state.storeSettings);
   const [realStats, setRealStats] = useState({ users: 0, completed: 0 });
 
   useEffect(() => {
@@ -16,7 +16,6 @@ export default function StoreIntro() {
         const usersSnap = await getCountFromServer(collection(db, 'users'));
         const completedQuery = query(collection(db, 'orders'), where('status', '==', 'completed'));
         const completedSnap = await getCountFromServer(completedQuery);
-
         setRealStats({
           users: usersSnap.data().count,
           completed: completedSnap.data().count,
@@ -25,52 +24,47 @@ export default function StoreIntro() {
         console.error('خطأ في جلب الإحصائيات:', error);
       }
     };
-
     fetchRealStats();
   }, []);
 
-  // تحديد الخلفية: إما الصورة المرفوعة من Storage (imageUrl) أو القديمة (base64) أو لون افتراضي
   const backgroundImage = storeSettings?.backgroundImageUrl || storeSettings?.backgroundImageBase64;
+  // استخدم صورة خلفية عادية (لحين تحميل الصورة الرئيسية)
   const bgStyle = backgroundImage
-    ? { backgroundImage: `url(${backgroundImage})` }
+    ? { backgroundColor: 'var(--color-accent)' } // لون خلفية مؤقت لمنع CLS
     : { backgroundColor: 'var(--color-accent)' };
 
   return (
     <div className="store-intro" style={bgStyle} dir="rtl">
-      <div className="store-intro__overlay"></div> {/* الطبقة العاتمة */}
+      {/* ✅ صورة خلفية مع fetchpriority="high" لتحسين LCP */}
+      {backgroundImage && (
+        <img
+          src={backgroundImage}
+          alt="خلفية مارسغو"
+          className="store-intro__bg-image"
+          fetchpriority="high"
+          decoding="sync"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0,
+          }}
+        />
+      )}
+      <div className="store-intro__overlay"></div>
       <div className="store-intro__content">
         <h2 className="store-intro__title">مرحباً بك {userData?.name || 'مستخدم'} في MarsGo</h2>
-        {/* <h2 className="store-intro__title">مرحباً بك {userData?.name || 'مستخدم'} </h2> */}
         <p className="store-intro__description">
-          مارسغو منصتك الرقمية الأولى للخدمات المالية  في سوريا. تحويل أموال، شحن ألعاب، بطاقات رقمية، 
+          مارسغو منصتك الرقمية الأولى للخدمات المالية في سوريا. تحويل أموال، شحن ألعاب، بطاقات رقمية، 
           وتداول العملات الرقمية بأمان وسرعة عبر نظام شام كاش.
         </p>
-        {/* <div className="store-intro__highlights">
-          <div className="store-intro__highlight-item">
-            <span className="store-intro__icon">⚡</span>
-            <span>تحويل سريع وآمن</span>
-          </div>
-          <div className="store-intro__highlight-item">
-            <span className="store-intro__icon">🎮</span>
-            <span>شحن جميع الألعاب</span>
-          </div>
-          <div className="store-intro__highlight-item">
-            <span className="store-intro__icon">💱</span>
-            <span>صرافة شام كاش</span>
-          </div>
-          <div className="store-intro__highlight-item">
-            <span className="store-intro__icon">₿</span>
-            <span>عملات رقمية قريباً</span>
-          </div>
-        </div> */}
       </div>
-      {/* <div className="store-intro__stats-mini">
-        <span className="store-intro__stat">+{realStats.users} مستخدم</span>
-        <span className="store-intro__stat">+{realStats.completed} عملية ناجحة</span>
-      </div> */}
       <div className="store-intro__stats-mini">
-        <span className="store-intro__stat">+348 مستخدم</span>
-        <span className="store-intro__stat">+1721 عملية ناجحة</span>
+        <span className="store-intro__stat">+{realStats.users || 348} مستخدم</span>
+        <span className="store-intro__stat">+{realStats.completed || 1721} عملية ناجحة</span>
       </div>
     </div>
   );

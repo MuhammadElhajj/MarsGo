@@ -1,11 +1,7 @@
 // src/pages/User/TopUp/TopUpPage.jsx
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
-import { useBalance } from '../../../context/BalanceContext';
-import { useTopUpSettings } from '../../../context/TopUpSettingsContext';
-import { useCurrency } from '../../../context/CurrencyContext';
-import { useExchangeRate } from '../../../context/ExchangeRateContext';
-import { useNotifications } from '../../../context/NotificationContext';
+import { useAppStore } from '../../../store/store';
 import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
@@ -20,47 +16,57 @@ import './TopUpPage.css';
 
 export default function TopUpPage() {
   const { userData } = useAuth();
-  const { balance, loading: balanceLoading } = useBalance();
-  const { settings, loading: settingsLoading } = useTopUpSettings();
-  const { currency } = useCurrency();
-  const { rate } = useExchangeRate();
-  const { addNotification } = useNotifications();
+  
+  // استخدام useAppStore بدلاً من السياقات القديمة
+  const balance = useAppStore((state) => state.balance);
+  const currency = useAppStore((state) => state.currency);
+  const exchangeRate = useAppStore((state) => state.exchangeRate);
+  const topUpSettings = useAppStore((state) => state.topUpSettings);
+  const addNotification = useAppStore((state) => state.addNotification);
 
-  const [selectedMethod, setSelectedMethod] = useState('usdt');
+  const [selectedMethod, setSelectedMethod] = useState(null);
   const [amount, setAmount] = useState('');
   const [transactionNumber, setTransactionNumber] = useState('');
   const [senderName, setSenderName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const hasWhatsapp = !!userData?.whatsappNumber?.trim();
+
+  // ✅ ترتيب طرق الدفع (بدون إيموجي، احترافي)
+  const methods = useMemo(() => {
+    if (!topUpSettings) return [];
+    const allMethods = [
+      { id: 'shamCash', name: 'شام كاش', enabled: topUpSettings.shamCash?.enabled },
+      { id: 'siretelCash', name: 'سيريتل كاش', enabled: topUpSettings.siretelCash?.enabled },
+      { id: 'usdt', name: 'USDT (تيثر)', enabled: topUpSettings.usdt?.enabled },
+    ];
+    return allMethods.filter(m => m.enabled);
+  }, [topUpSettings]);
+
+  // تعيين الطريقة المفضلة تلقائياً (شام كاش أولاً)
+  useEffect(() => {
+    if (methods.length > 0 && !selectedMethod) {
+      setSelectedMethod(methods[0].id);
+    }
+  }, [methods, selectedMethod]);
+
+  const currentMethod = useMemo(() => topUpSettings?.[selectedMethod], [topUpSettings, selectedMethod]);
+  const supportWhatsApp = useMemo(() => topUpSettings?.supportWhatsApp || '963939454690', [topUpSettings]);
+
   const {
     minDepositUSD,
     getMinDepositDisplay,
     amountIsInvalid,
     isMaintenance,
-  } = useTopUpValidation(settings, amount, selectedMethod, currency, rate);
+  } = useTopUpValidation(topUpSettings, amount, selectedMethod, currency, exchangeRate);
 
-  // تحسين الأداء: استخدام useMemo لقائمة طرق الدفع
-  const methods = useMemo(() => {
-    if (!settings) return [];
-    return [
-      { id: 'usdt', name: 'USDT', icon: '', enabled: settings.usdt?.enabled },
-      { id: 'shamCash', name: 'شام كاش', icon: '', enabled: settings.shamCash?.enabled },
-      { id: 'siretelCash', name: 'سيريتل كاش', icon: '', enabled: settings.siretelCash?.enabled },
-    ].filter(m => m.enabled);
-  }, [settings]);
-
-  const currentMethod = useMemo(() => settings?.[selectedMethod], [settings, selectedMethod]);
-  const supportWhatsApp = useMemo(() => settings?.supportWhatsApp || '963939454690', [settings]);
-  
   const maintenanceMessage = useMemo(() => {
     if (!currentMethod?.address && !currentMethod?.accountNumber) {
-      return '🚧 عذراً، خدمة شحن الرصيد غير متاحة حالياً بسبب تحديث معلومات التحويل. يرجى المحاولة لاحقاً.';
+      return 'معلومات التحويل لهذه الطريقة غير مكتملة، يرجى تجربة طريقة أخرى أو الاتصال بالدعم.';
     }
-    return '🚧 معلومات التحويل لهذه الطريقة غير مكتملة، يرجى تجربة طريقة دفع أخرى أو الاتصال بالدعم.';
+    return 'خدمة شحن الرصيد غير متاحة حالياً، يرجى المحاولة لاحقاً.';
   }, [currentMethod]);
 
-  // تحسين الأداء: استخدام useCallback لدالة إرسال الطلب
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
@@ -99,14 +105,16 @@ export default function TopUpPage() {
         createdAt: serverTimestamp(),
       });
 
-      await addNotification(
-        userData.uid,
-        '💰 طلب شحن رصيد',
-        `تم تقديم طلب شحن بقيمة ${amount} $ بنجاح. رقم الطلب: #${docRef.id.slice(-6)} سيتم مراجعته قريباً.`,
-        'order_created',
-        docRef.id,
-        '/profile'
-      );
+      await addNotification({
+        id: docRef.id,
+        userId: userData.uid,
+        title: 'طلب شحن رصيد',
+        message: `تم تقديم طلب شحن بقيمة ${amount} $ بنجاح. رقم الطلب: #${docRef.id.slice(-6)} سيتم مراجعته قريباً.`,
+        type: 'order_created',
+        link: '/profile',
+        read: false,
+        createdAt: new Date(),
+      });
 
       try {
         const depositMessage = formatDepositMessage(
@@ -115,16 +123,16 @@ export default function TopUpPage() {
             userName: userData.name,
             paymentMethod: selectedMethod,
             transactionNumber,
-            senderName, // ✅ إضافة اسم المرسل إلى الرسالة
+            senderName,
           },
           docRef.id
         );
         await sendTelegramDepositMessage(depositMessage, docRef.id);
       } catch (telegramErr) {
-        console.error('❌ فشل إرسال إشعار التلغرام:', telegramErr);
+        console.error('فشل إرسال إشعار التلغرام:', telegramErr);
       }
 
-      showToast('✅ تم إرسال طلب الشحن، سيتم مراجعته قريباً', 'success');
+      showToast('تم إرسال طلب الشحن، سيتم مراجعته قريباً', 'success');
       setAmount('');
       setTransactionNumber('');
       setSenderName('');
@@ -136,9 +144,8 @@ export default function TopUpPage() {
     }
   }, [hasWhatsapp, isMaintenance, amount, minDepositUSD, getMinDepositDisplay, transactionNumber, senderName, userData, selectedMethod, addNotification]);
 
-  if (settingsLoading) return <div className="topup-page-loading" aria-live="polite">جاري تحميل طرق الدفع...</div>;
-
-  if (!settings) {
+  // حالة تحميل الإعدادات
+  if (!topUpSettings) {
     return (
       <div className="topup-page" dir="rtl">
         <div className="topup-page__header">
@@ -147,14 +154,25 @@ export default function TopUpPage() {
         </div>
         <div className="current-balance-card">
           <div className="balance-label">رصيدك الحالي</div>
-          <div className="balance-amount">
-            {balanceLoading ? 'جاري التحميل...' : `${balance.toFixed(2)} $`}
-          </div>
+          <div className="balance-amount">{balance.toFixed(2)} $</div>
         </div>
-        <MaintenanceMessage
-          message="🚧 لم يتم إعداد معلومات التحويل بعد من قبل المدير. يرجى المحاولة لاحقاً."
-          supportWhatsApp="963939454690"
-        />
+        <MaintenanceMessage message="جاري تحميل إعدادات الدفع..." supportWhatsApp="963939454690" />
+      </div>
+    );
+  }
+
+  if (methods.length === 0) {
+    return (
+      <div className="topup-page" dir="rtl">
+        <div className="topup-page__header">
+          <GoBackButton text="رجوع" />
+          <h2>شحن الرصيد</h2>
+        </div>
+        <div className="current-balance-card">
+          <div className="balance-label">رصيدك الحالي</div>
+          <div className="balance-amount">{balance.toFixed(2)} $</div>
+        </div>
+        <MaintenanceMessage message="لا توجد طرق دفع مفعلة حالياً، يرجى مراجعة الإدارة." supportWhatsApp={supportWhatsApp} />
       </div>
     );
   }
@@ -168,9 +186,7 @@ export default function TopUpPage() {
 
       <div className="current-balance-card">
         <div className="balance-label">رصيدك الحالي</div>
-        <div className="balance-amount">
-          {balanceLoading ? 'جاري التحميل...' : `${balance.toFixed(2)} $`}
-        </div>
+        <div className="balance-amount">{balance.toFixed(2)} $</div>
       </div>
 
       {!hasWhatsapp && <WhatsappWarning />}
