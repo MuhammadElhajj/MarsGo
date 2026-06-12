@@ -3,22 +3,18 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const axios = require('axios');
 
-// لا نعيد تهيئة admin، نستخدم المستورد
 const db = admin.firestore();
 
-// قراءة التوكن من config (بدلاً من secrets)
-const getBotToken = () => {
-  const token = functions.config().telegram?.bot_token;
-  if (!token) throw new Error('Missing telegram.bot_token in functions config');
-  return token;
-};
+// ✅ قراءة التوكن من متغيرات البيئة (process.env) بدلاً من functions.config()
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+if (!BOT_TOKEN) {
+  console.error('❌ TELEGRAM_BOT_TOKEN environment variable is missing');
+}
 
 exports.telegramWebhook = functions.https.onRequest(async (req, res) => {
-  let BOT_TOKEN;
-  try {
-    BOT_TOKEN = getBotToken();
-  } catch (err) {
-    console.error(err.message);
+  // التحقق من صحة التوكن
+  if (!BOT_TOKEN) {
+    console.error('Missing TELEGRAM_BOT_TOKEN');
     return res.status(500).send('Server configuration error: missing token');
   }
 
@@ -53,7 +49,8 @@ exports.telegramWebhook = functions.https.onRequest(async (req, res) => {
     try {
       await axios.post(`${TELEGRAM_API}/sendMessage`, {
         chat_id: chatId,
-        text
+        text,
+        parse_mode: 'Markdown'
       });
     } catch (err) {
       console.error(`❌ sendMessage to ${chatId} failed:`, err.message);

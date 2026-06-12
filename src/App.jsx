@@ -98,11 +98,13 @@ function App() {
         {/* صفحة إدخال كود التفعيل */}
         <Route path="/verify-code" element={<VerifyCodePage />} />
 
-        {/* مسارات العميل */}
+        {/* ✅ صفحتي استعادة كلمة المرور (بدون مصادقة) - تم إخراجهما من الـ Layout */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        {/* مسارات العميل (تتطلب مصادقة + تفعيل) */}
         <Route element={(user && emailVerified) ? <Layout /> : <Navigate to="/login" />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />

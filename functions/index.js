@@ -14,6 +14,7 @@ exports.checkEmailVerified = verification.checkEmailVerified;
 // في index.js أضف الأسطر التالية بعد سطر verification
 exports.sendPasswordResetCode = verification.sendPasswordResetCode;
 exports.verifyPasswordResetCode = verification.verifyPasswordResetCode;
+exports.disableUser = verification.disableUser;   // ✅ السطر المضاف فقط
 
 // ==================== دوال سعر الصرف ====================
 // تأكد من صحة المسارات: إذا كانت الملفات في مجلد exchange، استخدم './exchange/autoUpdate'
