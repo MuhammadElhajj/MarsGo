@@ -1,61 +1,59 @@
-// src/pages/Admin/AdminTopUpSettings.jsx
 import { useState, useEffect } from 'react';
-import { useTopUpSettings } from '../../../context/TopUpSettingsContext';
+import { useAppStore } from '../../../store/store';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import Input from '../../../components/GeneralComponents/Input/Input';
 import ImageUpload from '../../../components/GeneralComponents/ImageUpload/ImageUpload';
-// import './AdminTopUpSettings.css';
+import './AdminTopUpSettings.css';
 
 export default function AdminTopUpSettings() {
-  const { settings, loading, updateSettings } = useTopUpSettings();
+  const topUpSettings = useAppStore((state) => state.topUpSettings);
+  const updateTopUpSettings = useAppStore((state) => state.updateTopUpSettings);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [initializing, setInitializing] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (settings) {
-        setForm({
-          usdt: {
-            enabled: settings.usdt?.enabled ?? true,
-            address: settings.usdt?.address || '',
-            qrCode: settings.usdt?.qrCode || '',
-            network: settings.usdt?.network || 'TRC20',
-            displayName: settings.usdt?.displayName || 'USDT (تيثر)',
-            logoImage: settings.usdt?.logoImage || '',
-          },
-          shamCash: {
-            enabled: settings.shamCash?.enabled ?? true,
-            accountName: settings.shamCash?.accountName || '',
-            accountNumber: settings.shamCash?.accountNumber || '',
-            qrCode: settings.shamCash?.qrCode || '',
-            displayName: settings.shamCash?.displayName || 'شام كاش',
-            logoImage: settings.shamCash?.logoImage || '',
-          },
-          siretelCash: {
-            enabled: settings.siretelCash?.enabled ?? true,
-            accountName: settings.siretelCash?.accountName || '',
-            accountNumber: settings.siretelCash?.accountNumber || '',
-            qrCode: settings.siretelCash?.qrCode || '',
-            displayName: settings.siretelCash?.displayName || 'سيريتل كاش',
-            logoImage: settings.siretelCash?.logoImage || '',
-          },
-          minDeposit: settings.minDeposit ?? 3,
-          supportWhatsApp: settings.supportWhatsApp || '963939454690',
-        });
-      } else {
-        // نموذج افتراضي فارغ
-        setForm({
-          usdt: { enabled: true, address: '', qrCode: '', network: 'TRC20', displayName: 'USDT (تيثر)', logoImage: '' },
-          shamCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '', displayName: 'شام كاش', logoImage: '' },
-          siretelCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '', displayName: 'سيريتل كاش', logoImage: '' },
-          minDeposit: 3,
-          supportWhatsApp: '963939454690',
-        });
-      }
-      setInitializing(false);
+    if (topUpSettings) {
+      setForm({
+        usdt: {
+          enabled: topUpSettings.usdt?.enabled ?? true,
+          address: topUpSettings.usdt?.address || '',
+          qrCode: topUpSettings.usdt?.qrCode || '',
+          network: topUpSettings.usdt?.network || 'TRC20',
+          displayName: topUpSettings.usdt?.displayName || 'USDT (تيثر)',
+          logoImage: topUpSettings.usdt?.logoImage || '',
+        },
+        shamCash: {
+          enabled: topUpSettings.shamCash?.enabled ?? true,
+          accountName: topUpSettings.shamCash?.accountName || '',
+          accountNumber: topUpSettings.shamCash?.accountNumber || '',
+          qrCode: topUpSettings.shamCash?.qrCode || '',
+          displayName: topUpSettings.shamCash?.displayName || 'شام كاش',
+          logoImage: topUpSettings.shamCash?.logoImage || '',
+        },
+        siretelCash: {
+          enabled: topUpSettings.siretelCash?.enabled ?? true,
+          accountName: topUpSettings.siretelCash?.accountName || '',
+          accountNumber: topUpSettings.siretelCash?.accountNumber || '',
+          qrCode: topUpSettings.siretelCash?.qrCode || '',
+          displayName: topUpSettings.siretelCash?.displayName || 'سيريتل كاش',
+          logoImage: topUpSettings.siretelCash?.logoImage || '',
+        },
+        minDeposit: topUpSettings.minDeposit ?? 3,
+        supportWhatsApp: topUpSettings.supportWhatsApp || '963939454690',
+      });
+      setLoading(false);
+    } else if (!topUpSettings && !form) {
+      setForm({
+        usdt: { enabled: true, address: '', qrCode: '', network: 'TRC20', displayName: 'USDT (تيثر)', logoImage: '' },
+        shamCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '', displayName: 'شام كاش', logoImage: '' },
+        siretelCash: { enabled: true, accountName: '', accountNumber: '', qrCode: '', displayName: 'سيريتل كاش', logoImage: '' },
+        minDeposit: 3,
+        supportWhatsApp: '963939454690',
+      });
+      setLoading(false);
     }
-  }, [settings, loading]);
+  }, [topUpSettings]);
 
   const handleMethodChange = (method, field, value) => {
     setForm(prev => ({
@@ -78,11 +76,14 @@ export default function AdminTopUpSettings() {
   const handleSave = async () => {
     if (!form) return;
     setSaving(true);
-    await updateSettings(form);
+    const success = await updateTopUpSettings(form);
     setSaving(false);
+    if (success) {
+      // يمكن إعادة تحميل البيانات أو تحديث الـ store
+    }
   };
 
-  if (loading || initializing) return <div className="admin-topup-loading">جاري تحميل الإعدادات...</div>;
+  if (loading) return <div className="admin-topup-loading">جاري تحميل الإعدادات...</div>;
   if (!form) return <div className="admin-topup-loading">لا يمكن تهيئة النموذج، يرجى تحديث الصفحة.</div>;
 
   return (

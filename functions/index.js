@@ -19,8 +19,8 @@ exports.verifyPasswordResetCode = verification.verifyPasswordResetCode;
 // تأكد من صحة المسارات: إذا كانت الملفات في مجلد exchange، استخدم './exchange/autoUpdate'
 // وإذا كانت في الجذر، استخدم './autoUpdate'
 // سنفترض أنك وضعت الملفين في مجلد exchange (كما تشير الأسطر الأصلية)
-exports.updateExchangeRate = require('./exchange/autoUpdate');
-exports.manualUpdateExchangeRate = require('./exchange/manualUpdate');
+exports.updateExchangeRate = require('./exchange/autoUpdate').updateExchangeRate;
+exports.manualUpdateExchangeRate = require('./exchange/manualUpdate').manualUpdateExchangeRate;
 
 // ==================== بوت تيليجرام ====================
 const telegramBot = require('./telegramBot/telegramBot');

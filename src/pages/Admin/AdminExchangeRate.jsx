@@ -1,23 +1,28 @@
 import { useState, useEffect } from 'react';
-import { useExchangeRate } from '../../context/ExchangeRateContext';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { useAppStore } from '../../store/store';
 import Button from '../../components/GeneralComponents/Button/Button';
 import Input from '../../components/GeneralComponents/Input/Input';
 import { showToast } from '../../components/GeneralComponents/ToastNotification/ToastNotification';
 import './AdminExchangeRate.css';
 
 export default function AdminExchangeRate() {
-  const { rate, autoSync, updateRate, setAutoSync, manualUpdate } = useExchangeRate();
-  const [newRate, setNewRate] = useState(rate || '');
+  const exchangeRate = useAppStore((state) => state.exchangeRate);
+  const autoSync = useAppStore((state) => state.autoSyncExchangeRate);
+  const setExchangeRate = useAppStore((state) => state.setExchangeRate);
+  const setAutoSync = useAppStore((state) => state.setAutoSyncExchangeRate);
+
+  const [newRate, setNewRate] = useState(exchangeRate || '');
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  // تحديث الحقل اليدوي عند تغير السعر من context
-  useEffect(() => {
-    if (rate) setNewRate(rate);
-  }, [rate]);
+  const functions = getFunctions();
+  const manualUpdateCallable = httpsCallable(functions, 'manualUpdateExchangeRate');
 
-  // حفظ السعر اليدوي
+  useEffect(() => {
+    if (exchangeRate) setNewRate(exchangeRate);
+  }, [exchangeRate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (autoSync) {
@@ -30,50 +35,58 @@ export default function AdminExchangeRate() {
       return;
     }
     setSaving(true);
-    const success = await updateRate(value);
-    if (success) {
+    try {
+      setExchangeRate(value);
       showToast('تم حفظ السعر اليدوي بنجاح', 'success');
+    } catch (err) {
+      showToast('فشل حفظ السعر', 'error');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
-  // تفعيل / إيقاف المزامنة التلقائية
   const handleToggleAutoSync = async () => {
     setSyncing(true);
     const newState = !autoSync;
-    const success = await setAutoSync(newState);
-    if (success) {
+    try {
+      setAutoSync(newState);
       showToast(newState ? 'تم تفعيل المزامنة التلقائية للسعر' : 'تم إيقاف المزامنة التلقائية', 'success');
-      // إذا تم التفعيل، نقوم فوراً بجلب آخر سعر من API
-      if (newState && manualUpdate) {
-        const result = await manualUpdate();
-        if (result?.success) {
-          showToast(`تم تحديث السعر إلى ${result.rate.toLocaleString()} ل.س`, 'success');
+      if (newState) {
+        const result = await manualUpdateCallable();
+        if (result.data?.success) {
+          setExchangeRate(result.data.rate);
+          showToast(`تم تحديث السعر إلى ${result.data.rate.toLocaleString()} ل.س`, 'success');
         }
       }
-    } else {
+    } catch (err) {
       showToast('فشل تغيير حالة المزامنة', 'error');
+    } finally {
+      setSyncing(false);
     }
-    setSyncing(false);
   };
 
-  // تحديث يدوي فوري (زر منفصل)
   const handleManualFetch = async () => {
     if (!autoSync) {
       showToast('المزامنة التلقائية غير مفعلة. قم بتفعيلها أولاً أو استخدم الحقل اليدوي', 'error');
       return;
     }
     setSyncing(true);
-    const result = await manualUpdate();
-    if (result?.success) {
-      showToast(`تم تحديث السعر إلى ${result.rate.toLocaleString()} ل.س`, 'success');
-    } else {
-      showToast('فشل تحديث السعر من المصدر الخارجي', 'error');
+    try {
+      const result = await manualUpdateCallable();
+      if (result.data?.success) {
+        setExchangeRate(result.data.rate);
+        showToast(`تم تحديث السعر إلى ${result.data.rate.toLocaleString()} ل.س`, 'success');
+      } else {
+        showToast('فشل تحديث السعر من المصدر الخارجي', 'error');
+      }
+    } catch (err) {
+      showToast('فشل تحديث السعر', 'error');
+    } finally {
+      setSyncing(false);
     }
-    setSyncing(false);
   };
 
-  if (rate === null) return <div>جاري التحميل...</div>;
+  if (exchangeRate === null) return <div>جاري التحميل...</div>;
 
   return (
     <div className="admin-exchange-rate">
@@ -123,10 +136,10 @@ export default function AdminExchangeRate() {
       )}
 
       <div className="admin-exchange-rate__current">
-        <p>السعر الحالي المعروض للمستخدمين: <strong>{rate.toLocaleString()} ل.س</strong></p>
+        <p>السعر الحالي المعروض للمستخدمين: <strong>{exchangeRate.toLocaleString()} ل.س</strong></p>
         <p className="admin-exchange-rate__note">
           {autoSync 
-            ? '✓ يتم تحديث السعر تلقائياً كل ساعة من LiraScope. يمكنك الضغط على "مزامنة الآن" لتحديث فوري.'
+            ? '✓ يتم تحديث السعر تلقائياً كل 15 دقيقة من LiraScope. يمكنك الضغط على "مزامنة الآن" لتحديث فوري.'
             : '✓ المزامنة التلقائية معطلة. يمكنك إدخال السعر يدوياً وسيتم عرضه للمستخدمين.'}
         </p>
       </div>

@@ -2,7 +2,7 @@
   width: 16rem;
   background-color: var(--color-bg-secondary);
   box-shadow: var(--shadow-sm);
-  padding: 1.5rem 0.5rem; /* تم إزالة padding-top الزائد */
+  padding: 0rem 0.5rem; /* تم إزالة padding-top الزائد */
   flex-shrink: 0;
   overflow-y: auto;
   transition: transform 0.3s ease;

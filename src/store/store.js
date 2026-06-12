@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { doc, updateDoc, increment, onSnapshot } from 'firebase/firestore';
+// import { doc, updateDoc, increment, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, increment, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import toast from 'react-hot-toast';
 
@@ -147,7 +148,26 @@ export const useAppStore = create(
         return state.userData?.customerType === 'merchant' ? state.merchantDiscountPercent : 0;
       },
 
+    
       // ========== إعدادات الإيداع (TopUp) ==========
+     updateTopUpSettings: async (settings) => {
+  try {
+    const docRef = doc(db, 'topUpSettings', 'default');
+    await setDoc(docRef, {
+      ...settings,
+      updatedAt: new Date().toISOString(),
+      updatedBy: get().user?.uid || 'admin'
+    }, { merge: true });
+    get().setTopUpSettings(settings);
+    toast.success('تم حفظ إعدادات الإيداع بنجاح');
+    return true;
+  } catch (error) {
+    console.error('خطأ في حفظ الإعدادات:', error);
+    toast.error('فشل حفظ الإعدادات');
+    return false;
+  }
+},
+
       topUpSettings: null,
       setTopUpSettings: (settings) => set({ topUpSettings: settings }),
 
