@@ -1,11 +1,312 @@
+
+// const functions = require('firebase-functions');
+// const admin = require('firebase-admin');
+// const nodemailer = require('nodemailer');
+
+// // ========== بيانات البريد الثابتة (مؤقتاً) ==========
+// const EMAIL_USER = "3elhajj@gmail.com";
+// const EMAIL_PASS = "wynxigcoegarzyjd";   // كلمة مرور التطبيق (App Password)
+
+// // ========== دوال مساعدة ==========
+// function generateVerificationCode() {
+//   return Math.floor(100000 + Math.random() * 900000).toString();
+// }
+
+// let transporter = null;
+// function getTransporter() {
+//   if (transporter) return transporter;
+//   try {
+//     if (!EMAIL_USER || !EMAIL_PASS) {
+//       console.warn('⚠️ Email credentials missing');
+//       return null;
+//     }
+//     transporter = nodemailer.createTransport({
+//       service: 'gmail',
+//       auth: { user: EMAIL_USER, pass: EMAIL_PASS }
+//     });
+//     console.log('✅ Email transporter created successfully');
+//     return transporter;
+//   } catch (err) {
+//     console.error('❌ Error creating email transporter:', err.message);
+//     return null;
+//   }
+// }
+
+// // ========== 1. إرسال كود التفعيل ==========
+// exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
+//   console.log("🚀 [STEP 0] Function started");
+  
+//   let email = data?.email || data?.data?.email;
+//   let uid = data?.uid || data?.data?.uid;
+  
+//   console.log("📨 Extracted:", { email, uid });
+
+//   if (!email) {
+//     console.error("❌ Missing email in request");
+//     throw new functions.https.HttpsError('invalid-argument', 'Email is required');
+//   }
+//   console.log("✅ [STEP 1] Email validated");
+
+//   let finalUid = uid;
+//   if (!finalUid) {
+//     try {
+//       const userRecord = await admin.auth().getUserByEmail(email);
+//       finalUid = userRecord.uid;
+//     } catch (err) {
+//       console.error("❌ Failed to get uid:", err.message);
+//       throw new functions.https.HttpsError('not-found', 'User not found with this email');
+//     }
+//   }
+
+//   // التحقق من وجود المستخدم
+//   try {
+//     const userRecord = await admin.auth().getUser(finalUid);
+//     if (userRecord.email !== email) throw new Error("Email mismatch");
+//   } catch (err) {
+//     console.error("❌ Invalid user:", err.message);
+//     throw new functions.https.HttpsError('not-found', 'Invalid user');
+//   }
+
+//   // التحقق من rate limit
+//   const codeDocRef = admin.firestore().collection('verificationCodes').doc(finalUid);
+//   const codeSnap = await codeDocRef.get();
+//   const now = Date.now();
+
+//   if (codeSnap.exists) {
+//     const lastSent = codeSnap.data().lastSentAt?.toMillis?.() || 0;
+//     if (now - lastSent < 60000) {
+//       throw new functions.https.HttpsError('failed-precondition', 'الرجاء الانتظار دقيقة قبل طلب كود جديد');
+//     }
+//   }
+
+//   const code = generateVerificationCode();
+//   const expiresAt = admin.firestore.Timestamp.fromMillis(now + 10 * 60 * 1000);
+
+//   await codeDocRef.set({
+//     code,
+//     email,
+//     expiresAt,
+//     lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+//     attempts: 0
+//   }, { merge: true });
+//   console.log("✅ Code saved to Firestore");
+
+//   // إرسال البريد الإلكتروني
+//   let emailSent = false;
+//   try {
+//     const transporter = getTransporter();
+//     if (transporter) {
+//       await transporter.sendMail({
+//         from: `"MarsGo" <${EMAIL_USER}>`,
+//         to: email,
+//         subject: 'رمز تفعيل حساب MarsGo',
+//         html: `
+//           <div dir="rtl" style="font-family: Tahoma, sans-serif; padding: 20px;">
+//             <h2>مرحباً بك في MarsGo</h2>
+//             <p>استخدم الرمز التالي لتفعيل حسابك. الرمز صالح لمدة 10 دقائق:</p>
+//             <h1 style="background: #f0f0f0; padding: 10px; text-align: center; letter-spacing: 5px;">${code}</h1>
+//             <p>إذا لم تطلب هذا، يمكنك تجاهل الرسالة.</p>
+//             <p>فريق MarsGo</p>
+//           </div>
+//         `,
+//       });
+//       emailSent = true;
+//       console.log(`✅ Email sent to ${email} with code ${code}`);
+//     } else {
+//       console.warn("⚠️ No transporter available");
+//     }
+//   } catch (err) {
+//     console.error("❌ Email sending failed:", err.message);
+//   }
+
+//   return { success: true, emailSent, uid: finalUid };
+// });
+
+// // ========== 2. التحقق من كود التفعيل ==========
+// exports.verifyCode = functions.https.onCall(async (data, context) => {
+//   const { email, uid, code } = data;
+//   if (!email || !uid || !code) {
+//     throw new functions.https.HttpsError('invalid-argument', 'Missing required fields');
+//   }
+//   if (!context.auth || context.auth.uid !== uid) {
+//     throw new functions.https.HttpsError('permission-denied', 'Unauthorized');
+//   }
+
+//   const codeDocRef = admin.firestore().collection('verificationCodes').doc(uid);
+//   const codeSnap = await codeDocRef.get();
+//   if (!codeSnap.exists) {
+//     throw new functions.https.HttpsError('not-found', 'لم يتم طلب كود تفعيل لهذا الحساب');
+//   }
+
+//   const record = codeSnap.data();
+//   if (record.email !== email) {
+//     throw new functions.https.HttpsError('permission-denied', 'البريد الإلكتروني غير متطابق');
+//   }
+//   if (record.expiresAt?.toMillis?.() < Date.now()) {
+//     throw new functions.https.HttpsError('deadline-exceeded', 'انتهت صلاحية الكود. يرجى طلب كود جديد');
+//   }
+
+//   const attempts = (record.attempts || 0) + 1;
+//   if (attempts > 3) {
+//     await codeDocRef.delete();
+//     throw new functions.https.HttpsError('failed-precondition', 'تم تجاوز عدد المحاولات. يرجى طلب كود جديد');
+//   }
+//   if (record.code !== code) {
+//     await codeDocRef.update({ attempts });
+//     throw new functions.https.HttpsError('invalid-argument', 'الكود غير صحيح');
+//   }
+
+//   const userRef = admin.firestore().collection('users').doc(uid);
+//   await userRef.update({
+//     emailVerified: true,
+//     verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+//   });
+//   await admin.auth().updateUser(uid, { emailVerified: true });
+
+//   await codeDocRef.delete();
+//   return { success: true, message: 'تم تفعيل الحساب بنجاح' };
+// });
+
+// // ========== 3. التحقق من حالة التفعيل ==========
+// exports.checkEmailVerified = functions.https.onCall(async (data, context) => {
+//   const { uid } = data;
+//   if (!uid) throw new functions.https.HttpsError('invalid-argument', 'UID required');
+//   const userRecord = await admin.auth().getUser(uid);
+//   return { verified: userRecord.emailVerified };
+// });
+
+// // ========== 4. إرسال كود إعادة تعيين كلمة المرور ==========
+// exports.sendPasswordResetCode = functions.https.onCall(async (data, context) => {
+//   const { email } = data;
+//   if (!email) {
+//     throw new functions.https.HttpsError('invalid-argument', 'البريد الإلكتروني مطلوب');
+//   }
+
+//   let uid;
+//   try {
+//     const userRecord = await admin.auth().getUserByEmail(email);
+//     uid = userRecord.uid;
+//   } catch (err) {
+//     console.log(`Password reset requested for non-existent email: ${email}`);
+//     return { success: true, message: 'إذا كان البريد موجوداً، تم إرسال الكود.' };
+//   }
+
+//   const codeDocRef = admin.firestore().collection('passwordResets').doc(uid);
+//   const codeSnap = await codeDocRef.get();
+//   const now = Date.now();
+//   if (codeSnap.exists) {
+//     const lastSent = codeSnap.data().lastSentAt?.toMillis?.() || 0;
+//     if (now - lastSent < 60000) {
+//       throw new functions.https.HttpsError('failed-precondition', 'الرجاء الانتظار دقيقة قبل طلب كود جديد');
+//     }
+//   }
+
+//   const code = generateVerificationCode();
+//   const expiresAt = admin.firestore.Timestamp.fromMillis(now + 10 * 60 * 1000);
+
+//   await codeDocRef.set({
+//     code,
+//     email,
+//     expiresAt,
+//     lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+//     attempts: 0
+//   }, { merge: true });
+
+//   let emailSent = false;
+//   try {
+//     const transporter = getTransporter();
+//     if (transporter) {
+//       await transporter.sendMail({
+//         from: `"MarsGo" <${EMAIL_USER}>`,
+//         to: email,
+//         subject: 'إعادة تعيين كلمة المرور في MarsGo',
+//         html: `
+//           <div dir="rtl" style="font-family: Tahoma, sans-serif; padding: 20px;">
+//             <h2>إعادة تعيين كلمة المرور</h2>
+//             <p>استخدم الرمز التالي لإعادة تعيين كلمة المرور. الرمز صالح لمدة 10 دقائق:</p>
+//             <h1 style="background: #f0f0f0; padding: 10px; text-align: center; letter-spacing: 5px;">${code}</h1>
+//             <p>إذا لم تطلب إعادة التعيين، يمكنك تجاهل هذه الرسالة.</p>
+//             <p>فريق MarsGo</p>
+//           </div>
+//         `,
+//       });
+//       emailSent = true;
+//       console.log(`✅ Password reset email sent to ${email}`);
+//     } else {
+//       console.log(`⚠️ No transporter, reset code for ${email}: ${code}`);
+//     }
+//   } catch (err) {
+//     console.error('Email sending failed:', err);
+//   }
+
+//   return { success: true, emailSent };
+// });
+
+// // ========== 5. التحقق من كود إعادة التعيين وتحديث كلمة المرور ==========
+// exports.verifyPasswordResetCode = functions.https.onCall(async (data, context) => {
+//   const { email, code, newPassword } = data;
+//   if (!email || !code || !newPassword) {
+//     throw new functions.https.HttpsError('invalid-argument', 'جميع الحقول مطلوبة');
+//   }
+//   if (newPassword.length < 6) {
+//     throw new functions.https.HttpsError('invalid-argument', 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل');
+//   }
+
+//   let uid;
+//   try {
+//     const userRecord = await admin.auth().getUserByEmail(email);
+//     uid = userRecord.uid;
+//   } catch (err) {
+//     throw new functions.https.HttpsError('not-found', 'لا يوجد حساب مرتبط بهذا البريد');
+//   }
+
+//   const codeDocRef = admin.firestore().collection('passwordResets').doc(uid);
+//   const codeSnap = await codeDocRef.get();
+
+//   if (!codeSnap.exists) {
+//     throw new functions.https.HttpsError('not-found', 'لم يتم طلب كود إعادة تعيين لهذا الحساب');
+//   }
+
+//   const record = codeSnap.data();
+//   if (record.expiresAt?.toMillis?.() < Date.now()) {
+//     await codeDocRef.delete();
+//     throw new functions.https.HttpsError('deadline-exceeded', 'انتهت صلاحية الكود. يرجى طلب كود جديد');
+//   }
+
+//   const attempts = (record.attempts || 0) + 1;
+//   if (attempts > 3) {
+//     await codeDocRef.delete();
+//     throw new functions.https.HttpsError('failed-precondition', 'تم تجاوز عدد المحاولات. يرجى طلب كود جديد');
+//   }
+//   if (record.code !== code) {
+//     await codeDocRef.update({ attempts });
+//     throw new functions.https.HttpsError('invalid-argument', 'الكود غير صحيح');
+//   }
+
+//   await admin.auth().updateUser(uid, { password: newPassword });
+//   await codeDocRef.delete();
+
+//   return { success: true, message: 'تم تغيير كلمة المرور بنجاح' };
+// });
+
+
+
+
+
+
+
+
+
 // functions/verification.js
-// جميع دوال التفعيل وإعادة تعيين كلمة المرور
-// تم إصلاح دالة sendVerificationCode لتقبل تنسيقات مختلفة من data
-// وتم تعليق التحقق الصارم من uid مؤقتاً لتجنب 403 في مرحلة التسجيل
+// دوال التفعيل وإعادة تعيين كلمة المرور - نسخة عالمية
 
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
+
+// ========== بيانات البريد الثابتة (مؤقتاً) ==========
+const EMAIL_USER = "3elhajj@gmail.com";
+const EMAIL_PASS = "wynxigcoegarzyjd";   // كلمة مرور التطبيق (App Password)
 
 // ========== دوال مساعدة ==========
 function generateVerificationCode() {
@@ -16,20 +317,13 @@ let transporter = null;
 function getTransporter() {
   if (transporter) return transporter;
   try {
-    const emailConfig = functions.config().email;
-    if (!emailConfig) {
-      console.warn('⚠️ Email config object missing entirely');
-      return null;
-    }
-    const user = emailConfig.user;
-    const pass = emailConfig.pass;
-    if (!user || !pass) {
-      console.warn('⚠️ Email credentials not set (user or pass missing)');
+    if (!EMAIL_USER || !EMAIL_PASS) {
+      console.warn('⚠️ Email credentials missing');
       return null;
     }
     transporter = nodemailer.createTransport({
       service: 'gmail',
-      auth: { user, pass }
+      auth: { user: EMAIL_USER, pass: EMAIL_PASS }
     });
     console.log('✅ Email transporter created successfully');
     return transporter;
@@ -39,61 +333,41 @@ function getTransporter() {
   }
 }
 
-// ========== 1. إرسال كود التفعيل (معدل ليتحمل تنسيقات متعددة وبدون تحقق صارم من uid) ==========
+// ========== 1. إرسال كود التفعيل ==========
 exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
-  console.log("🚀 [STEP 0] Function started");
+  console.log("🚀 sendVerificationCode started");
   
-  // استخراج البيانات بطريقة مرنة (يدعم formatين)
   let email = data?.email || data?.data?.email;
   let uid = data?.uid || data?.data?.uid;
   
   console.log("📨 Extracted:", { email, uid });
 
   if (!email) {
-    console.error("❌ Missing email in request. Full data:", JSON.stringify(data));
-    throw new functions.https.HttpsError('invalid-argument', 'Email is required');
+    console.error("❌ Missing email");
+    throw new functions.https.HttpsError('invalid-argument', 'البريد الإلكتروني مطلوب');
   }
-  console.log("✅ [STEP 1] Email validated");
 
   let finalUid = uid;
   if (!finalUid) {
     try {
-      console.log("🔍 [STEP 2a] Fetching uid by email...");
       const userRecord = await admin.auth().getUserByEmail(email);
       finalUid = userRecord.uid;
-      console.log(`✅ [STEP 2a] Retrieved uid: ${finalUid}`);
     } catch (err) {
-      console.error(`❌ [STEP 2a] Failed:`, err.message);
-      throw new functions.https.HttpsError('not-found', 'User not found with this email');
+      console.error("❌ Failed to get uid:", err.message);
+      throw new functions.https.HttpsError('not-found', 'لا يوجد مستخدم بهذا البريد');
     }
   }
 
   // التحقق من وجود المستخدم
   try {
-    console.log("🔍 [STEP 2b] Verifying user with uid...");
     const userRecord = await admin.auth().getUser(finalUid);
-    if (userRecord.email !== email) {
-      console.warn(`⚠️ UID ${finalUid} email mismatch: ${userRecord.email} vs ${email}`);
-      throw new Error("Email mismatch");
-    }
-    console.log("✅ [STEP 2b] User verified");
+    if (userRecord.email !== email) throw new Error("Email mismatch");
   } catch (err) {
-    console.error(`❌ [STEP 2b] Failed:`, err.message);
-    throw new functions.https.HttpsError('not-found', 'Invalid user');
+    console.error("❌ Invalid user:", err.message);
+    throw new functions.https.HttpsError('not-found', 'بيانات المستخدم غير صحيحة');
   }
 
-  // ✅ تم تعليق التحقق من تطابق uid مع context.auth مؤقتاً لتجنب 403 في مرحلة التسجيل
-  // ملاحظة: هذا الإجراء غير آمن للإنتاج، لكنه ضروري لتجربة العملية.
-  // يمكن إعادة تفعيله لاحقاً بعد التأكد من أن المستخدم مسجل الدخول بشكل صحيح.
-  /*
-  if (!context.auth || context.auth.uid !== finalUid) {
-    console.error(`❌ Auth mismatch: token UID=${context.auth?.uid}, requested UID=${finalUid}`);
-    throw new functions.https.HttpsError('permission-denied', 'You can only request code for your own account');
-  }
-  */
-  console.log("⚠️ [STEP 2c] Permission check skipped for debugging (remove in production).");
-
-  console.log("🔍 [STEP 3] Accessing Firestore...");
+  // التحقق من rate limit (مرة كل دقيقة)
   const codeDocRef = admin.firestore().collection('verificationCodes').doc(finalUid);
   const codeSnap = await codeDocRef.get();
   const now = Date.now();
@@ -104,12 +378,10 @@ exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
       throw new functions.https.HttpsError('failed-precondition', 'الرجاء الانتظار دقيقة قبل طلب كود جديد');
     }
   }
-  console.log("✅ [STEP 3] Rate limit check passed");
 
   const code = generateVerificationCode();
   const expiresAt = admin.firestore.Timestamp.fromMillis(now + 10 * 60 * 1000);
 
-  console.log("🔍 [STEP 4] Saving code to Firestore...");
   await codeDocRef.set({
     code,
     email,
@@ -117,44 +389,41 @@ exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
     lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
     attempts: 0
   }, { merge: true });
-  console.log("✅ [STEP 4] Code saved");
+  console.log("✅ Code saved to Firestore");
 
-  // محاولة إرسال البريد
-  console.log("🔍 [STEP 5] Attempting to send email...");
+  // إرسال البريد الإلكتروني
   let emailSent = false;
   try {
     const transporter = getTransporter();
     if (transporter) {
-      const emailUser = functions.config().email?.user;
-      if (emailUser) {
-        await transporter.sendMail({
-          from: `"MarsGo" <${emailUser}>`,
-          to: email,
-          subject: 'رمز تفعيل حساب MarsGo',
-          html: `
-            <div dir="rtl" style="font-family: Tahoma, sans-serif; padding: 20px;">
-              <h2>مرحباً بك في MarsGo</h2>
-              <p>استخدم الرمز التالي لتفعيل حسابك. الرمز صالح لمدة 10 دقائق:</p>
-              <h1 style="background: #f0f0f0; padding: 10px; text-align: center; letter-spacing: 5px;">${code}</h1>
-              <p>إذا لم تطلب هذا، يمكنك تجاهل الرسالة.</p>
-              <p>فريق MarsGo</p>
+      await transporter.sendMail({
+from: `"MarsGo" <${EMAIL_USER}>`,
+        to: email,
+        subject: 'رمز التحقق من البريد الإلكتروني',
+        html: `
+          <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; text-align: right; padding: 20px; background-color: #f9f9f9;">
+            <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #4f46e5; margin-bottom: 20px;">مرحباً بك</h2>
+              <p style="font-size: 16px; color: #333;">لقد قمت بطلب تفعيل حسابك. الرمز التالي صالح لمدة 10 دقائق:</p>
+              <div style="background: #f0f0f0; font-size: 28px; font-weight: bold; text-align: center; padding: 15px; margin: 20px 0; letter-spacing: 8px; border-radius: 8px; direction: ltr;">
+                ${code}
+              </div>
+              <p style="font-size: 14px; color: #777;">إذا لم تقم بهذا الطلب، يرجى تجاهل هذه الرسالة.</p>
+              <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+              <p style="font-size: 12px; color: #aaa;">هذه رسالة آلية، الرجاء عدم الرد عليها.</p>
             </div>
-          `,
-        });
-        emailSent = true;
-        console.log(`✅ [STEP 5a] Email sent to ${email} with code ${code}`);
-      } else {
-        console.warn("⚠️ [STEP 5b] Email user config missing, cannot send.");
-      }
+          </div>
+        `,
+      });
+      emailSent = true;
+      console.log(`✅ Email sent to ${email} with code ${code}`);
     } else {
-      console.warn("⚠️ [STEP 5b] No transporter available (likely Spark plan or missing credentials)");
+      console.warn("⚠️ No transporter available");
     }
   } catch (err) {
-    console.error(`❌ [STEP 5c] Email sending failed:`, err.message);
-    // لا نعيد الخطأ، نكمل
+    console.error("❌ Email sending failed:", err.message);
   }
 
-  console.log("🎉 [STEP 6] Function completed successfully");
   return { success: true, emailSent, uid: finalUid };
 });
 
@@ -162,17 +431,14 @@ exports.sendVerificationCode = functions.https.onCall(async (data, context) => {
 exports.verifyCode = functions.https.onCall(async (data, context) => {
   const { email, uid, code } = data;
   if (!email || !uid || !code) {
-    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields');
+    throw new functions.https.HttpsError('invalid-argument', 'جميع الحقول مطلوبة (البريد، المعرف، الرمز)');
   }
-
-  // التحقق من أن المستخدم الموثق هو نفسه (يمكن إبقاء هذا للتحقق)
   if (!context.auth || context.auth.uid !== uid) {
-    throw new functions.https.HttpsError('permission-denied', 'Unauthorized');
+    throw new functions.https.HttpsError('permission-denied', 'غير مصرح لك بتفعيل هذا الحساب');
   }
 
   const codeDocRef = admin.firestore().collection('verificationCodes').doc(uid);
   const codeSnap = await codeDocRef.get();
-
   if (!codeSnap.exists) {
     throw new functions.https.HttpsError('not-found', 'لم يتم طلب كود تفعيل لهذا الحساب');
   }
@@ -181,8 +447,8 @@ exports.verifyCode = functions.https.onCall(async (data, context) => {
   if (record.email !== email) {
     throw new functions.https.HttpsError('permission-denied', 'البريد الإلكتروني غير متطابق');
   }
-
   if (record.expiresAt?.toMillis?.() < Date.now()) {
+    await codeDocRef.delete();
     throw new functions.https.HttpsError('deadline-exceeded', 'انتهت صلاحية الكود. يرجى طلب كود جديد');
   }
 
@@ -191,7 +457,6 @@ exports.verifyCode = functions.https.onCall(async (data, context) => {
     await codeDocRef.delete();
     throw new functions.https.HttpsError('failed-precondition', 'تم تجاوز عدد المحاولات. يرجى طلب كود جديد');
   }
-
   if (record.code !== code) {
     await codeDocRef.update({ attempts });
     throw new functions.https.HttpsError('invalid-argument', 'الكود غير صحيح');
@@ -211,7 +476,10 @@ exports.verifyCode = functions.https.onCall(async (data, context) => {
 // ========== 3. التحقق من حالة التفعيل ==========
 exports.checkEmailVerified = functions.https.onCall(async (data, context) => {
   const { uid } = data;
-  if (!uid) throw new functions.https.HttpsError('invalid-argument', 'UID required');
+  if (!uid) throw new functions.https.HttpsError('invalid-argument', 'UID مطلوب');
+  if (!context.auth || context.auth.uid !== uid) {
+    throw new functions.https.HttpsError('permission-denied', 'غير مصرح');
+  }
   const userRecord = await admin.auth().getUser(uid);
   return { verified: userRecord.emailVerified };
 });
@@ -229,6 +497,7 @@ exports.sendPasswordResetCode = functions.https.onCall(async (data, context) => 
     uid = userRecord.uid;
   } catch (err) {
     console.log(`Password reset requested for non-existent email: ${email}`);
+    // لأسباب أمنية نعيد نفس الرسالة سواء وجد البريد أم لا
     return { success: true, message: 'إذا كان البريد موجوداً، تم إرسال الكود.' };
   }
 
@@ -253,30 +522,36 @@ exports.sendPasswordResetCode = functions.https.onCall(async (data, context) => 
     attempts: 0
   }, { merge: true });
 
-  const transporter = getTransporter();
   let emailSent = false;
-  if (transporter) {
-    try {
+  try {
+    const transporter = getTransporter();
+    if (transporter) {
       await transporter.sendMail({
-        from: `"MarsGo" <${functions.config().email.user}>`,
+          from: `"MarsGo" <${EMAIL_USER}>`,
         to: email,
-        subject: 'إعادة تعيين كلمة المرور في MarsGo',
+        subject: 'إعادة تعيين كلمة المرور',
         html: `
-          <div dir="rtl" style="font-family: Tahoma, sans-serif; padding: 20px;">
-            <h2>إعادة تعيين كلمة المرور</h2>
-            <p>استخدم الرمز التالي لإعادة تعيين كلمة المرور. الرمز صالح لمدة 10 دقائق:</p>
-            <h1 style="background: #f0f0f0; padding: 10px; text-align: center; letter-spacing: 5px;">${code}</h1>
-            <p>إذا لم تطلب إعادة التعيين، يمكنك تجاهل هذه الرسالة.</p>
-            <p>فريق MarsGo</p>
+          <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; text-align: right; padding: 20px; background-color: #f9f9f9;">
+            <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+              <h2 style="color: #4f46e5;">إعادة تعيين كلمة المرور</h2>
+              <p>استخدم الرمز التالي لإكمال العملية. الرمز صالح لمدة 10 دقائق:</p>
+              <div style="background: #f0f0f0; font-size: 28px; font-weight: bold; text-align: center; padding: 15px; margin: 20px 0; letter-spacing: 8px; border-radius: 8px; direction: ltr;">
+                ${code}
+              </div>
+              <p>إذا لم تطلب إعادة التعيين، يمكنك تجاهل هذه الرسالة.</p>
+              <hr>
+              <p style="font-size: 12px; color: #aaa;">رسالة آلية، الرجاء عدم الرد.</p>
+            </div>
           </div>
         `,
       });
       emailSent = true;
-    } catch (err) {
-      console.error('Email sending failed:', err);
+      console.log(`✅ Password reset email sent to ${email}`);
+    } else {
+      console.log(`⚠️ No transporter, reset code for ${email}: ${code}`);
     }
-  } else {
-    console.log(`⚠️ Email not sent. Reset code for ${email}: ${code}`);
+  } catch (err) {
+    console.error('Email sending failed:', err);
   }
 
   return { success: true, emailSent };
@@ -288,7 +563,6 @@ exports.verifyPasswordResetCode = functions.https.onCall(async (data, context) =
   if (!email || !code || !newPassword) {
     throw new functions.https.HttpsError('invalid-argument', 'جميع الحقول مطلوبة');
   }
-
   if (newPassword.length < 6) {
     throw new functions.https.HttpsError('invalid-argument', 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل');
   }
@@ -319,7 +593,6 @@ exports.verifyPasswordResetCode = functions.https.onCall(async (data, context) =
     await codeDocRef.delete();
     throw new functions.https.HttpsError('failed-precondition', 'تم تجاوز عدد المحاولات. يرجى طلب كود جديد');
   }
-
   if (record.code !== code) {
     await codeDocRef.update({ attempts });
     throw new functions.https.HttpsError('invalid-argument', 'الكود غير صحيح');
