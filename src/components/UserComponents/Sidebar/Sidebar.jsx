@@ -142,10 +142,10 @@ export default function Sidebar({ isOpen, onClose }) {
           </Link>
         )}
         
-        <button className="sidebar__theme-btn" onClick={toggleTheme} aria-label="تبديل المظهر">
+        {/* <button className="sidebar__theme-btn" onClick={toggleTheme} aria-label="تبديل المظهر">
           {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
           <span>{isDark ? "الوضع الفاتح" : "الوضع الداكن"}</span>
-        </button>
+        </button> */}
         <button className="sidebar__logout-btn" onClick={handleLogout} aria-label="تسجيل الخروج">
           <FiLogOut size={20} />
           <span>تسجيل الخروج</span>

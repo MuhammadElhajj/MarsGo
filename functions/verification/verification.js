@@ -1,17 +1,16 @@
 require('dotenv').config();
-
-
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 
-// قراءة من متغيرات البيئة
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
+// ... باقي الكود
 
 if (!EMAIL_USER || !EMAIL_PASS) {
   console.error('⚠️ EMAIL_USER or EMAIL_PASS not set in environment variables');
 }
+
 
 // ========== بيانات البريد الثابتة (مؤقتاً) ==========
 // const EMAIL_USER = "3elhajj@gmail.com";

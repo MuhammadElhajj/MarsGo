@@ -24,5 +24,7 @@ exports.updateExchangeRate = require('./autoUpdate').updateExchangeRate;
 exports.manualUpdateExchangeRate = require('./manualUpdate').manualUpdateExchangeRate;
 
 // ==================== بوت تيليجرام ====================
-const telegramBot = require('./telegramBot/telegramBot');
-exports.telegramWebhook = telegramBot.telegramWebhook;
+// const telegramBot = require('./telegramBot/telegramBot');
+// exports.telegramWebhook = telegramBot.telegramWebhook;
+
+exports.externalStoreProxy = require('./externalStoreProxy').externalStoreProxy;

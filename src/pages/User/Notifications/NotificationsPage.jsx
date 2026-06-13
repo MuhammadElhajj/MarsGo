@@ -27,13 +27,13 @@ export default function NotificationsPage() {
         <GoBackButton text="رجوع" />
         <h2>الإشعارات</h2>
         <Button onClick={handleMarkAll} variant="primary" size="sm">
-          ✅ تحديد كمقروء
+        تحديد كمقروء
         </Button>
       </div>
 
       {notifications.length === 0 ? (
         <div className="notifications-page__empty">
-          <span>🔔</span>
+       
           <p>لا توجد إشعارات حالياً</p>
         </div>
       ) : (

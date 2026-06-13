@@ -1,74 +1,82 @@
 // src/services/apiStoreService.js
-const API_BASE = 'https://mhd-game.com/api';
-const API_TOKEN = import.meta.env.VITE_STORE_API_TOKEN;
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
+const functions = getFunctions();
+const storeProxy = httpsCallable(functions, 'externalStoreProxy');
 
 /**
- * جلب جميع المنتجات من المتجر الخارجي
+ * جلب جميع المنتجات من المتجر الخارجي (عبر Cloud Function)
  */
 export async function fetchStoreProducts() {
-  if (!API_TOKEN) throw new Error('Store API token missing');
-  const res = await fetch(`${API_BASE}/client/api/products`, {
-    headers: { 'api-token': API_TOKEN }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
-}
-
-/**
- * إنشاء طلب شراء في المتجر الخارجي (يتم استدعاؤها من UnifiedCheckout)
- */
-export async function createStoreOrder({ productId, quantity, playerId, anyKey = '', orderUuid }) {
-  if (!API_TOKEN) throw new Error('Store API token missing');
-  if (!productId || !quantity || !playerId) throw new Error('Missing required parameters');
-
-  let url = `${API_BASE}/client/api/newOrder/${productId}/params?qty=${quantity}&playerId=${encodeURIComponent(playerId)}&order_uuid=${encodeURIComponent(orderUuid)}`;
-  if (anyKey) url += `&anyKey=${encodeURIComponent(anyKey)}`;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 ثانية مهلة
-
   try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { 'api-token': API_TOKEN },
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.status !== 'OK') throw new Error(data.message || 'Store order failed');
-    return data.data; // { order_id, status, price, data }
-  } catch (err) {
-    clearTimeout(timeoutId);
-    throw new Error(`فشل الاتصال بالمتجر: ${err.message}`);
+    const result = await storeProxy({ action: 'fetchProducts' });
+    if (!result.data.success) {
+      throw new Error(result.data.message || 'Failed to fetch products');
+    }
+    const data = result.data.data;
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('fetchStoreProducts error:', error);
+    throw new Error(`فشل جلب المنتجات: ${error.message}`);
   }
 }
 
 /**
- * التحقق من حالة طلب خارجي (يمكن استخدامها في خلفية النظام)
+ * إنشاء طلب شراء في المتجر الخارجي
+ */
+export async function createStoreOrder({ productId, quantity, playerId, anyKey = '', orderUuid }) {
+  if (!productId || !quantity || !playerId) {
+    throw new Error('Missing required parameters');
+  }
+
+  try {
+    const result = await storeProxy({
+      action: 'createOrder',
+      params: { productId, quantity, playerId, anyKey, orderUuid }
+    });
+
+    if (!result.data.success) {
+      throw new Error(result.data.message || 'Store order failed');
+    }
+    return result.data.data; // { order_id, status, price, data }
+  } catch (error) {
+    console.error('createStoreOrder error:', error);
+    throw new Error(`فشل الاتصال بالمتجر: ${error.message}`);
+  }
+}
+
+/**
+ * التحقق من حالة طلب خارجي
  */
 export async function checkStoreOrderStatus(orderUuid) {
-  if (!API_TOKEN) throw new Error('Store API token missing');
-  const url = `${API_BASE}/client/api/check?orders=[${encodeURIComponent(orderUuid)}]&uuid=1`;
-  const res = await fetch(url, { headers: { 'api-token': API_TOKEN } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (data.status !== 'OK') throw new Error(data.message);
-  const orderInfo = data.data?.find(o => o.order_id === orderUuid);
-  return orderInfo || { status: 'unknown' };
+  try {
+    const result = await storeProxy({
+      action: 'checkOrder',
+      params: { orderUuid }
+    });
+    if (!result.data.success) {
+      throw new Error(result.data.message || 'Failed to check order');
+    }
+    const orderInfo = result.data.data?.data?.find(o => o.order_id === orderUuid);
+    return orderInfo || { status: 'unknown' };
+  } catch (error) {
+    console.error('checkStoreOrderStatus error:', error);
+    throw new Error(`فشل التحقق من الطلب: ${error.message}`);
+  }
 }
 
 /**
  * جلب رصيد المتجر
  */
 export async function fetchStoreBalance() {
-  if (!API_TOKEN) throw new Error('Store API token missing');
-  const res = await fetch(`${API_BASE}/client/api/profile`, {
-    headers: { 'api-token': API_TOKEN }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (data.status !== 'OK') throw new Error(data.message);
-  return data.balance || 0;
+  try {
+    const result = await storeProxy({ action: 'fetchBalance' });
+    if (!result.data.success) {
+      throw new Error(result.data.message || 'Failed to fetch balance');
+    }
+    return result.data.balance || 0;
+  } catch (error) {
+    console.error('fetchStoreBalance error:', error);
+    throw new Error(`فشل جلب الرصيد: ${error.message}`);
+  }
 }

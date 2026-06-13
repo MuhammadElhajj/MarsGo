@@ -22,7 +22,7 @@
 
 .notifications-page__empty {
   text-align: center;
-  padding: 3rem;
+  padding: 1rem;
   background: var(--color-bg-secondary);
   border-radius: 1rem;
   color: var(--color-text-secondary);
