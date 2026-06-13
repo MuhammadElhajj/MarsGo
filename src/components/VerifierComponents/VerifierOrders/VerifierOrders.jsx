@@ -2,9 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { db } from '../../../firebase';
 import { collection, query, where, onSnapshot, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
-import { useGames } from '../../../context/GamesContext';
-import { useNotifications } from '../../../context/NotificationContext'; // ✅ استيراد الإشعارات
-import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification'; // ✅ إشعارات منبثقة للمدقق
+import { useAppStore } from '../../../store/store'; // ✅ استبدال السياقات بـ Zustand
+import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
 import Loading from '../../GeneralComponents/Loading/Loading';
@@ -19,8 +18,13 @@ const orderTypes = {
 
 export default function VerifierOrders() {
   const { userData } = useAuth();
-  const { games, loading: gamesLoading } = useGames();
-  const { addNotification } = useNotifications(); // ✅ دالة إضافة إشعار للمستخدم
+  
+  // ✅ استخدم الـ store المركزية بدلاً من السياقات
+  const games = useAppStore((state) => state.games);
+  const setGames = useAppStore((state) => state.setGames);
+  const addNotification = useAppStore((state) => state.addNotification);
+  const [gamesLoading, setGamesLoading] = useState(!games || games.length === 0);
+
   const [pendingOrders, setPendingOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -34,7 +38,29 @@ export default function VerifierOrders() {
 
   const isAdvanced = userData?.verifierType === 'advanced';
 
-  // استخدام onSnapshot للاستماع المباشر للطلبات المعلقة
+  // جلب الألعاب إذا لم تكن موجودة في الـ store
+  useEffect(() => {
+    const fetchGames = async () => {
+      if (games && games.length > 0) {
+        setGamesLoading(false);
+        return;
+      }
+      setGamesLoading(true);
+      try {
+        const q = query(collection(db, 'games'));
+        const snapshot = await getDocs(q);
+        const gamesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setGames(gamesList);
+      } catch (err) {
+        console.error('خطأ في جلب الألعاب:', err);
+      } finally {
+        setGamesLoading(false);
+      }
+    };
+    fetchGames();
+  }, [games, setGames]);
+
+  // استخدام onSnapshot للاستماع للطلبات المعلقة
   useEffect(() => {
     setLoading(true);
     const q = query(collection(db, 'orders'), where('status', '==', 'pending_verification'));
@@ -46,7 +72,6 @@ export default function VerifierOrders() {
       console.error("خطأ في الاستماع للطلبات:", error);
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -72,20 +97,22 @@ export default function VerifierOrders() {
       
       await updateDoc(orderRef, {
         status: 'completed',
-        processNumber: processNumber, // ✅ تغيير الاسم إلى processNumber (رقم العملية)
+        processNumber: processNumber,
         completedBy: userData?.uid,
         completedAt: new Date(),
       });
 
-      // ✅ إضافة إشعار للمستخدم بنجاح التنفيذ مع رقم العملية
-      await addNotification(
-        orderData.userId,
-        '🎉 تم تنفيذ طلبك',
-        `طلب #${orderId.slice(-6)} - ${orderTypes[orderData.type] || orderData.type} تم تنفيذه بنجاح. رقم العملية: ${processNumber}`,
-        'order_completed',
-        orderId,
-        '/my-orders'
-      );
+      // ✅ إضافة إشعار للمستخدم باستخدام addNotification من الـ store
+      await addNotification({
+        userId: orderData.userId,
+        title: '🎉 تم تنفيذ طلبك',
+        message: `طلب #${orderId.slice(-6)} - ${orderTypes[orderData.type] || orderData.type} تم تنفيذه بنجاح. رقم العملية: ${processNumber}`,
+        type: 'order_completed',
+        orderId: orderId,
+        link: '/my-orders',
+        read: false,
+        createdAt: new Date(),
+      });
 
       showToast('✅ تم تنفيذ الطلب بنجاح وإرسال إشعار للمستخدم', 'success', 4000);
     } catch (err) {
@@ -111,15 +138,16 @@ export default function VerifierOrders() {
         verifiedAt: new Date(),
       });
 
-      // ✅ إشعار للمستخدم بطلب التعديل
-      await addNotification(
-        orderData.userId,
-        '✏️ مطلوب تعديل على طلبك',
-        `طلب #${orderId.slice(-6)} بحاجة إلى تعديل: ${note}`,
-        'order_resubmit',
-        orderId,
-        '/my-orders'
-      );
+      await addNotification({
+        userId: orderData.userId,
+        title: '✏️ مطلوب تعديل على طلبك',
+        message: `طلب #${orderId.slice(-6)} بحاجة إلى تعديل: ${note}`,
+        type: 'order_resubmit',
+        orderId: orderId,
+        link: '/my-orders',
+        read: false,
+        createdAt: new Date(),
+      });
 
       showToast('✅ تم إرسال طلب تعديل للمستخدم', 'success', 4000);
     } catch (err) {
@@ -145,15 +173,16 @@ export default function VerifierOrders() {
         verifiedAt: new Date(),
       });
 
-      // ✅ إشعار للمستخدم برفض الطلب مع السبب
-      await addNotification(
-        orderData.userId,
-        '❌ تم رفض طلبك',
-        `طلب #${orderId.slice(-6)} - ${orderTypes[orderData.type] || orderData.type} تم رفضه. السبب: ${reason}`,
-        'order_rejected',
-        orderId,
-        '/my-orders'
-      );
+      await addNotification({
+        userId: orderData.userId,
+        title: '❌ تم رفض طلبك',
+        message: `طلب #${orderId.slice(-6)} - ${orderTypes[orderData.type] || orderData.type} تم رفضه. السبب: ${reason}`,
+        type: 'order_rejected',
+        orderId: orderId,
+        link: '/my-orders',
+        read: false,
+        createdAt: new Date(),
+      });
 
       showToast('✅ تم رفض الطلب وإرسال إشعار للمستخدم', 'success', 4000);
     } catch (err) {
@@ -238,7 +267,6 @@ export default function VerifierOrders() {
                 <span className="verifier-orders__status">قيد التدقيق</span>
               </div>
               <div className="verifier-orders__details">
-                {/* ✅ عرض بيانات العميل */}
                 <p><strong>العميل:</strong> {order.customerName || '—'} ({order.userId?.slice(-6)})</p>
                 {order.type === 'transfer' && (
                   <>

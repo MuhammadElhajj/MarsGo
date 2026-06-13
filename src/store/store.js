@@ -81,7 +81,7 @@ export const useAppStore = create(
       toggleTheme: () => set((state) => ({ isDark: !state.isDark })),
 
       // ========== سعر الصرف ==========
-      exchangeRate: 15000,
+      exchangeRate: 145,
       setExchangeRate: (rate) => set({ exchangeRate: rate }),
       autoSyncExchangeRate: true,
       setAutoSyncExchangeRate: (auto) => set({ autoSyncExchangeRate: auto }),

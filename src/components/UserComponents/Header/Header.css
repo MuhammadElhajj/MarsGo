@@ -1,328 +1,102 @@
-.header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--color-bg-secondary);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  height: 4rem;
-  gap: 1rem;
-}
+/* ========================================
+   Header - تصميم نظيف ومرتب
+   ======================================== */
 
-.header__left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
-}
-
-.header__center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.header__right {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.header__hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-
-.hamburger-icon {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background-color: var(--color-text-primary);
-  transition: 0.3s;
-}
-
-.header__brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--color-accent);
-}
-
-.header__user {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.header__name {
-  font-weight: 500;
-  display: none;
-}
-
-@media (min-width: 640px) {
-  .header__name {
-    display: inline;
-  }
-}
-
-.header__logout-btn {
-  width: auto;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.8rem;
-}
-
-/* إظهار الهمبرغر فقط على الجوال */
-@media (max-width: 768px) {
-  .header__hamburger {
-    display: flex;
-  }
-
-  .header__center {
-    display: none;
-  }
-
-  .header__brand {
-    font-size: 1.2rem;
-  }
-}
-
-/* ===== الهيدر الرئيسي ===== */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 30;
   height: 4rem;
-  transition: all 0.3s ease;
-  border-bottom: 1px solid var(--color-border);
 }
 
-/* ===== الأقسام الداخلية ===== */
+/* ===== القسم الأيسر ===== */
 .header__left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
-.header__center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  max-width: 400px;
-  margin: 0 auto;
+.header__logo {
+  width: 100px;
+  height: auto;
+  transition: opacity 0.2s;
 }
 
-.header__right {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* ===== زر القائمة (هامبرغر) ===== */
+/* زر الهامبرغر (يظهر فقط في الجوال) */
 .header__hamburger {
   display: none;
-  flex-direction: column;
-  gap: 4px;
   background: none;
   border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.5rem;
-  transition: background 0.2s;
-}
-.header__hamburger:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-.hamburger-icon {
-  display: block;
-  width: 22px;
-  height: 2px;
-  background-color: var(--color-text-primary);
-  transition: 0.3s;
-}
-
-/* ===== العلامة التجارية ===== */
-.header__brand {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--color-accent), #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
-}
-
-/* ===== مجموعة المستخدم (أفاتار + اسم + زر خروج) ===== */
-.header__user {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.header__name {
-  font-weight: 500;
-  font-size: 0.9rem;
   color: var(--color-text-primary);
-  white-space: nowrap;
-}
-
-/* ===== زر الخروج ===== */
-.header__logout-btn {
-  width: auto;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.8rem;
-}
-
-/* ===== استجابة للشاشات المتوسطة والصغيرة ===== */
-@media (max-width: 900px) {
-  .header__center {
-    max-width: 260px;
-  }
-  .header__brand {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .header {
-    padding: 0.5rem 1rem;
-  }
-  .header__hamburger {
-    display: flex;
-  }
-  .header__center {
-    display: none; /* إخفاء شريط البحث في الجوال */
-  }
-  .header__name {
-    display: none; /* إخفاء اسم المستخدم */
-  }
-  .header__user {
-    gap: 0.5rem;
-  }
-}
-
-/* ===== تحسينات للوضع الفاتح والداكن ===== */
-.light .header__hamburger:hover {
-  background: rgba(0, 0, 0, 0.03);
-}
-.dark .header__hamburger:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* زر تسجيل الخروج (أيقونة فقط) */
-.header__logout-icon {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.header__logout-icon:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-danger);
-  transform: scale(1.05);
-}
-
-/* تحسين للجوال */
-@media (max-width: 768px) {
-  .header__logout-icon {
-    padding: 0.4rem;
-  }
-}
-
-/* ===== الهيدر الرئيسي ===== */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--color-bg-secondary);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  height: 4rem;
-  transition: all 0.3s ease;
-  border-bottom: 1px solid var(--color-border);
-}
-
-/* ===== الأقسام الداخلية ===== */
-.header__left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
-}
-
-.header__center {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.header__right {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* ===== زر القائمة (أيقونة React) ===== */
-.header__hamburger {
-  display: none;
-  background: none;
-  border: none;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  color: var(--color-text-primary);
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   line-height: 0;
 }
+
 .header__hamburger:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
+
 .dark .header__hamburger:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* ===== العلامة التجارية ===== */
-.header__brand {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--color-accent), #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.02em;
+/* ===== منتصف الهيدر (شريط البحث) ===== */
+.header__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-/* ===== مجموعة المستخدم ===== */
+/* ===== القسم الأيمن ===== */
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* حاوية الأيقونات */
+.header__icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* زر تسجيل الخروج */
+.header__logout-icon {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.header__logout-icon:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  transform: scale(1.05);
+}
+
+/* قسم المستخدم (الاسم + الأفاتار) */
 .header__user {
   display: flex;
   align-items: center;
@@ -334,106 +108,96 @@
   font-size: 0.9rem;
   color: var(--color-text-primary);
   white-space: nowrap;
+  display: inline-block;
 }
 
-/* ===== زر تسجيل الخروج (أيقونة) ===== */
-.header__logout-icon {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-.header__logout-icon:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-danger);
-  transform: scale(1.05);
-}
-
-/* ===== تحسين زر تبديل المظهر (ThemeToggle) ===== */
-.theme-toggle {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-primary);
-  transition: all 0.2s ease;
-}
-.theme-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  transform: scale(1.05);
-}
-.dark .theme-toggle:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* ===== استجابة للشاشات ===== */
+/* ===== استجابة للشاشات المتوسطة ===== */
 @media (max-width: 900px) {
   .header__center {
     max-width: 260px;
   }
-  .header__brand {
-    font-size: 1.2rem;
+  .header__right {
+    gap: 1rem;
   }
-}
-
-@media (max-width: 768px) {
-  .header {
-    padding: 0.4rem;
-  }
-  .header__hamburger {
-    display: flex;  /* ✅ إظهار زر القائمة في الجوال */
-  }
-  .header__center {
-    display: none;  /* إخفاء شريط البحث */
-  }
-  .header__name {
-    display: none;  /* إخفاء اسم المستخدم */
-  }
-  .header__user {
+  .header__icons {
     gap: 0.5rem;
   }
 }
 
-.header-Logo--img {
-  width: 100px;
-}
-
-
+/* ===== استجابة للشاشات الصغيرة (جوال) ===== */
 @media (max-width: 768px) {
-  /* القواعد الموجودة حالياً */
   .header {
     padding: 0.5rem 1rem;
   }
+
+  /* إظهار زر الهامبرغر */
   .header__hamburger {
     display: flex;
   }
+
+  /* إخفاء شريط البحث */
   .header__center {
     display: none;
   }
+
+  /* إخفاء اسم المستخدم */
   .header__name {
     display: none;
   }
-  .header__user {
-    gap: 0.5rem;
-  }
-  
 
+  /* تقليل المسافات بين الأيقونات */
+  .header__right {
+    gap: 0.75rem;
+  }
+
+  .header__icons {
+    gap: 0.25rem;
+  }
 }
 
+/* ===== تحسينات إضافية للوضع الداكن ===== */
+.dark .header__logout-icon {
+  color: var(--color-text-secondary);
+}
 
-/* إخفاء أيقونات المود والخروج في الجوال */
+.dark .header__logout-icon:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ===== استجابة للشاشات الصغيرة (جوال) ===== */
 @media (max-width: 768px) {
-  .header__desktop-actions {
+  .header {
+    padding: 0.5rem 1rem;
+  }
+
+  /* إظهار زر الهامبرغر */
+  .header__hamburger {
+    display: flex;
+  }
+
+  /* إخفاء شريط البحث */
+  .header__center {
     display: none;
+  }
+
+  /* إخفاء اسم المستخدم */
+  .header__name {
+    display: none;
+  }
+
+  /* ✅ إخفاء أزرار المود وتغيير العملة والخروج */
+  .header__icons .theme-toggle,
+  .header__icons .currency-toggle,
+  .header__icons .header__logout-icon {
+    display: none;
+  }
+
+  /* تقليل المسافات بين الأيقونات */
+  .header__right {
+    gap: 0.75rem;
+  }
+
+  .header__icons {
+    gap: 0.25rem;
   }
 }

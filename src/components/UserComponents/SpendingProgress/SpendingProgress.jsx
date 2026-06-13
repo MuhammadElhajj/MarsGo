@@ -32,7 +32,7 @@ export default function SpendingProgress() {
           style={{ width: `${progressPercent}%` }}
         ></div>
       </div>
-      <div className="spending-progress__info">
+      {/* <div className="spending-progress__info">
         {nextTier ? (
           <div className="spending-progress__next">
             تحتاج إلى <strong>{formatPrice(remaining)}</strong>  للوصول إلى المستوى {nextTier.level}
@@ -40,7 +40,7 @@ export default function SpendingProgress() {
         ) : (
           <div className="spending-progress__max">لقد وصلت إلى أعلى مستوى ولاء!</div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

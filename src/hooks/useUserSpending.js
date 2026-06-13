@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { db } from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
 // تعريف المستويات (بالدولار)
@@ -11,6 +11,35 @@ const TIERS = [
   { level: 4, min: 1000, max: 2500, target: 2500 },
   { level: 5, min: 2500, max: Infinity, target: null },
 ];
+
+// دالة حساب المستوى خارج الـ component لتجنب إعادة الإنشاء
+const calculateTierAndProgress = (total) => {
+  let current = null;
+  let next = null;
+  for (let i = 0; i < TIERS.length; i++) {
+    const tier = TIERS[i];
+    if (total >= tier.min && total < tier.max) {
+      current = tier;
+      if (i + 1 < TIERS.length) next = TIERS[i + 1];
+      break;
+    }
+  }
+  if (!current && total >= TIERS[TIERS.length - 1].min) {
+    current = TIERS[TIERS.length - 1];
+    next = null;
+  }
+
+  let progressPercent = 0;
+  if (current && next) {
+    const range = next.min - current.min;
+    const progress = total - current.min;
+    progressPercent = Math.min(100, Math.max(0, (progress / range) * 100));
+  } else if (current && !next) {
+    progressPercent = 100;
+  }
+
+  return { currentTier: current, nextTier: next, progressPercent };
+};
 
 export default function useUserSpending() {
   const { userData } = useAuth();
@@ -23,24 +52,27 @@ export default function useUserSpending() {
   useEffect(() => {
     if (!userData?.uid) {
       setTotalSpent(0);
+      setCurrentTier(null);
+      setNextTier(null);
+      setProgressPercent(0);
       setLoading(false);
       return;
     }
 
     const fetchCompletedOrders = async () => {
       try {
-        // جلب الطلبات المكتملة فقط
+        // ✅ إضافة حد أقصى 500 طلب مكتمل (يمكن تعديل الرقم حسب الحاجة)
         const q = query(
           collection(db, "orders"),
           where("userId", "==", userData.uid),
-          where("status", "==", "completed")
+          where("status", "==", "completed"),
+          limit(500)
         );
         const snapshot = await getDocs(q);
         let total = 0;
 
         snapshot.forEach((doc) => {
           const order = doc.data();
-          // الحصول على المبلغ بالدولار: يعتمد على الحقول الموجودة
           let amountUSD = 0;
           if (order.finalPriceUSD && typeof order.finalPriceUSD === "number") {
             amountUSD = order.finalPriceUSD;
@@ -49,44 +81,16 @@ export default function useUserSpending() {
           } else if (order.amount && order.currency === "USD") {
             amountUSD = order.amount;
           } else if (order.amount && typeof order.amount === "number") {
-            // إذا كان الحقل amount فقط بدون عملة (افتراض دولار)
             amountUSD = order.amount;
           }
           total += amountUSD;
         });
 
         setTotalSpent(total);
-
-        // تحديد المستوى الحالي والمستوى التالي
-        let current = null;
-        let next = null;
-        for (let i = 0; i < TIERS.length; i++) {
-          const tier = TIERS[i];
-          if (total >= tier.min && total < tier.max) {
-            current = tier;
-            if (i + 1 < TIERS.length) next = TIERS[i + 1];
-            break;
-          }
-        }
-        // إذا تجاوز أعلى مستوى
-        if (!current && total >= TIERS[TIERS.length - 1].min) {
-          current = TIERS[TIERS.length - 1];
-          next = null;
-        }
-        setCurrentTier(current);
-        setNextTier(next);
-
-        // حساب نسبة التقدم للمستوى الحالي
-        if (current && next) {
-          const range = next.min - current.min;
-          const progress = total - current.min;
-          const percent = (progress / range) * 100;
-          setProgressPercent(Math.min(100, Math.max(0, percent)));
-        } else if (current && !next) {
-          setProgressPercent(100);
-        } else {
-          setProgressPercent(0);
-        }
+        const { currentTier: cur, nextTier: nxt, progressPercent: prog } = calculateTierAndProgress(total);
+        setCurrentTier(cur);
+        setNextTier(nxt);
+        setProgressPercent(prog);
       } catch (err) {
         console.error("خطأ في حساب الإنفاق:", err);
       } finally {

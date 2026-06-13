@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../../firebase';
-import { collection, query, where, orderBy, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, updateDoc, doc, limit } from 'firebase/firestore';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
 import './AdminOrders.css';
@@ -16,7 +16,8 @@ export default function AdminOrders() {
       const q = query(
         collection(db, 'orders'),
         where('status', '==', 'verified_pending_execution'),
-        orderBy('verifiedAt', 'asc')
+        orderBy('verifiedAt', 'asc'),
+        limit(50)  // ✅ إضافة حد أقصى لتحسين الأداء
       );
       const snap = await getDocs(q);
       setOrders(snap.docs.map(d => ({ id: d.id, ...d.data() })));

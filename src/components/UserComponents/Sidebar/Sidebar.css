@@ -1,15 +1,40 @@
+/* ========================================
+   Sidebar - تحسين التموضع والمظهر
+   ======================================== */
+
 .sidebar {
-  width: 16rem;
+  width: 320px;
   background-color: var(--color-bg-secondary);
   box-shadow: var(--shadow-sm);
-  padding: 0rem 0.5rem; /* تم إزالة padding-top الزائد */
+  padding: 0 0.5rem;
   flex-shrink: 0;
-  overflow-y: auto;
   transition: transform 0.3s ease;
   position: relative;
-  width: 320px !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
+/* القسم القابل للتمرير */
+.sidebar__scrollable {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+
+/* القسم الثابت في الأسفل */
+.sidebar__fixed-bottom {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.3rem;
+  background: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ===== القائمة الرئيسية ===== */
 .sidebar__list {
   list-style: none;
   display: flex;
@@ -33,10 +58,12 @@
   text-transform: uppercase;
   cursor: pointer;
   border-radius: var(--radius-md);
+  transition: all 0.2s;
 }
 
 .sidebar__category-btn:hover {
   background-color: rgba(79, 70, 229, 0.1);
+  color: var(--color-accent);
 }
 
 .sidebar__chevron {
@@ -62,6 +89,7 @@
   to { opacity: 1; max-height: 200px; }
 }
 
+/* الروابط العادية */
 .sidebar__link {
   display: block;
   padding: 0.5rem 0.75rem;
@@ -69,11 +97,12 @@
   text-decoration: none;
   color: var(--color-text-primary);
   font-size: 0.9rem;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .sidebar__link:hover {
   background-color: rgba(79, 70, 229, 0.1);
+  transform: translateX(-3px);
 }
 
 .sidebar__link--active {
@@ -82,168 +111,62 @@
   font-weight: 500;
 }
 
+/* ===== روابط الأدوار الخاصة (تظهر في الأسفل) ===== */
 .sidebar__link--verifier {
   background: #059669;
-    color: #1f2937;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.sidebar__link--verifier:hover {
+  background: #047857;
+  transform: translateX(-3px);
+}
+.sidebar__link--verifier.sidebar__link--active {
+  background: #065f46;
+  box-shadow: inset 0 0 0 2px #fff3;
 }
 
 .sidebar__link--admin {
-     color: #1f2937;
-    background: #ffb0b0;
-}
-
-/* ===== زر الإغلاق (يظهر فقط في الجوال) ===== */
-.sidebar__close-btn {
-  display: none;
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: #ef4444;
-  border: none;
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 26;
+  background: #dc2626;
   color: white;
-  font-size: 1rem;
-}
-
-/* -------------------- الجوال -------------------- */
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 25;
-    transform: translateX(100%);
-    box-shadow: none;
-   padding-top: 5rem !important;/* ✅ المساحة المطلوبة لزر الإغلاق والهيدر */
-  }
-
-  .sidebar--open {
-    transform: translateX(0);
-    box-shadow: var(--shadow-md);
-  }
-
-  .sidebar__close-btn {
-    display: flex; /* ✅ إظهار زر الإغلاق */
-  }
-}
-
-
-/* === كارد معلومات المستخدم === */
-.sidebar__user-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  background: var(--color-bg-primary);
-  padding: 1rem;
-  margin: 0.75rem 0.5rem 1rem 0.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--color-border);
-  transition: all 0.2s;
-}
-
-.sidebar__user-card:hover {
-  background: var(--color-bg-secondary);
-  transform: translateY(-2px);
-}
-
-/* صورة الأفاتار */
-.sidebar__user-avatar {
-  flex-shrink: 0;
-}
-
-/* النصوص */
-.sidebar__user-text {
-  flex: 1;
-  min-width: 0; /* منع overflow */
-}
-
-.sidebar__user-name {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 0.2rem 0;
-  color: var(--color-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar__user-email {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* تباعد بين المكونات الأخرى */
-.sidebar__exchange-rate,
-.sidebar__spending-progress {
-  margin: 0 0.5rem 1rem 0.5rem;
-}
-
-/* استجابة للجوال */
-@media (max-width: 768px) {
-  .sidebar__user-card {
-    padding: 0.75rem;
-    gap: 0.75rem;
-    margin: 0.5rem;
-  }
-  .sidebar__user-name {
-    font-size: 0.9rem;
-  }
-  .sidebar__user-email {
-    font-size: 0.7rem;
-  }
-}
-
-
-/* زر تغيير العملة في السايد بار */
-.sidebar__currency-toggle {
-  margin: 0.5rem 0.5rem 0.5rem 0.5rem;
-  padding: 0;
-}
-
-.sidebar__currency-toggle .currency-toggle--sidebar {
-  width: 100%;
-}
-
-
-
-
-/* جعل السايد بار مرنة للتمرير مع أزرار ثابتة في الأسفل */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.sidebar__scrollable {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 1rem;
-}
-
-.sidebar__fixed-bottom {
-  flex-shrink: 0;
-  border-top: 1px solid var(--color-border);
-  padding: 1rem;
-  background: var(--color-bg-secondary);
-  display: flex;
-  flex-direction: column;
   gap: 0.75rem;
 }
+.sidebar__link--admin:hover {
+  background: #b91c1c;
+  transform: translateX(-3px);
+}
+.sidebar__link--admin.sidebar__link--active {
+  background: #991b1b;
+  box-shadow: inset 0 0 0 2px #fff3;
+}
 
-/* تنسيق الأزرار */
+.sidebar__link--finance {
+  background: #f59e0b;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.sidebar__link--finance:hover {
+  background: #d97706;
+  transform: translateX(-3px);
+}
+.sidebar__link--finance.sidebar__link--active {
+  background: #b45309;
+  box-shadow: inset 0 0 0 2px #fff3;
+}
+
+/* أيقونات الروابط */
+.sidebar__link-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ===== أزرار الثابتة (المظهر والخروج) ===== */
 .sidebar__theme-btn,
 .sidebar__logout-btn {
   display: flex;
@@ -272,15 +195,87 @@
   background: #ef4444;
 }
 
-/* في الجوال، الأزرار تبقى ثابتة كذلك */
-@media (max-width: 768px) {
-  .sidebar__fixed-bottom {
-    padding: 0.75rem;
-  }
+/* ===== كارد معلومات المستخدم ===== */
+.sidebar__user-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--color-bg-primary);
+  padding: 1rem;
+  margin: 0.75rem 0.5rem 1rem 0.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s;
 }
 
+.sidebar__user-card:hover {
+  background: var(--color-bg-secondary);
+  transform: translateY(-2px);
+}
 
-/* سبينر صغير */
+.sidebar__user-avatar {
+  flex-shrink: 0;
+}
+
+.sidebar__user-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__user-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem 0;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__user-email {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== مكونات إضافية ===== */
+.sidebar__exchange-rate,
+.sidebar__spending-progress {
+  margin: 0 0.5rem 1rem 0.5rem;
+}
+
+.sidebar__currency-toggle {
+  margin: 0.5rem;
+}
+
+/* ===== زر الإغلاق (يظهر فقط في الجوال) ===== */
+.sidebar__close-btn {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #ef4444;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 26;
+  color: white;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.sidebar__close-btn:hover {
+  background: #dc2626;
+}
+
+/* ===== سبينر التحميل ===== */
 .spinner-small {
   width: 28px;
   height: 28px;
@@ -308,7 +303,41 @@
   color: var(--color-text-secondary);
 }
 
+/* ===== استجابة الجوال ===== */
 @media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 25;
+    transform: translateX(100%);
+    box-shadow: none;
+    padding-top: 4rem;
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar__close-btn {
+    display: flex;
+  }
+
+  .sidebar__user-card {
+    padding: 0.75rem;
+    gap: 0.75rem;
+    margin: 0.5rem;
+  }
+  .sidebar__user-name {
+    font-size: 0.9rem;
+  }
+  .sidebar__user-email {
+    font-size: 0.7rem;
+  }
+
+
   .spinner-small {
     width: 22px;
     height: 22px;
@@ -317,4 +346,15 @@
   .sidebar-skeleton p {
     font-size: 0.65rem;
   }
+}
+
+/* ===== دعم الوضع الداكن ===== */
+.dark .sidebar__link--verifier {
+  background: #059669;
+}
+.dark .sidebar__link--admin {
+  background: #dc2626;
+}
+.dark .sidebar__link--finance {
+  background: #f59e0b;
 }

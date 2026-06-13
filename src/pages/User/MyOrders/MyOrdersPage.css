@@ -87,7 +87,7 @@
 
 .empty-orders {
   text-align: center;
-  padding: 3rem;
+  padding: 1rem;
   background: var(--color-bg-secondary);
   border-radius: 0.75rem;
   color: var(--color-text-secondary);

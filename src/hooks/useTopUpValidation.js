@@ -1,7 +1,12 @@
-import { useMemo } from 'react';
-import { useCurrency } from '../context/CurrencyContext';
-import { useExchangeRate } from '../context/ExchangeRateContext';
-
+// src/hooks/useTopUpValidation.js
+/**
+ * Hook للتحقق من صحة بيانات الإيداع
+ * @param {Object} settings - إعدادات الإيداع من الـ store
+ * @param {string} amount - المبلغ المدخل
+ * @param {string} selectedMethod - طريقة الدفع المختارة
+ * @param {string} currency - العملة المختارة ('USD' أو 'SYP')
+ * @param {number} rate - سعر الصرف (إذا كانت العملة SYP)
+ */
 export function useTopUpValidation(settings, amount, selectedMethod, currency, rate) {
   const minDepositUSD = settings?.minDeposit || 3;
   const minDepositSYP = rate ? Math.ceil(minDepositUSD * rate) : null;

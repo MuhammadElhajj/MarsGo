@@ -1,9 +1,13 @@
-import { useState } from 'react';
-import { useServices } from '../../../context/ServicesContext';
+import { useState, useEffect } from 'react';
+import { useAppStore } from '../../../store/store';
+import { db } from '../../../firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { uploadImage, deleteImage } from '../../../utils/uploadImage';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
 import { availableRoutes } from '../../../utils/routesList';
+import toast from 'react-hot-toast';
 import './AdminServices.css';
 
 // باقة من الإيموجيات التعبيرية المقترحة
@@ -12,7 +16,10 @@ const emojiOptions = [
 ];
 
 export default function AdminServices() {
-  const { services, addService, updateService, deleteService } = useServices();
+  // استخدام الـ store المركزي
+  const services = useAppStore((state) => state.services);
+  const setServices = useAppStore((state) => state.setServices);
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -29,6 +36,111 @@ export default function AdminServices() {
     isActive: true,
   });
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(!services || services.length === 0);
+
+  // جلب الخدمات من Firestore (للاستخدام داخل المكون)
+  const fetchServices = async () => {
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'services'), orderBy('order', 'asc'));
+      const snapshot = await getDocs(q);
+      const servicesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setServices(servicesList);
+    } catch (err) {
+      console.error('خطأ في جلب الخدمات:', err);
+      toast.error('فشل تحميل الخدمات');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // تحميل البيانات أول مرة إذا كانت فارغة
+  useEffect(() => {
+    if (!services || services.length === 0) {
+      fetchServices();
+    } else {
+      setLoading(false);
+    }
+  }, [services]);
+
+  // دوال مساعدة لرفع الصور وحذفها
+  const uploadServiceBgImage = async (serviceId, base64Image) => {
+    if (!base64Image) return null;
+    const path = `services/${serviceId}/bg_${Date.now()}.jpg`;
+    return await uploadImage(base64Image, path);
+  };
+
+  // إضافة خدمة جديدة
+  const addService = async (serviceData) => {
+    const { bgImageBase64, bgImageUrl, ...restData } = serviceData;
+    const tempImageBase64 = bgImageBase64 || (bgImageUrl ? null : null);
+    try {
+      const docRef = await addDoc(collection(db, 'services'), {
+        ...restData,
+        bgImageUrl: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+      const serviceId = docRef.id;
+      let finalImageUrl = null;
+      if (tempImageBase64) {
+        finalImageUrl = await uploadServiceBgImage(serviceId, tempImageBase64);
+      } else if (bgImageUrl) {
+        finalImageUrl = bgImageUrl;
+      }
+      if (finalImageUrl) {
+        await updateDoc(doc(db, 'services', serviceId), { bgImageUrl: finalImageUrl });
+      }
+      toast.success('تمت إضافة الخدمة بنجاح');
+      await fetchServices();
+      return serviceId;
+    } catch (err) {
+      toast.error('فشل إضافة الخدمة: ' + err.message);
+      throw err;
+    }
+  };
+
+  // تحديث خدمة
+  const updateService = async (id, updatedData) => {
+    const oldService = services.find(s => s.id === id);
+    const { bgImageBase64, bgImageUrl, ...restData } = updatedData;
+    let newImageUrl = bgImageUrl;
+    try {
+      if (bgImageBase64) {
+        if (oldService?.bgImageUrl) await deleteImage(oldService.bgImageUrl);
+        newImageUrl = await uploadServiceBgImage(id, bgImageBase64);
+      } else if (bgImageUrl && bgImageUrl !== oldService?.bgImageUrl) {
+        if (oldService?.bgImageUrl) await deleteImage(oldService.bgImageUrl);
+        newImageUrl = bgImageUrl;
+      }
+      await updateDoc(doc(db, 'services', id), {
+        ...restData,
+        ...(newImageUrl && { bgImageUrl: newImageUrl }),
+        updatedAt: new Date().toISOString(),
+      });
+      toast.success('تم تحديث الخدمة');
+      await fetchServices();
+    } catch (err) {
+      toast.error('فشل تحديث الخدمة: ' + err.message);
+      throw err;
+    }
+  };
+
+  // حذف خدمة
+  const deleteService = async (id) => {
+    try {
+      const service = services.find(s => s.id === id);
+      if (service?.bgImageUrl) {
+        await deleteImage(service.bgImageUrl);
+      }
+      await deleteDoc(doc(db, 'services', id));
+      toast.success('تم حذف الخدمة');
+      await fetchServices();
+    } catch (err) {
+      toast.error('فشل حذف الخدمة: ' + err.message);
+      throw err;
+    }
+  };
 
   const openAdd = () => {
     setEditing(null);
@@ -45,7 +157,7 @@ export default function AdminServices() {
       name: service.name, description: service.description || '', note: service.note || '',
       link: service.link || availableRoutes[0].path,
       icon: service.icon || '🔹', bgColor: service.bgColor || '#4f46e5',
-      bgImageUrl: service.bgImageUrl || service.bgImageBase64 || '', // دعم قديم
+      bgImageUrl: service.bgImageUrl || service.bgImageBase64 || '',
       order: service.order, isComingSoon: service.isComingSoon || false,
       isActive: service.isActive !== false,
     });
@@ -63,7 +175,7 @@ export default function AdminServices() {
       note: form.note,
       link: form.link,
       icon: form.icon,
-      bgColor: form.bgImageUrl ? '' : form.bgColor, // إذا وجدت صورة نلغي اللون
+      bgColor: form.bgImageUrl ? '' : form.bgColor,
       bgImageUrl: form.bgImageUrl,
       order: Number(form.order),
       isComingSoon: form.isComingSoon,
@@ -86,6 +198,8 @@ export default function AdminServices() {
     setForm(prev => ({ ...prev, icon: emoji }));
     setShowEmojiPicker(false);
   };
+
+  if (loading) return <div className="admin-services-loading">جاري تحميل الخدمات...</div>;
 
   return (
     <div className="admin-services">
@@ -128,22 +242,15 @@ export default function AdminServices() {
               <Input label="الوصف المختصر" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
               <Input label="ملاحظة إضافية (تظهر أسفل الوصف)" value={form.note} onChange={e => setForm({...form, note: e.target.value})} />
               
-              {/* حقل الرابط كقائمة منسدلة */}
               <div className="input-group">
                 <label className="input-label">الرابط (الصفحة التي تنتقل إليها) *</label>
-                <select 
-                  value={form.link} 
-                  onChange={e => setForm({...form, link: e.target.value})}
-                  className="input-field"
-                  required
-                >
+                <select value={form.link} onChange={e => setForm({...form, link: e.target.value})} className="input-field" required>
                   {availableRoutes.map(route => (
                     <option key={route.path} value={route.path}>{route.label} ({route.path})</option>
                   ))}
                 </select>
               </div>
 
-              {/* أيقونة مع زر اختيار الإيموجيات */}
               <div className="input-group">
                 <label className="input-label">أيقونة الخدمة</label>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -164,14 +271,7 @@ export default function AdminServices() {
                   </div>
                 )}
                 <small className="input-hint">يمكنك أيضاً كتابة أي إيموجي يدوياً في الحقل أدناه</small>
-                <input 
-                  type="text" 
-                  value={form.icon} 
-                  onChange={e => setForm({...form, icon: e.target.value})}
-                  className="input-field"
-                  style={{ marginTop: '0.5rem' }}
-                  placeholder="مثلاً: 🎮 أو 💰 أو ⚡"
-                />
+                <input type="text" value={form.icon} onChange={e => setForm({...form, icon: e.target.value})} className="input-field" style={{ marginTop: '0.5rem' }} placeholder="مثلاً: 🎮 أو 💰 أو ⚡" />
               </div>
 
               <Input label="لون الخلفية (إذا لم ترفع صورة)" type="color" value={form.bgColor} onChange={e => setForm({...form, bgColor: e.target.value})} />
