@@ -1,7 +1,2 @@
 node_modules/
 *.local
-
-# تجاهل ملفات البيئة الحساسة
-functions/.env
-.env
-*.env

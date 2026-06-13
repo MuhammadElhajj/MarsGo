@@ -1,5 +1,6 @@
 // src/components/Generic/CatalogList/CatalogList.jsx
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✅ إضافة useNavigate
 import CatalogCard from '../CatalogCard/CatalogCard';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
 import './CatalogList.css';
@@ -15,6 +16,18 @@ export default function CatalogList({
   customBadge = null,
   type = 'item'
 }) {
+  const navigate = useNavigate(); // ✅ للتوجيه إلى صفحة الدفع الموحدة
+
+  // ✅ معالج النقر على العنصر: إما استخدام onItemClick الممرر أو التوجيه المباشر
+  const handleItemClick = useCallback((item) => {
+    if (onItemClick) {
+      onItemClick(item);
+    } else {
+      // التوجيه إلى صفحة الدفع الموحدة باستخدام معرف المنتج
+      navigate(`/checkout/${item.id}`);
+    }
+  }, [onItemClick, navigate]);
+
   if (!items || items.length === 0) {
     return <p className="catalog-list__empty">لا توجد عناصر لعرضها</p>;
   }
@@ -25,13 +38,13 @@ export default function CatalogList({
       <CatalogCard
         key={item.id}
         item={item}
-        onSelect={onItemClick}
+        onSelect={handleItemClick}  // ✅ استخدام المعالج الجديد
         showPrice={showPrice}
         customBadge={customBadge}
         type={type}
       />
     ));
-  }, [items, onItemClick, showPrice, customBadge, type]);
+  }, [items, handleItemClick, showPrice, customBadge, type]);
 
   return (
     <div className="catalog-list" dir="rtl">

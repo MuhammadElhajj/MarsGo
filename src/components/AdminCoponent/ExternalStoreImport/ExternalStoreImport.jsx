@@ -1,20 +1,19 @@
 // src/components/AdminCoponent/ExternalStoreImport/ExternalStoreImport.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '../../../firebase';
 import { fetchStoreProducts } from '../../../services/apiStoreService';
-import { useGames } from '../../../context/GamesContext';
-import { useApps } from '../../../context/AppsContext';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
 import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
-import { FiSearch, FiArrowUp, FiArrowDown, FiStar, FiImage, FiGlobe } from 'react-icons/fi';
+import { FiSearch, FiArrowUp, FiArrowDown, FiStar } from 'react-icons/fi';
 import './ExternalStoreImport.css';
 
 export default function ExternalStoreImport() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedGameId, setSelectedGameId] = useState('');
-  const [selectedAppId, setSelectedAppId] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('games'); // 'games', 'apps', 'services'
   const [markupPercent, setMarkupPercent] = useState(10);
   const [importing, setImporting] = useState({});
   
@@ -23,23 +22,22 @@ export default function ExternalStoreImport() {
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [filterCategory, setFilterCategory] = useState('');
-  const [filterByTarget, setFilterByTarget] = useState(false); // فلتر حسب الوجهة المحددة
   
   // تخزين الصور والعلامات المخصصة لكل منتج
   const [productImages, setProductImages] = useState({});
   const [popularProducts, setPopularProducts] = useState(new Set());
   
-  // صورة عامة للوجهة المحددة
-  const [targetGlobalImage, setTargetGlobalImage] = useState('');
+  // صورة عامة للتصنيف المحدد
   const [globalImageUrl, setGlobalImageUrl] = useState('');
-  const [uploadingGlobal, setUploadingGlobal] = useState(false);
 
-  const { games, loading: gamesLoading } = useGames();
-  const { apps, loading: appsLoading } = useApps();
-  const { addPackage: addGamePackage } = useGames();
-  const { addPackage: addAppPackage } = useApps();
+  // قائمة التصنيفات الداخلية (الوجهات)
+  const categoryOptions = [
+    { id: 'games', name: '🎮 ألعاب' },
+    { id: 'apps', name: '📱 تطبيقات' },
+    { id: 'services', name: '🛠️ خدمات' }
+  ];
 
-  // جلب المنتجات
+  // جلب المنتجات من المتجر الخارجي
   const loadProducts = async () => {
     setLoading(true);
     try {
@@ -60,8 +58,8 @@ export default function ExternalStoreImport() {
     loadProducts();
   }, []);
 
-  // التصنيفات الفريدة
-  const categories = useMemo(() => {
+  // التصنيفات الفريدة من المنتجات الخارجية (للفلتر)
+  const externalCategories = useMemo(() => {
     const cats = new Set();
     products.forEach(p => {
       if (p.category_name) cats.add(p.category_name);
@@ -69,38 +67,12 @@ export default function ExternalStoreImport() {
     return ['الكل', ...Array.from(cats)];
   }, [products]);
 
-  // الحصول على اسم الوجهة المحددة (للفلتر)
-  const selectedTargetName = useMemo(() => {
-    if (selectedGameId) {
-      const game = games.find(g => g.id === selectedGameId);
-      return game?.name || '';
-    }
-    if (selectedAppId) {
-      const app = apps.find(a => a.id === selectedAppId);
-      return app?.name || '';
-    }
-    return '';
-  }, [selectedGameId, selectedAppId, games, apps]);
-
-  // فلترة + بحث + ترتيب + فلتر الوجهة
+  // فلترة + بحث + ترتيب (بدون فلتر الوجهة القديم)
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
-    
-    // فلتر التصنيف
     if (filterCategory && filterCategory !== 'الكل') {
       filtered = filtered.filter(p => p.category_name === filterCategory);
     }
-    
-    // فلتر حسب الوجهة المحددة (مطابقة اسم الفئة مع اسم اللعبة/التطبيق)
-    if (filterByTarget && selectedTargetName) {
-      const targetLower = selectedTargetName.toLowerCase();
-      filtered = filtered.filter(p => 
-        p.category_name?.toLowerCase().includes(targetLower) || 
-        targetLower.includes(p.category_name?.toLowerCase())
-      );
-    }
-    
-    // بحث
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(p => 
@@ -108,8 +80,6 @@ export default function ExternalStoreImport() {
         p.id.toString().includes(term)
       );
     }
-    
-    // ترتيب
     filtered.sort((a, b) => {
       let valA, valB;
       if (sortBy === 'name') {
@@ -123,80 +93,77 @@ export default function ExternalStoreImport() {
         valB = b.id;
       }
       if (typeof valA === 'string') {
-        return sortOrder === 'asc' 
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
+        return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
       } else {
         return sortOrder === 'asc' ? valA - valB : valB - valA;
       }
     });
-    
     return filtered;
-  }, [products, filterCategory, searchTerm, sortBy, sortOrder, filterByTarget, selectedTargetName]);
+  }, [products, filterCategory, searchTerm, sortBy, sortOrder]);
 
-  // استيراد قائمة منتجات
-  const importProducts = async (productsToImport) => {
-    const targetId = selectedGameId || selectedAppId;
-    const targetType = selectedGameId ? 'game' : (selectedAppId ? 'app' : null);
-    if (!targetType) {
-      showToast('يرجى اختيار لعبة أو تطبيق أولاً', 'error');
+  // دالة استيراد المنتجات (مرنة وديناميكية)
+  const importToDynamicProducts = async (productsToImport) => {
+    if (!selectedCategoryId) {
+      showToast('يرجى اختيار تصنيف الوجهة', 'error');
       return false;
     }
-    const addPackageFunc = targetType === 'game' ? addGamePackage : addAppPackage;
 
-    let successCount = 0;
-    let failCount = 0;
+    const productsForImport = productsToImport.map(prod => ({
+      id: prod.id,
+      name: prod.name,
+      category_name: prod.category_name,
+      price: prod.price,
+      image: prod.image,
+      stock: prod.stock,
+      customImageUrl: productImages[prod.id] || null,
+      isPopular: popularProducts.has(prod.id),
+    }));
 
-    for (const product of productsToImport) {
-      const finalPrice = product.price * (1 + markupPercent / 100);
-      // أولوية الصورة: صورة المنتج الخاصة > الصورة العامة للوجهة > فارغ
-      const finalImageUrl = productImages[product.id] || (filterByTarget ? globalImageUrl : '');
-      const packageData = {
-        name: product.name,
-        price: finalPrice.toFixed(2),
-        currency: 'USD',
-        discount: 0,
-        type: 'normal',
-        order: 0,
-        imageUrl: finalImageUrl,
-        note: `منتج مستورد: ${product.category_name || ''}`,
-        externalProductId: product.id,
-        externalAnyKey: '',
-        isPopular: popularProducts.has(product.id),
-      };
-      setImporting(prev => ({ ...prev, [product.id]: true }));
-      try {
-        await addPackageFunc(targetId, packageData);
-        successCount++;
-      } catch (err) {
-        console.error(err);
-        failCount++;
-      } finally {
-        setImporting(prev => ({ ...prev, [product.id]: false }));
-      }
+    const functionsInstance = getFunctions(app);
+    const importFunc = httpsCallable(functionsInstance, 'importProductsFromExternal');
+
+    try {
+      const result = await importFunc({
+        products: productsForImport,
+        markupPercent,
+        globalImageUrl: globalImageUrl || null,
+        targetCategoryId: selectedCategoryId   // نرسل التصنيف الداخلي مباشرة
+      });
+      return result.data.success;
+    } catch (err) {
+      console.error(err);
+      showToast(`فشل الاستيراد: ${err.message}`, 'error');
+      return false;
     }
-    if (successCount > 0) showToast(`تم استيراد ${successCount} منتج بنجاح.`, 'success');
-    if (failCount > 0) showToast(`فشل استيراد ${failCount} منتج.`, 'error');
-    return successCount > 0;
   };
 
   const handleImportSingle = async (product) => {
-    await importProducts([product]);
+    setImporting(prev => ({ ...prev, [product.id]: true }));
+    const success = await importToDynamicProducts([product]);
+    setImporting(prev => ({ ...prev, [product.id]: false }));
+    if (success) showToast(`تم استيراد المنتج ${product.name} بنجاح`, 'success');
   };
 
-  // تحديث صورة المنتج (خاصة)
+  const handleImportAll = async () => {
+    if (filteredAndSortedProducts.length === 0) {
+      showToast('لا توجد منتجات للاستيراد', 'error');
+      return;
+    }
+    setLoading(true);
+    const success = await importToDynamicProducts(filteredAndSortedProducts);
+    setLoading(false);
+    if (success) showToast(`تم استيراد ${filteredAndSortedProducts.length} منتج بنجاح`, 'success');
+  };
+
   const handleImageUpload = (productId, url) => {
     setProductImages(prev => ({ ...prev, [productId]: url }));
   };
 
-  // رفع الصورة العامة للوجهة
   const handleGlobalImageUpload = (url) => {
     setGlobalImageUrl(url);
-    setTargetGlobalImage(url);
-    showToast('تم رفع الصورة العامة للوجهة بنجاح', 'success');
+    showToast('تم رفع الصورة العامة للتصنيف بنجاح', 'success');
   };
 
-  // تبديل علامة "الأكثر طلباً"
   const togglePopular = (productId) => {
     setPopularProducts(prev => {
       const newSet = new Set(prev);
@@ -206,29 +173,24 @@ export default function ExternalStoreImport() {
     });
   };
 
-  if (loading || gamesLoading || appsLoading) return <div className="import-loading">⏳ جاري تحميل البيانات...</div>;
-
-  const targetSelected = !!(selectedGameId || selectedAppId);
+  if (loading) return <div className="import-loading">⏳ جاري تحميل البيانات...</div>;
 
   return (
     <div className="external-store-import" dir="rtl">
       <div className="import-header">
         <h2>📦 استيراد منتجات من المتجر الخارجي</h2>
-        <p>عرض جميع المنتجات المتاحة، إضافة نسبة ربح، تخصيص الصور، وتمييز الأكثر طلباً</p>
+        <p>اختر التصنيف المستهدف، نسبة الربح، الصور، ثم استورد المنتجات</p>
       </div>
 
       {/* إعدادات الاستيراد */}
       <div className="import-settings card">
         <div className="settings-row">
           <div className="target-selector">
-            <label>اختر الوجهة:</label>
-            <select value={selectedGameId} onChange={(e) => { setSelectedGameId(e.target.value); setSelectedAppId(''); setGlobalImageUrl(''); }}>
-              <option value="">-- لعبة --</option>
-              {games.map(game => <option key={game.id} value={game.id}>{game.name}</option>)}
-            </select>
-            <select value={selectedAppId} onChange={(e) => { setSelectedAppId(e.target.value); setSelectedGameId(''); setGlobalImageUrl(''); }}>
-              <option value="">-- تطبيق --</option>
-              {apps.map(app => <option key={app.id} value={app.id}>{app.name}</option>)}
+            <label>اختر التصنيف المستهدف:</label>
+            <select value={selectedCategoryId} onChange={(e) => setSelectedCategoryId(e.target.value)}>
+              {categoryOptions.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
             </select>
           </div>
           <div className="markup-input">
@@ -244,27 +206,24 @@ export default function ExternalStoreImport() {
           </div>
         </div>
 
-        {/* رفع صورة عامة للوجهة المحددة */}
-        {targetSelected && (
-          <div className="global-image-upload">
-            <label>صورة عامة لهذه الوجهة (تطبق على جميع منتجاتها عند الاستيراد):</label>
-            <div className="global-upload-wrapper">
-              <ImageUpload
-                onUploadComplete={handleGlobalImageUpload}
-                maxSizeMB={0.5}
-                storagePath={`store_import/global/${selectedGameId || selectedAppId}`}
-                label="رفع صورة عامة"
-              />
-              {globalImageUrl && (
-                <div className="global-preview">
-                  <img src={globalImageUrl} alt="الصورة العامة" />
-                  <button onClick={() => setGlobalImageUrl('')} className="remove-global">إزالة</button>
-                </div>
-              )}
-            </div>
-            <p className="hint">إذا رفعت صورة هنا، سيتم استخدامها لكل منتج يتم استيراده لهذه الوجهة ما لم يتم رفع صورة خاصة بالمنتج.</p>
+        {/* رفع صورة عامة للتصنيف */}
+        <div className="global-image-upload">
+          <label>صورة عامة لهذا التصنيف (تطبق على جميع المنتجات المستوردة ما لم ترفع صورة خاصة):</label>
+          <div className="global-upload-wrapper">
+            <ImageUpload
+              onUploadComplete={handleGlobalImageUpload}
+              maxSizeMB={0.5}
+              storagePath={`store_import/global/${selectedCategoryId}`}
+              label="رفع صورة عامة"
+            />
+            {globalImageUrl && (
+              <div className="global-preview">
+                <img src={globalImageUrl} alt="الصورة العامة" />
+                <button onClick={() => setGlobalImageUrl('')} className="remove-global">إزالة</button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* أدوات البحث والفلترة */}
@@ -280,7 +239,7 @@ export default function ExternalStoreImport() {
         </div>
         <div className="filter-sort">
           <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            {externalCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
           </select>
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
             <option value="name">الترتيب حسب الاسم</option>
@@ -294,20 +253,6 @@ export default function ExternalStoreImport() {
         </div>
       </div>
 
-      {/* فلتر إضافي: عرض منتجات الوجهة فقط */}
-      {targetSelected && (
-        <div className="target-filter-card">
-          <label className="target-filter-label">
-            <input
-              type="checkbox"
-              checked={filterByTarget}
-              onChange={(e) => setFilterByTarget(e.target.checked)}
-            />
-            عرض منتجات تنتمي إلى "{selectedTargetName}" فقط
-          </label>
-        </div>
-      )}
-
       {/* شبكة المنتجات */}
       <div className="products-grid">
         {filteredAndSortedProducts.length === 0 ? (
@@ -316,7 +261,7 @@ export default function ExternalStoreImport() {
           filteredAndSortedProducts.map(product => {
             const finalPrice = product.price * (1 + markupPercent / 100);
             const isPopular = popularProducts.has(product.id);
-            const imageUrl = productImages[product.id] || (filterByTarget ? globalImageUrl : '');
+            const imageUrl = productImages[product.id] || globalImageUrl;
             return (
               <div key={product.id} className="product-card">
                 <div className="product-card__image">
@@ -354,7 +299,7 @@ export default function ExternalStoreImport() {
                   </button>
                   <Button
                     onClick={() => handleImportSingle(product)}
-                    disabled={!targetSelected || importing[product.id]}
+                    disabled={!selectedCategoryId || importing[product.id]}
                     variant="primary"
                   >
                     {importing[product.id] ? 'جاري...' : 'استيراد'}
@@ -365,6 +310,14 @@ export default function ExternalStoreImport() {
           })
         )}
       </div>
+
+      {selectedCategoryId && filteredAndSortedProducts.length > 0 && (
+        <div className="import-all-button">
+          <Button onClick={handleImportAll} variant="secondary" disabled={loading}>
+            📦 استيراد جميع المنتجات المعروضة ({filteredAndSortedProducts.length})
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

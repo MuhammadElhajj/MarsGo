@@ -1,5 +1,5 @@
-import { useState, lazy, Suspense, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useAppStore } from '../../../store/store';
 import { db } from '../../../firebase';
@@ -9,262 +9,150 @@ import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
 import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import { sendWhatsAppNotification, formatOrderMessage } from '../../../utils/sendWhatsAppNotification';
 import Loading from '../../GeneralComponents/Loading/Loading';
-import useFinalPrice from '../../../hooks/useFinalPrice';
-import { createStoreOrder } from '../../../services/apiStoreService';
+import DynamicFields from './DynamicFields';
 import './UnifiedCheckout.css';
 
-const GamingAppsForm = lazy(() => import('./forms/GamingAppsForm'));
-
-export default function UnifiedCheckout({ serviceType, redirectPath }) {
+export default function UnifiedCheckout() {
+  const { productId } = useParams(); // المنتج من الرابط
   const { userData } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { item, package: pkg } = location.state || {};
-
-  // استخدام الـ store المركزي
+  
+  // Zustand store
   const balance = useAppStore((state) => state.balance);
   const deductBalance = useAppStore((state) => state.deductBalance);
   const addNotification = useAppStore((state) => state.addNotification);
   const currency = useAppStore((state) => state.currency);
   const exchangeRate = useAppStore((state) => state.exchangeRate);
+  const products = useAppStore((state) => state.products);
+  const fetchProducts = useAppStore((state) => state.fetchProducts); // تأكد من وجودها
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [customValues, setCustomValues] = useState({});
+  const [quantity, setQuantity] = useState(1);
 
-  // حقول النماذج
-  const [playerId, setPlayerId] = useState('');
-  const [recipientName, setRecipientName] = useState('');
-  const [shamCashPhone, setShamCashPhone] = useState('');
-  const [amount, setAmount] = useState('');
-  const [tradeType, setTradeType] = useState('buy');
-  const [price, setPrice] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('شام كاش');
-  const [exchangeType, setExchangeType] = useState('buy_dollar');
-  const [rateExchange, setRateExchange] = useState('');
+  // جلب المنتج من الـ store (أو من Firestore إذا لم يكن موجوداً)
+  const product = useMemo(() => products.find(p => p.id === productId), [products, productId]);
 
-  const needsItemAndPackage = ['gaming', 'apps'].includes(serviceType);
-  if (needsItemAndPackage && (!item || !pkg)) {
-    return (
-      <div className="unified-checkout" dir="rtl">
-        <GoBackButton text="رجوع" onClick={() => navigate(redirectPath || '/dashboard')} />
-        <p className="unified-checkout__error">⚠️ لم يتم تحديد خدمة أو باقة. الرجاء اختيار الخدمة أولاً.</p>
-      </div>
-    );
-  }
-
-  const productType = (serviceType === 'gaming') ? 'game' : (serviceType === 'apps') ? 'app' : null;
-  
-  const { priceUSD, packageDiscount } = useMemo(() => {
-    if (needsItemAndPackage && pkg) {
-      const rawPrice = typeof pkg.price === 'number' ? pkg.price : parseFloat(pkg.price);
-      return { priceUSD: rawPrice, packageDiscount: pkg.discount || 0 };
+  // إذا لم يكن المنتج في الـ store، قم بجلبه
+  useEffect(() => {
+    if (productId && !product) {
+      fetchProducts(); // تفترض أن fetchProducts تجلب كل المنتجات من Firestore
     }
-    return { priceUSD: 0, packageDiscount: 0 };
-  }, [needsItemAndPackage, pkg]);
+  }, [productId, product, fetchProducts]);
 
-  const hookProductId = (needsItemAndPackage && item?.id) ? item.id : null;
-  const hookOriginalPrice = (needsItemAndPackage && pkg) ? priceUSD : 0;
-  const hookItemDiscount = (needsItemAndPackage && pkg) ? packageDiscount : 0;
-  
-  const { finalPrice: computedPrice, discountPercent: computedDiscount } = useFinalPrice(
-    productType,
-    hookProductId,
-    hookOriginalPrice,
-    hookItemDiscount
-  );
-
-  const { requiredAmountUSD, displayPrice } = useMemo(() => {
-    if (needsItemAndPackage && pkg) {
-      const amountUSD = computedPrice;
-      const priceDisplay = currency === 'USD'
-        ? `${amountUSD.toFixed(2)} $`
-        : exchangeRate ? `${(amountUSD * exchangeRate).toFixed(0).toLocaleString()} ل.س` : '...';
-      return { requiredAmountUSD: amountUSD, displayPrice: priceDisplay };
-    } else if (serviceType === 'transfer') {
-      const val = parseFloat(amount) || 0;
-      return { requiredAmountUSD: val, displayPrice: `${val} $` };
-    } else if (serviceType === 'crypto') {
-      const val = parseFloat(price) || 0;
-      return { requiredAmountUSD: val, displayPrice: `${val} $` };
-    } else if (serviceType === 'exchange') {
-      const val = parseFloat(amount) || 0;
-      return { requiredAmountUSD: val, displayPrice: `${val} $` };
+  // تهيئة القيم الافتراضية من customFields
+  useEffect(() => {
+    if (product?.customFields) {
+      const defaults = {};
+      product.customFields.forEach(f => {
+        if (f.defaultValue !== undefined) defaults[f.name] = f.defaultValue;
+        if (f.name === 'quantity') setQuantity(f.defaultValue || 1);
+      });
+      setCustomValues(defaults);
+    } else {
+      setCustomValues({});
+      setQuantity(1);
     }
-    return { requiredAmountUSD: 0, displayPrice: '' };
-  }, [needsItemAndPackage, pkg, computedPrice, currency, exchangeRate, serviceType, amount, price]);
+  }, [product]);
 
-  const validateForm = useCallback(() => {
-    if (serviceType === 'gaming' || serviceType === 'apps') {
-      if (!playerId) return 'يرجى إدخال المعرف (ID اللاعب أو رقم الحساب)';
-    } else if (serviceType === 'transfer') {
-      if (!recipientName || !shamCashPhone || !amount) return 'جميع الحقول مطلوبة';
-    } else if (serviceType === 'crypto') {
-      if (!amount || !price) return 'يرجى إدخال المبلغ والسعر';
-    } else if (serviceType === 'exchange') {
-      if (!amount || !rateExchange) return 'يرجى ملء جميع الحقول';
+  if (!product) return <Loading text="جاري تحميل المنتج..." />;
+
+  // تحديد ما إذا كان المنتج يسمح بتغيير الكمية (بناءً على وجود حقل quantity في customFields أو نوعه)
+  const allowQuantity = product.customFields?.some(f => f.name === 'quantity') || product.type === 'app';
+
+  // حساب السعر الإجمالي (مع مراعاة الكمية)
+  const unitPrice = product.price || 0;
+  const totalPrice = unitPrice * (allowQuantity ? quantity : 1);
+  const displayPrice = currency === 'USD'
+    ? `${totalPrice.toFixed(2)} $`
+    : exchangeRate ? `${(totalPrice * exchangeRate).toFixed(0).toLocaleString()} ل.س` : '...';
+
+  // التحقق من صحة الحقول المطلوبة
+  const validateForm = () => {
+    const missing = product.customFields?.filter(f => f.required && !customValues[f.name]) || [];
+    if (missing.length) {
+      return `يرجى ملء: ${missing.map(m => m.label).join(', ')}`;
+    }
+    if (balance < totalPrice) {
+      return `رصيدك غير كافٍ. المطلوب: ${totalPrice.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`;
     }
     return null;
-  }, [serviceType, playerId, recipientName, shamCashPhone, amount, price, rateExchange]);
+  };
 
-  const getFormData = useCallback(() => {
-    switch (serviceType) {
-      case 'gaming':
-      case 'apps':
-        return { playerId, requiredAmountUSD };
-      case 'transfer':
-        return { recipientName, shamCashPhone, amount: parseFloat(amount), requiredAmountUSD };
-      case 'crypto':
-        return { tradeType, amount: parseFloat(amount), price: parseFloat(price), paymentMethod, requiredAmountUSD };
-      case 'exchange':
-        return { exchangeType, amount: parseFloat(amount), rateExchange: parseFloat(rateExchange), requiredAmountUSD };
-      default:
-        return {};
-    }
-  }, [serviceType, playerId, requiredAmountUSD, recipientName, shamCashPhone, amount, tradeType, price, paymentMethod, exchangeType, rateExchange]);
+  // تجميع بيانات الطلب
+  const getOrderData = (externalResult = null) => ({
+    userId: userData.uid,
+    customerName: userData.name || '',
+    productId: product.id,
+    productName: product.name,
+    categoryId: product.categoryId,
+    type: product.type,
+    priceUSD: unitPrice,
+    finalPriceUSD: totalPrice,
+    quantity: allowQuantity ? quantity : 1,
+    customFieldsValues: customValues,
+    status: 'completed',
+    paidByBalance: true,
+    createdAt: serverTimestamp(),
+    exchangeRateAtPurchase: exchangeRate || null,
+    currencyUsed: currency,
+    ...(externalResult && { externalOrderId: externalResult.order_id, externalData: externalResult })
+  });
 
-  const buildOrderData = useCallback((formData, externalResult = null) => {
-    let orderData = {
-      userId: userData.uid,
-      customerName: userData.name || '',
-      type: serviceType,
-      status: 'completed',
-      paidByBalance: true,
-      createdAt: serverTimestamp(),
-    };
-
-    switch (serviceType) {
-      case 'gaming':
-      case 'apps':
-        orderData = {
-          ...orderData,
-          itemId: item.id,
-          itemName: item.name,
-          packageId: pkg.id,
-          packageName: pkg.name,
-          priceUSD: requiredAmountUSD,
-          finalPriceUSD: requiredAmountUSD,
-          exchangeRateAtPurchase: exchangeRate || null,
-          currencyUsed: currency,
-          playerId: formData.playerId,
-          discountApplied: computedDiscount,
-          ...(externalResult && {
-            externalOrderId: externalResult.order_id,
-            externalStatus: externalResult.status,
-            externalPrice: externalResult.price,
-            externalData: externalResult.data,
-          }),
-        };
-        break;
-      case 'transfer':
-        orderData = { ...orderData, recipientName: formData.recipientName, shamCashPhone: formData.shamCashPhone, amount: formData.amount };
-        break;
-      case 'crypto':
-        orderData = { ...orderData, tradeType: formData.tradeType, amount: formData.amount, price: formData.price, paymentMethod: formData.paymentMethod };
-        break;
-      case 'exchange':
-        orderData = { ...orderData, exchangeType: formData.exchangeType, amount: formData.amount, rate: formData.rateExchange };
-        break;
-    }
-    return orderData;
-  }, [userData, serviceType, item, pkg, requiredAmountUSD, exchangeRate, currency, computedDiscount]);
-
-  const sendNotifications = useCallback(async (orderId, formData) => {
-    let orderMessageData = {};
-    switch (serviceType) {
-      case 'gaming':
-      case 'apps':
-        orderMessageData = {
-          itemName: item.name,
-          packageName: pkg.name,
-          playerId: formData.playerId,
-          finalPriceUSD: formData.requiredAmountUSD,
-          currencyUsed: currency,
-          customerName: userData.name || '',
-        };
-        break;
-      case 'transfer':
-        orderMessageData = { recipientName: formData.recipientName, shamCashPhone: formData.shamCashPhone, amount: formData.amount, customerName: userData.name || '' };
-        break;
-      case 'crypto':
-        orderMessageData = { tradeType: formData.tradeType, amount: formData.amount, price: formData.price, customerName: userData.name || '' };
-        break;
-      case 'exchange':
-        orderMessageData = { exchangeType: formData.exchangeType, amount: formData.amount, rate: formData.rateExchange, customerName: userData.name || '' };
-        break;
-    }
-    const message = formatOrderMessage(orderMessageData, orderId, serviceType);
-    await sendWhatsAppNotification(null, message, null);
-    // إضافة إشعار داخلي (تنسيق جديد يناسب الـ store)
-    addNotification({
-      id: orderId,
-      userId: userData.uid,
-      title: '✅ طلب مكتمل',
-      message: `طلب #${orderId.slice(-6)} - تم خصم ${formData.requiredAmountUSD.toFixed(2)} $ من رصيدك`,
-      type: 'order_completed',
-      link: '/my-orders',
-      read: false,
-      createdAt: new Date(),
-    });
-  }, [serviceType, item, pkg, currency, userData, addNotification]);
-
-  const handleSubmit = useCallback(async (e) => {
+  // إرسال الطلب
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
-    setError('');
-
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    if (balance < requiredAmountUSD) {
-      setError(`رصيدك غير كافٍ. المطلوب: ${requiredAmountUSD.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
+    const errMsg = validateForm();
+    if (errMsg) {
+      setError(errMsg);
       return;
     }
 
     setLoading(true);
     try {
-      let externalResult = null;
+      // خصم الرصيد
+      const deducted = await deductBalance(totalPrice);
+      if (!deducted) throw new Error('فشل خصم الرصيد');
 
-      if (serviceType === 'gaming' || serviceType === 'apps') {
-        if (!pkg.externalProductId) {
-          throw new Error('هذه الباقة غير مرتبطة بمتجر خارجي، يرجى مراجعة الإدارة.');
-        }
-        // دعم randomUUID مع fallback للمتصفحات القديمة
-        const orderUuid = (typeof crypto.randomUUID === 'function')
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const anyKey = pkg.externalAnyKey || '';
-        externalResult = await createStoreOrder({
-          productId: pkg.externalProductId,
-          quantity: 1,
-          playerId,
-          anyKey,
-          orderUuid,
-        });
-        const deducted = await deductBalance(requiredAmountUSD);
-        if (!deducted) throw new Error('فشل خصم الرصيد');
-      } else {
-        const deducted = await deductBalance(requiredAmountUSD);
-        if (!deducted) throw new Error('فشل خصم الرصيد');
+      // (اختياري) إذا كان المنتج مرتبطاً بمتجر خارجي، يمكن استدعاء externalStoreProxy هنا
+      let externalResult = null;
+      if (product.externalStore?.enabled) {
+        // مثال: const proxyFunc = httpsCallable(functions, 'externalStoreProxy');
+        // externalResult = await proxyFunc({ productId: product.id, ...customValues, quantity });
+        // يمكنك تنفيذ ذلك لاحقاً
+        console.log('طلب منتج خارجي', product.externalStore);
       }
 
-      const formData = getFormData();
-      const orderData = buildOrderData(formData, externalResult);
+      const orderData = getOrderData(externalResult);
       const docRef = await addDoc(collection(db, 'orders'), orderData);
 
-      await sendNotifications(docRef.id, formData);
+      // إشعار واتساب
+      const orderMessageData = {
+        productName: product.name,
+        quantity: allowQuantity ? quantity : 1,
+        customValues,
+        totalPrice,
+        customerName: userData.name || ''
+      };
+      const message = formatOrderMessage(orderMessageData, docRef.id, 'product');
+      await sendWhatsAppNotification(null, message, null);
 
-      showToast(`✅ تم تنفيذ طلبك بنجاح!`, 'success', 3000);
+      // إشعار داخلي
+      addNotification({
+        id: docRef.id,
+        userId: userData.uid,
+        title: '✅ طلب مكتمل',
+        message: `طلب #${docRef.id.slice(-6)} - تم خصم ${totalPrice.toFixed(2)} $ من رصيدك`,
+        type: 'order_completed',
+        link: '/my-orders',
+        read: false,
+        createdAt: new Date(),
+      });
 
-      // إعادة تعيين الحقول
-      if (serviceType === 'gaming' || serviceType === 'apps') setPlayerId('');
-      if (serviceType === 'transfer') { setRecipientName(''); setShamCashPhone(''); setAmount(''); }
-      if (serviceType === 'crypto') { setAmount(''); setPrice(''); }
-      if (serviceType === 'exchange') { setAmount(''); setRateExchange(''); }
-
-      setTimeout(() => navigate(redirectPath || '/dashboard'), 1500);
+      showToast('✅ تم تنفيذ طلبك بنجاح!', 'success', 3000);
+      setTimeout(() => navigate('/my-orders'), 1500);
     } catch (err) {
       console.error(err);
       showToast(`❌ فشل الطلب: ${err.message}`, 'error', 5000);
@@ -272,38 +160,37 @@ export default function UnifiedCheckout({ serviceType, redirectPath }) {
     } finally {
       setLoading(false);
     }
-  }, [loading, validateForm, balance, requiredAmountUSD, deductBalance, getFormData, buildOrderData, sendNotifications, serviceType, navigate, redirectPath, playerId, pkg]);
-
-  const renderForm = () => {
-    switch (serviceType) {
-      case 'gaming':
-      case 'apps':
-        return <GamingAppsForm playerId={playerId} setPlayerId={setPlayerId} displayPrice={displayPrice} pkg={pkg} balance={balance} />;
-      default:
-        return <p>نموذج الخدمة قيد التطوير</p>;
-    }
   };
 
   return (
     <div className="unified-checkout" dir="rtl">
-      <div style={{ marginBottom: '1rem' }}>
-        <GoBackButton text="رجوع" />
-      </div>
-      <h2 className="unified-checkout__title">إتمام عملية الشراء</h2>
+      <GoBackButton text="رجوع" onClick={() => navigate(-1)} />
+      <h2 className="unified-checkout__title">{product.name}</h2>
+      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="product-image" />}
       <div className="unified-checkout__form">
-        <h3>
-          {serviceType === 'gaming' && 'طلب شحن ألعاب'}
-          {serviceType === 'apps' && 'طلب شحن تطبيقات'}
-          {needsItemAndPackage && item && pkg && `: ${item.name} - ${pkg.name}`}
-        </h3>
         <form onSubmit={handleSubmit}>
-          <Suspense fallback={<Loading text="جاري تحميل النموذج..." />}>
-            {renderForm()}
-          </Suspense>
-          <Button type="submit" disabled={loading || balance < requiredAmountUSD}>
-            {loading ? 'جاري التنفيذ...' : `تأكيد الطلب (${requiredAmountUSD.toFixed(2)} $)`}
+          {allowQuantity && (
+            <div className="form-group">
+              <label>الكمية</label>
+              <input
+                type="number"
+                min={1}
+                className="form-control"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              />
+            </div>
+          )}
+          <DynamicFields
+            fields={product.customFields || []}
+            onChange={setCustomValues}
+            initialValues={customValues}
+          />
+          <p className="price-display">السعر الإجمالي: {displayPrice}</p>
+          <Button type="submit" disabled={loading || balance < totalPrice}>
+            {loading ? 'جاري التنفيذ...' : `تأكيد الطلب (${totalPrice.toFixed(2)} $)`}
           </Button>
-          {error && <p className="unified-checkout__error">❌ {error}</p>}
+          {error && <p className="error">❌ {error}</p>}
         </form>
       </div>
     </div>
