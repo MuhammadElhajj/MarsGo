@@ -18,20 +18,29 @@ export default function CatalogList({
 }) {
   const navigate = useNavigate();
 
-  // ✅ التحقق من أن items مصفوفة وليست فارغة
   if (!items || !Array.isArray(items) || items.length === 0) {
     return <div className="catalog-list__empty">لا توجد عناصر لعرضها</div>;
   }
 
   const handleItemClick = useCallback((item) => {
-    if (onItemClick) {
-      onItemClick(item);
+    // ✅ منع أي خطأ في حالة عدم وجود item
+    if (!item) return;
+
+    // ✅ إذا تم تمرير دالة onItemClick من الخارج (مثل PackagesList) نستخدمها
+    if (onItemClick && typeof onItemClick === 'function') {
+      try {
+        onItemClick(item);
+      } catch (err) {
+        console.error('خطأ في onItemClick:', err);
+        // في حالة فشل onItemClick، نلجأ للتنقل الافتراضي
+        navigate(`/checkout/${item.id}`, { state: { item } });
+      }
     } else {
-      navigate(`/checkout/${item.id}`);
+      // ✅ التنقل الافتراضي (في حالة عدم وجود onItemClick)
+      navigate(`/checkout/${item.id}`, { state: { item } });
     }
   }, [onItemClick, navigate]);
 
-  // ✅ استخدام useMemo مع try-catch لتجنب الأخطاء
   const renderedCards = useMemo(() => {
     try {
       return items.map(item => (

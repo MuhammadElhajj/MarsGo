@@ -109,12 +109,11 @@ export const useAppStore = create(
       games: [],
       setGames: (games) => set({ games }),
 
-      // ========== دوال إدارة الألعاب (الحالية – لم نغيرها) ==========
+      // ========== دوال إدارة الألعاب ==========
       loading: false,
       setLoading: (loading) => set({ loading }),
 
       fetchPackages: async () => {
-        // موجودة كما هي (فقط مثال)
         const { setLoading } = get();
         setLoading(true);
         try {
@@ -122,8 +121,6 @@ export const useAppStore = create(
           const { db } = await import('../firebase');
           const snapshot = await getDocs(collection(db, 'packages'));
           const packages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          // يمكنك تخزين الباقات في الـ store إذا أردت
-          // set({ packages });
         } catch (error) {
           console.error('Error fetching packages:', error);
         } finally {
@@ -178,26 +175,66 @@ export const useAppStore = create(
         }
       },
 
-      // ===== دوال باقات الألعاب (جديدة – مع الحفاظ على القديمة) =====
-      addGamePackage: async (gameId, packageData) => {
-        // هنا يمكنك إضافة باقة إلى لعبة محددة (subcollection)
-        console.log('Adding game package:', gameId, packageData);
-        return true;
-      },
-      updateGamePackage: async (gameId, packageId, packageData) => {
-        console.log('Updating game package:', gameId, packageId, packageData);
-        return true;
-      },
-      deleteGamePackage: async (gameId, packageId) => {
-        console.log('Deleting game package:', gameId, packageId);
-        return true;
-      },
+      // ===== دوال باقات الألعاب (مكتملة) =====
       fetchGamePackages: async (gameId) => {
-        console.log('Fetching game packages:', gameId);
-        return [];
+        try {
+          const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const q = query(collection(db, 'games', gameId, 'packages'), orderBy('order', 'asc'));
+          const snapshot = await getDocs(q);
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+          console.error('Error fetching game packages:', error);
+          return [];
+        }
       },
 
-      // ========== التطبيقات (جديدة) ==========
+      addGamePackage: async (gameId, packageData) => {
+        try {
+          const { collection, addDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const docRef = await addDoc(collection(db, 'games', gameId, 'packages'), {
+            ...packageData,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          return docRef.id;
+        } catch (error) {
+          console.error('Error adding game package:', error);
+          throw error;
+        }
+      },
+
+      updateGamePackage: async (gameId, packageId, packageData) => {
+        try {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const packageRef = doc(db, 'games', gameId, 'packages', packageId);
+          await updateDoc(packageRef, {
+            ...packageData,
+            updatedAt: new Date(),
+          });
+          return true;
+        } catch (error) {
+          console.error('Error updating game package:', error);
+          throw error;
+        }
+      },
+
+      deleteGamePackage: async (gameId, packageId) => {
+        try {
+          const { doc, deleteDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const packageRef = doc(db, 'games', gameId, 'packages', packageId);
+          await deleteDoc(packageRef);
+          return true;
+        } catch (error) {
+          console.error('Error deleting game package:', error);
+          throw error;
+        }
+      },
+
+      // ========== التطبيقات ==========
       apps: [],
       setApps: (apps) => set({ apps }),
 
@@ -248,22 +285,63 @@ export const useAppStore = create(
         }
       },
 
-      // ===== دوال باقات التطبيقات =====
-      addAppPackage: async (appId, packageData) => {
-        console.log('Adding app package:', appId, packageData);
-        return true;
-      },
-      updateAppPackage: async (appId, packageId, packageData) => {
-        console.log('Updating app package:', appId, packageId, packageData);
-        return true;
-      },
-      deleteAppPackage: async (appId, packageId) => {
-        console.log('Deleting app package:', appId, packageId);
-        return true;
-      },
+      // ===== دوال باقات التطبيقات (مكتملة) =====
       fetchAppPackages: async (appId) => {
-        console.log('Fetching app packages:', appId);
-        return [];
+        try {
+          const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const q = query(collection(db, 'apps', appId, 'packages'), orderBy('order', 'asc'));
+          const snapshot = await getDocs(q);
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+          console.error('Error fetching app packages:', error);
+          return [];
+        }
+      },
+
+      addAppPackage: async (appId, packageData) => {
+        try {
+          const { collection, addDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const docRef = await addDoc(collection(db, 'apps', appId, 'packages'), {
+            ...packageData,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          return docRef.id;
+        } catch (error) {
+          console.error('Error adding app package:', error);
+          throw error;
+        }
+      },
+
+      updateAppPackage: async (appId, packageId, packageData) => {
+        try {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const packageRef = doc(db, 'apps', appId, 'packages', packageId);
+          await updateDoc(packageRef, {
+            ...packageData,
+            updatedAt: new Date(),
+          });
+          return true;
+        } catch (error) {
+          console.error('Error updating app package:', error);
+          throw error;
+        }
+      },
+
+      deleteAppPackage: async (appId, packageId) => {
+        try {
+          const { doc, deleteDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          const packageRef = doc(db, 'apps', appId, 'packages', packageId);
+          await deleteDoc(packageRef);
+          return true;
+        } catch (error) {
+          console.error('Error deleting app package:', error);
+          throw error;
+        }
       },
 
       // ========== الخدمات ==========
@@ -334,7 +412,7 @@ export const useAppStore = create(
       tickerSettings: null,
       setTickerSettings: (settings) => set({ tickerSettings: settings }),
 
-      // ========== المنتجات الديناميكية (المستوردة من المتجر الخارجي) ==========
+      // ========== المنتجات الديناميكية ==========
       products: [],
       loadingProducts: false,
       setProducts: (products) => set({ products }),

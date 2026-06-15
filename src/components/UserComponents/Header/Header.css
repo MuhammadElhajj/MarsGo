@@ -186,7 +186,7 @@
   }
 
   /* ✅ إخفاء أزرار المود وتغيير العملة والخروج */
-  .header__icons .theme-toggle,
+  
   .header__icons .currency-toggle,
   .header__icons .header__logout-icon {
     display: none;

@@ -40,7 +40,7 @@
 .packages-page__game-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-text-primary);
   margin: 0;
 }
 

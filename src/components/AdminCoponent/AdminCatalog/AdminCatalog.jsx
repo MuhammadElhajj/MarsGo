@@ -1,25 +1,38 @@
 // src/components/AdminCoponent/AdminCatalog/AdminCatalog.jsx
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
+import { FiRefreshCw } from 'react-icons/fi';
+import { useAppStore } from '../../../store/store';
 import './AdminCatalog.css';
 
-export default function AdminCatalog({
-  type,                     // 'games' أو 'apps'
-  items,                    // المصفوفة (ألعاب أو تطبيقات)
-  loading,
-  fetchPackages,            // دالة لجلب الباقات
-  addItem,                  // دالة إضافة عنصر (addGame أو addApp)
-  updateItem,               // دالة تحديث عنصر
-  deleteItem,               // دالة حذف عنصر
-  addPackage,               // دالة إضافة باقة
-  updatePackage,            // دالة تحديث باقة
-  deletePackage,            // دالة حذف باقة
-  title = 'إدارة العناصر',
-  itemLabel = 'عنصر',
-  packageTypeOptions = [],  // مصفوفة من القيم المسموحة لنوع الباقة
-}) {
+export default function AdminCatalog({ type }) { // type: 'games' أو 'apps'
+  const store = useAppStore();
+  
+  // بيانات العناصر
+  const items = type === 'games' ? store.games : store.apps;
+  const loading = false; // يمكنك إضافة حالة تحميل إذا أردت
+  
+  // دوال إدارة العناصر
+  const addItem = type === 'games' ? store.addGame : store.addApp;
+  const updateItem = type === 'games' ? store.updateGame : store.updateApp;
+  const deleteItem = type === 'games' ? store.deleteGame : store.deleteApp;
+  
+  // دوال إدارة الباقات
+  const fetchPackages = type === 'games' ? store.fetchGamePackages : store.fetchAppPackages;
+  const addPackage = type === 'games' ? store.addGamePackage : store.addAppPackage;
+  const updatePackage = type === 'games' ? store.updateGamePackage : store.updateAppPackage;
+  const deletePackage = type === 'games' ? store.deleteGamePackage : store.deleteAppPackage;
+  
+  const packageTypeOptions = type === 'games' 
+    ? ['normal', 'royalPass', 'direct'] 
+    : ['normal', 'premium', 'subscription'];
+  
+  const title = type === 'games' ? '🎮 إدارة الألعاب' : '📱 إدارة التطبيقات';
+  const itemLabel = type === 'games' ? 'لعبة' : 'تطبيق';
+
+  // باقي الكود كما هو (لم يتغير)
   const [selectedItem, setSelectedItem] = useState(null);
   const [packages, setPackages] = useState([]);
   const [packagesLoading, setPackagesLoading] = useState(false);
@@ -28,67 +41,53 @@ export default function AdminCatalog({
   const [editingItem, setEditingItem] = useState(null);
   const [editingPackage, setEditingPackage] = useState(null);
 
-  // نموذج العنصر (لعبة أو تطبيق) مع الحقول الجديدة
   const [formItem, setFormItem] = useState({
-    name: '',
-    imageUrl: '',
-    note: '',
-    isAvailable: true,
-    unavailableReason: '',
-    order: 0,
-    discount: 0,        // ← جديد
-    rating: 5.0,        // ← جديد
-    sold: '',           // ← جديد
+    name: '', imageUrl: '', note: '', isAvailable: true, unavailableReason: '',
+    order: 0, discount: 0, rating: 5.0, sold: '',
   });
 
-  // نموذج الباقة
   const [formPackage, setFormPackage] = useState({
-    name: '',
-    price: '',
-    currency: 'USD',
-    discount: 0,
-    type: packageTypeOptions[0] || 'normal',
-    order: 0,
-    imageUrl: '',
-    note: '',
-    externalProductId: '',
-    externalAnyKey: '',
+    name: '', price: '', currency: 'USD', discount: 0,
+    type: packageTypeOptions[0] || 'normal', order: 0,
+    imageUrl: '', note: '', externalProductId: '', externalAnyKey: '',
   });
 
-  const handleSelectItem = async (item) => {
-    setSelectedItem(item);
+  const loadPackages = useCallback(async (item) => {
+    if (!item) return;
     setPackagesLoading(true);
-    const pkgs = await fetchPackages(item.id);
-    setPackages(pkgs);
-    setPackagesLoading(false);
-  };
+    try {
+      const pkgs = await fetchPackages(item.id);
+      setPackages(pkgs);
+    } catch (err) {
+      console.error('خطأ في تحميل الباقات:', err);
+    } finally {
+      setPackagesLoading(false);
+    }
+  }, [fetchPackages]);
+
+  const refreshPackages = useCallback(async () => {
+    if (selectedItem) await loadPackages(selectedItem);
+  }, [selectedItem, loadPackages]);
+
+  const handleSelectItem = useCallback(async (item) => {
+    setSelectedItem(item);
+    await loadPackages(item);
+  }, [loadPackages]);
 
   const openItemModal = (item = null) => {
     if (item) {
       setEditingItem(item);
       setFormItem({
-        name: item.name || '',
-        imageUrl: item.imageUrl || '',
-        note: item.note || '',
-        isAvailable: item.isAvailable !== false,
-        unavailableReason: item.unavailableReason || '',
-        order: item.order || 0,
-        discount: item.discount || 0,
-        rating: item.rating || 5.0,
-        sold: item.sold || '',
+        name: item.name || '', imageUrl: item.imageUrl || '', note: item.note || '',
+        isAvailable: item.isAvailable !== false, unavailableReason: item.unavailableReason || '',
+        order: item.order || 0, discount: item.discount || 0,
+        rating: item.rating || 5.0, sold: item.sold || '',
       });
     } else {
       setEditingItem(null);
       setFormItem({
-        name: '',
-        imageUrl: '',
-        note: '',
-        isAvailable: true,
-        unavailableReason: '',
-        order: items.length,
-        discount: 0,
-        rating: 5.0,
-        sold: '',
+        name: '', imageUrl: '', note: '', isAvailable: true, unavailableReason: '',
+        order: items.length, discount: 0, rating: 5.0, sold: '',
       });
     }
     setShowItemModal(true);
@@ -97,15 +96,10 @@ export default function AdminCatalog({
   const handleItemSubmit = async (e) => {
     e.preventDefault();
     const data = {
-      name: formItem.name,
-      imageUrl: formItem.imageUrl,
-      note: formItem.note,
-      isAvailable: formItem.isAvailable,
-      unavailableReason: formItem.unavailableReason,
-      order: Number(formItem.order),
-      discount: Number(formItem.discount) || 0,
-      rating: Number(formItem.rating) || 5.0,
-      sold: formItem.sold || '',
+      name: formItem.name, imageUrl: formItem.imageUrl, note: formItem.note,
+      isAvailable: formItem.isAvailable, unavailableReason: formItem.unavailableReason,
+      order: Number(formItem.order), discount: Number(formItem.discount) || 0,
+      rating: Number(formItem.rating) || 5.0, sold: formItem.sold || '',
       updatedAt: new Date(),
     };
     if (editingItem) {
@@ -113,7 +107,7 @@ export default function AdminCatalog({
       if (selectedItem?.id === editingItem.id) {
         const updated = { ...selectedItem, ...data };
         setSelectedItem(updated);
-        await handleSelectItem(updated);
+        await loadPackages(updated);
       }
     } else {
       data.createdAt = new Date();
@@ -136,30 +130,17 @@ export default function AdminCatalog({
     if (pkg) {
       setEditingPackage(pkg);
       setFormPackage({
-        name: pkg.name || '',
-        price: pkg.price || '',
-        currency: pkg.currency || 'USD',
-        discount: pkg.discount || 0,
-        type: pkg.type || (packageTypeOptions[0] || 'normal'),
-        order: pkg.order || 0,
-        imageUrl: pkg.imageUrl || '',
-        note: pkg.note || '',
-        externalProductId: pkg.externalProductId || '',
-        externalAnyKey: pkg.externalAnyKey || '',
+        name: pkg.name || '', price: pkg.price || '', currency: pkg.currency || 'USD',
+        discount: pkg.discount || 0, type: pkg.type || (packageTypeOptions[0] || 'normal'),
+        order: pkg.order || 0, imageUrl: pkg.imageUrl || '', note: pkg.note || '',
+        externalProductId: pkg.externalProductId || '', externalAnyKey: pkg.externalAnyKey || '',
       });
     } else {
       setEditingPackage(null);
       setFormPackage({
-        name: '',
-        price: '',
-        currency: 'USD',
-        discount: 0,
-        type: packageTypeOptions[0] || 'normal',
-        order: packages.length,
-        imageUrl: '',
-        note: '',
-        externalProductId: '',
-        externalAnyKey: '',
+        name: '', price: '', currency: 'USD', discount: 0,
+        type: packageTypeOptions[0] || 'normal', order: packages.length,
+        imageUrl: '', note: '', externalProductId: '', externalAnyKey: '',
       });
     }
     setShowPackageModal(true);
@@ -169,14 +150,9 @@ export default function AdminCatalog({
     e.preventDefault();
     if (!selectedItem) return;
     const data = {
-      name: formPackage.name,
-      price: Number(formPackage.price),
-      currency: formPackage.currency,
-      discount: Number(formPackage.discount),
-      type: formPackage.type,
-      order: Number(formPackage.order),
-      imageUrl: formPackage.imageUrl,
-      note: formPackage.note,
+      name: formPackage.name, price: Number(formPackage.price), currency: formPackage.currency,
+      discount: Number(formPackage.discount), type: formPackage.type, order: Number(formPackage.order),
+      imageUrl: formPackage.imageUrl, note: formPackage.note,
       externalProductId: formPackage.externalProductId ? Number(formPackage.externalProductId) : null,
       externalAnyKey: formPackage.externalAnyKey || '',
     };
@@ -186,104 +162,103 @@ export default function AdminCatalog({
       await addPackage(selectedItem.id, data);
     }
     setShowPackageModal(false);
-    const pkgs = await fetchPackages(selectedItem.id);
-    setPackages(pkgs);
+    await loadPackages(selectedItem);
   };
 
   const handleDeletePackage = async (pkg) => {
     if (window.confirm(`حذف باقة "${pkg.name}"؟`)) {
       await deletePackage(selectedItem.id, pkg.id);
-      const pkgs = await fetchPackages(selectedItem.id);
-      setPackages(pkgs);
+      await loadPackages(selectedItem);
     }
   };
 
-  if (loading) return <div className="admin-loading">جاري تحميل {itemLabel}...</div>;
+  if (loading) return <div className="admin-catalog__loading">جاري تحميل {itemLabel}...</div>;
 
   return (
-    <div className="admin-catalog" dir="rtl">
+    <div className="admin-catalog">
       <div className="admin-catalog__header">
         <h2>{title}</h2>
         <Button onClick={() => openItemModal()}>➕ إضافة {itemLabel} جديد</Button>
       </div>
 
-      <div className="admin-catalog__content">
-        {/* قائمة العناصر */}
-        <div className="items-list">
-          <h3>قائمة {itemLabel}</h3>
-          {items.length === 0 ? (
-            <p>لا توجد {itemLabel} مضافة بعد</p>
-          ) : (
-            <div className="items-table-wrapper">
-              <table className="items-table">
-                <thead>
-                  <tr>
-                    <th>الصورة</th><th>الاسم</th><th>الحالة</th><th>الترتيب</th><th>إجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map(item => (
-                    <tr key={item.id} className={selectedItem?.id === item.id ? 'selected-row' : ''}>
-                      <td>{item.imageUrl ? <img src={item.imageUrl} alt={item.name} className="item-thumb" /> : <span>📦</span>}</td>
-                      <td>{item.name}</td>
-                      <td><span className={`status-badge ${item.isAvailable ? 'available' : 'unavailable'}`}>{item.isAvailable ? 'متاحة' : 'غير متاحة'}</span></td>
-                      <td>{item.order}</td>
-                      <td>
-                        <Button onClick={() => openItemModal(item)} variant="primary">تعديل</Button>
-                        <Button onClick={() => handleDeleteItem(item)} variant="danger">حذف</Button>
-                        <Button onClick={() => handleSelectItem(item)} variant="secondary">
-                          {selectedItem?.id === item.id ? 'مختارة' : 'إدارة الباقات'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* باقات العنصر المختار */}
-        {selectedItem && (
-          <div className="packages-list">
-            <div className="packages-header">
-              <h3>باقات {selectedItem.name}</h3>
-              <Button onClick={() => openPackageModal()}>➕ إضافة باقة</Button>
-            </div>
-            {packagesLoading ? (
-              <p>جاري تحميل الباقات...</p>
-            ) : packages.length === 0 ? (
-              <p>لا توجد باقات لهذا {itemLabel}</p>
-            ) : (
-              <div className="packages-table-wrapper">
-                <table className="packages-table">
-                  <thead>
-                    <tr><th>الاسم</th><th>السعر</th><th>العملة</th><th>الخصم</th><th>النوع</th><th>الترتيب</th><th>إجراءات</th></tr>
-                  </thead>
-                  <tbody>
-                    {packages.map(pkg => (
-                      <tr key={pkg.id}>
-                        <td>{pkg.name}</td>
-                        <td>{pkg.price}</td>
-                        <td>{pkg.currency}</td>
-                        <td>{pkg.discount || 0}%</td>
-                        <td>{pkg.type}</td>
-                        <td>{pkg.order}</td>
-                        <td>
-                          <Button onClick={() => openPackageModal(pkg)} variant="primary">تعديل</Button>
-                          <Button onClick={() => handleDeletePackage(pkg)} variant="danger">حذف</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+      {/* قائمة العناصر (ألعاب/تطبيقات) - بطاقات متجاوبة */}
+      <div className="admin-catalog__section">
+        <h3>قائمة {itemLabel}</h3>
+        {items.length === 0 ? (
+          <p>لا توجد {itemLabel} مضافة بعد</p>
+        ) : (
+          <div className="items-grid">
+            {items.map(item => (
+              <div key={item.id} className={`item-card ${selectedItem?.id === item.id ? 'item-card--selected' : ''}`}>
+                <div className="item-card__image">
+                  {item.imageUrl ? <img src={item.imageUrl} alt={item.name} /> : <span>📦</span>}
+                </div>
+                <div className="item-card__info">
+                  <h4>{item.name}</h4>
+                  <div className="item-card__status">
+                    <span className={`status-badge ${item.isAvailable ? 'available' : 'unavailable'}`}>
+                      {item.isAvailable ? 'متاحة' : 'غير متاحة'}
+                    </span>
+                    <span className="item-card__order">ترتيب: {item.order}</span>
+                  </div>
+                </div>
+                <div className="item-card__actions">
+                  <Button onClick={() => openItemModal(item)} variant="primary" size="sm">تعديل</Button>
+                  <Button onClick={() => handleDeleteItem(item)} variant="danger" size="sm">حذف</Button>
+                  <Button onClick={() => handleSelectItem(item)} variant="secondary" size="sm">
+                    {selectedItem?.id === item.id ? 'مختارة' : 'إدارة الباقات'}
+                  </Button>
+                </div>
               </div>
-            )}
+            ))}
           </div>
         )}
       </div>
 
-      {/* مودال العنصر */}
+      {/* باقات العنصر المختار */}
+      {selectedItem && (
+        <div className="admin-catalog__section">
+          <div className="packages-header">
+            <h3>باقات {selectedItem.name}</h3>
+            <div className="packages-actions">
+              <Button onClick={refreshPackages} variant="outline" size="sm" disabled={packagesLoading}>
+                <FiRefreshCw /> تحديث
+              </Button>
+              <Button onClick={() => openPackageModal()}>➕ إضافة باقة</Button>
+            </div>
+          </div>
+          {packagesLoading ? (
+            <p>جاري تحميل الباقات...</p>
+          ) : packages.length === 0 ? (
+            <p>لا توجد باقات لهذا {itemLabel}</p>
+          ) : (
+            <div className="packages-grid">
+              {packages.map(pkg => (
+                <div key={pkg.id} className="package-card">
+                  <div className="package-card__image">
+                    {pkg.imageUrl ? <img src={pkg.imageUrl} alt={pkg.name} /> : <span>📦</span>}
+                  </div>
+                  <div className="package-card__info">
+                    <h4>{pkg.name}</h4>
+                    <div className="package-card__details">
+                      <span><strong>السعر:</strong> {pkg.price} {pkg.currency}</span>
+                      <span><strong>الخصم:</strong> {pkg.discount || 0}%</span>
+                      <span><strong>النوع:</strong> {pkg.type}</span>
+                      <span><strong>الترتيب:</strong> {pkg.order}</span>
+                    </div>
+                  </div>
+                  <div className="package-card__actions">
+                    <Button onClick={() => openPackageModal(pkg)} variant="primary" size="sm">تعديل</Button>
+                    <Button onClick={() => handleDeletePackage(pkg)} variant="danger" size="sm">حذف</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* المودالات (نفس الكود السابق) */}
       {showItemModal && (
         <div className="modal-overlay" onClick={() => setShowItemModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -295,20 +270,13 @@ export default function AdminCatalog({
               <Input label={`اسم ${itemLabel} *`} value={formItem.name} onChange={e => setFormItem({...formItem, name: e.target.value})} required />
               <div className="form-field">
                 <label>صورة {itemLabel}</label>
-                <ImageUpload 
-                  onUploadComplete={(url) => setFormItem({...formItem, imageUrl: url})} 
-                  maxSizeMB={0.5} 
-                  storagePath={`${type}/${editingItem?.id || 'temp'}`}
-                />
+                <ImageUpload onUploadComplete={(url) => setFormItem({...formItem, imageUrl: url})} maxSizeMB={0.5} storagePath={`${type}/${editingItem?.id || 'temp'}`} />
                 {formItem.imageUrl && <img src={formItem.imageUrl} alt="معاينة" className="preview-img" />}
               </div>
               <Input label="ملاحظة (تظهر تحت الاسم)" value={formItem.note} onChange={e => setFormItem({...formItem, note: e.target.value})} />
-              
-              {/* الحقول الجديدة */}
               <Input label="الخصم (%)" type="number" step="0.1" min="0" max="100" value={formItem.discount} onChange={e => setFormItem({...formItem, discount: parseFloat(e.target.value) || 0})} />
               <Input label="التقييم (1–5)" type="number" step="0.1" min="1" max="5" value={formItem.rating} onChange={e => setFormItem({...formItem, rating: parseFloat(e.target.value) || 5.0})} />
               <Input label="المبيعات (نص)" value={formItem.sold} onChange={e => setFormItem({...formItem, sold: e.target.value})} placeholder="مثال: 100k+ Sold" />
-
               <div className="form-field checkbox">
                 <label><input type="checkbox" checked={formItem.isAvailable} onChange={e => setFormItem({...formItem, isAvailable: e.target.checked})} /> {itemLabel} متاحة</label>
               </div>
@@ -323,7 +291,6 @@ export default function AdminCatalog({
         </div>
       )}
 
-      {/* مودال الباقة */}
       {showPackageModal && (
         <div className="modal-overlay" onClick={() => setShowPackageModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -336,11 +303,7 @@ export default function AdminCatalog({
               <Input label="السعر *" type="number" step="0.01" value={formPackage.price} onChange={e => setFormPackage({...formPackage, price: e.target.value})} required />
               <div className="form-field">
                 <label>صورة الباقة</label>
-                <ImageUpload 
-                  onUploadComplete={(url) => setFormPackage({...formPackage, imageUrl: url})} 
-                  maxSizeMB={0.5} 
-                  storagePath={`${type}/${selectedItem?.id}/packages/${editingPackage?.id || 'temp'}`}
-                />
+                <ImageUpload onUploadComplete={(url) => setFormPackage({...formPackage, imageUrl: url})} maxSizeMB={0.5} storagePath={`${type}/${selectedItem?.id}/packages/${editingPackage?.id || 'temp'}`} />
                 {formPackage.imageUrl && <img src={formPackage.imageUrl} alt="معاينة" className="preview-img" />}
               </div>
               <Input label="ملاحظة الباقة" value={formPackage.note} onChange={e => setFormPackage({...formPackage, note: e.target.value})} />

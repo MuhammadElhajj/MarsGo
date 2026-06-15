@@ -223,9 +223,9 @@
 /* العنصر الواحد – أساس التكديس */
 .carousel-item {
   position: absolute;
-  width: 80%;
+  width: 92%;
   height: 100%;
-  left: 10%;
+  left: 4%;
   top: 0;
   transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
   border-radius: 0.875rem;
@@ -432,7 +432,7 @@
 /* فقط تحسين للارتفاع على الشاشات الصغيرة جداً (اختياري) */
 @media (max-width: 480px) {
   .carousel-items {
-    height: 120px;   /* يمكن تعديله حسب رغبتك */
+    height: 140px;   /* يمكن تعديله حسب رغبتك */
   }
   .carousel-item.prev {
     transform: translateX(-22%) scale(0.78);
@@ -456,7 +456,7 @@
 /* دعم الشاشات الصغيرة جداً (350px وأقل) */
 @media (max-width: 350px) {
   .carousel-items {
-    height: 80px;
+    height: 100px;
   }
   .carousel-item.prev {
     transform: translateX(-18%) scale(0.75);

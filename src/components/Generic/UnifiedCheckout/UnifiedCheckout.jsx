@@ -1,3 +1,4 @@
+// src/components/Generic/UnifiedCheckout/UnifiedCheckout.jsx
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
@@ -18,7 +19,6 @@ export default function UnifiedCheckout() {
   const navigate = useNavigate();
   const { userData } = useAuth();
   
-  // Zustand store
   const balance = useAppStore((state) => state.balance);
   const deductBalance = useAppStore((state) => state.deductBalance);
   const addNotification = useAppStore((state) => state.addNotification);
@@ -31,19 +31,14 @@ export default function UnifiedCheckout() {
   const [error, setError] = useState('');
   const [customValues, setCustomValues] = useState({});
   const [quantity, setQuantity] = useState(1);
+  const [dataError, setDataError] = useState(false);
 
-  // استقبال بيانات الباقة المحلية من location.state
-  const { item, pkg, serviceType } = location.state || {};
+  const { item, package: pkg, serviceType } = location.state || {};
+  const isLocalPackage = !!(item && pkg && serviceType);
 
-  // تحديد ما إذا كنا في حالة باقة محلية
-  const isLocalPackage = item && pkg && serviceType;
-
-  // بناء كائن المنتج (product) ديناميكياً
   const product = useMemo(() => {
     if (isLocalPackage) {
-      // دمج بيانات اللعبة/التطبيق مع الباقة
-      const customFields = item.customFields || [];
-      // إذا كان type = 'game' نضيف حقل playerId افتراضياً إذا لم يوجد
+      const customFields = item.customFields ? [...item.customFields] : [];
       if (serviceType === 'gaming' && !customFields.some(f => f.name === 'playerId')) {
         customFields.push({
           label: 'معرف اللاعب (Player ID)',
@@ -53,7 +48,6 @@ export default function UnifiedCheckout() {
           placeholder: 'أدخل معرف اللاعب'
         });
       }
-      // إذا كان type = 'apps' نضيف حقل quantity افتراضياً إذا لم يوجد
       if (serviceType === 'apps' && !customFields.some(f => f.name === 'quantity')) {
         customFields.push({
           label: 'الكمية',
@@ -65,7 +59,6 @@ export default function UnifiedCheckout() {
           defaultValue: 1
         });
       }
-
       return {
         id: pkg.id,
         name: pkg.name,
@@ -74,9 +67,9 @@ export default function UnifiedCheckout() {
         currency: pkg.currency || 'USD',
         imageUrl: pkg.imageUrl || item.imageUrl || '',
         customFields: customFields,
+        note: pkg.note || item.note || '',
         type: serviceType === 'gaming' ? 'game' : 'app',
         categoryId: serviceType === 'gaming' ? 'games' : 'apps',
-        externalStore: null // ليس منتجاً خارجياً
       };
     } else if (productId) {
       return products.find(p => p.id === productId) || null;
@@ -84,14 +77,25 @@ export default function UnifiedCheckout() {
     return null;
   }, [productId, products, isLocalPackage, item, pkg, serviceType]);
 
-  // جلب المنتجات من Firestore إذا لم تكن موجودة في الـ store
   useEffect(() => {
-    if (productId && !product && !isLocalPackage) {
+    if (productId && !product && !isLocalPackage && products.length === 0) {
       fetchProducts();
     }
-  }, [productId, product, isLocalPackage, fetchProducts]);
+  }, [productId, product, isLocalPackage, fetchProducts, products.length]);
 
-  // تهيئة القيم الافتراضية من customFields
+  useEffect(() => {
+    if (!isLocalPackage && !productId) {
+      setDataError(true);
+      setError('لا توجد بيانات المنتج. يرجى العودة إلى صفحة المنتجات والمحاولة مرة أخرى.');
+    } else if (isLocalPackage && (!item || !pkg)) {
+      setDataError(true);
+      setError('بيانات الباقة غير مكتملة. يرجى المحاولة مرة أخرى.');
+    } else {
+      setDataError(false);
+      setError('');
+    }
+  }, [isLocalPackage, productId, item, pkg]);
+
   useEffect(() => {
     if (product?.customFields) {
       const defaults = {};
@@ -106,37 +110,55 @@ export default function UnifiedCheckout() {
     }
   }, [product]);
 
-  if (!product) {
-    if (isLocalPackage) return <Loading text="جاري تحميل الباقة..." />;
-    return <Loading text="جاري تحميل المنتج..." />;
+  if (dataError) {
+    return (
+      <div className="unified-checkout product-page" dir="rtl">
+        <div className="product-page__back">
+          <GoBackButton text="رجوع" onClick={() => navigate(-1)} />
+        </div>
+        <div className="error-container">
+          <h3>⚠️ {error}</h3>
+          <Button onClick={() => navigate(-1)}>العودة</Button>
+        </div>
+      </div>
+    );
   }
 
-  // تحديد ما إذا كان المنتج يسمح بتغيير الكمية
-  const allowQuantity = product.customFields?.some(f => f.name === 'quantity') || product.type === 'app';
+  if (!product) {
+    return <Loading text={isLocalPackage ? 'جاري تحميل الباقة...' : 'جاري تحميل المنتج...'} />;
+  }
 
-  // حساب السعر الإجمالي (مع مراعاة الخصم إن وجد)
+  const allowQuantity = product.customFields?.some(f => f.name === 'quantity') || product.type === 'app';
   const basePrice = product.price || 0;
   const discountPercent = product.discount || 0;
   const discountedPrice = discountPercent > 0 ? basePrice * (1 - discountPercent / 100) : basePrice;
   const totalPrice = discountedPrice * (allowQuantity ? quantity : 1);
-  const displayPrice = currency === 'USD'
+  
+  const displayTotalPrice = currency === 'USD'
     ? `${totalPrice.toFixed(2)} $`
     : exchangeRate ? `${(totalPrice * exchangeRate).toFixed(0).toLocaleString()} ل.س` : '...';
+  const displayUnitPrice = currency === 'USD'
+    ? `${discountedPrice.toFixed(2)} $`
+    : exchangeRate ? `${(discountedPrice * exchangeRate).toFixed(0).toLocaleString()} ل.س` : '...';
 
-  // التحقق من صحة الحقول المطلوبة
+  const isBalanceSufficient = balance >= totalPrice;
+  const balanceStatusMessage = isBalanceSufficient 
+    ? ' رصيد كافٍ، يمكنك إتمام الشراء' 
+    : ` الرصيد غير كافٍ. المطلوب: ${totalPrice.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`;
+
   const validateForm = () => {
-    const missing = product.customFields?.filter(f => f.required && !customValues[f.name]) || [];
+    const fieldsToValidate = (product.customFields || []).filter(f => f.name !== 'quantity');
+    const missing = fieldsToValidate.filter(f => f.required && !customValues[f.name]);
     if (missing.length) {
       return `يرجى ملء: ${missing.map(m => m.label).join(', ')}`;
     }
-    if (balance < totalPrice) {
-      return `رصيدك غير كافٍ. المطلوب: ${totalPrice.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`;
+    if (!isBalanceSufficient) {
+      return balanceStatusMessage;
     }
     return null;
   };
 
-  // تجميع بيانات الطلب
-  const getOrderData = (externalResult = null) => ({
+  const getOrderData = () => ({
     userId: userData.uid,
     customerName: userData.name || '',
     productId: product.id,
@@ -152,10 +174,9 @@ export default function UnifiedCheckout() {
     createdAt: serverTimestamp(),
     exchangeRateAtPurchase: exchangeRate || null,
     currencyUsed: currency,
-    ...(externalResult && { externalOrderId: externalResult.order_id, externalData: externalResult })
+    productNote: product.note || '',
   });
 
-  // إرسال الطلب
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -164,24 +185,12 @@ export default function UnifiedCheckout() {
       setError(errMsg);
       return;
     }
-
     setLoading(true);
     try {
-      // خصم الرصيد
       const deducted = await deductBalance(totalPrice);
       if (!deducted) throw new Error('فشل خصم الرصيد');
-
-      // (اختياري) إذا كان المنتج مرتبطاً بمتجر خارجي
-      let externalResult = null;
-      if (product.externalStore?.enabled) {
-        console.log('طلب منتج خارجي', product.externalStore);
-        // يمكنك استدعاء externalStoreProxy هنا
-      }
-
-      const orderData = getOrderData(externalResult);
+      const orderData = getOrderData();
       const docRef = await addDoc(collection(db, 'orders'), orderData);
-
-      // إشعار واتساب
       const orderMessageData = {
         productName: product.name,
         quantity: allowQuantity ? quantity : 1,
@@ -191,8 +200,6 @@ export default function UnifiedCheckout() {
       };
       const message = formatOrderMessage(orderMessageData, docRef.id, 'product');
       await sendWhatsAppNotification(null, message, null);
-
-      // إشعار داخلي
       addNotification({
         id: docRef.id,
         userId: userData.uid,
@@ -203,7 +210,6 @@ export default function UnifiedCheckout() {
         read: false,
         createdAt: new Date(),
       });
-
       showToast('✅ تم تنفيذ طلبك بنجاح!', 'success', 3000);
       setTimeout(() => navigate('/my-orders'), 1500);
     } catch (err) {
@@ -215,36 +221,92 @@ export default function UnifiedCheckout() {
     }
   };
 
+  const handleQuantityChange = (e) => {
+    const newQty = parseInt(e.target.value) || 1;
+    setQuantity(newQty);
+    if (product.customFields?.some(f => f.name === 'quantity')) {
+      setCustomValues(prev => ({ ...prev, quantity: newQty }));
+    }
+  };
+
+  const imageUrl = product.imageUrl;
+
   return (
-    <div className="unified-checkout" dir="rtl">
-      <GoBackButton text="رجوع" onClick={() => navigate(-1)} />
-      <h2 className="unified-checkout__title">{product.name}</h2>
-      {product.imageUrl && <img src={product.imageUrl} alt={product.name} className="product-image" />}
-      <div className="unified-checkout__form">
-        <form onSubmit={handleSubmit}>
-          {allowQuantity && (
-            <div className="form-group">
-              <label>الكمية</label>
-              <input
-                type="number"
-                min={1}
-                className="form-control"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-              />
+    <div className="unified-checkout product-page" dir="rtl">
+      <div className="product-page__back">
+        <GoBackButton text="رجوع" onClick={() => navigate(-1)} />
+      </div>
+      <div className="product-page__container">
+        <div className="product-page__image">
+          {imageUrl ? <img src={imageUrl} alt={product.name} /> : <div className="image-placeholder">📦</div>}
+        </div>
+
+        <div className="product-page__details">
+          <h1 className="product-page__title">{product.name}</h1>
+          {product.note && (
+            <div className="product-page__note">
+              <strong>ملاحظة المدير:</strong> {product.note}
             </div>
           )}
-          <DynamicFields
-            fields={product.customFields || []}
-            onChange={setCustomValues}
-            initialValues={customValues}
-          />
-          <p className="price-display">السعر الإجمالي: {displayPrice}</p>
-          <Button type="submit" disabled={loading || balance < totalPrice}>
-            {loading ? 'جاري التنفيذ...' : `تأكيد الطلب (${totalPrice.toFixed(2)} $)`}
-          </Button>
-          {error && <p className="error">❌ {error}</p>}
-        </form>
+
+          <div className="product-page__price">
+            {discountPercent > 0 ? (
+              <>
+                <span className="original-price">{basePrice} $</span>
+                <span className="final-price">{displayUnitPrice}</span>
+                <span className="discount-badge">-{discountPercent}%</span>
+              </>
+            ) : (
+              <span className="final-price">{displayUnitPrice}</span>
+            )}
+          </div>
+
+          {/* كارد الرصيد مع لون متغير */}
+          <div className={`balance-card ${isBalanceSufficient ? 'balance-sufficient' : 'balance-insufficient'}`}>
+            <div className="balance-label"> رصيدك الحالي</div>
+            <div className="balance-amount">{balance.toFixed(2)} $</div>
+          </div>
+          {!isBalanceSufficient && (
+            <div className="balance-warning">{balanceStatusMessage}</div>
+          )}
+
+          <form onSubmit={handleSubmit} className="product-page__form">
+            {allowQuantity && (
+              <div className="form-group">
+                <label>الكمية</label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  className="quantity-input"
+                />
+              </div>
+            )}
+
+            <DynamicFields
+              fields={(product.customFields || []).filter(f => f.name !== 'quantity')}
+              onChange={setCustomValues}
+              initialValues={customValues}
+            />
+
+            <div className="product-page__total">
+              <span>الإجمالي:</span>
+              <strong>{displayTotalPrice}</strong>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <Button 
+              type="submit" 
+              disabled={loading || !isBalanceSufficient} 
+              className="buy-button"
+            >
+              {loading ? 'جاري التنفيذ...' : `تأكيد الشراء (${displayTotalPrice})`}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

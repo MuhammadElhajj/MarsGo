@@ -59,3 +59,476 @@
     padding: 1rem;
   }
 }
+
+/* ===== منتج / صفحة دفع موحدة ===== */
+.unified-checkout.product-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.product-page__back {
+  margin-bottom: 1rem;
+}
+
+.product-page__container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.product-page__image {
+  flex: 1;
+  min-width: 250px;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+ }
+
+.product-page__image img {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.image-placeholder {
+  font-size: 5rem;
+  color: var(--color-text-secondary);
+}
+
+.product-page__details {
+  flex: 2;
+  min-width: 280px;
+}
+
+.product-page__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.product-page__note {
+  background: var(--color-bg-primary);
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+
+  font-size: 0.9rem;
+}
+
+.product-page__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.original-price {
+  text-decoration: line-through;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.final-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.discount-badge {
+  background: #f59e0b;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+}
+
+.product-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--color-text-secondary);
+}
+
+.quantity-input {
+  width: 100px;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.product-page__total {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+}
+
+.product-page__total strong {
+  font-size: 1.3rem;
+  color: var(--color-accent);
+}
+
+.error-message {
+  color: #ef4444;
+  background: #fee2e2;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.buy-button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* استجابة للجوال */
+@media (max-width: 768px) {
+  .product-page__container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .product-page__image {
+    min-width: auto;
+  }
+  .product-page__title {
+    font-size: 1.4rem;
+  }
+  .final-price {
+    font-size: 1.2rem;
+  }
+  .product-page__total strong {
+    font-size: 1.1rem;
+  }
+  .quantity-input {
+    width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .unified-checkout.product-page {
+    padding: 0.5rem;
+  }
+  .product-page__note {
+    font-size: 0.8rem;
+  }
+  .buy-button {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
+
+/* src/components/Generic/UnifiedCheckout/UnifiedCheckout.css */
+
+/* ===== الحاوية الرئيسية ===== */
+.unified-checkout.product-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease;
+  direction: rtl;
+}
+
+/* ===== زر الرجوع ===== */
+.product-page__back {
+  margin-bottom: 1.5rem;
+}
+
+/* ===== حاوية الصورة والتفاصيل ===== */
+.product-page__container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1.5rem;
+ 
+}
+
+/* ===== قسم الصورة ===== */
+.product-page__image {
+  flex: 1;
+  min-width: 250px;
+  background: var(--color-bg-primary);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.product-page__image img {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+.image-placeholder {
+  font-size: 5rem;
+  color: var(--color-text-secondary);
+}
+
+/* ===== قسم التفاصيل ===== */
+.product-page__details {
+  flex: 2;
+  min-width: 280px;
+}
+
+.product-page__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-primary);
+  border-right: 4px solid #f59e0b;
+  padding-right: 1rem;
+}
+
+/* ===== ملاحظة المدير ===== */
+.product-page__note {
+  background: rgba(79, 70, 229, 0.08);
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.25rem;
+ 
+  font-size: 0.9rem;
+}
+
+/* ===== سعر الوحدة والخصم ===== */
+.product-page__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.original-price {
+  text-decoration: line-through;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+.final-price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+.discount-badge {
+  background: #f59e0b;
+  color: white;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ===== كارد الرصيد (بطاقة منفصلة أنيقة) ===== */
+.balance-card {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #7c3aed 100%);
+  border-radius: 1rem;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.balance-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.balance-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ===== النموذج ===== */
+.product-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--color-text-secondary);
+}
+.quantity-input {
+  width: 100px;
+  padding: 0.6rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ===== السعر الإجمالي ===== */
+.product-page__total {
+  margin-top: 0.5rem;
+  padding-top: 0.8rem;
+  border-top: 2px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.product-page__total strong {
+  font-size: 1.5rem;
+  color: var(--color-accent);
+}
+
+/* ===== أزرار وأخطاء ===== */
+.error-message {
+  color: #ef4444;
+  background: #fee2e2;
+  padding: 0.6rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.buy-button {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 2rem;
+  transition: all 0.3s;
+}
+.buy-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79,70,229,0.3);
+}
+
+/* ===== حالة الخطأ العامة ===== */
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  color: var(--color-text-secondary);
+}
+.error-container h3 {
+  color: var(--color-danger);
+  margin-bottom: 1rem;
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 768px) {
+  .product-page__container {
+    flex-direction: column;
+   
+    gap: 1rem;
+  }
+  .product-page__title {
+    font-size: 1.4rem;
+  }
+  .final-price {
+    font-size: 1.4rem;
+  }
+  .product-page__total strong {
+    font-size: 1.2rem;
+  }
+  .balance-amount {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+
+  .balance-card {
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+/* كارد الرصيد - أساسي أبيض/داكن حسب الثيم */
+.balance-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+/* عندما الرصيد كافٍ - لون أخضر فاتح */
+.balance-card.balance-sufficient {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  border-color: #10b981;
+  color: #064e3b;
+}
+.balance-card.balance-sufficient .balance-amount {
+  color: #065f46;
+}
+/* عندما الرصيد غير كافٍ - لون أحمر فاتح */
+.balance-card.balance-insufficient {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-color: #ef4444;
+  color: #7f1d1d;
+}
+.balance-card.balance-insufficient .balance-amount {
+  color: #b91c1c;
+}
+
+.balance-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.balance-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.balance-warning {
+  background: rgba(239, 68, 68, 0.1);
+  
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: #ef4444;
+  text-align: center;
+}
+
+/* زر الشراء معطل */
+.buy-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

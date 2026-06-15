@@ -77,7 +77,7 @@
   font-size: 1rem;
   font-weight: 700;
   margin: 0;
-  color: #1f2937;
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,7 +88,8 @@
 .catalog-card__stats {
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: #6b7280;
+  /* color: #6b7280; */
+  color: var(--color-text-secondary);
   text-align: left; /* 🟢 */
   white-space: nowrap;
   overflow: hidden;
