@@ -70,6 +70,12 @@ function App() {
     }
   }, [user, listenToBalance]);
 
+   // ✅ استمع لسعر الصرف (أضف هذا الكود)
+  useEffect(() => {
+    const unsubscribeRate = useAppStore.getState().listenToExchangeRate?.();
+    return () => { if (unsubscribeRate) unsubscribeRate(); };
+  }, []); 
+
   if (loading) return <Loading />;
 
   return (

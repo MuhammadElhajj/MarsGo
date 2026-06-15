@@ -5,6 +5,9 @@ import { useAppStore } from '../../../../store/store';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import CatalogList from '../../../Generic/CatalogList/CatalogList';
+import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton';
+import { FiStar } from 'react-icons/fi';
+import './AppPackages.css'; // سننشئ ملف CSS خاص
 
 export default function AppPackages() {
   const { appId } = useParams();
@@ -17,11 +20,9 @@ export default function AppPackages() {
   useEffect(() => {
     const load = async () => {
       if (!appId) return;
-      // البحث عن التطبيق في الـ store (تم جلبها مسبقاً في AppsPage)
       const foundApp = apps?.find(a => a.id === appId);
       setApp(foundApp || null);
 
-      // جلب الباقات من Firestore
       try {
         const q = query(collection(db, 'apps', appId, 'packages'), orderBy('order', 'asc'));
         const snapshot = await getDocs(q);
@@ -37,22 +38,56 @@ export default function AppPackages() {
   }, [appId, apps]);
 
   const handlePackageSelect = (pkg) => {
-    navigate('/apps/checkout', { state: { item: app, package: pkg } });
+    navigate('/apps/checkout', { state: { item: app, package: pkg, serviceType: 'apps' } });
   };
 
-  if (loading) return <div>جاري التحميل...</div>;
-  if (!app) return <div>التطبيق غير موجود</div>;
+  if (loading) return <div className="app-packages-loading">جاري تحميل الباقات...</div>;
+  if (!app) return <div className="app-packages-error">التطبيق غير موجود</div>;
 
   return (
-    <CatalogList
-      items={packages}
-      onItemClick={handlePackageSelect}
-      title={`باقات ${app.name}`}
-      showBackButton={true}
-      showPrice={true}
-      type="package"
-      parentId={app.id}
-      parentType="app"
-    />
+    <div className="app-packages-page" dir="rtl">
+      {/* زر الرجوع */}
+      <div className="app-packages-page__back-button">
+        <GoBackButton text="رجوع" />
+      </div>
+
+      {/* ===== رأس الصفحة (معلومات التطبيق) ===== */}
+      <div className="app-packages-page__header">
+        <div className="app-packages-page__app-info">
+          <div className="app-packages-page__app-image">
+            <img src={app.imageUrl} alt={app.name} />
+          </div>
+          <div className="app-packages-page__app-details">
+            <h1 className="app-packages-page__app-title">{app.name}</h1>
+            <div className="app-packages-page__app-stats">
+              <span className="app-packages-page__rating">
+                <FiStar /> {app.rating || '5.0'}
+              </span>
+              <span className="app-packages-page__separator">|</span>
+              <span className="app-packages-page__sold">{app.sold || '100k+ Downloads'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* وصف التطبيق (إذا وجد) */}
+      {app.description && (
+        <div className="app-packages-page__app-description-below">
+          {app.description}
+        </div>
+      )}
+
+      {/* شبكة الباقات */}
+      <div className="app-packages-page__grid">
+        <CatalogList
+          items={packages}
+          onItemClick={handlePackageSelect}
+          showPrice={true}
+          type="package"
+          showBackButton={false}
+          title=""
+        />
+      </div>
+    </div>
   );
 }

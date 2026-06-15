@@ -80,10 +80,24 @@ export const useAppStore = create(
       toggleTheme: () => set((state) => ({ isDark: !state.isDark })),
 
       // ========== سعر الصرف ==========
-      exchangeRate: 145,
-      setExchangeRate: (rate) => set({ exchangeRate: rate }),
-      autoSyncExchangeRate: true,
-      setAutoSyncExchangeRate: (auto) => set({ autoSyncExchangeRate: auto }),
+ // ========== سعر الصرف ==========
+exchangeRate: 145,
+setExchangeRate: (rate) => set({ exchangeRate: rate }),
+
+// الاستماع لتغيرات سعر الصرف في الوقت الفعلي (من Firestore)
+listenToExchangeRate: () => {
+  const unsub = onSnapshot(doc(db, 'exchangeRate', 'default'), (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.value) {
+        get().setExchangeRate(data.value);
+      }
+    }
+  }, (error) => {
+    console.error('خطأ في الاستماع لسعر الصرف:', error);
+  });
+  return unsub;
+},
 
       // ========== الإشعارات ==========
       notifications: [],
