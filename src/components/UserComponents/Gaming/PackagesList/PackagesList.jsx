@@ -1,9 +1,13 @@
+// src/components/UserComponents/Gaming/PackagesList/PackagesList.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../../store/store';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../../../firebase';
 import CatalogList from '../../../Generic/CatalogList/CatalogList';
+import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton'; // ✅ إضافة زر الرجوع
+import { FiStar } from 'react-icons/fi';
+import './PackagesList.css';
 
 export default function PackagesList() {
   const { gameId } = useParams();
@@ -16,7 +20,7 @@ export default function PackagesList() {
   useEffect(() => {
     const load = async () => {
       if (!gameId) return;
-      // البحث عن اللعبة في الـ store (البيانات موجودة مسبقاً)
+      // البحث عن اللعبة في الـ store
       const foundGame = games?.find(g => g.id === gameId);
       setGame(foundGame || null);
 
@@ -36,22 +40,59 @@ export default function PackagesList() {
   }, [gameId, games]);
 
   const handlePackageSelect = (pkg) => {
-    navigate('/gaming/checkout', { state: { item: game, package: pkg } });
+    navigate('/gaming/checkout', { state: { item: game, package: pkg, serviceType: 'gaming' } });
   };
 
-  if (loading) return <div>جاري التحميل...</div>;
+  if (loading) return <div>جاري تحميل الباقات...</div>;
   if (!game) return <div>اللعبة غير موجودة</div>;
 
   return (
-    <CatalogList
-      items={packages}
-      onItemClick={handlePackageSelect}
-      title={`باقات ${game.name}`}
-      showBackButton={true}
-      showPrice={true}
-      type="package"
-      parentId={game.id}
-      parentType="game"
-    />
+    <div className="packages-page" dir="rtl">
+      
+      {/* ✅ زر الرجوع في الأعلى */}
+      <div className="packages-page__back-button">
+        <GoBackButton text="رجوع" />
+      </div>
+
+      {/* ===== رأس الصفحة (معلومات اللعبة) ===== */}
+      <div className="packages-page__header">
+        <div className="packages-page__game-info">
+          <div className="packages-page__game-image">
+            <img src={game.imageUrl} alt={game.name} />
+          </div>
+          <div className="packages-page__game-details">
+            <h1 className="packages-page__game-title">{game.name}</h1>
+            
+            {/* التقييم والمبيعات */}
+            <div className="packages-page__game-stats">
+              <span className="packages-page__rating">
+                <FiStar /> {game.rating || '5.0'}
+              </span>
+              <span className="packages-page__separator">|</span>
+              <span className="packages-page__sold">{game.sold || '100k+ Sold'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ✅ وصف اللعبة – يظهر تحت الهيدر مباشرة */}
+      {game.description && (
+        <div className="packages-page__game-description-below">
+          {game.description}
+        </div>
+      )}
+
+      {/* ===== شبكة الباقات ===== */}
+      <div className="packages-page__grid">
+        <CatalogList
+          items={packages}
+          onItemClick={handlePackageSelect}
+          showPrice={true}
+          type="package"
+          showBackButton={false}
+          title=""
+        />
+      </div>
+    </div>
   );
 }

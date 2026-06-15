@@ -214,3 +214,105 @@
     gap: 0.5rem;
   }
 }
+
+
+
+
+/* ===== قسم الباقات (تصميم Lootbar) ===== */
+.catalog-card--package {
+  background: #fefcf0; /* خلفية صفراء فاتحة جداً */
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.catalog-card--package:hover {
+  border-color: #ea580c; /* برتقالي عند التمرير */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+/* صورة الباقة */
+.catalog-card--package .catalog-card__image-wrapper {
+  padding: 0.5rem;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.catalog-card--package .catalog-card__image {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+
+/* معلومات الباقة */
+.catalog-card--package .catalog-card__info {
+  padding: 0.5rem 0.8rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.catalog-card--package .catalog-card__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+/* ===== تنسيق السعر (تصميم Lootbar) ===== */
+.catalog-card__package-price {
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.catalog-card__price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.catalog-card__final-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ea580c;
+}
+
+.catalog-card__discount-box {
+  background: #ea580c;
+  color: white;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.catalog-card__old-price {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+  margin-top: 0.1rem;
+}
+
+/* استجابة للجوال */
+@media (max-width: 640px) {
+  .catalog-card--package .catalog-card__final-price {
+    font-size: 1rem;
+  }
+  .catalog-card--package .catalog-card__discount-box {
+    font-size: 0.6rem;
+    padding: 0.05rem 0.4rem;
+  }
+  .catalog-card--package .catalog-card__title {
+    font-size: 0.85rem;
+  }
+}
