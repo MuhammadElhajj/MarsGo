@@ -28,7 +28,7 @@ export default function AdminCatalog({
   const [editingItem, setEditingItem] = useState(null);
   const [editingPackage, setEditingPackage] = useState(null);
 
-  // نموذج العنصر (لعبة أو تطبيق) – استخدم imageUrl بدلاً من imageBase64
+  // نموذج العنصر (لعبة أو تطبيق) مع الحقول الجديدة
   const [formItem, setFormItem] = useState({
     name: '',
     imageUrl: '',
@@ -36,9 +36,12 @@ export default function AdminCatalog({
     isAvailable: true,
     unavailableReason: '',
     order: 0,
+    discount: 0,        // ← جديد
+    rating: 5.0,        // ← جديد
+    sold: '',           // ← جديد
   });
 
-  // نموذج الباقة – أضف الحقول الجديدة
+  // نموذج الباقة
   const [formPackage, setFormPackage] = useState({
     name: '',
     price: '',
@@ -48,8 +51,8 @@ export default function AdminCatalog({
     order: 0,
     imageUrl: '',
     note: '',
-    externalProductId: '',   // معرف المنتج في API الخارجي
-    externalAnyKey: '',      // مفتاح إضافي (مثل سيرفر موبايل ليجند)
+    externalProductId: '',
+    externalAnyKey: '',
   });
 
   const handleSelectItem = async (item) => {
@@ -70,6 +73,9 @@ export default function AdminCatalog({
         isAvailable: item.isAvailable !== false,
         unavailableReason: item.unavailableReason || '',
         order: item.order || 0,
+        discount: item.discount || 0,
+        rating: item.rating || 5.0,
+        sold: item.sold || '',
       });
     } else {
       setEditingItem(null);
@@ -80,6 +86,9 @@ export default function AdminCatalog({
         isAvailable: true,
         unavailableReason: '',
         order: items.length,
+        discount: 0,
+        rating: 5.0,
+        sold: '',
       });
     }
     setShowItemModal(true);
@@ -94,6 +103,9 @@ export default function AdminCatalog({
       isAvailable: formItem.isAvailable,
       unavailableReason: formItem.unavailableReason,
       order: Number(formItem.order),
+      discount: Number(formItem.discount) || 0,
+      rating: Number(formItem.rating) || 5.0,
+      sold: formItem.sold || '',
       updatedAt: new Date(),
     };
     if (editingItem) {
@@ -291,6 +303,12 @@ export default function AdminCatalog({
                 {formItem.imageUrl && <img src={formItem.imageUrl} alt="معاينة" className="preview-img" />}
               </div>
               <Input label="ملاحظة (تظهر تحت الاسم)" value={formItem.note} onChange={e => setFormItem({...formItem, note: e.target.value})} />
+              
+              {/* الحقول الجديدة */}
+              <Input label="الخصم (%)" type="number" step="0.1" min="0" max="100" value={formItem.discount} onChange={e => setFormItem({...formItem, discount: parseFloat(e.target.value) || 0})} />
+              <Input label="التقييم (1–5)" type="number" step="0.1" min="1" max="5" value={formItem.rating} onChange={e => setFormItem({...formItem, rating: parseFloat(e.target.value) || 5.0})} />
+              <Input label="المبيعات (نص)" value={formItem.sold} onChange={e => setFormItem({...formItem, sold: e.target.value})} placeholder="مثال: 100k+ Sold" />
+
               <div className="form-field checkbox">
                 <label><input type="checkbox" checked={formItem.isAvailable} onChange={e => setFormItem({...formItem, isAvailable: e.target.checked})} /> {itemLabel} متاحة</label>
               </div>
@@ -329,23 +347,8 @@ export default function AdminCatalog({
               <div className="form-field"><label>العملة</label><select value={formPackage.currency} onChange={e => setFormPackage({...formPackage, currency: e.target.value})}><option value="USD">دولار أمريكي ($)</option><option value="SYP">ليرة سورية (ل.س)</option></select></div>
               <Input label="نسبة الخصم" type="number" step="0.1" value={formPackage.discount} onChange={e => setFormPackage({...formPackage, discount: e.target.value})} />
               <div className="form-field"><label>نوع الباقة</label><select value={formPackage.type} onChange={e => setFormPackage({...formPackage, type: e.target.value})}>{packageTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-              
-              {/* ✅ الحقول الجديدة لربط API المتجر */}
-              <Input 
-                label="معرف المنتج في المتجر الخارجي (externalProductId)" 
-                type="number" 
-                value={formPackage.externalProductId} 
-                onChange={e => setFormPackage({...formPackage, externalProductId: e.target.value})} 
-                placeholder="مثال: 2054"
-                helperText="مطلوب للطلبات التلقائية عبر API"
-              />
-              <Input 
-                label="مفتاح إضافي (anyKey) - لمنتجات موبايل ليجند" 
-                value={formPackage.externalAnyKey} 
-                onChange={e => setFormPackage({...formPackage, externalAnyKey: e.target.value})} 
-                placeholder="السيرفر أو أي قيمة إضافية"
-              />
-              
+              <Input label="معرف المنتج في المتجر الخارجي (externalProductId)" type="number" value={formPackage.externalProductId} onChange={e => setFormPackage({...formPackage, externalProductId: e.target.value})} placeholder="مثال: 2054" helperText="مطلوب للطلبات التلقائية عبر API" />
+              <Input label="مفتاح إضافي (anyKey) - لمنتجات موبايل ليجند" value={formPackage.externalAnyKey} onChange={e => setFormPackage({...formPackage, externalAnyKey: e.target.value})} placeholder="السيرفر أو أي قيمة إضافية" />
               <Input label="ترتيب الظهور" type="number" value={formPackage.order} onChange={e => setFormPackage({...formPackage, order: parseInt(e.target.value) || 0})} />
               <div className="modal-actions">
                 <Button type="submit">حفظ</Button>

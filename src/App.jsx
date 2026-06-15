@@ -7,7 +7,7 @@ import Layout from "./layouts/UserLayout/Layout";
 import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import VerifierLayout from "./layouts/VerifierLayout/VerifierLayout";
 import Loading from "./components/GeneralComponents/Loading/Loading";
-
+import AdminCategories from './components/AdminCoponent/AdminCategories/AdminCategories';
 // ==================== صفحات العميل ====================
 const Login = lazy(() => import("./pages/User/Login/Login"));
 const Dashboard = lazy(() => import("./pages/User/Dashboard/Dashboard"));
@@ -24,25 +24,26 @@ const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/User/ForgotPassword/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/User/ResetPassword/ResetPasswordPage"));
 const VerifyCodePage = lazy(() => import("./pages/User/VerifyCode/VerifyCodePage"));
-
+const CatalogPage = lazy(() => import("./pages/User/Catalog/CatalogPage"));
+const CategoryProductsPage = lazy(() => import("./pages/User/CategoryProductsPage/CategoryProductsPage"));
+const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePackagesPage"));
 // ==================== صفحات المدير (Admin) ====================
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
 const AdminUsersPage = lazy(() => import("./pages/Admin/AdminUsers"));
 const AdManagementPage = lazy(() => import("./pages/Admin/AdManagementPage"));
-const AdminGamesPage = lazy(() => import("./pages/Admin/AdminGames"));
 const AdminNavLinksPage = lazy(() => import("./pages/Admin/AdminNavLinks"));
 const AdminPageInstructions = lazy(() => import("./components/AdminCoponent/AdminPageInstructions/AdminPageInstructions"));
 const AdminExchangeRate = lazy(() => import("./pages/Admin/AdminExchangeRate"));
 const AdminStoreSettingsPage = lazy(() => import("./pages/Admin/AdminStoreSettingsPage"));
 const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
-const AdminApps = lazy(() => import("./pages/Admin/AdminApps"));
 const AdminVerifiers = lazy(() => import("./components/AdminCoponent/AdminVerifiers/AdminVerifiers"));
 const ExternalStoreImport = lazy(() => import("./pages/Admin/ExternalStoreImport/ExternalStoreImport"));
 const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/AdminTopUpSettings"));
 const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
 const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
+const AdminUnifiedCatalog = lazy(() => import("./pages/Admin/AdminUnifiedCatalog/AdminUnifiedCatalog"));
 
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
@@ -53,11 +54,14 @@ const ArchiveOrders = lazy(() => import("./components/VerifierComponents/Archive
 const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/FinanceTopUpRequests"));
 
 function App() {
+   const fetchProducts = useAppStore((state) => state.fetchProducts);
+
   const { user, userData, loading, emailVerified } = useAuth();
   const listenToBalance = useAppStore((state) => state.listenToBalance);
 
   // ✅ الاستماع لتغيرات الرصيد في الوقت الفعلي
   useEffect(() => {
+     fetchProducts(); // ✅ هذا السطر مهم جداً
     if (user?.uid) {
       const unsubscribe = listenToBalance(user.uid);
       return () => {
@@ -115,6 +119,10 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/topup" element={<TopUpPage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
+<Route path="/category/:categoryId" element={<CategoryProductsPage />} />
+<Route path="/category/:categoryId/:gameName" element={<CategoryProductsPage />} />
+          {/* <Route path="/game/:gameName" element={<GamePackagesPage />} /> */}
         </Route>
 
         {/* مسارات المدير */}
@@ -124,12 +132,13 @@ function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrdersPage />} />
-          <Route path="games" element={<AdminGamesPage />} />
           <Route path="services" element={<AdminServicesPage />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
+          <Route path="catalog" element={<AdminUnifiedCatalog />} />
           <Route path="external-store-import" element={<ExternalStoreImport />} />
-          <Route path="ticker" element={<AdminTicker />} />
-          <Route path="apps" element={<AdminApps />} />
+        
+        <Route path="/admin/categories" element={<AdminCategories />} />  <Route path="ticker" element={<AdminTicker />} />
+
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} />
           <Route path="exchange-rate" element={<AdminExchangeRate />} />

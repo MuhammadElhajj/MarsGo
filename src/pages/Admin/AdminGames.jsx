@@ -1,8 +1,9 @@
 // src/pages/Admin/AdminGames.jsx
-import { useGames } from '../../context/GamesContext';
+import { useAppStore } from '../../store/store';
 import AdminCatalog from '../../components/AdminCoponent/AdminCatalog/AdminCatalog';
 
 export default function AdminGames() {
+  // استخدم useAppStore مباشرة دون قيم افتراضية
   const {
     games,
     loading,
@@ -13,7 +14,7 @@ export default function AdminGames() {
     addPackage,
     updatePackage,
     deletePackage,
-  } = useGames();
+  } = useAppStore();
 
   return (
     <AdminCatalog

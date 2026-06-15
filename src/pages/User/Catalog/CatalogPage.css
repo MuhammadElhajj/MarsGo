@@ -1,0 +1,156 @@
+/* src/pages/User/Catalog/CatalogPage.css */
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.category-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: white;
+  aspect-ratio: 16 / 9;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-md);
+  display: block;
+  background-color: var(--color-accent); /* لون احتياطي */
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* صورة الخلفية */
+.category-card__bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* طبقة التعتيم */
+.category-card__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  transition: background 0.3s;
+}
+
+.category-card:hover .category-card__overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* المحتوى (النص) */
+.category-card__content {
+  position: relative;
+  z-index: 2;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.category-card__icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.category-card__title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.category-card__description {
+  font-size: 0.9rem;
+  opacity: 0.95;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.category-card__badge {
+  display: inline-block;
+  background: #f59e0b;
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.category-card--coming-soon {
+  cursor: default;
+  filter: grayscale(0.2);
+}
+
+.category-card--coming-soon:hover {
+  transform: none;
+}
+
+.catalog-loading,
+.catalog-empty {
+  text-align: center;
+  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+}
+
+/* ========== استجابة الجوال: قسمين في الصف ========== */
+@media (max-width: 640px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  .category-card__content {
+    padding: 0.75rem;
+  }
+  .category-card__icon {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+  .category-card__title {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .category-card__description {
+    font-size: 0.7rem;
+    margin-bottom: 0.3rem;
+  }
+  .category-card__badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .category-card__title {
+    font-size: 0.9rem;
+  }
+  .category-card__icon {
+    font-size: 1.8rem;
+  }
+}

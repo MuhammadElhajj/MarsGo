@@ -146,6 +146,10 @@ export default function Sidebar({ isOpen, onClose }) {
           {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
           <span>{isDark ? "الوضع الفاتح" : "الوضع الداكن"}</span>
         </button> */}
+    <Link to="/catalog" className={roleLinkClass("/catalog", "user")} onClick={handleLinkClick}>
+  🛒 المتجر
+</Link>
+
         <button className="sidebar__logout-btn" onClick={handleLogout} aria-label="تسجيل الخروج">
           <FiLogOut size={20} />
           <span>تسجيل الخروج</span>

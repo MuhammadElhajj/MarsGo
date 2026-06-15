@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import './AdminSidebar.css';
 import ExchangeRateWidget from '../../GeneralComponents/ExchangeRateWidget/ExchangeRateWidget'; // ✅ استيراد الـ widget
 import { lazy, Suspense } from 'react';
-
+import { FiBox, FiFolder, FiShoppingCart, FiDownload, FiGrid } from 'react-icons/fi';
 export default function AdminSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const linkClass = (path) => `admin-sidebar__link ${location.pathname === path ? 'admin-sidebar__link--active' : ''}`;
@@ -13,15 +13,16 @@ export default function AdminSidebar({ isOpen, onClose }) {
     <aside className={`admin-sidebar ${isOpen ? 'admin-sidebar--open' : ''}`}>
       <button className="admin-sidebar__close-btn" onClick={onClose}>✕</button>
       <nav>
+       
         <ul className="admin-sidebar__list">
-         <li><Link to="/admin/external-store-import" className={linkClass('/admin/external-store-import')} onClick={handleLinkClick}>📦 استيراد من المتجر الخارجي</Link></li>
+       
+     <li><Link to="/admin/external-store-import" className={linkClass('/admin/external-store-import')} onClick={handleLinkClick}> استيراد  خارجي</Link></li>
+         <li><Link to="/admin/catalog" className={linkClass('/admin/catalog')} onClick={handleLinkClick}>🎮 إدارة الألعاب والتطبيقات</Link></li>
           <li><Link to="/admin/verifiers" className={linkClass('/admin/verifiers')} onClick={handleLinkClick}>🔑 إدارة المدققين</Link></li>
           <li><Link to="/admin" className={linkClass('/admin')} onClick={handleLinkClick}>📊 لوحة التحكم</Link></li>
           <li><Link to="/admin/orders" className={linkClass('/admin/orders')} onClick={handleLinkClick}>📋 إدارة الطلبات</Link></li>
           <li><Link to="/admin/users" className={linkClass('/admin/users')} onClick={handleLinkClick}>👥 إدارة المستخدمين</Link></li>
-          {/* <li><Link to="/admin/payment-settings" className={linkClass('/admin/games')} onClick={handleLinkClick}>🎮 إدارة الألعاب</Link></li> */}
-          <li><Link to="/admin/games" className={linkClass('/admin/games')} onClick={handleLinkClick}>🎮 إدارة الألعاب</Link></li>
-          <li><Link to="/admin/apps" className={linkClass('/admin/apps')} onClick={handleLinkClick}>📱 إدارة التطبيقات</Link></li>
+   
           <li><Link to="/admin/ads" className={linkClass('/admin/ads')} onClick={handleLinkClick}>📢 إدارة الإعلانات</Link></li>
          <li><Link to="/admin/topup-settings" className={linkClass('/admin/topup-settings')} onClick={handleLinkClick}>💰 إعدادات الإيداع</Link></li>
     <li><Link to="/admin/discounts" className={linkClass('/admin/discounts')} onClick={handleLinkClick}>🏷️ إدارة الخصومات</Link></li>

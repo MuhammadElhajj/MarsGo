@@ -1,0 +1,66 @@
+.admin-sub-categories {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.admin-sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.back-btn {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+.sub-form-card {
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.full-width { grid-column: 1 / -1; }
+.checkbox-item { display: flex; align-items: center; gap: 0.5rem; }
+.form-actions { display: flex; gap: 1rem; margin-top: 1rem; }
+.image-preview-sm { position: relative; display: inline-block; margin-top: 0.5rem; }
+.image-preview-sm img { width: 80px; height: 60px; object-fit: cover; border-radius: 8px; }
+.image-preview-sm button { position: absolute; top: -8px; right: -8px; background: var(--color-danger); color: white; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; }
+.sub-table {
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+.sub-table-header, .sub-table-row {
+  display: grid;
+  grid-template-columns: 100px 1.5fr 1fr 2fr 80px 100px;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  border-bottom: 1px solid var(--color-border);
+  align-items: center;
+}
+.sub-table-header { font-weight: 700; background: var(--color-bg-primary); }
+.order-controls { display: flex; gap: 0.3rem; align-items: center; }
+.order-controls button { background: none; border: none; cursor: pointer; font-size: 1rem; }
+.slug { font-family: monospace; color: var(--color-accent); font-size: 0.8rem; }
+.desc { font-size: 0.8rem; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.active-toggle { background: none; border: none; cursor: pointer; font-size: 1.4rem; color: gray; }
+.active-toggle.active { color: #22c55e; }
+.actions { display: flex; gap: 0.5rem; }
+.icon-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+.icon-btn.delete:hover { color: var(--color-danger); }
+@media (max-width: 768px) {
+  .sub-table-header, .sub-table-row { grid-template-columns: 80px 1fr 0.8fr 0fr 60px 80px; }
+  .desc { display: none; }
+}

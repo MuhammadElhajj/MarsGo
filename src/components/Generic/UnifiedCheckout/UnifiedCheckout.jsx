@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useAppStore } from '../../../store/store';
 import { db } from '../../../firebase';
@@ -13,9 +13,10 @@ import DynamicFields from './DynamicFields';
 import './UnifiedCheckout.css';
 
 export default function UnifiedCheckout() {
-  const { productId } = useParams(); // المنتج من الرابط
-  const { userData } = useAuth();
+  const { productId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+  const { userData } = useAuth();
   
   // Zustand store
   const balance = useAppStore((state) => state.balance);
@@ -24,22 +25,71 @@ export default function UnifiedCheckout() {
   const currency = useAppStore((state) => state.currency);
   const exchangeRate = useAppStore((state) => state.exchangeRate);
   const products = useAppStore((state) => state.products);
-  const fetchProducts = useAppStore((state) => state.fetchProducts); // تأكد من وجودها
+  const fetchProducts = useAppStore((state) => state.fetchProducts);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [customValues, setCustomValues] = useState({});
   const [quantity, setQuantity] = useState(1);
 
-  // جلب المنتج من الـ store (أو من Firestore إذا لم يكن موجوداً)
-  const product = useMemo(() => products.find(p => p.id === productId), [products, productId]);
+  // استقبال بيانات الباقة المحلية من location.state
+  const { item, pkg, serviceType } = location.state || {};
 
-  // إذا لم يكن المنتج في الـ store، قم بجلبه
-  useEffect(() => {
-    if (productId && !product) {
-      fetchProducts(); // تفترض أن fetchProducts تجلب كل المنتجات من Firestore
+  // تحديد ما إذا كنا في حالة باقة محلية
+  const isLocalPackage = item && pkg && serviceType;
+
+  // بناء كائن المنتج (product) ديناميكياً
+  const product = useMemo(() => {
+    if (isLocalPackage) {
+      // دمج بيانات اللعبة/التطبيق مع الباقة
+      const customFields = item.customFields || [];
+      // إذا كان type = 'game' نضيف حقل playerId افتراضياً إذا لم يوجد
+      if (serviceType === 'gaming' && !customFields.some(f => f.name === 'playerId')) {
+        customFields.push({
+          label: 'معرف اللاعب (Player ID)',
+          name: 'playerId',
+          type: 'text',
+          required: true,
+          placeholder: 'أدخل معرف اللاعب'
+        });
+      }
+      // إذا كان type = 'apps' نضيف حقل quantity افتراضياً إذا لم يوجد
+      if (serviceType === 'apps' && !customFields.some(f => f.name === 'quantity')) {
+        customFields.push({
+          label: 'الكمية',
+          name: 'quantity',
+          type: 'number',
+          required: true,
+          min: 1,
+          max: 100,
+          defaultValue: 1
+        });
+      }
+
+      return {
+        id: pkg.id,
+        name: pkg.name,
+        price: pkg.price || 0,
+        discount: pkg.discount || 0,
+        currency: pkg.currency || 'USD',
+        imageUrl: pkg.imageUrl || item.imageUrl || '',
+        customFields: customFields,
+        type: serviceType === 'gaming' ? 'game' : 'app',
+        categoryId: serviceType === 'gaming' ? 'games' : 'apps',
+        externalStore: null // ليس منتجاً خارجياً
+      };
+    } else if (productId) {
+      return products.find(p => p.id === productId) || null;
     }
-  }, [productId, product, fetchProducts]);
+    return null;
+  }, [productId, products, isLocalPackage, item, pkg, serviceType]);
+
+  // جلب المنتجات من Firestore إذا لم تكن موجودة في الـ store
+  useEffect(() => {
+    if (productId && !product && !isLocalPackage) {
+      fetchProducts();
+    }
+  }, [productId, product, isLocalPackage, fetchProducts]);
 
   // تهيئة القيم الافتراضية من customFields
   useEffect(() => {
@@ -56,14 +106,19 @@ export default function UnifiedCheckout() {
     }
   }, [product]);
 
-  if (!product) return <Loading text="جاري تحميل المنتج..." />;
+  if (!product) {
+    if (isLocalPackage) return <Loading text="جاري تحميل الباقة..." />;
+    return <Loading text="جاري تحميل المنتج..." />;
+  }
 
-  // تحديد ما إذا كان المنتج يسمح بتغيير الكمية (بناءً على وجود حقل quantity في customFields أو نوعه)
+  // تحديد ما إذا كان المنتج يسمح بتغيير الكمية
   const allowQuantity = product.customFields?.some(f => f.name === 'quantity') || product.type === 'app';
 
-  // حساب السعر الإجمالي (مع مراعاة الكمية)
-  const unitPrice = product.price || 0;
-  const totalPrice = unitPrice * (allowQuantity ? quantity : 1);
+  // حساب السعر الإجمالي (مع مراعاة الخصم إن وجد)
+  const basePrice = product.price || 0;
+  const discountPercent = product.discount || 0;
+  const discountedPrice = discountPercent > 0 ? basePrice * (1 - discountPercent / 100) : basePrice;
+  const totalPrice = discountedPrice * (allowQuantity ? quantity : 1);
   const displayPrice = currency === 'USD'
     ? `${totalPrice.toFixed(2)} $`
     : exchangeRate ? `${(totalPrice * exchangeRate).toFixed(0).toLocaleString()} ل.س` : '...';
@@ -88,7 +143,7 @@ export default function UnifiedCheckout() {
     productName: product.name,
     categoryId: product.categoryId,
     type: product.type,
-    priceUSD: unitPrice,
+    priceUSD: discountedPrice,
     finalPriceUSD: totalPrice,
     quantity: allowQuantity ? quantity : 1,
     customFieldsValues: customValues,
@@ -116,13 +171,11 @@ export default function UnifiedCheckout() {
       const deducted = await deductBalance(totalPrice);
       if (!deducted) throw new Error('فشل خصم الرصيد');
 
-      // (اختياري) إذا كان المنتج مرتبطاً بمتجر خارجي، يمكن استدعاء externalStoreProxy هنا
+      // (اختياري) إذا كان المنتج مرتبطاً بمتجر خارجي
       let externalResult = null;
       if (product.externalStore?.enabled) {
-        // مثال: const proxyFunc = httpsCallable(functions, 'externalStoreProxy');
-        // externalResult = await proxyFunc({ productId: product.id, ...customValues, quantity });
-        // يمكنك تنفيذ ذلك لاحقاً
         console.log('طلب منتج خارجي', product.externalStore);
+        // يمكنك استدعاء externalStoreProxy هنا
       }
 
       const orderData = getOrderData(externalResult);

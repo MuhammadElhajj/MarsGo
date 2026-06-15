@@ -1,61 +1,99 @@
-/* src/components/Generic/CatalogList/CatalogList.css */
+/* ============================================
+   CatalogList - شبكة متجاوبة (8/7/6/5/4/3 أعمدة)
+   عرض مرن (بدون أبعاد ثابتة)
+   ============================================ */
+
 .catalog-list {
   width: 100%;
-
   background: transparent;
   animation: fadeIn 0.3s ease;
+  padding: 0.5rem;
 }
 
-/* حاوية الرجوع */
 .catalog-list__back {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
-/* العنوان */
 .catalog-list__title {
   font-size: 1.6rem;
   font-weight: 700;
-  margin: 0 0 1.2rem 0;
+  margin: 0 0 1rem 0;
   padding-right: 1rem;
   border-right: 4px solid var(--color-accent);
   color: var(--color-text-primary);
-  letter-spacing: -0.3px;
 }
 
-/* شبكة البطاقات */
+/* ===== الشبكة الأساسية ===== */
 .catalog-list__grid {
   display: grid;
-          gap: 0.2rem !important;
-  margin-bottom: 2rem;
+  gap: 0.8rem;
+  width: 100%;
+  justify-content: center;
 }
 
-/* ===== شاشات كبيرة (≥ 1024px) ===== */
-@media (min-width: 1024px) {
+/* ===== توزيع الأعمدة بناءً على حجم الشاشة ===== */
+
+/* 8 أعمدة للشاشات الكبيرة جداً (> 1400px) */
+@media (min-width: 1400px) {
+  .catalog-list__grid {
+    grid-template-columns: repeat(9, minmax(100px, 1fr));
+    gap: 0.8rem;
+  }
+}
+
+/* 7 أعمدة (1200px - 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .catalog-list__grid {
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
+    gap: 0.8rem;
+  }
+}
+
+/* 6 أعمدة (1000px - 1199px) */
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .catalog-list__grid {
+    grid-template-columns: repeat(6, minmax(100px, 1fr));
+    gap: 0.7rem;
+  }
+}
+
+/* 5 أعمدة (800px - 999px) */
+@media (min-width: 800px) and (max-width: 999px) {
+  .catalog-list__grid {
+    grid-template-columns: repeat(5, minmax(100px, 1fr));
+    gap: 0.6rem;
+  }
+}
+
+/* 4 أعمدة (600px - 799px) */
+@media (min-width: 600px) and (max-width: 799px) {
+  .catalog-list__grid {
+    grid-template-columns: repeat(4, minmax(100px, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+/* 3 أعمدة للجوال (< 600px) */
+@media (max-width: 599px) {
+  .catalog-list__grid {
+    grid-template-columns: repeat(4, minmax(130px, 1fr));
+    gap: 0.4rem;
+  }
+}
+
+/* شاشات صغيرة جداً (أقل من 480px) – عمودين */
+@media (max-width: 480px) {
   .catalog-list__grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 0.4rem;
   }
 }
 
-/* ===== شاشات متوسطة (بين 640px و 1023px) ===== */
-@media (min-width: 640px) and (max-width: 1023px) {
-  .catalog-list__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.2rem;
-  }
-}
-
-/* ===== شاشات صغيرة (أقل من 640px) ===== */
-@media (max-width: 639px) {
-  .catalog-list__grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-/* رسالة فارغة */
+/* ============================================== */
+/*   حالة عدم وجود عناصر                         */
+/* ============================================== */
 .catalog-list__empty {
   text-align: center;
   padding: 3rem 1.5rem;
@@ -64,27 +102,12 @@
   color: var(--color-text-secondary);
   font-size: 0.9rem;
   border: 1px solid var(--color-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* حركة الظهور */
+/* ============================================== */
+/*   حركة الظهور                                  */
+/* ============================================== */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* تحسينات إضافية للجوال */
-@media (max-width: 639px) {
-  .catalog-list__title {
-    font-size: 1.3rem;
-  }
-  .catalog-list__back {
-    margin-bottom: 1rem;
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }

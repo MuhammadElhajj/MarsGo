@@ -28,3 +28,6 @@ exports.externalStoreProxy = require('./externalStoreProxy').externalStoreProxy;
 
 // ==================== استيراد المنتجات من متجر خارجي (لوحة المدير) ====================
 exports.importProductsFromExternal = require('./admin/importFromExternal').importProductsFromExternal;
+
+// دالة تصحيح التصنيفات (تشغيل لمرة واحدة)
+exports.updateCategoryIds = require('./updateCategoryIds').updateCategoryIds;

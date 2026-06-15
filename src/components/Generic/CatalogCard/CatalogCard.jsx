@@ -1,7 +1,7 @@
 import './CatalogCard.css';
 import useFinalPrice from '../../../hooks/useFinalPrice';
 import PriceDisplay from '../PriceDisplay/PriceDisplay';
-
+import { FiStar } from 'react-icons/fi';
 export default function CatalogCard({ 
   item,           
   type = 'item',  
@@ -12,36 +12,41 @@ export default function CatalogCard({
   customLabels = {},  
 }) {
   const {
-    name = 'بدون اسم',
-    imageBase64 = '',
-    imageUrl = '',
-    note = '',
+    name,
+    imageBase64,
+    imageUrl,
     isAvailable = true,
-    unavailableReason = '',
-    price = null,
+    unavailableReason,
+    price,
     discount = 0,
     currency = 'USD',
-    id
+    id,
+    rating,
+    sold,
+    description,
+    parentId
   } = item || {};
 
   const productType = (type === 'game' || type === 'app') ? type : null;
-  
-  let originalPriceUSD = null;
-  let finalPriceUSD = null;
-  let finalDiscount = 0;
-  
-  if (price !== null && price !== undefined) {
-    const priceNum = typeof price === 'number' ? price : parseFloat(price);
-    originalPriceUSD = priceNum;
-    const { finalPrice, discountPercent } = useFinalPrice(
-      productType,
-      id,
-      priceNum,
-      discount || 0
-    );
-    finalPriceUSD = finalPrice;
-    finalDiscount = discountPercent;
-  }
+
+  // ✅ تعيين قيمة افتراضية آمنة للسعر
+  const safePrice = (price !== null && price !== undefined && !isNaN(price)) 
+    ? (typeof price === 'number' ? price : parseFloat(price)) 
+    : 0;
+
+  // ✅ استدعاء الـ hook في أعلى المستوى دائماً
+  const { finalPrice, discountPercent } = useFinalPrice(
+    productType,
+    id,
+    safePrice,
+    discount || 0
+  );
+
+  // الآن نحدد ما إذا كنا نعرض السعر الحقيقي أم لا
+  const hasValidPrice = price !== null && price !== undefined && !isNaN(price);
+  let originalPriceUSD = hasValidPrice ? safePrice : null;
+  let finalPriceUSD = hasValidPrice ? finalPrice : null;
+  let finalDiscount = hasValidPrice ? discountPercent : 0;
 
   const isUnavailable = isAvailable === false;
   
@@ -53,6 +58,7 @@ export default function CatalogCard({
 
   const shouldShowPrice = showPrice || type === 'package';
   const shouldShowBadge = showBadge || customBadge !== null;
+  const isCategory = type === 'category';
 
   const handleClick = () => {
     if (!isUnavailable && onSelect) {
@@ -61,7 +67,8 @@ export default function CatalogCard({
   };
 
   const imgSrc = imageUrl || imageBase64;
-  const imageSize = type === 'package' ? 70 : 80;
+
+  if (!name) return null;
 
   return (
     <div 
@@ -72,43 +79,61 @@ export default function CatalogCard({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
       aria-label={name}
     >
-      <div className="catalog-card__image" style={{ width: imageSize, height: imageSize, flexShrink: 0 }}>
+      {/* صورة + شارة الخصم */}
+      <div className="catalog-card__image-wrapper">
         {imgSrc ? (
           <img 
             src={imgSrc} 
             alt={name} 
             loading="lazy"
-            decoding="async"           // ✅ تسريع فك الترميز
-            width={imageSize}
-            height={imageSize}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            decoding="async"
+            className="catalog-card__image"
           />
         ) : (
           <div className="catalog-card__placeholder" aria-hidden="true">
             {type === 'game' && '🎮'}
             {type === 'app' && '📱'}
             {type === 'package' && '📦'}
-            {!['game','app','package'].includes(type) && '🃏'}
+            {type === 'category' && '📂'}
+            {!['game','app','package','category'].includes(type) && '🃏'}
           </div>
         )}
+
+        {/* شارة الخصم – فقط إذا كان الخصم > 0 */}
+        {!isCategory && finalDiscount > 0 && (
+          <span className="catalog-card__discount-badge">-{finalDiscount}%</span>
+        )}
       </div>
+
+      {/* المعلومات */}
       <div className="catalog-card__info">
-        <div className="catalog-card__header-row">
-          <h3 className="catalog-card__title">{name}</h3>
-          <div className="catalog-card__status-group">
-            <span className={`catalog-card__status status-${isAvailable ? 'available' : 'unavailable'}`}>
-              {isAvailable ? labels.available : labels.unavailable}
-            </span>
-            {shouldShowBadge && customBadge && (
-              <span className="catalog-card__badge">{customBadge}</span>
+        <h3 className="catalog-card__title">{name}</h3>
+        
+        {/* التقييم والمبيعات – يظهران فقط إذا وضعها المدير */}
+        {!isCategory && (rating !== undefined && rating !== null) && (
+          <div className="catalog-card__stats">
+            <span className="catalog-card__rating"><FiStar/> {rating}</span>
+            {(sold !== undefined && sold !== null) && (
+              <span className="catalog-card__separator">|</span>
+            )}
+            {sold !== undefined && sold !== null && (
+              <span className="catalog-card__sold">{sold}</span>
             )}
           </div>
-        </div>
-        {note && <p className="catalog-card__note">{note}</p>}
+        )}
+
+        {/* الوصف – للأقسام فقط */}
+        {isCategory && description && (
+          <p className="catalog-card__note">{description}</p>
+        )}
+
+        {/* حالة عدم التوفر */}
         {isUnavailable && unavailableReason && (
           <p className="catalog-card__unavailable-reason">⚠️ {unavailableReason}</p>
         )}
-        {shouldShowPrice && finalPriceUSD !== null && (
+
+        {/* السعر – لا يظهر للأقسام */}
+        {!isCategory && shouldShowPrice && finalPriceUSD !== null && (
           <PriceDisplay
             originalPrice={originalPriceUSD}
             finalPrice={finalPriceUSD}

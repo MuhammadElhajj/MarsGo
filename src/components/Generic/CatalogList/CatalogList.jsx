@@ -1,6 +1,6 @@
 // src/components/Generic/CatalogList/CatalogList.jsx
 import { useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ إضافة useNavigate
+import { useNavigate } from 'react-router-dom';
 import CatalogCard from '../CatalogCard/CatalogCard';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
 import './CatalogList.css';
@@ -16,34 +16,38 @@ export default function CatalogList({
   customBadge = null,
   type = 'item'
 }) {
-  const navigate = useNavigate(); // ✅ للتوجيه إلى صفحة الدفع الموحدة
+  const navigate = useNavigate();
 
-  // ✅ معالج النقر على العنصر: إما استخدام onItemClick الممرر أو التوجيه المباشر
+  // ✅ التحقق من أن items مصفوفة وليست فارغة
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return <div className="catalog-list__empty">لا توجد عناصر لعرضها</div>;
+  }
+
   const handleItemClick = useCallback((item) => {
     if (onItemClick) {
       onItemClick(item);
     } else {
-      // التوجيه إلى صفحة الدفع الموحدة باستخدام معرف المنتج
       navigate(`/checkout/${item.id}`);
     }
   }, [onItemClick, navigate]);
 
-  if (!items || items.length === 0) {
-    return <p className="catalog-list__empty">لا توجد عناصر لعرضها</p>;
-  }
-
-  // ✅ تحسين الأداء: استخدام useMemo لمنع إعادة إنشاء البطاقات إذا لم تتغير items
+  // ✅ استخدام useMemo مع try-catch لتجنب الأخطاء
   const renderedCards = useMemo(() => {
-    return items.map(item => (
-      <CatalogCard
-        key={item.id}
-        item={item}
-        onSelect={handleItemClick}  // ✅ استخدام المعالج الجديد
-        showPrice={showPrice}
-        customBadge={customBadge}
-        type={type}
-      />
-    ));
+    try {
+      return items.map(item => (
+        <CatalogCard
+          key={item.id}
+          item={item}
+          onSelect={handleItemClick}
+          showPrice={showPrice}
+          customBadge={customBadge}
+          type={type}
+        />
+      ));
+    } catch (error) {
+      console.error('خطأ في عرض الكروت:', error);
+      return <div className="catalog-list__error">حدث خطأ في عرض العناصر</div>;
+    }
   }, [items, handleItemClick, showPrice, customBadge, type]);
 
   return (
