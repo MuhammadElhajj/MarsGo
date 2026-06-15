@@ -45,7 +45,8 @@
 .app-content {
   flex: 1;            /* يدفع الفوتر للأسفل إذا كان المحتوى قليلاً */
   padding: 1rem;
-  background-color: var(--color-bg-primary);
+  /* background-color: var(--color-bg-primary); */
+  background-color: #ffffff;
 }
 
 /* ========== الفوتر ========== */

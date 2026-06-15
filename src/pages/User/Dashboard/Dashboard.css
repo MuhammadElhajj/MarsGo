@@ -137,3 +137,36 @@
     justify-content: center;
   }
 }
+
+/* تنسيق رابط "المزيد" تحت الألعاب */
+.dashboard__hot-games-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+
+.view-more-link {
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.view-more-link:hover {
+  color: var(--color-accent);
+  transform: translateX(3px);
+}
+
+.view-more-link .arrow {
+  font-size: 1.2rem;
+  font-weight: 300;
+  transition: transform 0.2s;
+}
+
+.view-more-link:hover .arrow {
+  transform: translateX(2px);
+}

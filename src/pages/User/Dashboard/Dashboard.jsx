@@ -1,13 +1,17 @@
+
+
 // src/pages/User/Dashboard/Dashboard.jsx
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../../context/AuthContext";
+import { useAppStore } from "../../../store/store";
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '../../../firebase';
 import useStats from "../../../hooks/useStats";
 import useUserStats from "../../../hooks/useUserStats";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import StoreIntro from "../../../components/UserComponents/StoreIntro/StoreIntro";
-// استيراد LazyOnScroll ليس مستخدماً بعد الآن
-// import LazyOnScroll from "../../../components/GeneralComponents/LazyOnScroll/LazyOnScroll";
+import CatalogList from "../../../components/Generic/CatalogList/CatalogList";
 import './Dashboard.css';
 
 // Lazy imports (كما هي)
@@ -18,7 +22,6 @@ const ServicesGrid = lazy(() => import("../../../components/UserComponents/Servi
 const OrdersList = lazy(() => import("../../../components/UserComponents/OrdersList/OrdersList"));
 const SpendingProgress = lazy(() => import("../../../components/UserComponents/SpendingProgress/SpendingProgress"));
 
-// ✅ مكونات الرصيد والإيداع (لازي لود)
 const BalanceDisplay = lazy(() => import('../../../components/GeneralComponents/BalanceDisplay/BalanceDisplay'));
 const TopUpButton = lazy(() => import('../../../components/GeneralComponents/TopUpButton/TopUpButton'));
 
@@ -28,67 +31,172 @@ export default function Dashboard() {
   const { stats: userStats, loading: userStatsLoading } = useUserStats();
   const navigate = useNavigate();
 
-  const handleViewAllOrders = () => {
-    navigate('/my-orders');
+  // ===== الألعاب =====
+  const { games, setGames } = useAppStore();
+  const [gamesLoading, setGamesLoading] = useState(!games || games.length === 0);
+  const [gamesToDisplay, setGamesToDisplay] = useState([]);
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      if (games && games.length > 0) {
+        setGamesToDisplay(games.slice(0, 6));
+        setGamesLoading(false);
+        return;
+      }
+      setGamesLoading(true);
+      try {
+        const q = query(collection(db, 'games'), orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+        const gamesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setGames(gamesList);
+        setGamesToDisplay(gamesList.slice(0, 6));
+      } catch (err) {
+        console.error('خطأ في جلب الألعاب:', err);
+      } finally {
+        setGamesLoading(false);
+      }
+    };
+    fetchGames();
+  }, [games, setGames]);
+
+  const handleGameClick = (game) => {
+    navigate(`/gaming/game/${game.id}`);
+  };
+
+  const handleViewAllGames = () => {
+    navigate('/gaming');
+  };
+
+  // ===== التطبيقات =====
+  const { apps, setApps } = useAppStore();
+  const [appsLoading, setAppsLoading] = useState(!apps || apps.length === 0);
+  const [appsToDisplay, setAppsToDisplay] = useState([]);
+
+  useEffect(() => {
+    const fetchApps = async () => {
+      if (apps && apps.length > 0) {
+        setAppsToDisplay(apps.slice(0, 6));
+        setAppsLoading(false);
+        return;
+      }
+      setAppsLoading(true);
+      try {
+        const q = query(collection(db, 'apps'), orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+        const appsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setApps(appsList);
+        setAppsToDisplay(appsList.slice(0, 6));
+      } catch (err) {
+        console.error('خطأ في جلب التطبيقات:', err);
+      } finally {
+        setAppsLoading(false);
+      }
+    };
+    fetchApps();
+  }, [apps, setApps]);
+
+  const handleAppClick = (app) => {
+    navigate(`/apps/app/${app.id}`);
+  };
+
+  const handleViewAllApps = () => {
+    navigate('/apps');
   };
 
   if (statsLoading) return <Loading />;
 
   return (
     <div className="dashboard" dir="rtl">
-    {/* ✅ صف الرصيد وزر الإيداع */}
+      {/* صف الرصيد والإعلانات */}
+      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
+        <AdSpace />
+      </Suspense>
       <div className="dashboard__balance-row">
-        <Suspense fallback={<div className="balance-placeholder" style={{width: '100px', height: '36px', background: 'rgba(79,70,229,0.1)', borderRadius: '2rem'}}>...</div>}>
+        <Suspense fallback={<div className="balance-placeholder">...</div>}>
           <BalanceDisplay />
         </Suspense>
-        <Suspense fallback={<div className="topup-placeholder" style={{width: '100px', height: '36px', background: 'rgba(79,70,229,0.1)', borderRadius: '2rem'}}>...</div>}>
+        <Suspense fallback={<div className="topup-placeholder">...</div>}>
           <TopUpButton />
         </Suspense>
       </div>
+
       <SpendingProgress />
-     
 
-  
+      {/* ===== قسم الألعاب ===== */}
+      <div className="dashboard__hot-games-section">
+        <div className="dashboard__hot-games-header">
+          <div>
+            <h2>🔥 الألعاب الأكثر مبيعاً</h2>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
+              آمنة وبأسعار مناسبة دائماً
+            </p>
+          </div>
+        </div>
+        {gamesLoading ? (
+          <div className="loading-wrapper">جاري تحميل الألعاب...</div>
+        ) : (
+          <>
+            <CatalogList
+              items={gamesToDisplay}
+              onItemClick={handleGameClick}
+              showPrice={true}
+              type="game"
+              showBackButton={false}
+              title=""
+            />
+            <div className="dashboard__hot-games-footer">
+              <span className="view-more-link" onClick={handleViewAllGames}>
+                المزيد <span className="arrow">›</span>
+              </span>
+            </div>
+          </>
+        )}
+      </div>
 
-      
+      {/* ===== قسم التطبيقات ===== */}
+      <div className="dashboard__hot-apps-section">
+        <div className="dashboard__hot-apps-header">
+          <div>
+            <h2>📱 التطبيقات الأكثر مبيعاً</h2>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
+              تطبيقات متنوعة بأسعار تنافسية
+            </p>
+          </div>
+        </div>
+        {appsLoading ? (
+          <div className="loading-wrapper">جاري تحميل التطبيقات...</div>
+        ) : (
+          <>
+            <CatalogList
+              items={appsToDisplay}
+              onItemClick={handleAppClick}
+              showPrice={true}
+              type="app"
+              showBackButton={false}
+              title=""
+            />
+            <div className="dashboard__hot-apps-footer">
+              <span className="view-more-link" onClick={handleViewAllApps}>
+                المزيد <span className="arrow">›</span>
+              </span>
+            </div>
+          </>
+        )}
+      </div>
 
-      
+      {/* باقي المحتوى */}
       <div className="dashboard__services">
         <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
         <Suspense fallback={<Loading text="جاري تحميل الخدمات..." />}>
           <ServicesGrid />
         </Suspense>
       </div>
-       <StoreIntro />
-      
-      <h3 className="dashboard__services-title">مساحة إعلانية</h3>
-      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
-        <AdSpace />
-      </Suspense>
-      
-      {/* تم تعطيل LazyOnScroll: نستخدم Suspense مباشرة */}
-      {/* <Suspense fallback={<Loading text="جاري تحميل التعليمات..." />}>
-        <HowItWorks page="dashboard" />
-      </Suspense> */}
-
-
+      <StoreIntro />
 
       <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإحصائيات..." />}>
         <UserStatsGrid stats={userStats} loading={userStatsLoading} />
       </Suspense>
-
-
-      {/* <h3 className="dashboard__services-title">آخر العمليات</h3>
-      <Suspense fallback={<Loading text="جاري تحميل آخر العمليات..." />}>
-        <OrdersList 
-          orderType="all" 
-          title="آخر العمليات" 
-          limitCount={5} 
-          showViewAll={true}
-          onViewAll={handleViewAllOrders}
-        />
-      </Suspense> */}
     </div>
   );
 }

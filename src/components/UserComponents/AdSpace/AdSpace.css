@@ -3,7 +3,7 @@
   margin-bottom: 2rem;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
 }
 
 /* ===== حاوية السلايدر ===== */
@@ -197,8 +197,7 @@
   width: 100%;
   margin-bottom: 1rem;
   border-radius: 0.75rem;
-  overflow: visible;  /* حتى لا يقطع الظلال */
-  background: transparent;
+ 
 }
 
 /* ===== كاروسيل ثلاثي الأبعاد (لجميع الشاشات) ===== */
@@ -216,7 +215,7 @@
 .carousel-items {
   position: relative;
   width: 100%;
-  height: clamp(200px, 30vw, 340px); /* يتناسب مع حجم الشاشة */
+    height: clamp(160px, 30vw, 240px); /* يتناسب مع حجم الشاشة */
   perspective: 100px;
   overflow: visible;
 }
@@ -433,7 +432,7 @@
 /* فقط تحسين للارتفاع على الشاشات الصغيرة جداً (اختياري) */
 @media (max-width: 480px) {
   .carousel-items {
-    height: 210px;   /* يمكن تعديله حسب رغبتك */
+    height: 120px;   /* يمكن تعديله حسب رغبتك */
   }
   .carousel-item.prev {
     transform: translateX(-22%) scale(0.78);
@@ -457,7 +456,7 @@
 /* دعم الشاشات الصغيرة جداً (350px وأقل) */
 @media (max-width: 350px) {
   .carousel-items {
-    height: 180px;
+    height: 80px;
   }
   .carousel-item.prev {
     transform: translateX(-18%) scale(0.75);
