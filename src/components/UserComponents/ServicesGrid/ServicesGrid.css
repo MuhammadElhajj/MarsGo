@@ -1,111 +1,6 @@
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.service-card {
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  text-decoration: none;
-  color: white;
-  aspect-ratio: 16 / 9; /* نسبة عرض إلى ارتفاع منسجمة */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: var(--shadow-md);
-  display: block;
-}
-
-.service-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-.service-card__overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1;
-  transition: background 0.3s;
-}
-
-.service-card:hover .service-card__overlay {
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.service-card__content {
-  position: relative;
-  z-index: 2;
-  padding: 1.5rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.service-card__icon {
-  font-size: 3rem;
-  margin-bottom: 0.75rem;
-}
-
-.service-card__title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.service-card__description {
-  font-size: 0.9rem;
-  opacity: 0.9;
-  margin-bottom: 1rem;
-}
-
-.service-card__badge {
-  display: inline-block;
-  background: #f59e0b;
-  color: #fff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 2rem;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.service-card--coming-soon {
-  cursor: default;
-  filter: grayscale(0.2);
-}
-
-.service-card--coming-soon:hover {
-  transform: none;
-}
-
-.services-grid-loading,
-.services-grid-empty {
-  text-align: center;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-}
-
-@media (max-width: 768px) {
-  .services-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-  .service-card__title {
-    font-size: 1.3rem;
-  }
-}
-
-/* ServicesGrid.css المعدل */
+/* ========================================
+   ServicesGrid - Professional Design
+   ======================================== */
 
 .services-grid {
   display: grid;
@@ -114,6 +9,7 @@
   margin: 2rem 0;
 }
 
+/* ===== بطاقة الخدمة ===== */
 .service-card {
   position: relative;
   border-radius: var(--radius-lg);
@@ -124,6 +20,7 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: var(--shadow-md);
   display: block;
+  background-color: var(--color-accent);
 }
 
 .service-card:hover {
@@ -131,129 +28,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-.service-card__overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1;
-  transition: background 0.3s;
-}
-
-.service-card:hover .service-card__overlay {
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.service-card__content {
-  position: relative;
-  z-index: 2;
-  padding: 1.5rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.service-card__icon {
-  font-size: 3rem;
-  margin-bottom: 0.75rem;
-}
-
-.service-card__title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.service-card__description {
-  font-size: 0.9rem;
-  opacity: 0.9;
-  margin-bottom: 1rem;
-}
-
-.service-card__badge {
-  display: inline-block;
-  background: #f59e0b;
-  color: #fff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 2rem;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.service-card--coming-soon {
-  cursor: default;
-  filter: grayscale(0.2);
-}
-
-.service-card--coming-soon:hover {
-  transform: none;
-}
-
-.services-grid-loading,
-.services-grid-empty {
-  text-align: center;
-  padding: 2rem;
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-}
-
-/* ========== استجابة الجوال: خدمتين في الصف ========== */
-@media (max-width: 640px) {
-  .services-grid {
-    grid-template-columns: repeat(2, 1fr);  /* عمودين */
-    gap: 0.75rem;
-    margin: 1rem 0;
-  }
-  
-  .service-card__content {
-    padding: 0.75rem;
-  }
-  
-  .service-card__icon {
-    font-size: 2rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .service-card__title {
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-  }
-  
-  .service-card__description {
-    font-size: 0.7rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .service-card__badge {
-    font-size: 0.6rem;
-    padding: 0.15rem 0.5rem;
-  }
-}
-
-/* لشاشات صغيرة جداً (أقل من 400px) يمكن الاحتفاظ بعمودين أو تبديله لواحد حسب الرغبة */
-@media (max-width: 400px) {
-  .services-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-  .service-card__title {
-    font-size: 0.9rem;
-  }
-  .service-card__icon {
-    font-size: 1.8rem;
-  }
-}
-
-.service-card {
-  position: relative;
-  overflow: hidden;
-}
+/* ===== صورة الخلفية ===== */
 .service-card__bg-image {
   position: absolute;
   top: 0;
@@ -263,57 +38,16 @@
   object-fit: cover;
   z-index: 0;
 }
-.service-card__overlay,
-.service-card__content {
-  position: relative;
-  z-index: 1;
-}
 
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.service-card {
-  position: relative; /* ضروري للأبناء المطلقين */
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  text-decoration: none;
-  color: white;
-  aspect-ratio: 16 / 9;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: var(--shadow-md);
-  display: block;
-  background-color: var(--color-accent); /* لون احتياطي */
-}
-
-.service-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* صورة الخلفية */
-.service-card__bg-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0; /* خلف كل شيء */
-}
-
-/* طبقة التعتيم */
+/* ===== طبقة التعتيم ===== */
 .service-card__overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* زيادة التعتيم قليلاً */
-  z-index: 1; /* فوق الصورة */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
   transition: background 0.3s;
 }
 
@@ -321,10 +55,10 @@
   background: rgba(0, 0, 0, 0.65);
 }
 
-/* المحتوى (النص) */
+/* ===== المحتوى ===== */
 .service-card__content {
   position: relative;
-  z-index: 2; /* فوق التعتيم */
+  z-index: 2;
   padding: 1.5rem;
   height: 100%;
   display: flex;
@@ -332,8 +66,8 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: white; /* تأكيد اللون */
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* لتحسين القراءة */
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .service-card__icon {
@@ -358,13 +92,14 @@
 .service-card__badge {
   display: inline-block;
   background: #f59e0b;
-  color: #fff;
+  color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 2rem;
   font-size: 0.75rem;
   font-weight: bold;
 }
 
+/* ===== حالة "قريباً" ===== */
 .service-card--coming-soon {
   cursor: default;
   filter: grayscale(0.2);
@@ -374,6 +109,7 @@
   transform: none;
 }
 
+/* ===== حالات التحميل والفارغة ===== */
 .services-grid-loading,
 .services-grid-empty {
   text-align: center;
@@ -383,34 +119,40 @@
   color: var(--color-text-secondary);
 }
 
-/* ========== استجابة الجوال ========== */
+/* ===== استجابة الجوال ===== */
 @media (max-width: 640px) {
   .services-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
     margin: 1rem 0;
   }
+  
   .service-card__content {
     padding: 0.75rem;
   }
+  
   .service-card__icon {
     font-size: 2rem;
     margin-bottom: 0.3rem;
   }
+  
   .service-card__title {
     font-size: 1rem;
     margin-bottom: 0.2rem;
   }
+  
   .service-card__description {
     font-size: 0.7rem;
     margin-bottom: 0.3rem;
   }
+  
   .service-card__badge {
     font-size: 0.6rem;
     padding: 0.15rem 0.5rem;
   }
 }
 
+/* لشاشات صغيرة جداً (أقل من 400px) */
 @media (max-width: 400px) {
   .services-grid {
     grid-template-columns: repeat(2, 1fr);

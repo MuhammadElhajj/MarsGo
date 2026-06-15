@@ -1,124 +1,194 @@
 /* ========================================
-   StatCard - Luxury Animated Cards
+   StatCard - Professional & Modern Design
+   Inspired by Lootbar.com
    ======================================== */
 
 .stat-card {
   position: relative;
-  background: linear-gradient(145deg, var(--color-bg-secondary), rgba(0, 0, 0, 0.02));
-  backdrop-filter: blur(2px);
-  padding: 1.5rem 1.2rem;
-  border-radius: 1.5rem;
-  transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  background: var(--stat-bg, rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 1.8rem 1.5rem;
+  border-radius: 1.2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--stat-border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-/* شريط علوي متوهج */
+/* تأثير "الوَهَج" الخفيف عند التمرير */
 .stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(circle at 80% 20%, var(--stat-glow, rgba(139, 92, 246, 0.15)), transparent 60%);
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* الشريط العلوي المتوهج */
+.stat-card::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, currentColor, transparent);
-  opacity: 0.6;
-  transition: height 0.3s ease;
-}
-
-.stat-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 0;
-  background: radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.1), transparent);
-  transition: height 0.3s;
-  pointer-events: none;
-}
-
-.stat-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 24px 40px -12px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.15);
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--stat-color, #8b5cf6), transparent);
+  opacity: 0.7;
+  transition: height 0.2s ease, opacity 0.2s ease;
 }
 
 .stat-card:hover::after {
-  height: 30px;
-}
-
-.stat-card:hover::before {
-  height: 6px;
+  height: 4px;
   opacity: 1;
-  box-shadow: 0 0 12px currentColor;
 }
 
-/* الألوان الفاخرة لكل نوع */
-.stat-card--accent { color: #8b5cf6; }
-.stat-card--accent .stat-value { text-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
-.stat-card--accent:hover { border-top: 1px solid rgba(139, 92, 246, 0.4); }
+/* المحتوى فوق التأثيرات */
+.stat-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 
-.stat-card--blue { color: #3b82f6; }
-.stat-card--blue .stat-value { text-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+/* ===== الأيقونة ===== */
+.stat-card__icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--stat-icon-bg, rgba(139, 92, 246, 0.1));
+  color: var(--stat-color, #8b5cf6);
+  margin-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
 
-.stat-card--yellow { color: #f59e0b; }
-.stat-card--yellow .stat-value { text-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
+.stat-card__icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
 
-.stat-card--green { color: #10b981; }
-.stat-card--green .stat-value { text-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+.stat-card:hover .stat-card__icon-wrapper svg {
+  transform: scale(1.05);
+}
 
-.stat-card--red { color: #ef4444; }
-.stat-card--red .stat-value { text-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
-
-.stat-card--orange { color: #f97316; }
-.stat-card--orange .stat-value { text-shadow: 0 0 12px rgba(249, 115, 22, 0.4); }
-
-.stat-card--purple { color: #a855f7; }
-.stat-card--purple .stat-value { text-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
-
-/* العناوين والقيم */
+/* ===== العنوان ===== */
 .stat-title {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: 700;
+  letter-spacing: 0.5px;
   color: var(--color-text-secondary);
-  margin-bottom: 0.75rem;
+  margin: 0;
   opacity: 0.8;
-  transition: opacity 0.2s;
 }
 
+/* ===== القيمة ===== */
 .stat-value {
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 800;
   line-height: 1.2;
   margin: 0;
-  background: linear-gradient(135deg, #ffffff, var(--color-text-primary));
+  background: linear-gradient(135deg, var(--color-text-primary), var(--stat-color, #8b5cf6));
   -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: transparent;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
-/* أيقونة وهمية (اختيارية) يمكن إضافتها مستقبلاً */
 .stat-card:hover .stat-value {
-  transform: scale(1.03);
-  letter-spacing: 1px;
+  transform: scale(1.02);
 }
 
-/* استجابة للشاشات الصغيرة */
+/* ===== ألوان متخصصة (Lootbar Style) ===== */
+.stat-card--accent {
+  --stat-color: #8b5cf6;
+  --stat-icon-bg: rgba(139, 92, 246, 0.12);
+  --stat-glow: rgba(139, 92, 246, 0.2);
+}
+
+.stat-card--blue {
+  --stat-color: #3b82f6;
+  --stat-icon-bg: rgba(59, 130, 246, 0.12);
+  --stat-glow: rgba(59, 130, 246, 0.2);
+}
+
+.stat-card--yellow {
+  --stat-color: #f59e0b;
+  --stat-icon-bg: rgba(245, 158, 11, 0.12);
+  --stat-glow: rgba(245, 158, 11, 0.2);
+}
+
+.stat-card--green {
+  --stat-color: #10b981;
+  --stat-icon-bg: rgba(16, 185, 129, 0.12);
+  --stat-glow: rgba(16, 185, 129, 0.2);
+}
+
+.stat-card--red {
+  --stat-color: #ef4444;
+  --stat-icon-bg: rgba(239, 68, 68, 0.12);
+  --stat-glow: rgba(239, 68, 68, 0.2);
+}
+
+.stat-card--orange {
+  --stat-color: #f97316;
+  --stat-icon-bg: rgba(249, 115, 22, 0.12);
+  --stat-glow: rgba(249, 115, 22, 0.2);
+}
+
+.stat-card--purple {
+  --stat-color: #a855f7;
+  --stat-icon-bg: rgba(168, 85, 247, 0.12);
+  --stat-glow: rgba(168, 85, 247, 0.2);
+}
+
+/* ===== استجابة للجوال ===== */
 @media (max-width: 768px) {
   .stat-card {
-    padding: 1rem 0.8rem;
-    border-radius: 1.2rem;
+    padding: 1.2rem 1rem;
+    border-radius: 1rem;
   }
   .stat-value {
     font-size: 1.8rem;
   }
   .stat-title {
-    font-size: 0.65rem;
-    letter-spacing: 1px;
+    font-size: 0.7rem;
   }
+  .stat-card__icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  .stat-card__icon-wrapper svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ===== دعم الوضع المظلم ===== */
+.dark .stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark .stat-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
 }

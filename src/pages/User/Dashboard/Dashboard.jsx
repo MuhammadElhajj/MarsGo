@@ -184,7 +184,7 @@ export default function Dashboard() {
           </>
         )}
       </div>
-
+  <StoreIntro />
       {/* باقي المحتوى */}
       <div className="dashboard__services">
         <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
@@ -192,7 +192,7 @@ export default function Dashboard() {
           <ServicesGrid />
         </Suspense>
       </div>
-      <StoreIntro />
+    
 
       <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإحصائيات..." />}>
