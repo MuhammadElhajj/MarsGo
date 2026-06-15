@@ -120,7 +120,7 @@ export default function Dashboard() {
         </Suspense>
       </div>
 
-      <SpendingProgress />
+      {/* <SpendingProgress /> */}
 
       {/* ===== قسم الألعاب ===== */}
       <div className="dashboard__hot-games-section">
