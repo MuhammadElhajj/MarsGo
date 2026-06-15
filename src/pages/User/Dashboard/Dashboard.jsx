@@ -126,7 +126,7 @@ export default function Dashboard() {
       <div className="dashboard__hot-games-section">
         <div className="dashboard__hot-games-header">
           <div>
-            <h2>🔥 الألعاب الأكثر مبيعاً</h2>
+            <h2> الألعاب الأكثر مبيعاً</h2>
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
               آمنة وبأسعار مناسبة دائماً
             </p>
@@ -157,7 +157,7 @@ export default function Dashboard() {
       <div className="dashboard__hot-apps-section">
         <div className="dashboard__hot-apps-header">
           <div>
-            <h2>📱 التطبيقات الأكثر مبيعاً</h2>
+            <h2> التطبيقات الأكثر مبيعاً</h2>
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
               تطبيقات متنوعة بأسعار تنافسية
             </p>
@@ -175,11 +175,12 @@ export default function Dashboard() {
               showBackButton={false}
               title=""
             />
-            <div className="dashboard__hot-apps-footer">
+            <div className="dashboard__hot-games-footer">
               <span className="view-more-link" onClick={handleViewAllApps}>
                 المزيد <span className="arrow">›</span>
               </span>
             </div>
+            
           </>
         )}
       </div>

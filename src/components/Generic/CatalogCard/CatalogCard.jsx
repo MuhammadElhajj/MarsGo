@@ -252,7 +252,7 @@ export default function CatalogCard({
 
         {/* ✅ شارة الخصم – تظهر فقط إذا كان discount من المدير > 0 */}
         {!isCategory && showDiscountBadge && (
-          <span className="catalog-card__discount-badge">-{discount}%</span>
+          <span className="catalog-card__discount-badge">{discount}%-</span>
         )}
       </div>
 
@@ -263,9 +263,12 @@ export default function CatalogCard({
         {/* التقييم والمبيعات – يظهران فقط إذا وضعها المدير */}
         {!isCategory && (rating !== undefined && rating !== null) && (
           <div className="catalog-card__stats">
-            <span className="catalog-card__rating"><FiStar/> {rating}</span>
+           <span className="catalog-card__rating">
+  <FiStar />
+  {rating}
+</span>
             {(sold !== undefined && sold !== null) && (
-              <span className="catalog-card__separator">|</span>
+              <span className="catalog-card__separator"> | </span>
             )}
             {sold !== undefined && sold !== null && (
               <span className="catalog-card__sold">{sold}</span>
@@ -280,7 +283,7 @@ export default function CatalogCard({
 
         {/* حالة عدم التوفر */}
         {isUnavailable && unavailableReason && (
-          <p className="catalog-card__unavailable-reason">⚠️ {unavailableReason}</p>
+          <p className="catalog-card__unavailable-reason"> {unavailableReason}</p>
         )}
 
         {/* السعر – لا يظهر للأقسام */}

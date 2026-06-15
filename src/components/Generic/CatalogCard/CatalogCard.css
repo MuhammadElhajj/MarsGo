@@ -51,17 +51,17 @@
 
 /* شارة الخصم */
 .catalog-card__discount-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: linear-gradient(135deg, #ff8c00, #ff6f00);
-  color: white;
-  font-weight: 700;
-  font-size: 0.7rem;
-  padding: 0.15rem 0.6rem;
-  border-radius: 0.8rem;
-  box-shadow: 0 2px 6px rgba(255, 100, 0, 0.4);
-  z-index: 10;
+     position: absolute;
+    top: 0px;
+    right: 0px;
+    background: linear-gradient(135deg, #ff8c00, #ff6f00);
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 0 0.5rem 0 0.5rem;
+    box-shadow: 0 2px 6px rgba(255, 100, 0, 0.4);
+    z-index: 10;
 }
 
 /* المحتوى النصي - الآن محاذي لليسار */
@@ -98,6 +98,11 @@
 }
 
 .catalog-card__rating {
+  font-weight: 500;
+  color: #f59e0b;
+    display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;  /* مسافة صغيرة بين النجمة والرقم */
   font-weight: 500;
   color: #f59e0b;
 
@@ -164,10 +169,9 @@
   }
   
   .catalog-card__discount-badge {
-    font-size: 0.5rem;
-    padding: 0.1rem 0.4rem;
-    top: 4px;
-    right: 4px;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.6rem;
+   
   }
 }
 
