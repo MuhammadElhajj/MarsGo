@@ -171,3 +171,10 @@
 .view-more-link:hover .arrow {
   transform: translateX(2px);
 }
+
+/* تنسيق حاوية الفيزا في لوحة التحكم */
+.dashboard__visa-wrapper {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}

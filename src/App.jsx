@@ -76,6 +76,15 @@ function App() {
     return () => { if (unsubscribeRate) unsubscribeRate(); };
   }, []); 
 
+  useEffect(() => {
+  const unsubscribeRate = useAppStore.getState().listenToExchangeRate?.();
+  const unsubscribeTopUp = useAppStore.getState().listenToTopUpSettings?.();
+  return () => {
+    if (unsubscribeRate) unsubscribeRate();
+    if (unsubscribeTopUp) unsubscribeTopUp();
+  };
+}, []);
+
   if (loading) return <Loading />;
 
   return (

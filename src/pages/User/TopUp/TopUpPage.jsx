@@ -10,14 +10,12 @@ import { sendTelegramDepositMessage, formatDepositMessage } from '../../../utils
 import { useTopUpValidation } from '../../../hooks/useTopUpValidation';
 import WhatsappWarning from '../../../components/UserComponents/TopUp/WhatsappWarning/WhatsappWarning';
 import MaintenanceMessage from '../../../components/UserComponents/TopUp/MaintenanceMessage/MaintenanceMessage';
-import TopUpMethods from '../../../components/UserComponents/TopUp/TopUpMethods/TopUpMethods';
 import TopUpForm from '../../../components/UserComponents/TopUp/TopUpForm/TopUpForm';
 import './TopUpPage.css';
+import VisaCard from '../../../components/GeneralComponents/VisaCard/VisaCard';
 
 export default function TopUpPage() {
   const { userData } = useAuth();
-  
-  // استخدام useAppStore بدلاً من السياقات القديمة
   const balance = useAppStore((state) => state.balance);
   const currency = useAppStore((state) => state.currency);
   const exchangeRate = useAppStore((state) => state.exchangeRate);
@@ -27,30 +25,44 @@ export default function TopUpPage() {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [amount, setAmount] = useState('');
   const [transactionNumber, setTransactionNumber] = useState('');
-  const [senderName, setSenderName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const hasWhatsapp = !!userData?.whatsappNumber?.trim();
 
-  // ✅ ترتيب طرق الدفع (بدون إيموجي، احترافي)
+  // بناء قائمة طرق الدفع مع الحساب النشط لكل طريقة
   const methods = useMemo(() => {
     if (!topUpSettings) return [];
-    const allMethods = [
-      { id: 'shamCash', name: 'شام كاش', enabled: topUpSettings.shamCash?.enabled },
-      { id: 'siretelCash', name: 'سيريتل كاش', enabled: topUpSettings.siretelCash?.enabled },
-      { id: 'usdt', name: 'USDT (تيثر)', enabled: topUpSettings.usdt?.enabled },
-    ];
-    return allMethods.filter(m => m.enabled);
+    const result = [];
+    const methodIds = ['shamCash', 'siretelCash', 'usdt'];
+    for (const methodId of methodIds) {
+      const methodData = topUpSettings[methodId];
+      if (!methodData?.enabled) continue;
+      const activeAccount = methodData.accounts?.find(acc => acc.isActive === true);
+      if (!activeAccount) continue;
+      result.push({
+        id: methodId,
+        name: methodId === 'shamCash' ? 'شام كاش' : methodId === 'siretelCash' ? 'سيريتل كاش' : 'USDT (تيثر)',
+        icon: methodId === 'shamCash' ? '🏦' : methodId === 'siretelCash' ? '📱' : '₿',
+        activeAccount: activeAccount,
+      });
+    }
+    return result;
   }, [topUpSettings]);
 
-  // تعيين الطريقة المفضلة تلقائياً (شام كاش أولاً)
+  // تحديد أول طريقة متاحة كاختيار افتراضي
   useEffect(() => {
     if (methods.length > 0 && !selectedMethod) {
       setSelectedMethod(methods[0].id);
     }
   }, [methods, selectedMethod]);
 
-  const currentMethod = useMemo(() => topUpSettings?.[selectedMethod], [topUpSettings, selectedMethod]);
+  // الحصول على الحساب النشط للطريقة المختارة
+  const activeAccount = useMemo(() => {
+    if (!selectedMethod || !topUpSettings) return null;
+    const methodData = topUpSettings[selectedMethod];
+    return methodData?.accounts?.find(acc => acc.isActive === true) || null;
+  }, [selectedMethod, topUpSettings]);
+
   const supportWhatsApp = useMemo(() => topUpSettings?.supportWhatsApp || '963939454690', [topUpSettings]);
 
   const {
@@ -61,21 +73,24 @@ export default function TopUpPage() {
   } = useTopUpValidation(topUpSettings, amount, selectedMethod, currency, exchangeRate);
 
   const maintenanceMessage = useMemo(() => {
-    if (!currentMethod?.address && !currentMethod?.accountNumber) {
-      return 'معلومات التحويل لهذه الطريقة غير مكتملة، يرجى تجربة طريقة أخرى أو الاتصال بالدعم.';
+    if (!activeAccount) return 'لا يوجد حساب دفع نشط لهذه الطريقة. يرجى مراجعة الإدارة.';
+    if (selectedMethod === 'usdt' && !activeAccount.address) {
+      return 'معلومات التحويل (عنوان المحفظة) غير مكتملة، يرجى تجربة طريقة أخرى أو الاتصال بالدعم.';
     }
-    return 'خدمة شحن الرصيد غير متاحة حالياً، يرجى المحاولة لاحقاً.';
-  }, [currentMethod]);
+    if ((selectedMethod === 'shamCash' || selectedMethod === 'siretelCash') && (!activeAccount.accountName || !activeAccount.accountNumber)) {
+      return 'معلومات التحويل (اسم المستفيد أو رقم الحساب) غير مكتملة، يرجى تجربة طريقة أخرى أو الاتصال بالدعم.';
+    }
+    return null;
+  }, [activeAccount, selectedMethod]);
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-
     if (!hasWhatsapp) {
       showToast('يرجى إضافة رقم واتساب في ملفك الشخصي أولاً', 'error', 5000);
       return;
     }
-    if (isMaintenance) {
-      showToast('خدمة شحن الرصيد في صيانة حالياً، يرجى المحاولة لاحقاً', 'error');
+    if (maintenanceMessage) {
+      showToast(maintenanceMessage, 'error');
       return;
     }
     const amountNum = parseFloat(amount);
@@ -87,10 +102,6 @@ export default function TopUpPage() {
       showToast('يرجى إدخال رقم العملية', 'error');
       return;
     }
-    if (!senderName) {
-      showToast('يرجى إدخال اسم المرسل', 'error');
-      return;
-    }
 
     setLoading(true);
     try {
@@ -100,7 +111,6 @@ export default function TopUpPage() {
         amount: amountNum,
         paymentMethod: selectedMethod,
         transactionNumber,
-        senderName,
         status: 'pending',
         createdAt: serverTimestamp(),
       });
@@ -123,7 +133,6 @@ export default function TopUpPage() {
             userName: userData.name,
             paymentMethod: selectedMethod,
             transactionNumber,
-            senderName,
           },
           docRef.id
         );
@@ -135,16 +144,14 @@ export default function TopUpPage() {
       showToast('تم إرسال طلب الشحن، سيتم مراجعته قريباً', 'success');
       setAmount('');
       setTransactionNumber('');
-      setSenderName('');
     } catch (error) {
       console.error(error);
       showToast('فشل إرسال الطلب', 'error');
     } finally {
       setLoading(false);
     }
-  }, [hasWhatsapp, isMaintenance, amount, minDepositUSD, getMinDepositDisplay, transactionNumber, senderName, userData, selectedMethod, addNotification]);
+  }, [hasWhatsapp, maintenanceMessage, amount, minDepositUSD, getMinDepositDisplay, transactionNumber, userData, selectedMethod, addNotification]);
 
-  // حالة تحميل الإعدادات
   if (!topUpSettings) {
     return (
       <div className="topup-page" dir="rtl">
@@ -152,10 +159,12 @@ export default function TopUpPage() {
           <GoBackButton text="رجوع" />
           <h2>شحن الرصيد</h2>
         </div>
-        <div className="current-balance-card">
-          <div className="balance-label">رصيدك الحالي</div>
-          <div className="balance-amount">{balance.toFixed(2)} $</div>
-        </div>
+       <VisaCard 
+  balance={balance} 
+  cardHolderName={userData?.name || 'MarsGo User'}
+  cardNumber="8888 8888 8888 8888"
+  brand="MarsGo Visa"
+/>
         <MaintenanceMessage message="جاري تحميل إعدادات الدفع..." supportWhatsApp="963939454690" />
       </div>
     );
@@ -168,10 +177,12 @@ export default function TopUpPage() {
           <GoBackButton text="رجوع" />
           <h2>شحن الرصيد</h2>
         </div>
-        <div className="current-balance-card">
-          <div className="balance-label">رصيدك الحالي</div>
-          <div className="balance-amount">{balance.toFixed(2)} $</div>
-        </div>
+       <VisaCard 
+  balance={balance} 
+  cardHolderName={userData?.name || 'MarsGo User'}
+  cardNumber="8888 8888 8888 8888"
+  brand="MarsGo Visa"
+/>
         <MaintenanceMessage message="لا توجد طرق دفع مفعلة حالياً، يرجى مراجعة الإدارة." supportWhatsApp={supportWhatsApp} />
       </div>
     );
@@ -184,49 +195,131 @@ export default function TopUpPage() {
         <h2>شحن الرصيد</h2>
       </div>
 
-      <div className="current-balance-card">
-        <div className="balance-label">رصيدك الحالي</div>
-        <div className="balance-amount">{balance.toFixed(2)} $</div>
-      </div>
-
+      {/* بطاقة الرصيد بتصميم فيزا */}
+  <VisaCard 
+  balance={balance} 
+  cardHolderName={userData?.name || 'MarsGo User'}
+  cardNumber="8888 8888 8888 8888"
+  brand="MarsGo Visa"
+/>
       {!hasWhatsapp && <WhatsappWarning />}
 
-      {isMaintenance ? (
-        <MaintenanceMessage message={maintenanceMessage} supportWhatsApp={supportWhatsApp} />
-      ) : (
-        <>
-          <TopUpMethods
-            methods={methods}
-            selectedMethod={selectedMethod}
-            onSelectMethod={setSelectedMethod}
-            currentMethod={currentMethod}
-          />
+      {/* شبكة بطاقات طرق الدفع */}
+      <div className="payment-methods-grid">
+        {methods.map(method => (
+          <div
+            key={method.id}
+            className={`payment-card ${selectedMethod === method.id ? 'payment-card--active' : ''}`}
+            onClick={() => setSelectedMethod(method.id)}
+          >
+            <div className="payment-card__logo">
+              {method.activeAccount?.logoImage ? (
+                <img src={method.activeAccount.logoImage} alt={method.name} loading="lazy" />
+              ) : (
+                <span className="payment-card__emoji">{method.icon}</span>
+              )}
+            </div>
+            <div className="payment-card__name">{method.name}</div>
+            {selectedMethod === method.id && (
+              <div className="payment-card__check">✓</div>
+            )}
+          </div>
+        ))}
+      </div>
 
+      {/* تفاصيل طريقة الدفع المختارة (مع أزرار نسخ) */}
+      {selectedMethod && activeAccount && (
+        <div className="selected-method-details">
+          <h3>تفاصيل التحويل عبر {methods.find(m => m.id === selectedMethod)?.name}</h3>
+          <div className="details-grid">
+            {selectedMethod === 'usdt' && activeAccount.address && (
+              <div className="detail-item">
+                <span className="detail-label">عنوان المحفظة:</span>
+                <div className="detail-value-with-copy">
+                  <code className="detail-value">{activeAccount.address}</code>
+                  <button
+                    className="copy-btn"
+                    onClick={() => {
+                      navigator.clipboard.writeText(activeAccount.address);
+                      showToast('تم نسخ العنوان', 'success', 1500);
+                    }}
+                    title="نسخ"
+                  >
+                    📋
+                  </button>
+                </div>
+              </div>
+            )}
+            {selectedMethod === 'usdt' && activeAccount.network && (
+              <div className="detail-item">
+                <span className="detail-label">الشبكة:</span>
+                <span className="detail-value">{activeAccount.network}</span>
+              </div>
+            )}
+            {(selectedMethod === 'shamCash' || selectedMethod === 'siretelCash') && activeAccount.accountName && (
+              <div className="detail-item">
+                <span className="detail-label">اسم المستفيد:</span>
+                <span className="detail-value">{activeAccount.accountName}</span>
+              </div>
+            )}
+            {(selectedMethod === 'shamCash' || selectedMethod === 'siretelCash') && activeAccount.accountNumber && (
+              <div className="detail-item">
+                <span className="detail-label">رقم الحساب/الهاتف:</span>
+                <div className="detail-value-with-copy">
+                  <code className="detail-value">{activeAccount.accountNumber}</code>
+                  <button
+                    className="copy-btn"
+                    onClick={() => {
+                      navigator.clipboard.writeText(activeAccount.accountNumber);
+                      showToast('تم نسخ رقم الحساب', 'success', 1500);
+                    }}
+                    title="نسخ"
+                  >
+                    📋
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {activeAccount.qrCode && (
+            <div className="qr-section">
+              <img src={activeAccount.qrCode} alt="رمز QR" className="qr-image" loading="lazy" />
+              <button
+                className="download-qr-btn"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = activeAccount.qrCode;
+                  link.download = `qr_${selectedMethod}.png`;
+                  link.click();
+                }}
+              >
+                تحميل رمز QR
+              </button>
+            </div>
+          )}
           <div className="min-deposit-notice">
             ⚠️ الحد الأدنى للإيداع: <strong>{getMinDepositDisplay()}</strong>
           </div>
-
-          <div className="support-note">
-            <p>للإيداع السريع والتواصل مع الدعم الفني:</p>
-            <a href={`https://wa.me/${supportWhatsApp}`} target="_blank" rel="noopener noreferrer" className="whatsapp-support-btn">
-              تواصل عبر واتساب للدعم
-            </a>
-          </div>
-
-          <TopUpForm
-            amount={amount}
-            setAmount={setAmount}
-            amountIsInvalid={amountIsInvalid}
-            getMinDepositDisplay={getMinDepositDisplay}
-            transactionNumber={transactionNumber}
-            setTransactionNumber={setTransactionNumber}
-            senderName={senderName}
-            setSenderName={setSenderName}
-            loading={loading}
-            onSubmit={handleSubmit}
-          />
-        </>
+        </div>
       )}
+
+      <div className="support-note">
+        <p>للإيداع السريع والتواصل مع الدعم الفني:</p>
+        <a href={`https://wa.me/${supportWhatsApp}`} target="_blank" rel="noopener noreferrer" className="whatsapp-support-btn">
+          تواصل عبر واتساب للدعم
+        </a>
+      </div>
+
+      <TopUpForm
+        amount={amount}
+        setAmount={setAmount}
+        amountIsInvalid={amountIsInvalid}
+        getMinDepositDisplay={getMinDepositDisplay}
+        transactionNumber={transactionNumber}
+        setTransactionNumber={setTransactionNumber}
+        loading={loading}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

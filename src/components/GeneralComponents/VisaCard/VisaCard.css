@@ -1,0 +1,124 @@
+/* src/components/GeneralComponents/VisaCard/VisaCard.css */
+.visa-card {
+  position: relative;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 1.25rem;
+  padding: 1.2rem 1.5rem;
+  color: white;
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.visa-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 28px -12px rgba(0, 0, 0, 0.4);
+}
+
+.visa-card__bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 120% 0%, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.visa-card__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.visa-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.visa-card__brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+.visa-card__chip {
+  font-size: 2rem;
+}
+
+.visa-card__number {
+  font-size: 1.2rem;
+  font-family: monospace;
+  letter-spacing: 2px;
+  background: rgba(255,255,255,0.1);
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  width: fit-content;
+  direction: ltr;
+}
+
+.visa-card__details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.visa-card__expiry span,
+.visa-card__balance span {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.visa-card__expiry strong,
+.visa-card__balance strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.visa-card__holder {
+  border-top: 1px solid rgba(255,255,255,0.3);
+  padding-top: 0.5rem;
+  text-align: left;
+  font-size: 0.7rem;
+}
+
+.visa-card__holder span {
+  display: block;
+  font-size: 0.55rem;
+  opacity: 0.6;
+  margin-bottom: 0.1rem;
+}
+
+.visa-card__holder div {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* استجابة الجوال */
+@media (max-width: 640px) {
+  .visa-card {
+    padding: 1rem;
+  }
+  .visa-card__number {
+    font-size: 0.9rem;
+  }
+  .visa-card__details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .visa-card__balance {
+    align-self: flex-start;
+  }
+}

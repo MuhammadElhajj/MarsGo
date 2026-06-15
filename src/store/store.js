@@ -99,6 +99,21 @@ listenToExchangeRate: () => {
   return unsub;
 },
 
+// ========== إعدادات الإيداع ==========
+listenToTopUpSettings: () => {
+  const unsub = onSnapshot(doc(db, 'topUpSettings', 'default'), (docSnap) => {
+    if (docSnap.exists()) {
+      get().setTopUpSettings(docSnap.data());
+    } else {
+      // يمكنك إنشاء إعدادات افتراضية هنا إذا أردت
+      get().setTopUpSettings(null);
+    }
+  }, (error) => {
+    console.error('خطأ في الاستماع لإعدادات الإيداع:', error);
+  });
+  return unsub;
+},
+
       // ========== الإشعارات ==========
       notifications: [],
       unreadCount: 0,

@@ -100,3 +100,308 @@
     font-size: 0.8rem;
   }
 }
+
+/* شبكة بطاقات طرق الدفع */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* البطاقة الواحدة */
+.payment-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.payment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.payment-card--active {
+  border-color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.payment-card__logo {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.payment-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.25rem;
+}
+
+.payment-card__emoji {
+  font-size: 2rem;
+}
+
+.payment-card__name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.payment-card__check {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: var(--color-accent);
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+/* تفاصيل طريقة الدفع المختارة */
+.selected-method-details {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+}
+
+.details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.detail-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.detail-value {
+  font-family: monospace;
+  color: var(--color-text-primary);
+  word-break: break-all;
+  text-align: left;
+}
+
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.qr-image {
+  max-width: 180px;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  background: white;
+}
+
+.download-qr-btn {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-accent);
+  border-radius: 2rem;
+  padding: 0.3rem 1rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.download-qr-btn:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+.min-deposit-notice {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* استجابة الجوال */
+@media (max-width: 768px) {
+  .payment-methods-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .payment-card__logo {
+    width: 50px;
+    height: 50px;
+  }
+  .payment-card__emoji {
+    font-size: 1.6rem;
+  }
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-methods-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* دعم الوضع الداكن */
+.dark .payment-card {
+  border-color: var(--color-border);
+}
+.dark .payment-card--active {
+  background: rgba(79, 70, 229, 0.15);
+}
+.dark .qr-image {
+  background: #1e2937;
+}
+
+/* ========== كارد الفيزا ========== */
+.visa-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 1.25rem;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.visa-card:hover {
+  transform: translateY(-3px);
+}
+.visa-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 150%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.visa-card__chip {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+.visa-card__brand {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-align: left;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+.visa-card__number {
+  font-size: 1.2rem;
+  font-family: monospace;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  background: rgba(255,255,255,0.1);
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.5rem;
+}
+.visa-card__details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.visa-card__expiry span,
+.visa-card__balance span {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+.visa-card__expiry strong,
+.visa-card__balance strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.visa-card__name {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  border-top: 1px solid rgba(255,255,255,0.3);
+  padding-top: 0.5rem;
+  text-align: left;
+}
+
+/* ========== زر النسخ ========== */
+.detail-value-with-copy {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: rgba(0,0,0,0.1);
+  transform: scale(1.05);
+}
+.dark .copy-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* استجابة الجوال */
+@media (max-width: 640px) {
+  .visa-card {
+    padding: 1rem;
+  }
+  .visa-card__number {
+    font-size: 1rem;
+  }
+  .visa-card__details {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .detail-value-with-copy {
+    flex-wrap: wrap;
+  }
+  .copy-btn {
+    font-size: 0.9rem;
+  }
+}

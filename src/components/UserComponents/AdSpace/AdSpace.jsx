@@ -153,9 +153,7 @@ export default function AdSpace() {
           </div>
         </div>
 
-        {/* Navigation buttons */}
-        {/* <button className="carousel-nav prev" onClick={goToPrev} aria-label="السابق">‹</button>
-        <button className="carousel-nav next" onClick={goToNext} aria-label="التالي">›</button> */}
+      
 
         {/* Dots indicator */}
         <div className="carousel-dots">

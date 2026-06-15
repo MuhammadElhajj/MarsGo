@@ -9,8 +9,6 @@ export default function TopUpForm({
   getMinDepositDisplay,
   transactionNumber,
   setTransactionNumber,
-  senderName,
-  setSenderName,
   loading,
   onSubmit,
 }) {
@@ -40,15 +38,10 @@ export default function TopUpForm({
           label="رقم العملية (رقم التحويل المرجعي)"
           value={transactionNumber}
           onChange={(e) => setTransactionNumber(e.target.value)}
-          placeholder="مثال: TRC20-123456"
+          placeholder="رقم عملية التحويل"
           required
         />
-        <Input
-          label="اسم المرسل (الاسم الذي أرسل به التحويل)"
-          value={senderName}
-          onChange={(e) => setSenderName(e.target.value)}
-          required
-        />
+        {/* تم إزالة حقل اسم المرسل */}
         <Button type="submit" disabled={loading}>
           {loading ? 'جاري الإرسال...' : 'تقديم طلب ايداع'}
         </Button>
