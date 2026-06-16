@@ -141,3 +141,155 @@
     padding: 0 0.5rem;
   }
 }
+
+/* ===== المحتوى الإضافي (من إدارة المحتوى) ===== */
+.packages-page__extra-content {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+}
+
+.extra-description {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.extra-images {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.extra-image {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+}
+
+.extra-tips h4 {
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.extra-tips ul {
+  list-style: none;
+  padding: 0;
+}
+
+.extra-tips li {
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.extra-video {
+  margin-top: 1rem;
+}
+
+.extra-video iframe {
+  border-radius: 0.5rem;
+  max-width: 100%;
+}
+
+/* ===== الصور العلوية (فوق الباقات) ===== */
+.packages-page__short-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.packages-page__short-image {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* نسبة العرض إلى الارتفاع */
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s;
+}
+
+/* ===== الصور السفلية (تحت الباقات) ===== */
+.packages-page__long-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.packages-page__long-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.packages-page__long-image:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== الوصف الطويل ===== */
+.packages-page__long-description {
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  white-space: pre-wrap; /* يحافظ على فواصل الأسطر */
+  word-break: break-word;
+}
+
+/* ===== النصائح ===== */
+.packages-page__tips h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-primary);
+}
+
+.packages-page__tips ul {
+  list-style: none;
+  padding: 0;
+}
+
+.packages-page__tips li {
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ===== الفيديو ===== */
+.packages-page__video iframe {
+  border-radius: 0.75rem;
+  max-width: 100%;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 768px) {
+  .packages-page__short-images {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .packages-page__long-images {
+    grid-template-columns: 1fr;
+  }
+  .packages-page__long-image {
+    aspect-ratio: 16 / 9;
+  }
+  .packages-page__long-description {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .packages-page__short-images {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}

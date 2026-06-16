@@ -17,9 +17,6 @@ export default function GamingPage() {
         <Route path="game/:gameId" element={<PackagesList />} />
         <Route path="checkout" element={<UnifiedCheckout serviceType="gaming" redirectPath="/gaming" />} />
       </Routes>
-      <Suspense fallback={<Loading text="جاري تحميل طلباتك..." />}>
-        <OrdersList orderType="gaming" title="طلبات شحن الألعاب السابقة" limitCount={5} />
-      </Suspense>
     </Suspense>
   );
 }

@@ -5,8 +5,9 @@ import Input from '../../GeneralComponents/Input/Input';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
 import { FiRefreshCw } from 'react-icons/fi';
 import { useAppStore } from '../../../store/store';
+import ContentManager from '../ContentManager/ContentManager'; // ✅ إضافة
 import './AdminCatalog.css';
-
+import { useNavigate } from 'react-router-dom';
 export default function AdminCatalog({ type }) { // type: 'games' أو 'apps'
   const store = useAppStore();
   
@@ -31,6 +32,11 @@ export default function AdminCatalog({ type }) { // type: 'games' أو 'apps'
   
   const title = type === 'games' ? '🎮 إدارة الألعاب' : '📱 إدارة التطبيقات';
   const itemLabel = type === 'games' ? 'لعبة' : 'تطبيق';
+
+  // ✅ دوال إدارة المحتوى الإضافي
+  const fetchContent = type === 'games' ? store.fetchGameContent : store.fetchAppContent;
+  const updateContent = type === 'games' ? store.updateGameContent : store.updateAppContent;
+  const [showContentModal, setShowContentModal] = useState(false); // ✅ حالة إظهار المودال
 
   // باقي الكود كما هو (لم يتغير)
   const [selectedItem, setSelectedItem] = useState(null);
@@ -171,7 +177,7 @@ export default function AdminCatalog({ type }) { // type: 'games' أو 'apps'
       await loadPackages(selectedItem);
     }
   };
-
+const navigate = useNavigate();
   if (loading) return <div className="admin-catalog__loading">جاري تحميل {itemLabel}...</div>;
 
   return (
@@ -225,6 +231,14 @@ export default function AdminCatalog({ type }) { // type: 'games' أو 'apps'
                 <FiRefreshCw /> تحديث
               </Button>
               <Button onClick={() => openPackageModal()}>➕ إضافة باقة</Button>
+              {/* ✅ زر إدارة المحتوى */}
+         <Button 
+  onClick={() => navigate(`/admin/content/${type}/${selectedItem.id}`)} 
+  variant="secondary" 
+  size="sm"
+>
+  📝 إدارة المحتوى
+</Button>
             </div>
           </div>
           {packagesLoading ? (
@@ -318,6 +332,21 @@ export default function AdminCatalog({ type }) { // type: 'games' أو 'apps'
                 <Button type="button" variant="danger" onClick={() => setShowPackageModal(false)}>إلغاء</Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ مودال إدارة المحتوى الإضافي */}
+      {showContentModal && selectedItem && (
+        <div className="modal-overlay" onClick={() => setShowContentModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <ContentManager
+              itemId={selectedItem.id}
+              type={type}
+              fetchContent={fetchContent}
+              updateContent={updateContent}
+              onClose={() => setShowContentModal(false)}
+            />
           </div>
         </div>
       )}

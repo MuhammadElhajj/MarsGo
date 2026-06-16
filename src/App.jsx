@@ -46,7 +46,7 @@ const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/A
 const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
 const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
 const AdminUnifiedCatalog = lazy(() => import("./pages/Admin/AdminUnifiedCatalog/AdminUnifiedCatalog"));
-
+const ContentManager = lazy(() => import("./components/AdminCoponent/ContentManager/ContentManager"));
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
@@ -154,7 +154,7 @@ function App() {
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
           <Route path="catalog" element={<AdminUnifiedCatalog />} />
           <Route path="external-store-import" element={<ExternalStoreImport />} />
-        
+        <Route path="content/:type/:itemId" element={<ContentManager />} />
         <Route path="/admin/categories" element={<AdminCategories />} />  <Route path="ticker" element={<AdminTicker />} />
 
           <Route path="verifiers" element={<AdminVerifiers />} />
