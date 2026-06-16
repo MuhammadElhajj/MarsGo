@@ -1,0 +1,93 @@
+/* src/components/UserComponents/PaymentMethods/PaymentMethods.css */
+
+.payment-methods {
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  overflow: hidden;
+}
+
+.payment-methods__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-methods__marquee {
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+  padding: 0.5rem 0;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border);
+}
+
+.payment-methods__track {
+  display: flex;
+  animation: paymentMarquee 20s linear infinite;
+  width: fit-content;
+}
+
+.payment-methods__track:hover {
+  animation-play-state: paused;
+}
+
+.payment-methods__icon {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.payment-methods__icon:hover {
+  opacity: 1;
+}
+
+.payment-methods__icon svg {
+  font-size: 1.4rem;
+  color: var(--color-text-primary);
+}
+
+.payment-methods__name {
+  font-size: 0.8rem;
+}
+
+@keyframes paymentMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+  .payment-methods__icon {
+    padding: 0 1rem;
+    font-size: 0.8rem;
+  }
+  .payment-methods__icon svg {
+    font-size: 1.2rem;
+  }
+  .payment-methods__track {
+    animation-duration: 15s;
+  }
+}
+
+.dark .payment-methods__marquee {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+.dark .payment-methods__icon {
+  color: var(--color-text-primary);
+}
+
+.dark .payment-methods__icon svg {
+  color: var(--color-text-primary);
+}

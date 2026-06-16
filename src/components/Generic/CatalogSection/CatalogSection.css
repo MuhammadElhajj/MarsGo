@@ -1,0 +1,75 @@
+/* src/components/Generic/CatalogSection/CatalogSection.css */
+
+.catalog-section {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.catalog-section__header {
+  margin-bottom: 1rem;
+}
+
+.catalog-section__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem 0;
+  color: var(--color-text-primary);
+}
+
+.catalog-section__description {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.catalog-section__count {
+  display: inline-block;
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--color-accent);
+  padding: 0.05rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
+
+.catalog-section__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+
+.view-more-link {
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.view-more-link:hover {
+  color: var(--color-accent);
+  transform: translateX(3px);
+}
+
+.view-more-link .arrow {
+  font-size: 1.2rem;
+  font-weight: 300;
+  transition: transform 0.2s;
+}
+
+.view-more-link:hover .arrow {
+  transform: translateX(2px);
+}
+
+.catalog-section__empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+}

@@ -2,31 +2,20 @@
 
 .why-choose-us {
   width: 100%;
- 
   animation: fadeIn 0.4s ease;
- 
+
 }
 
 .why-choose-us__title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  text-align: center;
-  margin-bottom: 2rem;
+  /* text-align: center; */
+  margin-bottom: 0.5rem;
   color: var(--color-text-primary);
   position: relative;
 }
 
-.why-choose-us__title::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: var(--color-accent);
-  border-radius: 2px;
-}
+
 
 /* شبكة الميزات */
 .why-choose-us__features {
@@ -34,99 +23,58 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   max-width: 1100px;
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 2rem;
 }
 
 .why-choose-us__feature-card {
   background: var(--color-bg-secondary);
   border-radius: 1.25rem;
-  padding: 1.8rem 1.2rem;
-  text-align: center;
+  padding: 1.2rem 1rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
 
 .why-choose-us__feature-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
-.why-choose-us__feature-icon {
-  font-size: 2.5rem;
-  color: var(--color-accent);
-  margin-bottom: 0.75rem;
-  display: inline-block;
-  background: rgba(79, 70, 229, 0.08);
-  padding: 0.5rem;
-  border-radius: 1rem;
-}
-
-.why-choose-us__feature-card h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
+.why-choose-us__feature-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 0.5rem;
-  color: var(--color-text-primary);
 }
 
-.why-choose-us__feature-card p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-}
-
-/* وسائل الدفع */
-.why-choose-us__payment-section {
-  max-width: 900px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.why-choose-us__payment-section h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.why-choose-us__payment-icons {
-  display: flex;
-  flex-wrap: wrap;
+.why-choose-us__feature-icon {
+  font-size: 1.8rem;
+  color: var(--color-accent);
+  flex-shrink: 0;
+  background: rgba(79, 70, 229, 0.08);
+  padding: 0.4rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  gap: 1.2rem 2rem;
-  padding: 0.5rem 0;
 }
 
-.payment-icon {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.why-choose-us__feature-title {
   font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  opacity: 0.8;
-  transition: opacity 0.2s, transform 0.2s;
-  cursor: default;
-}
-
-.payment-icon:hover {
-  opacity: 1;
-  transform: scale(1.02);
-}
-
-.payment-icon svg {
-  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
   color: var(--color-text-primary);
 }
 
-.payment-name {
+.why-choose-us__feature-description {
   font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: 0.5rem 0 0;
+  padding-right: 0.2rem;
 }
 
-/* استجابة للجوال */
+/* استجابة الجوال */
 @media (max-width: 768px) {
   .why-choose-us__features {
     grid-template-columns: 1fr;
@@ -135,14 +83,21 @@
   .why-choose-us__title {
     font-size: 1.6rem;
   }
-  .why-choose-us__payment-icons {
-    gap: 0.8rem 1.2rem;
+  .why-choose-us__feature-card {
+    padding: 1rem;
   }
-  .payment-icon {
-    font-size: 0.9rem;
+  .why-choose-us__feature-header {
+    gap: 0.5rem;
   }
-  .payment-icon svg {
-    font-size: 1.2rem;
+  .why-choose-us__feature-icon {
+    font-size: 1.5rem;
+    padding: 0.3rem;
+  }
+  .why-choose-us__feature-title {
+    font-size: 1rem;
+  }
+  .why-choose-us__feature-description {
+    font-size: 0.8rem;
   }
 }
 
@@ -152,216 +107,7 @@
   border-color: var(--color-border);
 }
 
-.dark .payment-icon {
-  color: var(--color-text-primary);
-}
-
-.dark .payment-icon svg {
-  color: var(--color-text-primary);
-}
-
 /* حركة الظهور */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* src/components/UserComponents/WhyChooseUs/WhyChooseUs.css */
-
-.why-choose-us {
-  width: 100%;
-  
-  animation: fadeIn 0.4s ease;
-
-}
-
-.why-choose-us__title {
-  font-size: 2rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 2rem;
-  color: var(--color-text-primary);
-  position: relative;
-}
-
-.why-choose-us__title::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: var(--color-accent);
-  border-radius: 2px;
-}
-
-/* شبكة الميزات */
-.why-choose-us__features {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  max-width: 1100px;
-  margin: 0 auto 2.5rem;
-}
-
-.why-choose-us__feature-card {
-  background: var(--color-bg-secondary);
-  border-radius: 1.25rem;
-  padding: 1.8rem 1.2rem;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-}
-
-.why-choose-us__feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
-}
-
-.why-choose-us__feature-icon {
-  font-size: 2.5rem;
-  color: var(--color-accent);
-  margin-bottom: 0.75rem;
-  display: inline-block;
-  background: rgba(79, 70, 229, 0.08);
-  padding: 0.5rem;
-  border-radius: 1rem;
-}
-
-.why-choose-us__feature-card h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--color-text-primary);
-}
-
-.why-choose-us__feature-card p {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-}
-
-/* ===== شريط طرق الدفع المتحرك ===== */
-.why-choose-us__payment-section {
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  overflow: hidden;
-}
-
-.why-choose-us__payment-section h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.why-choose-us__payment-marquee {
-  width: 100%;
-  overflow: hidden;
-  background: var(--color-bg-secondary);
-  padding: 0.5rem 0;
-  border-radius: 2rem;
-  border: 1px solid var(--color-border);
-}
-
-.why-choose-us__payment-track {
-  display: flex;
-  animation: marquee 20s linear infinite;
-  width: fit-content;
-}
-
-.why-choose-us__payment-track:hover {
-  animation-play-state: paused;
-}
-
-.payment-icon {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  white-space: nowrap;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
-
-.payment-icon:hover {
-  opacity: 1;
-}
-
-.payment-icon svg {
-  font-size: 1.4rem;
-  color: var(--color-text-primary);
-}
-
-.payment-name {
-  font-size: 0.8rem;
-}
-
-/* ===== حركة الماركي ===== */
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-/* ===== استجابة للجوال (≤ 768px) ===== */
-@media (max-width: 768px) {
-  .why-choose-us__features {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .why-choose-us__title {
-    font-size: 1.6rem;
-  }
-  .payment-icon {
-    padding: 0 1rem;
-    font-size: 0.8rem;
-  }
-  .payment-icon svg {
-    font-size: 1.2rem;
-  }
-  .why-choose-us__payment-track {
-    animation-duration: 15s;
-  }
-}
-
-/* ===== دعم الوضع الداكن ===== */
-.dark .why-choose-us__feature-card {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
-}
-
-.dark .why-choose-us__payment-marquee {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
-}
-
-.dark .payment-icon {
-  color: var(--color-text-primary);
-}
-
-.dark .payment-icon svg {
-  color: var(--color-text-primary);
-}
-
-/* ===== حركة الظهور ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
