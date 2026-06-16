@@ -1,7 +1,18 @@
 /* فقط تنسيقات الصفحة الرئيسية (الهيكل، الرأس، بطاقة الرصيد) */
 .topup-page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
   margin: 0 auto;
-  padding: 0rem !important;
+  padding: 0 !important;
+}
+
+.topup-page__header,
+.whatsapp-warning,
+.selected-method-details,
+.support-note,
+.topup-page__form {
+  flex: 0 0 100%;
 }
 
 .topup-page__header {
@@ -16,7 +27,22 @@
   margin: 0;
 }
 
-/* بطاقة عرض الرصيد الحالي */
+/* بطاقة الفيزا وشبكة طرق الدفع جنب بعض */
+.visa-card,
+.payment-methods-grid {
+  flex: 1 1 calc(50% - 0.75rem);
+  min-width: 280px;
+}
+
+/* في الشاشات الصغيرة (أقل من 600px) يصبحان عموديين */
+@media (max-width: 600px) {
+  .visa-card,
+  .payment-methods-grid {
+    flex: 0 0 100%;
+  }
+}
+
+/* ===== بطاقة عرض الرصيد الحالي (في حال استخدامها) ===== */
 .current-balance-card {
   background: linear-gradient(135deg, var(--color-accent) 0%, #7c3aed 100%);
   border-radius: 8px;
@@ -28,7 +54,6 @@
   color: white;
   box-shadow: var(--shadow-md);
 }
-
 .balance-label {
   font-size: 0.9rem;
   opacity: 0.9;
@@ -36,34 +61,30 @@
   align-items: center;
   gap: 0.3rem;
 }
-
 .balance-amount {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
-
 @media (max-width: 480px) {
   .balance-amount {
     font-size: 1.3rem;
   }
 }
 
-/* ملاحظة الحد الأدنى للإيداع */
+/* ملاحظات */
 .min-deposit-notice {
   margin: 0.5rem 0;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
   text-align: center;
 }
-
-/* ملاحظة الدعم */
 .support-note {
   margin: 1rem 0;
   text-align: center;
 }
 
-/* زر واتساب للدعم */
+/* زر واتساب */
 .whatsapp-support-btn {
   display: flex;
   align-items: center;
@@ -83,17 +104,11 @@
   box-sizing: border-box;
   margin: 10px 0;
 }
-
 .whatsapp-support-btn:hover {
   background-color: #128C7E;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
-.whatsapp-support-btn:active {
-  transform: translateY(0);
-}
-
 @media (max-width: 480px) {
   .whatsapp-support-btn {
     padding: 0.6rem 0.8rem;
@@ -106,7 +121,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin: 1.5rem 0;
+  margin: 0;
 }
 
 /* البطاقة الواحدة */
@@ -121,17 +136,14 @@
   box-shadow: var(--shadow-sm);
   position: relative;
 }
-
 .payment-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
-
 .payment-card--active {
   border-color: var(--color-accent);
   background: rgba(79, 70, 229, 0.05);
 }
-
 .payment-card__logo {
   width: 60px;
   height: 60px;
@@ -143,24 +155,20 @@
   border-radius: 1rem;
   overflow: hidden;
 }
-
 .payment-card__logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   padding: 0.25rem;
 }
-
 .payment-card__emoji {
   font-size: 2rem;
 }
-
 .payment-card__name {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--color-text-primary);
 }
-
 .payment-card__check {
   position: absolute;
   top: 0.5rem;
@@ -181,17 +189,15 @@
   background: var(--color-bg-secondary);
   border-radius: 1rem;
   padding: 1.2rem;
-  margin: 1rem 0;
+  margin: 0.5rem 0 1rem;
   border: 1px solid var(--color-border);
 }
-
 .details-grid {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
   margin-bottom: 1rem;
 }
-
 .detail-item {
   display: flex;
   justify-content: space-between;
@@ -201,13 +207,11 @@
   padding-bottom: 0.5rem;
   border-bottom: 1px dashed var(--color-border);
 }
-
 .detail-label {
   font-weight: 600;
   color: var(--color-text-secondary);
   font-size: 0.85rem;
 }
-
 .detail-value {
   font-family: monospace;
   color: var(--color-text-primary);
@@ -215,6 +219,7 @@
   text-align: left;
 }
 
+/* QR Code */
 .qr-section {
   display: flex;
   flex-direction: column;
@@ -222,7 +227,6 @@
   gap: 0.5rem;
   margin-top: 1rem;
 }
-
 .qr-image {
   max-width: 180px;
   border: 1px solid var(--color-border);
@@ -230,7 +234,6 @@
   padding: 0.5rem;
   background: white;
 }
-
 .download-qr-btn {
   background: var(--color-bg-primary);
   border: 1px solid var(--color-accent);
@@ -240,17 +243,9 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .download-qr-btn:hover {
   background: var(--color-accent);
   color: white;
-}
-
-.min-deposit-notice {
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
 }
 
 /* استجابة الجوال */
@@ -271,7 +266,6 @@
     align-items: flex-start;
   }
 }
-
 @media (max-width: 480px) {
   .payment-methods-grid {
     grid-template-columns: 1fr;
@@ -294,7 +288,7 @@
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border-radius: 1.25rem;
   padding: 1.2rem 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
   color: white;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -377,13 +371,16 @@
   padding: 0.2rem 0.4rem;
   border-radius: 0.3rem;
   transition: all 0.2s;
+  color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
 }
 .copy-btn:hover {
-  background: rgba(0,0,0,0.1);
+  background: rgba(79, 70, 229, 0.1);
   transform: scale(1.05);
 }
 .dark .copy-btn:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* استجابة الجوال */
@@ -403,36 +400,5 @@
   }
   .copy-btn {
     font-size: 0.9rem;
-  }
-}
-
-/* ===== جعل البطاقة وطرق الدفع جنب بعض على الشاشات الكبيرة ===== */
-.topup-page {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-/* الرأس والعناصر الأخرى تأخذ العرض الكامل */
-.topup-page__header,
-.whatsapp-warning,
-.selected-method-details,
-.support-note,
-.topup-page__form {
-  flex: 0 0 100%;
-}
-
-/* بطاقة الفيزا وشبكة طرق الدفع جنب بعض */
-.visa-card,
-.payment-methods-grid {
-  flex: 1 1 calc(50% - 0.75rem);
-  min-width: 280px; /* لمنع التصغير المفرط */
-}
-
-/* في الشاشات الصغيرة (أقل من 600px) يصبحان عموديين */
-@media (max-width: 600px) {
-  .visa-card,
-  .payment-methods-grid {
-    flex: 0 0 100%;
   }
 }

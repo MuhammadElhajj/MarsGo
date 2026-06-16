@@ -112,10 +112,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard" dir="rtl">
-      {/* صف الرصيد والإعلانات - تم استبدال BalanceDisplay و TopUpButton بـ VisaCard */}
-      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
-        <AdSpace />
-      </Suspense>
+   
       
       {/* ✅ بطاقة الفيزا الجديدة - تحل مكان الرصيد وزر الإيداع */}
       <div className="dashboard__visa-wrapper">
@@ -126,6 +123,8 @@ export default function Dashboard() {
           brand="MarsGo Visa"
         />
       </div>
+
+      <PaymentMethods/>
 
       {/* يمكن الاحتفاظ بـ SpendingProgress إذا أردت، أو إزالته */}
       {/* <SpendingProgress /> */}
@@ -171,36 +170,7 @@ export default function Dashboard() {
   maxItemsDesktop={14}
   maxItemsMobile={6}
 />
-      {/* ===== قسم التطبيقات =====
-      <div className="dashboard__hot-apps-section">
-        <div className="dashboard__hot-apps-header">
-          <div>
-            <h2> التطبيقات الأكثر مبيعاً</h2>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', marginTop: '4px' }}>
-              تطبيقات متنوعة بأسعار تنافسية
-            </p>
-          </div>
-        </div>
-        {appsLoading ? (
-          <div className="loading-wrapper">جاري تحميل التطبيقات...</div>
-        ) : (
-          <>
-            <CatalogList
-              items={appsToDisplay}
-              onItemClick={handleAppClick}
-              showPrice={true}
-              type="app"
-              showBackButton={false}
-              title=""
-            />
-            <div className="dashboard__hot-games-footer">
-              <span className="view-more-link" onClick={handleViewAllApps}>
-                المزيد <span className="arrow">›</span>
-              </span>
-            </div>
-          </>
-        )}
-      </div> */}
+
       <CatalogSection
   title="التطبيقات الأكثر مبيعاً"
   description="تطبيقات متنوعة بأسعار تنافسية"
@@ -213,8 +183,12 @@ export default function Dashboard() {
   maxItemsMobile={6}
 />
       
+     {/* صف الرصيد والإعلانات - تم استبدال BalanceDisplay و TopUpButton بـ VisaCard */}
+      <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
+        <AdSpace />
+      </Suspense>
       <StoreIntro />
-      
+    
       {/* باقي المحتوى */}
       <div className="dashboard__services">
         <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>

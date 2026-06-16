@@ -13,7 +13,8 @@ import MaintenanceMessage from '../../../components/UserComponents/TopUp/Mainten
 import TopUpForm from '../../../components/UserComponents/TopUp/TopUpForm/TopUpForm';
 import './TopUpPage.css';
 import VisaCard from '../../../components/GeneralComponents/VisaCard/VisaCard';
-
+import { FiCopy } from 'react-icons/fi'; // ✅ استيراد أيقونة النسخ
+import PaymentMethods from '../../../components/UserComponents/PaymentMethods/PaymentMethods';
 export default function TopUpPage() {
   const { userData } = useAuth();
   const balance = useAppStore((state) => state.balance);
@@ -159,12 +160,12 @@ export default function TopUpPage() {
           <GoBackButton text="رجوع" />
           <h2>شحن الرصيد</h2>
         </div>
-       <VisaCard 
-  balance={balance} 
-  cardHolderName={userData?.name || 'MarsGo User'}
-  cardNumber="8888 8888 8888 8888"
-  brand="MarsGo Visa"
-/>
+        <VisaCard 
+          balance={balance} 
+          cardHolderName={userData?.name || 'MarsGo User'}
+          cardNumber="8888 8888 8888 8888"
+          brand="MarsGo Visa"
+        />
         <MaintenanceMessage message="جاري تحميل إعدادات الدفع..." supportWhatsApp="963939454690" />
       </div>
     );
@@ -177,12 +178,12 @@ export default function TopUpPage() {
           <GoBackButton text="رجوع" />
           <h2>شحن الرصيد</h2>
         </div>
-       <VisaCard 
-  balance={balance} 
-  cardHolderName={userData?.name || 'MarsGo User'}
-  cardNumber="8888 8888 8888 8888"
-  brand="MarsGo Visa"
-/>
+        <VisaCard 
+          balance={balance} 
+          cardHolderName={userData?.name || 'MarsGo User'}
+          cardNumber="8888 8888 8888 8888"
+          brand="MarsGo Visa"
+        />
         <MaintenanceMessage message="لا توجد طرق دفع مفعلة حالياً، يرجى مراجعة الإدارة." supportWhatsApp={supportWhatsApp} />
       </div>
     );
@@ -195,16 +196,15 @@ export default function TopUpPage() {
         <h2>شحن الرصيد</h2>
       </div>
 
-      {/* بطاقة الرصيد بتصميم فيزا */}
-  <VisaCard 
-  balance={balance} 
-  cardHolderName={userData?.name || 'MarsGo User'}
-  cardNumber="8888 8888 8888 8888"
-  brand="MarsGo Visa"
-/>
+      <VisaCard 
+        balance={balance} 
+        cardHolderName={userData?.name || 'MarsGo User'}
+        cardNumber="8888 8888 8888 8888"
+        brand="MarsGo Visa"
+      />
+
       {!hasWhatsapp && <WhatsappWarning />}
 
-      {/* شبكة بطاقات طرق الدفع */}
       <div className="payment-methods-grid">
         {methods.map(method => (
           <div
@@ -226,8 +226,9 @@ export default function TopUpPage() {
           </div>
         ))}
       </div>
+<PaymentMethods/>
+      <pay/>
 
-      {/* تفاصيل طريقة الدفع المختارة (مع أزرار نسخ) */}
       {selectedMethod && activeAccount && (
         <div className="selected-method-details">
           <h3>تفاصيل التحويل عبر {methods.find(m => m.id === selectedMethod)?.name}</h3>
@@ -245,7 +246,7 @@ export default function TopUpPage() {
                     }}
                     title="نسخ"
                   >
-                    📋
+                    <FiCopy size={16} />
                   </button>
                 </div>
               </div>
@@ -275,7 +276,7 @@ export default function TopUpPage() {
                     }}
                     title="نسخ"
                   >
-                    📋
+                    <FiCopy size={16} />
                   </button>
                 </div>
               </div>
