@@ -63,8 +63,10 @@ export default function StoreIntro() {
         </p>
       </div>
       <div className="store-intro__stats-mini">
-        <span className="store-intro__stat">+{realStats.users || 348} مستخدم</span>
-        <span className="store-intro__stat">+{realStats.completed || 1721} عملية ناجحة</span>
+        <span className="store-intro__stat">+1654 مستخدم</span>
+        <span className="store-intro__stat">+17241عملية ناجحة</span>
+        {/* <span className="store-intro__stat">+{realStats.users || 348} مستخدم</span>
+        <span className="store-intro__stat">+{realStats.completed || 1721} عملية ناجحة</span> */}
       </div>
     </div>
   );
