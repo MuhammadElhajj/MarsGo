@@ -102,7 +102,10 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* القائمة الرئيسية */}
         <nav aria-label="القائمة الرئيسية">
           <ul className="sidebar__list">
-            <li><Link to="/dashboard" className={linkClass("/dashboard")} onClick={handleLinkClick}>لوحة التحكم</Link></li>
+            
+            <li><Link to="/dashboard" className={linkClass("/dashboard")} onClick={handleLinkClick}> الصفحة الرئيسية</Link></li>
+<li><Link to="/topup" className={linkClass("/topup")} onClick={handleLinkClick}> شحن الرصيد (فيزا)</Link></li>
+      
             <li>
               <button className="sidebar__category-btn" onClick={toggleServices} aria-expanded={servicesOpen}>
                 <span>الخدمات الرقمية</span>
@@ -112,14 +115,15 @@ export default function Sidebar({ isOpen, onClose }) {
               </button>
               {servicesOpen && (
                 <ul className="sidebar__sublist">
-                  <li><Link to="/gaming" className={linkClass("/gaming")} onClick={handleLinkClick}> شحن ألعاب</Link></li>
-                  <li><Link to="/apps" className={linkClass("/apps")} onClick={handleLinkClick}> تطبيقات</Link></li>
+                  <li><Link to="/gaming" className={linkClass("/gaming")} onClick={handleLinkClick}>  ألعاب</Link></li>
+                  <li><Link to="/apps" className={linkClass("/apps")} onClick={handleLinkClick}>   تطبيقات</Link></li>
                 </ul>
               )}
             </li>
-            <li><Link to="/profile" className={linkClass("/profile")} onClick={handleLinkClick}>ملفي الشخصي</Link></li>
+            <li><Link to="/profile" className={linkClass("/profile")} onClick={handleLinkClick}>الملف الشخصي</Link></li>
             <li><Link to="/my-orders" className={linkClass("/my-orders")} onClick={handleLinkClick}>طلباتي</Link></li>
-            <li><Link to="/about" className={linkClass("/about")} onClick={handleLinkClick}>من نحن</Link></li>
+          
+          <li><Link to="/privacy-policy" className={linkClass("/privacy-policy")} onClick={handleLinkClick}> سياسة الخصوصية</Link></li>  <li><Link to="/about" className={linkClass("/about")} onClick={handleLinkClick}>من نحن</Link></li>
           </ul>
         </nav>
       </div>

@@ -27,6 +27,8 @@ const VerifyCodePage = lazy(() => import("./pages/User/VerifyCode/VerifyCodePage
 const CatalogPage = lazy(() => import("./pages/User/Catalog/CatalogPage"));
 const CategoryProductsPage = lazy(() => import("./pages/User/CategoryProductsPage/CategoryProductsPage"));
 const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePackagesPage"));
+const PrivacyPolicy = lazy(() => import("./pages/User/PrivacyPolicy/PrivacyPolicy"));
+
 // ==================== صفحات المدير (Admin) ====================
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
@@ -133,7 +135,8 @@ function App() {
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/topup" element={<TopUpPage />} />
+         
+         <Route path="/privacy-policy" element={<PrivacyPolicy />} /> <Route path="/topup" element={<TopUpPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
 <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
 <Route path="/category/:categoryId/:gameName" element={<CategoryProductsPage />} />

@@ -1,0 +1,148 @@
+/* src/pages/User/PrivacyPolicy/PrivacyPolicy.css */
+
+.privacy-policy-page {
+  width: 100%;
+  animation: fadeIn 0.4s ease;
+  direction: rtl;
+  background: var(--color-bg-primary);
+}
+
+.privacy-policy-page__back {
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+
+/* ===== الهيدر البسيط ===== */
+.privacy-policy-page__hero {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #7c3aed 10%);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  border-radius: 2rem;
+  color: var(--color-text-primary);
+ 
+}
+
+.privacy-policy-page__hero h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.3px;
+}
+
+.privacy-policy-page__hero p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+/* ===== المحتوى ===== */
+.privacy-policy-page__content {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.privacy-policy-page__content section {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.privacy-policy-page__content section:last-child {
+  border-bottom: none;
+}
+
+.privacy-policy-page__content h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.privacy-policy-page__content p {
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.privacy-policy-page__content ul {
+  list-style: none;
+  padding-right: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.privacy-policy-page__content ul li {
+  position: relative;
+  padding-right: 1rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.privacy-policy-page__content ul li::before {
+  content: "•";
+  position: absolute;
+  right: 0;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.privacy-policy-page__content a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.privacy-policy-page__content a:hover {
+  text-decoration: underline;
+}
+
+/* ===== التذييل ===== */
+.privacy-policy-page__footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .privacy-policy-page__hero {
+    padding: 2rem 1rem;
+  }
+  .privacy-policy-page__hero h1 {
+    font-size: 1.5rem;
+  }
+  .privacy-policy-page__content {
+    padding: 0 1rem 2rem;
+  }
+  .privacy-policy-page__content section {
+    padding: 1rem 0;
+  }
+}
+
+/* ===== دعم الوضع الداكن ===== */
+.dark .privacy-policy-page {
+  background: var(--color-bg-primary);
+}
+
+.dark .privacy-policy-page__content section {
+  border-color: var(--color-border);
+}
+
+.dark .privacy-policy-page__content h2 {
+  color: var(--color-text-primary);
+}
+
+.dark .privacy-policy-page__content p,
+.dark .privacy-policy-page__content ul li {
+  color: var(--color-text-secondary);
+}
+
+/* ===== حركة الظهور ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

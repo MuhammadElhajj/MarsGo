@@ -91,6 +91,7 @@
   padding-top: 0.5rem;
   text-align: left;
   font-size: 0.7rem;
+  display: flex; justify-content: space-between;
 }
 
 .visa-card__holder span {
@@ -98,12 +99,15 @@
   font-size: 0.55rem;
   opacity: 0.6;
   margin-bottom: 0.1rem;
+  margin-left: 8px;
 }
 
 .visa-card__holder div {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  display: flex;
+  align-items: center;
 }
 
 /* استجابة الجوال */
@@ -122,3 +126,89 @@
     align-self: flex-start;
   }
 }
+
+
+
+/* ووووووووووووووووووو 
+*/
+
+/* ===== زر الشحن داخل الفيزا ===== */
+.visa-card__balance-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.visa-card__topup-btn {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.visa-card__topup-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.04);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+}
+
+.visa-card__topup-btn:active {
+  transform: scale(0.96);
+}
+
+/* دعم الوضع الداكن (بالفعل مناسب) */
+
+/* ===== صف اسم الحامل والزر ===== */
+.visa-card__holder-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.visa-card__holder-name {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  flex: 1;
+  font-weight: 500;
+}
+
+/* ===== زر الشحن ===== */
+.visa-card__topup-btn {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.25rem 0.8rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.visa-card__topup-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.visa-card__topup-btn:active {
+  transform: scale(0.95);
+}
+
+/* دعم الوضع الداكن (بالفعل مناسب) */

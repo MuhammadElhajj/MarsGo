@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   justify-content: space-between;
 }
 
@@ -403,5 +403,36 @@
   }
   .copy-btn {
     font-size: 0.9rem;
+  }
+}
+
+/* ===== جعل البطاقة وطرق الدفع جنب بعض على الشاشات الكبيرة ===== */
+.topup-page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+/* الرأس والعناصر الأخرى تأخذ العرض الكامل */
+.topup-page__header,
+.whatsapp-warning,
+.selected-method-details,
+.support-note,
+.topup-page__form {
+  flex: 0 0 100%;
+}
+
+/* بطاقة الفيزا وشبكة طرق الدفع جنب بعض */
+.visa-card,
+.payment-methods-grid {
+  flex: 1 1 calc(50% - 0.75rem);
+  min-width: 280px; /* لمنع التصغير المفرط */
+}
+
+/* في الشاشات الصغيرة (أقل من 600px) يصبحان عموديين */
+@media (max-width: 600px) {
+  .visa-card,
+  .payment-methods-grid {
+    flex: 0 0 100%;
   }
 }
