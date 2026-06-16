@@ -224,7 +224,7 @@ const UserStatsGrid = lazy(() => import("../../../components/UserComponents/User
 const ServicesGrid = lazy(() => import("../../../components/UserComponents/ServicesGrid/ServicesGrid"));
 const OrdersList = lazy(() => import("../../../components/UserComponents/OrdersList/OrdersList"));
 const SpendingProgress = lazy(() => import("../../../components/UserComponents/SpendingProgress/SpendingProgress"));
-
+const WhyChooseUs = lazy(() => import("../../../components/UserComponents/WhyChooseUs/WhyChooseUs"));
 // ✅ لم نعد نحتاج BalanceDisplay و TopUpButton، يمكن إزالة استيرادهما أو تعليقهما
 // const BalanceDisplay = lazy(() => import('../../../components/GeneralComponents/BalanceDisplay/BalanceDisplay'));
 // const TopUpButton = lazy(() => import('../../../components/GeneralComponents/TopUpButton/TopUpButton'));
@@ -401,11 +401,13 @@ export default function Dashboard() {
           <ServicesGrid />
         </Suspense>
       </div>
-
-      <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
+<Suspense fallback={<Loading text="جاري تحميل المزيد..." />}>
+  <WhyChooseUs />
+</Suspense>
+      {/* <h3 className="dashboard__services-title">إحصائيات المستخدم</h3>
       <Suspense fallback={<Loading text="جاري تحميل الإحصائيات..." />}>
         <UserStatsGrid stats={userStats} loading={userStatsLoading} />
-      </Suspense>
+      </Suspense> */}
     </div>
   );
 }
