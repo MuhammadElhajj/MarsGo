@@ -1,0 +1,317 @@
+/* src/components/UserComponents/Chat/ChatRoom.css */
+
+/* ===== الحاوية الرئيسية ===== */
+.chat-room {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(100vh - 120px);
+  background-color: var(--chat-bg, #efeae2);
+  position: relative;
+}
+
+/* الوضع الداكن */
+.dark .chat-room {
+  --chat-bg: #0b141a;
+}
+
+/* ===== الهيدر (مثل واتساب) ===== */
+.chat-room__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  min-height: 60px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.chat-room__back-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.chat-room__back-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.dark .chat-room__back-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.chat-room__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.chat-room__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-room__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-room__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-room__subtitle {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.chat-room__status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #31a24c;
+  margin-right: 4px;
+}
+
+.chat-room__status-dot.offline {
+  background-color: #8e8e8e;
+}
+
+.chat-room__actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.chat-room__action-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.chat-room__action-btn:hover {
+  background: rgba(0,0,0,0.05);
+  color: var(--color-text-primary);
+}
+
+.dark .chat-room__action-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ===== منطقة الرسائل ===== */
+.chat-room__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background-color: var(--chat-bg, #efeae2);
+  scroll-behavior: smooth;
+}
+
+/* تخصيص شريط التمرير */
+.chat-room__messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-room__messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-room__messages::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
+}
+
+.chat-room__messages::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* ===== فقاعة الرسالة (سيتم تطبيقها عبر Message.css بالفعل، لكن نضيف تحسينات) ===== */
+/* نترك تنسيق الفقاعات لـ Message.css، لكن نضمن أن الخلفية مناسبة */
+
+/* ===== منطقة الإدخال (مثل واتساب) ===== */
+.chat-room__input-area {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+  min-height: 60px;
+}
+
+.chat-room__input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-bg-primary);
+  border-radius: 25px;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid var(--color-border);
+  transition: border-color 0.2s;
+}
+
+.chat-room__input-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+.chat-room__input {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  min-width: 0;
+}
+
+.chat-room__input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.chat-room__emoji-btn,
+.chat-room__attach-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.2rem;
+}
+
+.chat-room__emoji-btn:hover,
+.chat-room__attach-btn:hover {
+  background: rgba(0,0,0,0.05);
+  color: var(--color-text-primary);
+}
+
+.dark .chat-room__emoji-btn:hover,
+.dark .chat-room__attach-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.chat-room__send-btn {
+  background: var(--color-primary);
+  border: none;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.chat-room__send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: var(--color-primary-dark);
+}
+
+.chat-room__send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== حالة التحميل ===== */
+.chat-room-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 480px) {
+  .chat-room {
+    max-height: calc(100vh - 80px);
+  }
+  
+  .chat-room__header {
+    padding: 0.4rem 0.6rem;
+    min-height: 50px;
+  }
+  
+  .chat-room__title {
+    font-size: 1rem;
+  }
+  
+  .chat-room__avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+  
+  .chat-room__messages {
+    padding: 0.5rem;
+  }
+  
+  .chat-room__input-area {
+    padding: 0.4rem 0.6rem;
+    min-height: 50px;
+  }
+  
+  .chat-room__input {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .chat-room__send-btn {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .chat-room__emoji-btn,
+  .chat-room__attach-btn {
+    font-size: 1rem;
+    padding: 0.3rem;
+  }
+}

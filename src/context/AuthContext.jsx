@@ -40,13 +40,44 @@ export function AuthProvider({ children }) {
         let data;
         if (docSnap.exists()) {
           data = docSnap.data();
-          // ✅ التحقق من وجود customerType وإضافته إذا كان مفقوداً (للمستخدمين القدامى)
+          // ✅ التحقق من وجود الحقول الجديدة وإضافتها بقيم افتراضية إذا كانت مفقودة
+          let needsUpdate = false;
           if (!data.customerType) {
             data.customerType = 'customer';
-            await updateDoc(userRef, { customerType: 'customer' });
+            needsUpdate = true;
+          }
+          if (!data.friends) {
+            data.friends = [];
+            needsUpdate = true;
+          }
+          if (!data.blockedUsers) {
+            data.blockedUsers = [];
+            needsUpdate = true;
+          }
+          if (data.popularity === undefined) {
+            data.popularity = 0;
+            needsUpdate = true;
+          }
+          if (data.power === undefined) {
+            data.power = 0;
+            needsUpdate = true;
+          }
+          if (!data.rank) {
+            data.rank = 'عضو';
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await updateDoc(userRef, {
+              customerType: data.customerType,
+              friends: data.friends,
+              blockedUsers: data.blockedUsers,
+              popularity: data.popularity,
+              power: data.power,
+              rank: data.rank,
+            });
           }
         } else {
-          // ✅ مستخدم جديد: نضيف customerType مع باقي الحقول
+          // ✅ مستخدم جديد: نضيف جميع الحقول المطلوبة
           data = {
             name: firebaseUser.displayName || "مستخدم جديد",
             email: firebaseUser.email,
@@ -55,6 +86,12 @@ export function AuthProvider({ children }) {
             customerType: "customer",
             avatar: firebaseUser.photoURL || "",
             createdAt: new Date(),
+            friends: [],
+            blockedUsers: [],
+            popularity: 0,
+            power: 0,
+            rank: 'عضو',
+            balance: 0,
           };
           await setDoc(userRef, data);
         }
@@ -90,9 +127,11 @@ export function AuthProvider({ children }) {
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, updates);
-      setUserData(prev => ({ ...prev, ...updates }));
+      // تحديث الحالة المحلية
+      const newData = { ...userData, ...updates };
+      setUserData(newData);
       // ✅ تحديث الـ Store أيضاً بعد التعديل
-      setStoreUserData({ ...userData, ...updates });
+      setStoreUserData(newData);
       if (updates.balance !== undefined) {
         setStoreBalance(updates.balance);
       }

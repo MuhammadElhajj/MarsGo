@@ -1,131 +1,306 @@
 /* src/components/UserComponents/Chat/ChatPage.css */
+
+/* ===== الحاوية الرئيسية ===== */
 .chat-page {
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-height: calc(100vh - 120px); /* تترك مساحة للهيدر والفوتتر */
   background-color: var(--color-bg-primary);
   border-radius: 12px;
   overflow: hidden;
 }
 
+/* ===== الهيدر (مثل واتساب) ===== */
 .chat-page__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.2rem;
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg-secondary);
   flex-shrink: 0;
+  min-height: 64px;
 }
 
 .chat-page__header h2 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
   color: var(--color-text-primary);
 }
 
-.chat-page__count {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
+.chat-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.chat-page__messages {
+.chat-page__new-chat-btn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.chat-page__new-chat-btn:hover {
+  transform: scale(1.05);
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ===== قائمة الغرف ===== */
+.chat-page__rooms-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0.75rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  padding: 0.25rem 0;
   background-color: var(--color-bg-primary);
 }
 
-.chat-page__messages::-webkit-scrollbar {
+/* تخصيص شريط التمرير */
+.chat-page__rooms-list::-webkit-scrollbar {
   width: 6px;
 }
 
-.chat-page__messages::-webkit-scrollbar-thumb {
+.chat-page__rooms-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-page__rooms-list::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: 10px;
 }
 
-.chat-page__input-area {
+.chat-page__rooms-list::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* ===== عنصر الغرفة الواحد ===== */
+.chat-page__room-item {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-top: 1px solid var(--color-border);
-  background-color: var(--color-bg-secondary);
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--color-border-light, rgba(0,0,0,0.04));
+  position: relative;
+}
+
+.chat-page__room-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+.dark .chat-page__room-item {
+  border-bottom-color: rgba(255,255,255,0.04);
+}
+
+.dark .chat-page__room-item:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+/* ===== الأفاتار ===== */
+.chat-page__room-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-primary-alpha);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.chat-page__room-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-page__room-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+/* النقطة الخضراء (الحالة) */
+.chat-page__room-status {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg-primary);
+  background-color: #31a24c;
+}
+
+.chat-page__room-status.offline {
+  background-color: #8e8e8e;
+}
+
+/* ===== معلومات الغرفة ===== */
+.chat-page__room-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-page__room-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.chat-page__room-last-msg {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== الوقت والعدد ===== */
+.chat-page__room-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
   flex-shrink: 0;
 }
 
-.chat-page__input {
-  flex: 1;
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 25px;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 0.2s;
+.chat-page__room-time {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
-.chat-page__input:focus {
-  border-color: var(--color-primary);
-}
-
-.chat-page__input:disabled {
-  opacity: 0.6;
-}
-
-.chat-page__input-area button {
-  padding: 0.6rem 1.5rem;
-  border: none;
-  border-radius: 25px;
-  background-color: var(--color-primary);
+.chat-page__room-unread {
+  background: var(--color-primary);
   color: #fff;
+  font-size: 0.65rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
 }
 
-.chat-page__input-area button:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
+/* ===== حالة فارغة ===== */
+.chat-page__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  gap: 0.5rem;
+  padding: 2rem;
+  text-align: center;
 }
 
-.chat-page__input-area button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.chat-page__empty svg {
+  font-size: 3.5rem;
+  color: var(--color-border);
 }
 
-.chat-page__login-prompt {
+.chat-page__empty p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.chat-page__empty-sub {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+/* ===== تحميل ===== */
+.chat-page__loading {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   color: var(--color-text-secondary);
-  font-size: 1.2rem;
-  padding: 2rem;
-  text-align: center;
+  font-size: 1.1rem;
 }
 
-/* استجابة الجوال */
+/* ===== استجابة للجوال ===== */
 @media (max-width: 480px) {
-  .chat-page {
-    max-height: calc(100vh - 100px);
+  .chat-page__header {
+    padding: 0.6rem 0.8rem;
+    min-height: 54px;
   }
+  
   .chat-page__header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .chat-page__new-chat-btn {
+    width: 34px;
+    height: 34px;
     font-size: 1rem;
   }
-  .chat-page__messages {
-    padding: 0.5rem;
-  }
-  .chat-page__input {
-    font-size: 0.85rem;
+  
+  .chat-page__room-item {
     padding: 0.5rem 0.8rem;
+    gap: 0.7rem;
   }
-  .chat-page__input-area button {
-    padding: 0.5rem 1rem;
+  
+  .chat-page__room-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+  
+  .chat-page__room-name {
     font-size: 0.85rem;
+  }
+  
+  .chat-page__room-last-msg {
+    font-size: 0.72rem;
+  }
+  
+  .chat-page__room-time {
+    font-size: 0.6rem;
+  }
+  
+  .chat-page__room-unread {
+    font-size: 0.55rem;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+  }
+  
+  .chat-page__empty svg {
+    font-size: 2.5rem;
+  }
+  
+  .chat-page__empty p {
+    font-size: 0.95rem;
   }
 }

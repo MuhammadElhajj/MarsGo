@@ -1,10 +1,13 @@
 // src/components/UserComponents/Chat/Message.jsx
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import './Message.css';
 
 export default function Message({ message, isOwn }) {
+  const navigate = useNavigate();
   const {
+    uid,
     displayName = 'مجهول',
     photoURL = null,
     text = '',
@@ -20,10 +23,20 @@ export default function Message({ message, isOwn }) {
 
   const initial = displayName?.charAt(0) || 'م';
 
+  const handleAvatarClick = () => {
+    if (uid && !isOwn) {
+      navigate(`/profile/${uid}`);
+    }
+  };
+
   return (
     <div className={`message ${isOwn ? 'message--own' : 'message--other'}`}>
       {/* صورة الأفاتار */}
-      <div className="message__avatar">
+      <div 
+        className="message__avatar"
+        onClick={handleAvatarClick}
+        style={{ cursor: isOwn ? 'default' : 'pointer' }}
+      >
         {photoURL ? (
           <img src={photoURL} alt={displayName} className="message__avatar-img" />
         ) : (

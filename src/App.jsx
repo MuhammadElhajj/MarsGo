@@ -8,6 +8,7 @@ import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import VerifierLayout from "./layouts/VerifierLayout/VerifierLayout";
 import Loading from "./components/GeneralComponents/Loading/Loading";
 import AdminCategories from './components/AdminCoponent/AdminCategories/AdminCategories';
+
 // ==================== صفحات العميل ====================
 const Login = lazy(() => import("./pages/User/Login/Login"));
 const Dashboard = lazy(() => import("./pages/User/Dashboard/Dashboard"));
@@ -30,6 +31,9 @@ const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePa
 const PrivacyPolicy = lazy(() => import("./pages/User/PrivacyPolicy/PrivacyPolicy"));
 import WheelPage from './components/UserComponents/WheelPage/WheelPage';
 import ChatPage from './components/UserComponents/Chat/ChatPage';
+import ChatRoom from './components/UserComponents/Chat/ChatRoom';
+const PublicProfilePage = lazy(() => import('./components/UserComponents/PublicProfile/PublicProfilePage'));
+
 // ==================== صفحات المدير (Admin) ====================
 import LeaderboardPage from './pages/User/LeaderboardPage/LeaderboardPage';
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -49,6 +53,7 @@ const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSett
 const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
 const AdminUnifiedCatalog = lazy(() => import("./pages/Admin/AdminUnifiedCatalog/AdminUnifiedCatalog"));
 const ContentManager = lazy(() => import("./components/AdminCoponent/ContentManager/ContentManager"));
+
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
@@ -58,14 +63,12 @@ const ArchiveOrders = lazy(() => import("./components/VerifierComponents/Archive
 const FinanceTopUpRequests = lazy(() => import("./pages/FinanceVerifier/FinanceTopUpRequests"));
 
 function App() {
-   const fetchProducts = useAppStore((state) => state.fetchProducts);
-
+  const fetchProducts = useAppStore((state) => state.fetchProducts);
   const { user, userData, loading, emailVerified } = useAuth();
   const listenToBalance = useAppStore((state) => state.listenToBalance);
 
-  // ✅ الاستماع لتغيرات الرصيد في الوقت الفعلي
   useEffect(() => {
-     fetchProducts(); // ✅ هذا السطر مهم جداً
+    fetchProducts();
     if (user?.uid) {
       const unsubscribe = listenToBalance(user.uid);
       return () => {
@@ -74,20 +77,19 @@ function App() {
     }
   }, [user, listenToBalance]);
 
-   // ✅ استمع لسعر الصرف (أضف هذا الكود)
   useEffect(() => {
     const unsubscribeRate = useAppStore.getState().listenToExchangeRate?.();
     return () => { if (unsubscribeRate) unsubscribeRate(); };
-  }, []); 
+  }, []);
 
   useEffect(() => {
-  const unsubscribeRate = useAppStore.getState().listenToExchangeRate?.();
-  const unsubscribeTopUp = useAppStore.getState().listenToTopUpSettings?.();
-  return () => {
-    if (unsubscribeRate) unsubscribeRate();
-    if (unsubscribeTopUp) unsubscribeTopUp();
-  };
-}, []);
+    const unsubscribeRate = useAppStore.getState().listenToExchangeRate?.();
+    const unsubscribeTopUp = useAppStore.getState().listenToTopUpSettings?.();
+    return () => {
+      if (unsubscribeRate) unsubscribeRate();
+      if (unsubscribeTopUp) unsubscribeTopUp();
+    };
+  }, []);
 
   if (loading) return <Loading />;
 
@@ -121,7 +123,7 @@ function App() {
         {/* صفحة إدخال كود التفعيل */}
         <Route path="/verify-code" element={<VerifyCodePage />} />
 
-        {/* ✅ صفحتي استعادة كلمة المرور (بدون مصادقة) - تم إخراجهما من الـ Layout */}
+        {/* صفحتي استعادة كلمة المرور (بدون مصادقة) */}
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
@@ -131,20 +133,22 @@ function App() {
           <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
-        
-        <Route path="/wheel" element={<WheelPage />} />  <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/chat/room/:roomId" element={<ChatRoom />} />
+          <Route path="/wheel" element={<WheelPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:userId" element={<PublicProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
-       
-       <Route path="/leaderboard" element={<LeaderboardPage />} />   <Route path="/about" element={<AboutPage />} />
-         <Route path="/chat" element={<ChatPage />} />
-         <Route path="/privacy-policy" element={<PrivacyPolicy />} /> <Route path="/topup" element={<TopUpPage />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/topup" element={<TopUpPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
-<Route path="/category/:categoryId" element={<CategoryProductsPage />} />
-<Route path="/category/:categoryId/:gameName" element={<CategoryProductsPage />} />
-          {/* <Route path="/game/:gameName" element={<GamePackagesPage />} /> */}
+          <Route path="/category/:categoryId" element={<CategoryProductsPage />} />
+          <Route path="/category/:categoryId/:gameName" element={<CategoryProductsPage />} />
         </Route>
 
         {/* مسارات المدير */}
@@ -158,9 +162,9 @@ function App() {
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
           <Route path="catalog" element={<AdminUnifiedCatalog />} />
           <Route path="external-store-import" element={<ExternalStoreImport />} />
-        <Route path="content/:type/:itemId" element={<ContentManager />} />
-        <Route path="/admin/categories" element={<AdminCategories />} />  <Route path="ticker" element={<AdminTicker />} />
-
+          <Route path="content/:type/:itemId" element={<ContentManager />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="ticker" element={<AdminTicker />} />
           <Route path="verifiers" element={<AdminVerifiers />} />
           <Route path="page-instructions" element={<AdminPageInstructions />} />
           <Route path="exchange-rate" element={<AdminExchangeRate />} />
