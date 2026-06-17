@@ -34,6 +34,7 @@ import WheelPage from './components/UserComponents/WheelPage/WheelPage';
 import ChatPage from './components/UserComponents/Chat/ChatPage';
 import ChatRoom from './components/UserComponents/Chat/ChatRoom';
 const PublicProfilePage = lazy(() => import('./components/UserComponents/PublicProfile/PublicProfilePage'));
+const FriendsPage  = lazy(() => import('./pages/User/FriendsPage/FriendsPage'));
 // import  PublicProfilePage from'./components/UserComponents/PublicProfile/PublicProfilePage';
 
 // ==================== صفحات المدير (Admin) ====================
@@ -147,7 +148,8 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/chat" element={<ChatPage />} />
+        
+        <Route path="/friends" element={<FriendsPage />} />  <Route path="/chat" element={<ChatPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/topup" element={<TopUpPage />} />
           <Route path="/catalog" element={<CatalogPage />} />

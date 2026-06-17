@@ -23,17 +23,15 @@
   font-weight: 700;
   margin: 0;
   color: var(--color-text-primary);
-  /* border-right: 4px solid var(--color-accent); */
   padding-right: 1rem;
-  order: 2; /* لضمان ظهوره في اليسار عند استخدام space-between مع RTL */
+  order: 2;
 }
 
-/* زر الرجوع يبقى في اليمين */
 .profile-page__header .go-back-btn {
   order: 1;
 }
 
-/* ========== كارد الأفاتار - صورة في اليمين، نص في اليسار ========== */
+/* ========== كارد الأفاتار ========== */
 .profile-page__avatar-card {
   background: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
@@ -52,14 +50,12 @@
   align-items: center;
   gap: 2rem;
   flex-wrap: wrap;
-  /* في RTL، الصورة تظهر في اليمين تلقائياً لأنها العنصر الأول */
 }
 
 .profile-page__avatar-image {
   flex-shrink: 0;
 }
 
-/* حجم الأفاتار كبير */
 .profile-page__avatar-image .avatar--xl {
   width: 100px;
   height: 100px;
@@ -84,7 +80,7 @@
   word-break: break-all;
 }
 
-/* ========== الشبكة (3 أعمدة) ========== */
+/* ========== الشبكة ========== */
 .profile-page__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -177,7 +173,6 @@
     font-size: 1.4rem;
   }
   .profile-page__avatar-row {
-  
     text-align: center;
     gap: 1rem;
   }
@@ -187,7 +182,6 @@
   .profile-page__email {
     font-size: 0.9rem;
   }
-  /* في الجوال، الترتيب العمودي لا يحتاج تبديل جهات */
 }
 
 @media (max-width: 480px) {
@@ -225,30 +219,30 @@
   display: inline-block;
   background-color: #10b981;
   color: white;
-  font-size: 0.8rem;
-  width: 1.4rem;
-  height: 1.4rem;
+  font-size: 0.7rem;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   text-align: center;
-  line-height: 1.4rem;
+  line-height: 18px;
   margin-right: 0.5rem;
+  vertical-align: middle;
   box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
 }
 
-/* عند تعطيل الحقل (وضع القراءة فقط) */
+/* عند تعطيل الحقل */
 .input--readonly {
   background-color: var(--color-bg-primary);
   cursor: default;
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
-/* أزرار الواتساب في صف */
+/* أزرار الواتساب */
 .profile-page__whatsapp-buttons {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
-
 .profile-page__whatsapp-buttons .btn {
   flex: 1;
 }
@@ -259,54 +253,7 @@
   }
 }
 
-/* علامة صح بجانب العنوان */
-.profile-page__saved-badge {
-  display: inline-block;
-  background-color: #10b981;
-  color: white;
-  font-size: 0.7rem;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 18px;
-  margin-right: 0.5rem;
-  vertical-align: middle;
-}
-
-/* مجموعة أزرار الواتساب */
-.profile-page__whatsapp-buttons {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.profile-page__whatsapp-buttons .btn {
-  flex: 1;
-}
-
-/* تنسيق الحقل عند تعطيله (وضع القراءة فقط) */
-.input--readonly {
-  background-color: var(--color-bg-primary);
-  cursor: default;
-  opacity: 0.8;
-}
-
-/* ProfilePage.css - إضافة تنسيقات الكروت الجديدة */
-
-.profile-page__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  align-items: stretch;
-}
-
-/* كارد قد يمتد على عمودين إذا أردنا (اختياري) */
-.profile-page__card--wide {
-  grid-column: span 1; /* افتراضي، يمكن تعديله لاحقاً */
-}
-
-/* إجمالي الإنفاق */
+/* ========== تنسيقات الكروت الأخرى ========== */
 .profile-page__total-spent {
   text-align: center;
   padding: 0.5rem 0;
@@ -328,7 +275,6 @@
   margin-top: 0.5rem;
 }
 
-/* الإشعارات */
 .profile-page__notifications {
   text-align: center;
   padding: 0.5rem 0;
@@ -418,48 +364,7 @@
   font-size: 0.8rem;
 }
 
-/* علامة صح */
-.profile-page__saved-badge {
-  display: inline-block;
-  background-color: #10b981;
-  color: white;
-  font-size: 0.7rem;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 18px;
-  margin-right: 0.5rem;
-  vertical-align: middle;
-}
-
-/* أزرار الواتساب */
-.profile-page__whatsapp-buttons {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-.profile-page__whatsapp-buttons .btn {
-  flex: 1;
-}
-.input--readonly {
-  background-color: var(--color-bg-primary);
-  cursor: default;
-  opacity: 0.8;
-}
-
-/* استجابة للشاشات الصغيرة */
-@media (max-width: 768px) {
-  .profile-page__grid {
-    gap: 1rem;
-  }
-  .profile-page__order-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* تنسيق قسم الرصيد وزر الإيداع */
+/* قسم الرصيد وزر الإيداع */
 .profile-page__balance-section {
   margin-top: 1rem;
   padding-top: 0.5rem;
@@ -479,7 +384,6 @@
   color: var(--color-accent);
 }
 
-/* على الشاشات الصغيرة ، نجعل المحتوى عمودياً */
 @media (max-width: 640px) {
   .profile-page__avatar-row {
     text-align: center;
@@ -503,4 +407,57 @@
   .profile-page__balance-section {
     width: 100%;
   }
+}
+
+/* ✅ تنسيقات كارد الأصدقاء الجديد */
+.profile-page__friend-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.friend-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.friend-btn:hover {
+  background: var(--color-accent);
+  color: white;
+  border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.friend-btn--requests {
+  /* يمكن إضافة لون مميز لاحقاً */
+}
+
+.friend-btn__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e53935;
+  color: white;
+  border-radius: 50%;
+  min-width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }

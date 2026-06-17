@@ -1,12 +1,12 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Link موجود مسبقاً
 import { 
   FaUser, FaCalendarAlt, FaBox, FaDollarSign, FaBell, FaWhatsapp, 
   FaEdit, FaSave, FaCheckCircle, FaInbox, FaTrophy, FaList, FaWallet,
-  FaArrowLeft, FaDownload, FaHistory
+  FaArrowLeft, FaDownload, FaHistory, FaUserFriends, FaUserPlus  // أضفت أيقونات الأصدقاء
 } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
-import { useAppStore } from '../../../store/store'; // ✅ استيراد الـ store المركزي
+import { useAppStore } from '../../../store/store';
 import useUserStats from '../../../hooks/useUserStats';
 import useUserSpending from '../../../hooks/useUserSpending';
 import SpendingProgress from '../../../components/UserComponents/SpendingProgress/SpendingProgress';
@@ -32,8 +32,8 @@ export default function ProfilePage() {
   const { totalSpent, loading: spendingLoading } = useUserSpending();
   const { formatPrice } = useFormattedPrice();
   
-  // ✅ استخدام الـ store المركزي بدلاً من السياقات المحذوفة
   const unreadCount = useAppStore((state) => state.unreadCount);
+  const pendingRequestsCount = useAppStore((state) => state.pendingRequestsCount); // ✅ عدد طلبات الصداقة
 
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentOrdersLoading, setRecentOrdersLoading] = useState(true);
@@ -127,7 +127,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* قسم رصيد الحساب وزر الإيداع - يظهر أسفل الاسم والبريد مباشرة */}
         <div className="profile-page__balance-section">
           <div className="balance-container">
             <BalanceDisplay />
@@ -221,6 +220,22 @@ export default function ProfilePage() {
               )}
             </div>
             <Link to="/notifications" className="profile-page__link">عرض الإشعارات →</Link>
+          </div>
+        </div>
+
+        {/* ✅ كارد الأصدقاء وطلبات الصداقة الجديد */}
+        <div className="profile-page__card">
+          <h3><FaUserFriends /> الأصدقاء</h3>
+          <div className="profile-page__friend-buttons">
+            <Link to="/friends" className="friend-btn">
+              <FaUserFriends /> الأصدقاء
+            </Link>
+            <Link to="/friends?tab=requests" className="friend-btn friend-btn--requests">
+              <FaUserPlus /> طلبات الصداقة
+              {pendingRequestsCount > 0 && (
+                <span className="friend-btn__badge">{pendingRequestsCount}</span>
+              )}
+            </Link>
           </div>
         </div>
       </div>
