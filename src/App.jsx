@@ -33,6 +33,7 @@ import WheelPage from './components/UserComponents/WheelPage/WheelPage';
 import ChatPage from './components/UserComponents/Chat/ChatPage';
 import ChatRoom from './components/UserComponents/Chat/ChatRoom';
 const PublicProfilePage = lazy(() => import('./components/UserComponents/PublicProfile/PublicProfilePage'));
+// import  PublicProfilePage from'./components/UserComponents/PublicProfile/PublicProfilePage';
 
 // ==================== صفحات المدير (Admin) ====================
 import LeaderboardPage from './pages/User/LeaderboardPage/LeaderboardPage';

@@ -5,12 +5,11 @@ import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
 import { 
   collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
-  doc, updateDoc, where 
+  doc, updateDoc, where, getDoc, increment
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 import Message from './Message';
-import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
 import { FiArrowLeft, FiSend, FiSmile, FiPaperclip } from 'react-icons/fi';
 import './ChatRoom.css';
 
@@ -38,14 +37,25 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // جلب بيانات الغرفة
+  // جلب بيانات الغرفة ومسح العداد
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !uid) return;
 
     const roomRef = doc(db, 'rooms', roomId);
-    const unsubscribe = onSnapshot(roomRef, (docSnap) => {
+    const unsubscribe = onSnapshot(roomRef, async (docSnap) => {
       if (docSnap.exists()) {
-        setRoom({ id: docSnap.id, ...docSnap.data() });
+        const roomData = docSnap.data();
+        setRoom({ id: docSnap.id, ...roomData });
+
+        if (roomData.unreadCount && roomData.unreadCount[uid] !== undefined) {
+          try {
+            await updateDoc(roomRef, {
+              [`unreadCount.${uid}`]: 0
+            });
+          } catch (err) {
+            console.warn('فشل مسح العداد:', err);
+          }
+        }
       } else {
         toast.error('الغرفة غير موجودة');
         navigate('/chat');
@@ -57,7 +67,7 @@ export default function ChatRoom() {
     });
 
     return () => unsubscribe();
-  }, [roomId, navigate]);
+  }, [roomId, navigate, uid]);
 
   // جلب رسائل الغرفة
   useEffect(() => {
@@ -109,10 +119,21 @@ export default function ChatRoom() {
       });
 
       const roomRef = doc(db, 'rooms', roomId);
-      await updateDoc(roomRef, {
-        lastMessage: newMessage.trim(),
-        lastMessageTime: serverTimestamp(),
-      });
+      const roomSnap = await getDoc(roomRef);
+      if (roomSnap.exists()) {
+        const roomData = roomSnap.data();
+        const members = roomData.members || [];
+        const updates = {
+          lastMessage: newMessage.trim(),
+          lastMessageTime: serverTimestamp(),
+        };
+        members.forEach(memberId => {
+          if (memberId !== uid) {
+            updates[`unreadCount.${memberId}`] = increment(1);
+          }
+        });
+        await updateDoc(roomRef, updates);
+      }
 
       setNewMessage('');
       inputRef.current?.focus();
@@ -126,7 +147,6 @@ export default function ChatRoom() {
 
   if (!room) return <div className="chat-room-loading">جاري تحميل المحادثة...</div>;
 
-  // تحديد اسم الغرفة
   let roomName = room.name;
   let roomSubtitle = '';
   if (room.type === 'global') {
@@ -176,31 +196,32 @@ export default function ChatRoom() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ===== منطقة الإدخال ===== */}
+      {/* ===== منطقة الإدخال (تصميم واتساب) ===== */}
       <form className="chat-room__input-area" onSubmit={sendMessage}>
         <button type="button" className="chat-room__emoji-btn" title="إيموجي">
-          <FiSmile size={20} />
-        </button>
-        <button type="button" className="chat-room__attach-btn" title="مرفق">
-          <FiPaperclip size={20} />
+          <FiSmile size={22} />
         </button>
         <div className="chat-room__input-wrapper">
           <input
             ref={inputRef}
             type="text"
-            placeholder="اكتب رسالتك..."
+            placeholder="اكتب رسالة..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             disabled={sending}
             className="chat-room__input"
           />
+          <button 
+            type="submit" 
+            className="chat-room__send-btn" 
+            disabled={sending || !newMessage.trim()}
+            title="إرسال"
+          >
+            <FiSend size={20} />
+          </button>
         </div>
-        <button 
-          type="submit" 
-          className="chat-room__send-btn" 
-          disabled={sending || !newMessage.trim()}
-        >
-          <FiSend size={20} />
+        <button type="button" className="chat-room__attach-btn" title="مرفق">
+          <FiPaperclip size={20} />
         </button>
       </form>
     </div>

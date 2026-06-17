@@ -24,6 +24,7 @@ export default function Message({ message, isOwn }) {
   const initial = displayName?.charAt(0) || 'م';
 
   const handleAvatarClick = () => {
+    console.log('🖱️ uid من الرسالة:', uid);
     if (uid && !isOwn) {
       navigate(`/profile/${uid}`);
     }

@@ -16,6 +16,7 @@ export default function Layout() {
 
   // تحديد صفحة الدردشة لإخفاء الفوتر
   const location = useLocation();
+ const isChatRoom = location.pathname.startsWith('/chat/room/');
   const isChatPage = location.pathname.startsWith('/chat');
   // حالات حجم الشاشة
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -57,7 +58,8 @@ export default function Layout() {
 
       {/* شريط البحث – يظهر فقط على الجوال */}
       <div className="layout__search-mobile">
-        <Search placeholder="ابحث عن خدمة، لعبة، تطبيق، طلب..." />
+        {/* <Search placeholder="ابحث عن خدمة، لعبة، تطبيق، طلب..." /> */}
+        {!isChatPage && <Search placeholder="ابحث عن خدمة، لعبة، تطبيق، طلب..." />} 
       </div>
 
       <div className="app-body">
@@ -72,7 +74,7 @@ export default function Layout() {
 
         {/* ===== المحتوى الأساسي + الفوتر ===== */}
         <div className="app-content-wrapper">
-          <main className="app-content">
+          <main className={`app-content ${isChatPage ? 'chat-page-layout' : ''}`}>
             <Outlet />
           </main>
           {!isChatPage && <Footer />}
@@ -84,7 +86,7 @@ export default function Layout() {
       </div>
 
       {/* ===== الشريط السفلي للجوال (يحل محل الثانوي) ===== */}
-      {isMobile && <MobileNav />}
+    {isMobile && !isChatRoom && <MobileNav />}
     </div>
   );
 }

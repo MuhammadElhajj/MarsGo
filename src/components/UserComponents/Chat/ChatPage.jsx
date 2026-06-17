@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
-import { collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useNavigate } from 'react-router-dom';
-import { FiMessageCircle, FiPlus } from 'react-icons/fi';
+import { FiMessageCircle, FiPlus, FiUsers } from 'react-icons/fi';
 import './ChatPage.css';
 
 export default function ChatPage() {
@@ -23,7 +23,7 @@ export default function ChatPage() {
 
   const uid = user?.uid || userData?.uid || null;
 
-  // دالة لإنشاء الغرفة العامة (global) إذا لم تكن موجودة
+  // دالة لإنشاء الغرفة العامة
   const ensureGlobalRoom = async () => {
     try {
       const q = query(collection(db, 'rooms'), where('type', '==', 'global'));
@@ -37,6 +37,7 @@ export default function ChatPage() {
           lastMessageTime: serverTimestamp(),
           createdAt: serverTimestamp(),
           imageUrl: null,
+          unreadCount: {},
         });
         console.log('✅ تم إنشاء الغرفة العامة');
       }
@@ -45,7 +46,7 @@ export default function ChatPage() {
     }
   };
 
-  // جلب بيانات المستخدمين الآخرين (للعرض في الغرف الخاصة)
+  // جلب بيانات المستخدمين الآخرين
   const fetchUsersData = async (userIds) => {
     try {
       const users = {};
@@ -65,11 +66,8 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!uid) return;
-
-    // التأكد من وجود الغرفة العامة
     ensureGlobalRoom();
 
-    // جلب الغرف الخاصة والعشائر (التي تحتوي على uid في members)
     const roomsRef = collection(db, 'rooms');
     const privateQuery = query(
       roomsRef,
@@ -83,7 +81,6 @@ export default function ChatPage() {
         ...doc.data(),
       }));
 
-      // جلب الغرفة العامة بشكل منفصل (بغض النظر عن members)
       try {
         const globalQuery = query(collection(db, 'rooms'), where('type', '==', 'global'));
         const globalSnap = await getDocs(globalQuery);
@@ -92,14 +89,13 @@ export default function ChatPage() {
           globalRoom = { id: globalSnap.docs[0].id, ...globalSnap.docs[0].data() };
         }
 
-        // دمج القوائم: نضع الغرفة العامة في البداية إذا كانت موجودة
         let roomsList = [];
         if (globalRoom) {
           roomsList.push(globalRoom);
         }
         roomsList = [...roomsList, ...privateRooms];
 
-        // جمع الـ userIds من الغرف الخاصة لعرض أسمائهم
+        // جلب بيانات المستخدمين
         const privateRoomsList = roomsList.filter(r => r.type === 'private');
         const userIds = privateRoomsList.flatMap(r => r.members || []).filter(id => id !== uid);
         if (userIds.length > 0) {
@@ -125,9 +121,7 @@ export default function ChatPage() {
     navigate(`/chat/room/${roomId}`);
   };
 
-  // فتح مودال لبدء محادثة جديدة (سيتم تنفيذه لاحقاً)
   const handleNewChat = () => {
-    // TODO: فتح مودال لاختيار مستخدم لبدء محادثة خاصة
     alert('سيتم فتح مودال لبدء محادثة جديدة قريباً');
   };
 
@@ -136,7 +130,13 @@ export default function ChatPage() {
   return (
     <div className="chat-page">
       <div className="chat-page__header">
-        <h2>المحادثات</h2>
+        {/* ✅ إضافة أيقونة/شعار الدردشة */}
+        <div className="chat-page__header-left">
+          <div className="chat-page__header-avatar">
+            <FiMessageCircle size={24} />
+          </div>
+          <h2>المحادثات</h2>
+        </div>
         <button className="chat-page__new-chat-btn" onClick={handleNewChat}>
           <FiPlus size={22} />
         </button>
@@ -153,10 +153,11 @@ export default function ChatPage() {
           {rooms.map((room) => {
             let displayName = room.name || 'محادثة';
             let imageUrl = room.imageUrl || null;
+            let unreadCount = room.unreadCount?.[uid] || 0;
 
             if (room.type === 'global') {
               displayName = 'الدردشة العامة';
-              imageUrl = null; // نستخدم الأفاتار الافتراضي
+              imageUrl = null;
             } else if (room.type === 'private') {
               const otherMemberId = room.members?.find(m => m !== uid);
               if (otherMemberId && usersMap[otherMemberId]) {
@@ -185,6 +186,7 @@ export default function ChatPage() {
                       {displayName.charAt(0).toUpperCase()}
                     </span>
                   )}
+                  {/* ✅ نقطة حالة (أخضر/رمادي) اختيارية */}
                 </div>
                 <div className="chat-page__room-info">
                   <div className="chat-page__room-name">{displayName}</div>
@@ -192,9 +194,15 @@ export default function ChatPage() {
                     {room.lastMessage || 'لا توجد رسائل بعد'}
                   </div>
                 </div>
-                <div className="chat-page__room-time">
-                  {room.lastMessageTime?.toDate?.()
-                    ?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
+                <div className="chat-page__room-meta">
+                  <div className="chat-page__room-time">
+                    {room.lastMessageTime?.toDate?.()
+                      ?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
+                  </div>
+                  {/* ✅ عداد الرسائل غير المقروءة */}
+                  {unreadCount > 0 && (
+                    <div className="chat-page__room-unread">{unreadCount}</div>
+                  )}
                 </div>
               </div>
             );

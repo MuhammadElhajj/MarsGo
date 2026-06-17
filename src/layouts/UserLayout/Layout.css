@@ -330,3 +330,40 @@
     position: relative;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========== باقي التنسيقات الموجودة ========== */
+/* ... (كل ما لديك) ... */
+
+/* ===== تنسيق خاص لصفحات الدردشة ===== */
+.app-content.chat-page-layout {
+  padding: 0 !important;        /* إزالة الهوامش */
+  overflow: hidden !important;  /* منع التمرير الزائد */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ✅ في الجوال أيضاً */
+@media (max-width: 768px) {
+  .app-content.chat-page-layout {
+    padding: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
