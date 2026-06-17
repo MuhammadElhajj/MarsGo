@@ -1,0 +1,169 @@
+/* src/pages/User/BuyMGC/BuyMGC.css */
+.buy-mgc {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.buy-mgc__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.buy-mgc__header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* ✅ بطاقة الرصيد الدولاري */
+.buy-mgc__balance-card {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  margin: 0.5rem 0 1.5rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.balance-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.balance-label {
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.balance-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+.balance-hint {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin: 0;
+}
+
+.buy-mgc__subtitle {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+.buy-mgc__packages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.buy-mgc__card {
+  background: var(--color-bg-secondary);
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.buy-mgc__card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.buy-mgc__mgc {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.mgc-icon {
+  color: var(--color-accent);
+  font-size: 2rem;
+}
+
+.buy-mgc__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.price-amount {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.price-discount {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+}
+
+.buy-mgc__per-mgc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.buy-mgc__btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.buy-mgc__note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border);
+}
+
+@media (max-width: 480px) {
+  .buy-mgc__packages {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .buy-mgc__mgc {
+    font-size: 1.8rem;
+  }
+  .price-amount {
+    font-size: 1.5rem;
+  }
+  .buy-mgc__balance-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.8rem 1rem;
+  }
+  .balance-amount {
+    font-size: 1.2rem;
+  }
+}

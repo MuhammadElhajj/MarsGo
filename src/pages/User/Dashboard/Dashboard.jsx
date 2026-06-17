@@ -17,7 +17,7 @@ const RecentlyViewed = lazy(() => import("../../../components/UserComponents/Rec
 import PaymentMethods from '../../../components/UserComponents/PaymentMethods/PaymentMethods';
 // Lazy imports
 import CatalogSection from '../../../components/Generic/CatalogSection/CatalogSection';
-
+import QuickActions from '../../../components/UserComponents/QuickActions/QuickActions';
 const HowItWorks = lazy(() => import("../../../components/UserComponents/HowItWorks/HowItWorks"));
 const AdSpace = lazy(() => import("../../../components/UserComponents/AdSpace/AdSpace"));
 const UserStatsGrid = lazy(() => import("../../../components/UserComponents/UserStatsGrid/UserStatsGrid"));
@@ -124,8 +124,8 @@ export default function Dashboard() {
         />
       </div>
 
-      <PaymentMethods/>
-
+      {/* <PaymentMethods/> */}
+<QuickActions />
       {/* يمكن الاحتفاظ بـ SpendingProgress إذا أردت، أو إزالته */}
       {/* <SpendingProgress /> */}
 
@@ -190,12 +190,12 @@ export default function Dashboard() {
       <StoreIntro />
     
       {/* باقي المحتوى */}
-      <div className="dashboard__services">
+      {/* <div className="dashboard__services">
         <h3 className="dashboard__services-title">خدماتنا الرقمية</h3>
         <Suspense fallback={<Loading text="جاري تحميل الخدمات..." />}>
           <ServicesGrid />
         </Suspense>
-      </div>
+      </div> */}
 <Suspense fallback={<Loading text="جاري تحميل المزيد..." />}>
   <WhyChooseUs />
 </Suspense>

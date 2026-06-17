@@ -20,6 +20,73 @@ const WHEEL_SEGMENTS = [
   { value: 500, weight: 0.2 },
 ];
 
+// ===== ماكينة الحظ (الجوائز) =====
+const MACHINE_REWARDS = [
+  { label: 'لا شيء', value: 0, weight: 30, isFail: true },
+  { label: '1 MGC', value: 1, weight: 15 },
+  { label: '2 MGC', value: 2, weight: 12 },
+  { label: '3 MGC', value: 3, weight: 10 },
+  { label: '5 MGC', value: 5, weight: 8 },
+  { label: '8 MGC', value: 8, weight: 6 },
+  { label: '10 MGC', value: 10, weight: 5 },
+  { label: '15 MGC', value: 15, weight: 3 },
+  { label: '20 MGC', value: 20, weight: 2 },
+  { label: '50 MGC', value: 50, weight: 1 },
+  { label: 'خصم 5%', value: 0, weight: 3, isCoupon: true, couponValue: 5 },
+  { label: 'خصم 10%', value: 0, weight: 2, isCoupon: true, couponValue: 10 },
+  { label: '+50 XP', value: 0, weight: 2, isXP: true, xpValue: 50 },
+  { label: '+100 XP', value: 0, weight: 1, isXP: true, xpValue: 100 },
+  { label: 'كوبون 1$', value: 0, weight: 1, isFreeCoupon: true, couponAmount: 1 },
+  { label: 'كوبون 2$', value: 0, weight: 0.5, isFreeCoupon: true, couponAmount: 2 },
+  { label: 'كوبون 5$', value: 0, weight: 0.2, isFreeCoupon: true, couponAmount: 5 },
+  { label: 'لقب جديد', value: 0, weight: 0.3, isTitle: true },
+];
+
+// ===== جوائز التعويض (بعد سحبين فاشلين) =====
+const PITY_REWARDS = [
+  { label: 'خصم 10%', isCoupon: true, couponValue: 10, weight: 25 },
+  { label: '+100 XP', isXP: true, xpValue: 100, weight: 25 },
+  { label: 'كوبون 1$', isFreeCoupon: true, couponAmount: 1, weight: 20 },
+  { label: 'كوبون 2$', isFreeCoupon: true, couponAmount: 2, weight: 15 },
+  { label: 'كوبون 5$', isFreeCoupon: true, couponAmount: 5, weight: 10 },
+  { label: 'لقب نادر', isTitle: true, weight: 5 },
+];
+
+// ===== ألقاب المستويات =====
+const LEVEL_TITLES = {
+  1: 'مبتدئ',
+  2: 'مستكشف',
+  3: 'مغامر',
+  4: 'الشاطر',
+  5: 'بطل',
+  6: 'أسطورة',
+  7: 'محارب',
+  8: 'الحاج',
+  9: 'سيد',
+  10: 'ملكي',
+};
+
+// ===== دوال مساعدة =====
+function getRandomReward(rewardsArray) {
+  const totalWeight = rewardsArray.reduce((sum, r) => sum + r.weight, 0);
+  let random = Math.random() * totalWeight;
+  for (const reward of rewardsArray) {
+    random -= reward.weight;
+    if (random <= 0) return reward;
+  }
+  return rewardsArray[0];
+}
+
+function calculateLevel(xp) {
+  return Math.floor(Math.sqrt(xp / 100)) + 1;
+}
+
+function getTitleByLevel(level) {
+  return LEVEL_TITLES[level] || LEVEL_TITLES[1];
+}
+
+// =====================================================
+// ===== الـ Store الرئيسي =====
 export const useAppStore = create(
   persist(
     (set, get) => ({
@@ -27,28 +94,39 @@ export const useAppStore = create(
       user: null,
       userData: null,
       setUser: (user) => set({ user }),
+
+      // ========== الرصيد الحقيقي (المودع) ==========
+      balance: 0,                         // ✅ الرصيد الحقيقي بالدولار
+      setBalance: (balance) => set({ balance }),
+
+      // ========== رصيد عملات MGC ==========
+      mgcBalance: 0,
+      setMgcBalance: (mgcBalance) => set({ mgcBalance }),
+
+      // ===== تحديث بيانات المستخدم (يستخدم في AuthContext) =====
       setUserData: (data) => set({
         userData: data,
         user: data?.user || data,
-        balance: data?.balance || 0,
+        balance: data?.balance || 0,          // الرصيد الحقيقي
+        mgcBalance: data?.mgcBalance || 0,    // رصيد MGC
       }),
+
       setUserFull: (userData) => set({
         user: userData,
         userData: userData,
         balance: userData?.balance || 0,
+        mgcBalance: userData?.mgcBalance || 0,
       }),
 
-      // ========== الرصيد ==========
-      balance: 0,
-      setBalance: (balance) => set({ balance }),
-
+      // ===== الاستماع لتحديثات الرصيد =====
       listenToBalance: (userId) => {
         if (!userId) return () => {};
         const userRef = doc(db, 'users', userId);
         const unsubscribe = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
-            const newBalance = docSnap.data().balance || 0;
-            get().setBalance(newBalance);
+            const data = docSnap.data();
+            get().setBalance(data.balance || 0);        // الرصيد الحقيقي
+            get().setMgcBalance(data.mgcBalance || 0);  // رصيد MGC
           }
         }, (error) => {
           console.error('خطأ في الاستماع للرصيد:', error);
@@ -56,41 +134,76 @@ export const useAppStore = create(
         return unsubscribe;
       },
 
-      // ===== دالة الخصم (للـ MGC) =====
-      deductBalance: async (amountMGC) => {
+      // ===== دوال إدارة الرصيد الحقيقي (balance) =====
+      addBalance: async (userId, amountUSD) => {
+        if (amountUSD <= 0) return false;
+        try {
+          const userRef = doc(db, 'users', userId);
+          await updateDoc(userRef, { balance: increment(amountUSD) });
+          const { balance, setBalance } = get();
+          setBalance(balance + amountUSD);
+          toast.success(`تم إضافة ${amountUSD.toFixed(2)} $ إلى رصيدك الحقيقي`);
+          return true;
+        } catch (error) {
+          console.error('فشل إضافة الرصيد الحقيقي:', error);
+          toast.error('حدث خطأ أثناء إضافة الرصيد');
+          return false;
+        }
+      },
+
+      deductBalance: async (amountUSD) => {
         const { user, balance, setBalance } = get();
-        if (balance < amountMGC) {
-          toast.error(`رصيد غير كافٍ، تحتاج ${amountMGC} MGC`);
+        if (balance < amountUSD) {
+          toast.error(`رصيد حقيقي غير كافٍ! تحتاج ${amountUSD.toFixed(2)} $`);
           return false;
         }
         try {
           const userRef = doc(db, 'users', user.uid);
-          await updateDoc(userRef, { balance: increment(-amountMGC) });
-          setBalance(balance - amountMGC);
-          toast.success(`تم خصم ${amountMGC.toFixed(2)} MGC من رصيدك`);
+          await updateDoc(userRef, { balance: increment(-amountUSD) });
+          setBalance(balance - amountUSD);
+          toast.success(`تم خصم ${amountUSD.toFixed(2)} $ من رصيدك الحقيقي`);
           return true;
         } catch (error) {
-          console.error('فشل الخصم:', error);
+          console.error('فشل خصم الرصيد الحقيقي:', error);
           toast.error('حدث خطأ أثناء خصم الرصيد');
           return false;
         }
       },
 
-      // ===== دالة إضافة الرصيد (للـ MGC) =====
-      addBalance: async (userId, amountMGC) => {
+      // ===== دوال إدارة رصيد MGC =====
+      addMgcBalance: async (userId, amountMGC) => {
         if (amountMGC <= 0) return false;
         try {
           const userRef = doc(db, 'users', userId);
-          await updateDoc(userRef, { balance: increment(amountMGC) });
-          const { user, balance, setBalance } = get();
-          if (user && user.uid === userId) {
-            setBalance(balance + amountMGC);
+          await updateDoc(userRef, { mgcBalance: increment(amountMGC) });
+          const { mgcBalance, setMgcBalance } = get();
+          if (get().user && get().user.uid === userId) {
+            setMgcBalance(mgcBalance + amountMGC);
           }
           toast.success(`تم إضافة ${amountMGC.toFixed(2)} MGC إلى رصيدك`);
           return true;
         } catch (error) {
-          console.error('فشل إضافة الرصيد:', error);
-          toast.error('حدث خطأ أثناء إضافة الرصيد');
+          console.error('فشل إضافة رصيد MGC:', error);
+          toast.error('حدث خطأ أثناء إضافة رصيد MGC');
+          return false;
+        }
+      },
+
+      deductMgcBalance: async (amountMGC) => {
+        const { user, mgcBalance, setMgcBalance } = get();
+        if (mgcBalance < amountMGC) {
+          toast.error(`رصيد MGC غير كافٍ! تحتاج ${amountMGC} MGC`);
+          return false;
+        }
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          await updateDoc(userRef, { mgcBalance: increment(-amountMGC) });
+          setMgcBalance(mgcBalance - amountMGC);
+          toast.success(`تم خصم ${amountMGC.toFixed(2)} MGC من رصيدك`);
+          return true;
+        } catch (error) {
+          console.error('فشل خصم رصيد MGC:', error);
+          toast.error('حدث خطأ أثناء خصم رصيد MGC');
           return false;
         }
       },
@@ -100,14 +213,19 @@ export const useAppStore = create(
         return balance;
       },
 
-      // ===== دالة الدولاب =====
+      getMgcBalance: () => {
+        const { mgcBalance } = get();
+        return mgcBalance;
+      },
+
+      // ===== دالة الدولاب (تستخدم MGC) =====
       spinWheel: async () => {
-        const { user, balance, deductBalance, addBalance } = get();
+        const { user, mgcBalance, deductMgcBalance, addMgcBalance } = get();
         const SPIN_COST = 0.25;
 
-        if (balance < SPIN_COST) {
-          toast.error(`رصيد غير كافٍ! تحتاج ${SPIN_COST} MGC`);
-          return { success: false, prize: null, index: -1, message: 'رصيد غير كافٍ' };
+        if (mgcBalance < SPIN_COST) {
+          toast.error(`رصيد MGC غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+          return { success: false, prize: null, index: -1, message: 'رصيد MGC غير كافٍ' };
         }
 
         const getRandomIndex = () => {
@@ -123,13 +241,13 @@ export const useAppStore = create(
         const selectedIndex = getRandomIndex();
         const prize = WHEEL_SEGMENTS[selectedIndex].value;
 
-        const deductSuccess = await deductBalance(SPIN_COST);
+        const deductSuccess = await deductMgcBalance(SPIN_COST);
         if (!deductSuccess) {
           return { success: false, prize: null, index: -1, message: 'فشل الخصم' };
         }
 
         if (prize > 0) {
-          const addSuccess = await addBalance(user.uid, prize);
+          const addSuccess = await addMgcBalance(user.uid, prize);
           if (!addSuccess) {
             toast.error('فشل إضافة الجائزة، يرجى التواصل مع الدعم');
             return { success: false, prize: null, index: -1, message: 'فشل إضافة الجائزة' };
@@ -261,7 +379,6 @@ export const useAppStore = create(
             timestamp: serverTimestamp(),
           });
 
-          // تحديث آخر رسالة في الغرفة
           const roomRef = doc(db, 'rooms', roomId);
           await updateDoc(roomRef, {
             lastMessage: text.trim(),
@@ -323,7 +440,116 @@ export const useAppStore = create(
         return true;
       },
 
-      // ========== باقي الدوال كما هي ==========
+      // ===== ماكينة الحظ الجديدة (تستخدم MGC) =====
+      pullMachine: async () => {
+        const { user, mgcBalance, deductMgcBalance, addMgcBalance, userData } = get();
+        const SPIN_COST = 75;
+
+        if (mgcBalance < SPIN_COST) {
+          toast.error(`رصيد MGC غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+          return { success: false, error: 'رصيد MGC غير كافٍ' };
+        }
+
+        let pityCounter = userData?.pityCounter || 0;
+
+        let reward = getRandomReward(MACHINE_REWARDS);
+        let isPity = false;
+
+        if (reward.isFail) {
+          pityCounter++;
+        } else {
+          pityCounter = 0;
+        }
+
+        if (pityCounter >= 2) {
+          reward = getRandomReward(PITY_REWARDS);
+          pityCounter = 0;
+          isPity = true;
+        }
+
+        const deductSuccess = await deductMgcBalance(SPIN_COST);
+        if (!deductSuccess) {
+          return { success: false, error: 'فشل الخصم' };
+        }
+
+        let prizeMessage = '';
+        let prizeValue = 0;
+        let xpGained = 0;
+
+        if (reward.isCoupon) {
+          const coupon = {
+            code: `DISCOUNT${Date.now()}`,
+            value: reward.couponValue,
+            expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+          };
+          await updateDoc(doc(db, 'users', user.uid), {
+            coupons: [...(userData?.coupons || []), coupon],
+          });
+          prizeMessage = `🎫 كوبون خصم ${reward.couponValue}%!`;
+        } else if (reward.isFreeCoupon) {
+          const coupon = {
+            code: `FREE${Date.now()}`,
+            amount: reward.couponAmount,
+            expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+          };
+          await updateDoc(doc(db, 'users', user.uid), {
+            freeCoupons: [...(userData?.freeCoupons || []), coupon],
+          });
+          prizeMessage = `🎁 كوبون شراء مجاني بقيمة ${reward.couponAmount}$!`;
+        } else if (reward.isXP) {
+          xpGained = reward.xpValue;
+          const newXP = (userData?.xp || 0) + xpGained;
+          const newLevel = calculateLevel(newXP);
+          const newTitle = getTitleByLevel(newLevel);
+          await updateDoc(doc(db, 'users', user.uid), {
+            xp: newXP,
+            level: newLevel,
+            title: newTitle,
+          });
+          prizeMessage = `⭐ +${xpGained} XP! المستوى ${newLevel} (${newTitle})`;
+        } else if (reward.isTitle) {
+          const specialTitles = ['الذهبي', 'الفضي', 'البرونزي', 'الماسي', 'الأسطوري'];
+          const newTitle = specialTitles[Math.floor(Math.random() * specialTitles.length)];
+          await updateDoc(doc(db, 'users', user.uid), {
+            title: newTitle,
+          });
+          prizeMessage = `🏅 لقب جديد: ${newTitle}!`;
+        } else {
+          prizeValue = reward.value;
+          await addMgcBalance(user.uid, prizeValue);
+          prizeMessage = `🎉 ربحت ${prizeValue} MGC!`;
+        }
+
+        await updateDoc(doc(db, 'users', user.uid), {
+          pityCounter: pityCounter,
+        });
+
+        try {
+          const { collection, addDoc } = await import('firebase/firestore');
+          await addDoc(collection(db, 'machineHistory'), {
+            userId: user.uid,
+            reward: reward.label,
+            prize: prizeValue,
+            xp: xpGained,
+            cost: SPIN_COST,
+            isPity,
+            timestamp: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.warn('فشل تسجيل تاريخ الماكينة:', error);
+        }
+
+        return {
+          success: true,
+          reward: reward.label,
+          prizeMessage,
+          prizeValue,
+          isPity,
+          pityCounter: pityCounter,
+        };
+      },
+
+      // ========== باقي الدوال ==========
       currency: 'USD',
       toggleCurrency: () => set((state) => ({ currency: state.currency === 'USD' ? 'SYP' : 'USD' })),
 
@@ -799,7 +1025,8 @@ export const useAppStore = create(
         isDark: state.isDark,
         userData: state.userData,
         user: state.user,
-        balance: state.balance,
+        balance: state.balance,          // الرصيد الحقيقي
+        mgcBalance: state.mgcBalance,    // رصيد MGC
       }),
     }
   )

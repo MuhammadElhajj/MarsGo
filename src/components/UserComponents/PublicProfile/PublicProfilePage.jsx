@@ -8,7 +8,10 @@ import { useAuth } from '../../../context/AuthContext';
 import Avatar from '../../../components/GeneralComponents/Avatar/Avatar';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
-import { FiUsers, FiHeart, FiZap, FiCalendar, FiMessageCircle, FiUserPlus, FiUserMinus, FiUserX, FiUserCheck } from 'react-icons/fi';
+import { 
+  FiUsers, FiHeart, FiZap, FiCalendar, FiMessageCircle, 
+  FiUserPlus, FiUserMinus, FiUserX, FiUserCheck, FiAward, FiStar 
+} from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import './PublicProfilePage.css';
 
@@ -102,6 +105,11 @@ export default function PublicProfilePage() {
   const joinDate = profile.createdAt?.toDate?.() || new Date(profile.createdAt);
   const formattedDate = joinDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  // مستوى المستخدم وخبرته
+  const level = profile.level || 1;
+  const xp = profile.xp || 0;
+  const title = profile.title || null;
+
   return (
     <div className="public-profile" dir="rtl">
       {/* الهيدر مع زر الرجوع */}
@@ -125,6 +133,15 @@ export default function PublicProfilePage() {
       {/* القسم الثاني: الاسم واللقب */}
       <div className="public-profile__info">
         <h1 className="public-profile__name">{profile.name}</h1>
+        {title && (
+          <div className="public-profile__title-badge">
+            <FiAward className="title-icon" /> {title}
+          </div>
+        )}
+        <div className="public-profile__level-xp">
+          <span className="level-badge">المستوى {level}</span>
+          <span className="xp-badge">{xp} XP</span>
+        </div>
         <p className="public-profile__rank">{profile.rank || 'عضو'}</p>
         <p className="public-profile__bio">{profile.bio || ''}</p>
       </div>

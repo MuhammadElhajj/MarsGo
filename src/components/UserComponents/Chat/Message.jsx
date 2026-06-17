@@ -15,6 +15,7 @@ export default function Message({ message, isOwn }) {
     popularity = 0,
     power = 0,
     rank = 'عضو',
+    title = null, // ✅ اللقب الجديد
   } = message;
 
   const timeAgo = timestamp
@@ -46,9 +47,11 @@ export default function Message({ message, isOwn }) {
       </div>
 
       <div className="message__content">
-        {/* رأس الرسالة: الاسم + اللقب + الشارات */}
+        {/* رأس الرسالة: الاسم + اللقب + الرتبة + الشارات */}
         <div className="message__header">
           <span className="message__name">{displayName}</span>
+          {/* ✅ عرض اللقب إن وجد */}
+          {title && <span className="message__title">🏅 {title}</span>}
           <span className="message__rank">{rank}</span>
           <span className="message__badges">
             <span className="message__badge" title="الشعبية">❤️ {popularity}</span>
@@ -57,7 +60,7 @@ export default function Message({ message, isOwn }) {
           <span className="message__time">{timeAgo}</span>
         </div>
 
-        {/* فقاعة النص (مثل واتساب) */}
+        {/* فقاعة النص */}
         <div className="message__bubble">
           <div className="message__text">{text}</div>
         </div>

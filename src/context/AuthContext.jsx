@@ -12,10 +12,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [emailVerified, setEmailVerified] = useState(false);
 
-  // ✅ جلب دوال الـ Store لتحديثها
+  // ✅ جلب دوال الـ Store لتحديثها (باستخدام الأسماء الجديدة)
   const setStoreUser = useAppStore((state) => state.setUser);
   const setStoreUserData = useAppStore((state) => state.setUserData);
-  const setStoreBalance = useAppStore((state) => state.setBalance);
+  const setStoreBalance = useAppStore((state) => state.setBalance);          // الرصيد الحقيقي
+  const setStoreMgcBalance = useAppStore((state) => state.setMgcBalance);    // رصيد MGC
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -30,6 +31,7 @@ export function AuthProvider({ children }) {
           setStoreUser(firebaseUser);
           setStoreUserData(null);
           setStoreBalance(0);
+          setStoreMgcBalance(0);
           setLoading(false);
           return;
         }
@@ -66,6 +68,39 @@ export function AuthProvider({ children }) {
             data.rank = 'عضو';
             needsUpdate = true;
           }
+          // ✅ التحقق من وجود الرصيد الحقيقي (balance) ورصيد MGC (mgcBalance)
+          if (data.balance === undefined) {
+            data.balance = 0;
+            needsUpdate = true;
+          }
+          if (data.mgcBalance === undefined) {
+            data.mgcBalance = 0;
+            needsUpdate = true;
+          }
+          if (data.xp === undefined) {
+            data.xp = 0;
+            needsUpdate = true;
+          }
+          if (data.level === undefined) {
+            data.level = 1;
+            needsUpdate = true;
+          }
+          if (data.title === undefined) {
+            data.title = null;
+            needsUpdate = true;
+          }
+          if (data.pityCounter === undefined) {
+            data.pityCounter = 0;
+            needsUpdate = true;
+          }
+          if (data.coupons === undefined) {
+            data.coupons = [];
+            needsUpdate = true;
+          }
+          if (data.freeCoupons === undefined) {
+            data.freeCoupons = [];
+            needsUpdate = true;
+          }
           if (needsUpdate) {
             await updateDoc(userRef, {
               customerType: data.customerType,
@@ -74,6 +109,14 @@ export function AuthProvider({ children }) {
               popularity: data.popularity,
               power: data.power,
               rank: data.rank,
+              balance: data.balance,
+              mgcBalance: data.mgcBalance,
+              xp: data.xp,
+              level: data.level,
+              title: data.title,
+              pityCounter: data.pityCounter,
+              coupons: data.coupons,
+              freeCoupons: data.freeCoupons,
             });
           }
         } else {
@@ -91,7 +134,14 @@ export function AuthProvider({ children }) {
             popularity: 0,
             power: 0,
             rank: 'عضو',
-            balance: 0,
+            balance: 0,          // الرصيد الحقيقي
+            mgcBalance: 0,       // رصيد MGC
+            xp: 0,
+            level: 1,
+            title: null,
+            pityCounter: 0,
+            coupons: [],
+            freeCoupons: [],
           };
           await setDoc(userRef, data);
         }
@@ -106,6 +156,7 @@ export function AuthProvider({ children }) {
         setStoreUser(firebaseUser);
         setStoreUserData(data);
         setStoreBalance(data.balance || 0);
+        setStoreMgcBalance(data.mgcBalance || 0);
 
       } else {
         // ✅ تسجيل الخروج: مسح الحالة المحلية والـ Store
@@ -115,6 +166,7 @@ export function AuthProvider({ children }) {
         setStoreUser(null);
         setStoreUserData(null);
         setStoreBalance(0);
+        setStoreMgcBalance(0);
       }
       setLoading(false);
     });
@@ -134,6 +186,9 @@ export function AuthProvider({ children }) {
       setStoreUserData(newData);
       if (updates.balance !== undefined) {
         setStoreBalance(updates.balance);
+      }
+      if (updates.mgcBalance !== undefined) {
+        setStoreMgcBalance(updates.mgcBalance);
       }
       return true;
     } catch (error) {

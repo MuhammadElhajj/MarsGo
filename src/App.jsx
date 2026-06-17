@@ -28,6 +28,7 @@ const VerifyCodePage = lazy(() => import("./pages/User/VerifyCode/VerifyCodePage
 const CatalogPage = lazy(() => import("./pages/User/Catalog/CatalogPage"));
 const CategoryProductsPage = lazy(() => import("./pages/User/CategoryProductsPage/CategoryProductsPage"));
 const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePackagesPage"));
+import BuyMGC from './pages/User/BuyMGC/BuyMGC';
 const PrivacyPolicy = lazy(() => import("./pages/User/PrivacyPolicy/PrivacyPolicy"));
 import WheelPage from './components/UserComponents/WheelPage/WheelPage';
 import ChatPage from './components/UserComponents/Chat/ChatPage';
@@ -140,7 +141,9 @@ function App() {
           <Route path="/profile/:userId" element={<PublicProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
-          <Route path="/my-orders" element={<MyOrdersPage />} />
+       
+       <Route path="/buy-mgc" element={<BuyMGC />} />
+   <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/about" element={<AboutPage />} />

@@ -1,0 +1,140 @@
+/* src/components/UserComponents/QuickActions/QuickActions.css */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 0.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1.25rem;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+
+.quick-actions:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.quick-actions__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.75rem 0.3rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: var(--color-text-secondary);
+  border-radius: 0.75rem;
+  background: transparent;
+  min-width: 0;
+  width: 100%;
+  text-decoration: none;
+}
+
+.quick-actions__item:hover {
+  transform: translateY(-3px);
+  color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.quick-actions__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: var(--color-bg-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  font-size: 1.6rem;
+  color: var(--color-text-secondary);
+}
+
+.quick-actions__item:hover .quick-actions__icon {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+  transform: scale(1.05);
+}
+
+.quick-actions__label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-text-secondary);
+  transition: color 0.2s;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.quick-actions__item:hover .quick-actions__label {
+  color: var(--color-accent);
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 768px) {
+  .quick-actions {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+    padding: 0.75rem 0.3rem;
+    border-radius: 1rem;
+  }
+
+  .quick-actions__item {
+    padding: 0.5rem 0.1rem;
+  }
+
+  .quick-actions__icon {
+    width: 42px;
+    height: 42px;
+    font-size: 1.3rem;
+    border-radius: 12px;
+  }
+
+  .quick-actions__label {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-actions {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.2rem;
+    padding: 0.5rem 0.1rem;
+    border-radius: 0.75rem;
+  }
+
+  .quick-actions__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+
+  .quick-actions__label {
+    font-size: 0.55rem;
+  }
+}
+
+/* ===== دعم الوضع الداكن ===== */
+.dark .quick-actions {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
+}
+
+.dark .quick-actions__icon {
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+}
+
+.dark .quick-actions__item:hover .quick-actions__icon {
+  background: var(--color-accent);
+  color: white;
+}
+
+.dark .quick-actions__item:hover {
+  background: rgba(79, 70, 229, 0.12);
+}
