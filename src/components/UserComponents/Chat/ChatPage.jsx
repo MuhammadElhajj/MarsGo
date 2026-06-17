@@ -1,4 +1,3 @@
-// src/components/UserComponents/Chat/ChatPage.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
@@ -9,7 +8,6 @@ import Message from './Message';
 import './ChatPage.css';
 
 export default function ChatPage() {
-  // استخراج user و userData من store
   const { user, userData } = useAppStore(
     useShallow((state) => ({
       user: state.user,
@@ -17,10 +15,10 @@ export default function ChatPage() {
     }))
   );
 
-  // استخراج uid بأمان من user أو userData
+  // الأولوية لـ userData ثم user
   const uid = user?.uid || userData?.uid || null;
-  const displayName = user?.displayName || userData?.displayName || 'مستخدم';
-  const photoURL = user?.photoURL || userData?.photoURL || null;
+  const displayName = userData?.name || userData?.displayName || user?.displayName || 'مستخدم';
+  const photoURL = userData?.avatar || userData?.photoURL || user?.photoURL || null;
   const popularity = userData?.popularity || 0;
   const power = userData?.power || 0;
   const rank = userData?.rank || 'عضو';
@@ -31,7 +29,6 @@ export default function ChatPage() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // جلب الرسائل من Firestore
   useEffect(() => {
     const q = query(collection(db, 'messages'), orderBy('timestamp', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -53,13 +50,12 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // إرسال رسالة جديدة
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
     if (sending) return;
 
-    // التحقق من وجود uid (من user أو userData)
+    // التحقق من وجود uid
     if (!uid) {
       toast.error('يرجى تسجيل الدخول أولاً');
       return;

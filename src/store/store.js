@@ -564,18 +564,16 @@
 // );
 
 
-
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { doc, updateDoc, increment, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import toast from 'react-hot-toast';
 
-// ===== جدول جوائز الدولاب (بالنسب المئوية) =====
-const WHEEL_PRIZES = [
+// ===== قطاعات الدولاب مع الأوزان =====
+const WHEEL_SEGMENTS = [
   { value: 0.5, weight: 35 },
-  { value: 0.5, weight: 35 }, // 0.5 تظهر أكثر
+  { value: 0.5, weight: 35 }, // 0.5 تظهر مرتين بمجموع وزن 70
   { value: 1.5, weight: 15 },
   { value: 3, weight: 8 },
   { value: 7, weight: 4 },
@@ -623,10 +621,10 @@ export const useAppStore = create(
       // ===== دالة الخصم (للـ MGC) =====
       deductBalance: async (amountMGC) => {
         const { user, balance, setBalance } = get();
-        if (!user) {
-          toast.error('يجب تسجيل الدخول أولاً');
-          return false;
-        }
+        // if (!user) {
+        //   toast.error('يجب تسجيل الدخول أولاً');
+        //   return false;
+        // }
         if (balance < amountMGC) {
           toast.error(`رصيد غير كافٍ، تحتاج ${amountMGC} MGC`);
           return false;
@@ -669,67 +667,58 @@ export const useAppStore = create(
         return balance;
       },
 
-      // ===== دالة الدولاب =====
-      spinWheel: async () => {
-        const { user, balance, deductBalance, addBalance } = get();
-        const SPIN_COST = 0.25;
+      // ===== دالة الدولاب (باستخدام WHEEL_SEGMENTS مع الأوزان) =====
+   spinWheel: async () => {
+  const { user, balance, deductBalance, addBalance } = get();
+  const SPIN_COST = 0.25;
 
-        if (!user) {
-          toast.error('يجب تسجيل الدخول أولاً');
-          return { success: false, prize: null, message: 'يجب تسجيل الدخول' };
-        }
+  if (balance < SPIN_COST) {
+    toast.error(`رصيد غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+    return { success: false, prize: null, index: -1, message: 'رصيد غير كافٍ' };
+  }
 
-        if (balance < SPIN_COST) {
-          toast.error(`رصيد غير كافٍ! تحتاج ${SPIN_COST} MGC`);
-          return { success: false, prize: null, message: 'رصيد غير كافٍ' };
-        }
+  const getRandomIndex = () => {
+    const totalWeight = WHEEL_SEGMENTS.reduce((sum, seg) => sum + seg.weight, 0);
+    let random = Math.random() * totalWeight;
+    for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
+      random -= WHEEL_SEGMENTS[i].weight;
+      if (random <= 0) return i;
+    }
+    return 0;
+  };
 
-        // اختيار الجائزة وفق النسب
-        const getRandomPrize = () => {
-          const totalWeight = WHEEL_PRIZES.reduce((sum, p) => sum + p.weight, 0);
-          let random = Math.random() * totalWeight;
-          for (const prize of WHEEL_PRIZES) {
-            random -= prize.weight;
-            if (random <= 0) return prize.value;
-          }
-          return WHEEL_PRIZES[0].value;
-        };
+  const selectedIndex = getRandomIndex();
+  const prize = WHEEL_SEGMENTS[selectedIndex].value;
 
-        const prize = getRandomPrize();
+  const deductSuccess = await deductBalance(SPIN_COST);
+  if (!deductSuccess) {
+    return { success: false, prize: null, index: -1, message: 'فشل الخصم' };
+  }
 
-        // خصم تكلفة الدخول
-        const deductSuccess = await deductBalance(SPIN_COST);
-        if (!deductSuccess) {
-          return { success: false, prize: null, message: 'فشل الخصم' };
-        }
+  if (prize > 0) {
+    const addSuccess = await addBalance(user.uid, prize);
+    if (!addSuccess) {
+      toast.error('فشل إضافة الجائزة، يرجى التواصل مع الدعم');
+      return { success: false, prize: null, index: -1, message: 'فشل إضافة الجائزة' };
+    }
+  }
 
-        // إضافة الجائزة إذا كانت أكبر من 0
-        if (prize > 0) {
-          const addSuccess = await addBalance(user.uid, prize);
-          if (!addSuccess) {
-            toast.error('فشل إضافة الجائزة، يرجى التواصل مع الدعم');
-            return { success: false, prize: null, message: 'فشل إضافة الجائزة' };
-          }
-        }
+  try {
+    const { collection, addDoc } = await import('firebase/firestore');
+    const { db } = await import('../firebase');
+    await addDoc(collection(db, 'wheelHistory'), {
+      userId: user.uid,
+      username: user.displayName || 'مستخدم',
+      prize: prize,
+      cost: SPIN_COST,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.warn('فشل تسجيل تاريخ الدوران:', error);
+  }
 
-        // تسجيل الحدث في قاعدة البيانات (اختياري)
-        try {
-          const { collection, addDoc } = await import('firebase/firestore');
-          const { db } = await import('../firebase');
-          await addDoc(collection(db, 'wheelHistory'), {
-            userId: user.uid,
-            username: user.displayName || 'مستخدم',
-            prize: prize,
-            cost: SPIN_COST,
-            timestamp: new Date().toISOString(),
-          });
-        } catch (error) {
-          console.warn('فشل تسجيل تاريخ الدوران:', error);
-        }
-
-        return { success: true, prize };
-      },
-
+  return { success: true, prize, index: selectedIndex };
+},
       // ===== دالة جلب تاريخ الدولاب (للإدارة أو للمستخدم) =====
       fetchWheelHistory: async (userId = null) => {
         try {

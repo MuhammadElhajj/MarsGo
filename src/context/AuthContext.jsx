@@ -1,8 +1,8 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { useAppStore } from '../store/store';
 
 const AuthContext = createContext();
 
@@ -11,6 +11,11 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [emailVerified, setEmailVerified] = useState(false);
+
+  // ✅ جلب دوال الـ Store لتحديثها
+  const setStoreUser = useAppStore((state) => state.setUser);
+  const setStoreUserData = useAppStore((state) => state.setUserData);
+  const setStoreBalance = useAppStore((state) => state.setBalance);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -21,6 +26,10 @@ export function AuthProvider({ children }) {
           setUser(firebaseUser);
           setUserData(null);
           setEmailVerified(false);
+          // ✅ مزامنة الـ Store (المستخدم موجود لكن بدون بيانات)
+          setStoreUser(firebaseUser);
+          setStoreUserData(null);
+          setStoreBalance(0);
           setLoading(false);
           return;
         }
@@ -43,20 +52,32 @@ export function AuthProvider({ children }) {
             email: firebaseUser.email,
             role: "customer",
             verifierType: "basic",
-            customerType: "customer",   // <-- الحقل الجديد
+            customerType: "customer",
             avatar: firebaseUser.photoURL || "",
             createdAt: new Date(),
           };
           await setDoc(userRef, data);
         }
         data.uid = firebaseUser.uid;
+
+        // ✅ تحديث الحالة المحلية
         setUserData(data);
         setUser(firebaseUser);
         setEmailVerified(true);
+
+        // ✅ مزامنة الـ Store مع البيانات الكاملة
+        setStoreUser(firebaseUser);
+        setStoreUserData(data);
+        setStoreBalance(data.balance || 0);
+
       } else {
+        // ✅ تسجيل الخروج: مسح الحالة المحلية والـ Store
         setUser(null);
         setUserData(null);
         setEmailVerified(false);
+        setStoreUser(null);
+        setStoreUserData(null);
+        setStoreBalance(0);
       }
       setLoading(false);
     });
@@ -70,6 +91,11 @@ export function AuthProvider({ children }) {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, updates);
       setUserData(prev => ({ ...prev, ...updates }));
+      // ✅ تحديث الـ Store أيضاً بعد التعديل
+      setStoreUserData({ ...userData, ...updates });
+      if (updates.balance !== undefined) {
+        setStoreBalance(updates.balance);
+      }
       return true;
     } catch (error) {
       console.error("Error updating user data:", error);
@@ -77,7 +103,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ✅ القيمة المُرجعة تشمل customerType
+  // ✅ القيمة المُرجعة
   const value = {
     user,
     userData,

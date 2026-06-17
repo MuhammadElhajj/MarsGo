@@ -14,16 +14,15 @@ export default function Message({ message, isOwn }) {
     rank = 'عضو',
   } = message;
 
-  // تنسيق الوقت
   const timeAgo = timestamp
     ? formatDistanceToNow(timestamp.toDate(), { addSuffix: true, locale: ar })
     : 'الآن';
 
-  // الحرف الأول من الاسم للـ Avatar
   const initial = displayName?.charAt(0) || 'م';
 
   return (
     <div className={`message ${isOwn ? 'message--own' : 'message--other'}`}>
+      {/* صورة الأفاتار */}
       <div className="message__avatar">
         {photoURL ? (
           <img src={photoURL} alt={displayName} className="message__avatar-img" />
@@ -33,9 +32,10 @@ export default function Message({ message, isOwn }) {
       </div>
 
       <div className="message__content">
+        {/* رأس الرسالة: الاسم + اللقب + الشارات */}
         <div className="message__header">
           <span className="message__name">{displayName}</span>
-          <span className="message__rank">[{rank}]</span>
+          <span className="message__rank">{rank}</span>
           <span className="message__badges">
             <span className="message__badge" title="الشعبية">❤️ {popularity}</span>
             <span className="message__badge" title="القوة">⚡ {power}</span>
@@ -43,7 +43,10 @@ export default function Message({ message, isOwn }) {
           <span className="message__time">{timeAgo}</span>
         </div>
 
-        <div className="message__text">{text}</div>
+        {/* فقاعة النص (مثل واتساب) */}
+        <div className="message__bubble">
+          <div className="message__text">{text}</div>
+        </div>
       </div>
     </div>
   );
