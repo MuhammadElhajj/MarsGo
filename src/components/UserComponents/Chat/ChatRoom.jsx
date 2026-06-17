@@ -5,12 +5,13 @@ import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
 import { 
   collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
-  doc, getDoc, updateDoc, where 
+  doc, updateDoc, where 
 } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 import Message from './Message';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
+import { FiArrowLeft, FiSend, FiSmile, FiPaperclip } from 'react-icons/fi';
 import './ChatRoom.css';
 
 export default function ChatRoom() {
@@ -37,7 +38,7 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // ✅ جلب بيانات الغرفة باستخدام doc مباشرة
+  // جلب بيانات الغرفة
   useEffect(() => {
     if (!roomId) return;
 
@@ -58,7 +59,7 @@ export default function ChatRoom() {
     return () => unsubscribe();
   }, [roomId, navigate]);
 
-  // ✅ جلب رسائل الغرفة
+  // جلب رسائل الغرفة
   useEffect(() => {
     if (!roomId) return;
 
@@ -88,14 +89,13 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // ✅ إرسال رسالة + تحديث آخر رسالة
+  // إرسال رسالة
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || sending || !roomId) return;
 
     setSending(true);
     try {
-      // إضافة الرسالة
       await addDoc(collection(db, 'messages'), {
         roomId: roomId,
         uid: uid,
@@ -108,7 +108,6 @@ export default function ChatRoom() {
         rank: rank,
       });
 
-      // ✅ تحديث آخر رسالة في الغرفة (باستخدام doc مباشرة)
       const roomRef = doc(db, 'rooms', roomId);
       await updateDoc(roomRef, {
         lastMessage: newMessage.trim(),
@@ -127,27 +126,45 @@ export default function ChatRoom() {
 
   if (!room) return <div className="chat-room-loading">جاري تحميل المحادثة...</div>;
 
-  // تحديد اسم الغرفة للعرض
+  // تحديد اسم الغرفة
   let roomName = room.name;
-  if (room.type === 'global') roomName = 'الدردشة العامة';
-  else if (room.type === 'private') {
+  let roomSubtitle = '';
+  if (room.type === 'global') {
+    roomName = 'الدردشة العامة';
+    roomSubtitle = 'محادثة عامة';
+  } else if (room.type === 'private') {
     const otherMember = room.members?.find(m => m !== uid);
-    // يمكننا جلب اسم المستخدم الآخر من userData المخزنة في الـ store، لكن سنكتفي بالاسم المخزن
     roomName = room.name || 'محادثة خاصة';
+    roomSubtitle = 'محادثة خاصة';
   } else if (room.type === 'clan') {
     roomName = room.name || 'المجموعة';
+    roomSubtitle = `مجموعة (${room.members?.length || 0} عضو)`;
   }
 
   return (
     <div className="chat-room">
+      {/* ===== الهيدر ===== */}
       <div className="chat-room__header">
-        <GoBackButton text="رجوع" onClick={() => navigate('/chat')} />
-        <div className="chat-room__title">{roomName}</div>
-        <div className="chat-room__members-count">
-          {room.type === 'global' ? 'عامة' : room.members?.length || 0}
+        <button className="chat-room__back-btn" onClick={() => navigate('/chat')}>
+          <FiArrowLeft size={22} />
+        </button>
+        <div className="chat-room__avatar">
+          {room.imageUrl ? (
+            <img src={room.imageUrl} alt={roomName} />
+          ) : (
+            <span>{roomName.charAt(0).toUpperCase()}</span>
+          )}
+        </div>
+        <div className="chat-room__info">
+          <div className="chat-room__title">{roomName}</div>
+          <div className="chat-room__subtitle">
+            <span className="chat-room__status-dot"></span>
+            {roomSubtitle || 'متصل'}
+          </div>
         </div>
       </div>
 
+      {/* ===== منطقة الرسائل ===== */}
       <div className="chat-room__messages">
         {messages.map((msg) => (
           <Message
@@ -159,18 +176,31 @@ export default function ChatRoom() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* ===== منطقة الإدخال ===== */}
       <form className="chat-room__input-area" onSubmit={sendMessage}>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="اكتب رسالتك..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          disabled={sending}
-          className="chat-room__input"
-        />
-        <button type="submit" disabled={sending || !newMessage.trim()}>
-          {sending ? 'جاري الإرسال...' : 'إرسال'}
+        <button type="button" className="chat-room__emoji-btn" title="إيموجي">
+          <FiSmile size={20} />
+        </button>
+        <button type="button" className="chat-room__attach-btn" title="مرفق">
+          <FiPaperclip size={20} />
+        </button>
+        <div className="chat-room__input-wrapper">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="اكتب رسالتك..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            disabled={sending}
+            className="chat-room__input"
+          />
+        </div>
+        <button 
+          type="submit" 
+          className="chat-room__send-btn" 
+          disabled={sending || !newMessage.trim()}
+        >
+          <FiSend size={20} />
         </button>
       </form>
     </div>

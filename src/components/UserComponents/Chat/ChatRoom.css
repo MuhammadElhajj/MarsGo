@@ -4,10 +4,11 @@
 .chat-room {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  max-height: calc(100vh - 120px);
+  height: 100vh;
+  max-height: 100vh;
   background-color: var(--chat-bg, #efeae2);
   position: relative;
+  overflow: hidden;
 }
 
 /* الوضع الداكن */
@@ -15,7 +16,7 @@
   --chat-bg: #0b141a;
 }
 
-/* ===== الهيدر (مثل واتساب) ===== */
+/* ===== الهيدر (ثابت في الأعلى) ===== */
 .chat-room__header {
   display: flex;
   align-items: center;
@@ -25,7 +26,10 @@
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
   min-height: 60px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .chat-room__back-btn {
@@ -39,14 +43,16 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  width: 36px;
+  height: 36px;
 }
 
 .chat-room__back-btn:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .dark .chat-room__back-btn:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .chat-room__avatar {
@@ -85,7 +91,7 @@
 }
 
 .chat-room__subtitle {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
@@ -98,51 +104,24 @@
   height: 8px;
   border-radius: 50%;
   background-color: #31a24c;
-  margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .chat-room__status-dot.offline {
   background-color: #8e8e8e;
 }
 
-.chat-room__actions {
-  display: flex;
-  gap: 0.3rem;
-}
-
-.chat-room__action-btn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  padding: 0.4rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.chat-room__action-btn:hover {
-  background: rgba(0,0,0,0.05);
-  color: var(--color-text-primary);
-}
-
-.dark .chat-room__action-btn:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-/* ===== منطقة الرسائل ===== */
+/* ===== منطقة الرسائل (تملأ المساحة المتبقية) ===== */
 .chat-room__messages {
   flex: 1;
   overflow-y: auto;
-      background: var(--color-bg-primary);
   padding: 0.75rem 1rem;
+  background: var(--color-bg-primary);
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
-
   scroll-behavior: smooth;
+  min-height: 0;
 }
 
 /* تخصيص شريط التمرير */
@@ -163,10 +142,7 @@
   background: var(--color-text-secondary);
 }
 
-/* ===== فقاعة الرسالة (سيتم تطبيقها عبر Message.css بالفعل، لكن نضيف تحسينات) ===== */
-/* نترك تنسيق الفقاعات لـ Message.css، لكن نضمن أن الخلفية مناسبة */
-
-/* ===== منطقة الإدخال (مثل واتساب) ===== */
+/* ===== منطقة الإدخال (ثابتة في الأسفل) ===== */
 .chat-room__input-area {
   display: flex;
   align-items: center;
@@ -175,7 +151,12 @@
   background-color: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border);
   flex-shrink: 0;
-  min-height: 60px;
+  min-height: 64px;
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  /* ✅ مساحة إضافية لتجنب تغطية الموبايل ناف */
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 .chat-room__input-wrapper {
@@ -183,14 +164,15 @@
   display: flex;
   align-items: center;
   background-color: var(--color-bg-primary);
-  border-radius: 25px;
+  border-radius: 24px;
   padding: 0.1rem 0.3rem;
-  border: 1px solid var(--color-border);
-  transition: border-color 0.2s;
+  border: 1.5px solid var(--color-border);
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 .chat-room__input-wrapper:focus-within {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 79, 70, 229), 0.12);
 }
 
 .chat-room__input {
@@ -202,11 +184,12 @@
   font-size: 0.95rem;
   outline: none;
   min-width: 0;
+  font-family: inherit;
 }
 
 .chat-room__input::placeholder {
   color: var(--color-text-secondary);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .chat-room__emoji-btn,
@@ -222,17 +205,20 @@
   justify-content: center;
   transition: all 0.2s;
   font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
 
 .chat-room__emoji-btn:hover,
 .chat-room__attach-btn:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
   color: var(--color-text-primary);
 }
 
 .dark .chat-room__emoji-btn:hover,
 .dark .chat-room__attach-btn:hover {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .chat-room__send-btn {
@@ -246,18 +232,26 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb, 79, 70, 229), 0.3);
 }
 
 .chat-room__send-btn:hover:not(:disabled) {
-  transform: scale(1.05);
+  transform: scale(1.06);
   background: var(--color-primary-dark);
+  box-shadow: 0 4px 14px rgba(var(--color-primary-rgb, 79, 70, 229), 0.4);
+}
+
+.chat-room__send-btn:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .chat-room__send-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* ===== حالة التحميل ===== */
@@ -265,7 +259,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  height: 100vh;
   color: var(--color-text-secondary);
   font-size: 1.2rem;
 }
@@ -273,46 +267,104 @@
 /* ===== استجابة للجوال ===== */
 @media (max-width: 480px) {
   .chat-room {
-    max-height: calc(100vh - 80px);
+    height: 100dvh;
+    max-height: 100dvh;
   }
-  
+
   .chat-room__header {
     padding: 0.4rem 0.6rem;
-    min-height: 50px;
+    min-height: 52px;
   }
-  
+
   .chat-room__title {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
-  
+
   .chat-room__avatar {
     width: 34px;
     height: 34px;
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
-  
+
   .chat-room__messages {
     padding: 0.5rem;
   }
-  
+
   .chat-room__input-area {
-    padding: 0.4rem 0.6rem;
-    min-height: 50px;
+    padding: 0.4rem 0.5rem;
+    min-height: 56px;
+    /* ✅ مسافة أسفل لتجنب الموبايل ناف */
+    padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
   }
-  
+
   .chat-room__input {
     font-size: 0.85rem;
     padding: 0.4rem 0.6rem;
   }
-  
+
   .chat-room__send-btn {
     width: 38px;
     height: 38px;
   }
-  
+
+  .chat-room__send-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
   .chat-room__emoji-btn,
   .chat-room__attach-btn {
+    width: 32px;
+    height: 32px;
     font-size: 1rem;
-    padding: 0.3rem;
+  }
+
+  .chat-room__emoji-btn svg,
+  .chat-room__attach-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .chat-room__input-wrapper {
+    border-radius: 20px;
+  }
+}
+
+/* ===== دعم الشاشات الصغيرة جداً ===== */
+@media (max-width: 360px) {
+  .chat-room__header {
+    padding: 0.3rem 0.4rem;
+    min-height: 44px;
+    gap: 0.4rem;
+  }
+
+  .chat-room__title {
+    font-size: 0.85rem;
+  }
+
+  .chat-room__avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .chat-room__input-area {
+    padding: 0.3rem 0.3rem;
+    min-height: 46px;
+    gap: 0.3rem;
+  }
+
+  .chat-room__send-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chat-room__input {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .chat-room__subtitle {
+    font-size: 0.6rem;
   }
 }
