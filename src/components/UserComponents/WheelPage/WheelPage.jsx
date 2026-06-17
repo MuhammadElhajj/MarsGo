@@ -1,16 +1,85 @@
 // src/pages/User/WheelPage/WheelPage.jsx
-import { useState } from 'react';
-// ✅ استيراد الماكينة
+import { useState, useEffect } from 'react';
 import Machine from '../../../components/UserComponents/Machine/Machine';
-// ⏸️ تعليق الدولاب مؤقتاً للاختبار
-// import Wheel from '../../../components/UserComponents/Wheel/Wheel';
 import './WheelPage.css';
 
+// ============================================================
+// 🏆 مكون شريط الفائزين (PUBG-style)
+// ============================================================
+function WinnerFeed() {
+  const [winners, setWinners] = useState([]);
+
+  // أسماء وهمية
+  const NAMES = [
+    'سلطان', 'ريم', 'أحمد', 'نور', 'خالد', 'سارة', 'محمد', 'منى',
+    'علي', 'هدى', 'عمر', 'ليلى', 'حسن', 'غادة', 'يوسف', 'رنا',
+    'ماجد', 'دينا', 'سامي', 'روان', 'أسامة', 'جمانة', 'باسل', 'شهد'
+  ];
+
+  // جوائز وهمية
+  const PRIZES = [10, 15, 20, 25, 30, 50, 75, 100, 150, 200, 250, 300, 500];
+  const GAMES = ['الدولاب', 'ماكينة الحظ', 'الدولاب الذهبي', 'الماكينة الفاخرة'];
+
+  // توليد فائز عشوائي
+  const generateRandomWinner = () => {
+    const name = NAMES[Math.floor(Math.random() * NAMES.length)];
+    const prize = PRIZES[Math.floor(Math.random() * PRIZES.length)];
+    const game = GAMES[Math.floor(Math.random() * GAMES.length)];
+    const isMGC = Math.random() > 0.3; // 70% MGC، 30% XP أو لقب
+    const reward = isMGC ? `${prize} MGC` : Math.random() > 0.5 ? `${prize} XP` : 'لقب نادر';
+    return {
+      id: Date.now() + Math.random(),
+      name,
+      reward,
+      game,
+      time: new Date(),
+    };
+  };
+
+  // توليد 5 فائزين أوليين
+  useEffect(() => {
+    const initial = Array.from({ length: 5 }, generateRandomWinner);
+    setWinners(initial);
+
+    // إضافة فائز جديد كل 4-7 ثواني
+    const interval = setInterval(() => {
+      setWinners(prev => {
+        const newWinner = generateRandomWinner();
+        return [newWinner, ...prev].slice(0, 12); // الاحتفاظ بآخر 12
+      });
+    }, Math.random() * 3000 + 4000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="winner-feed">
+      <div className="winner-feed__icon">
+        <span>🏆</span>
+      </div>
+      <div className="winner-feed__track">
+        {winners.map((winner, index) => (
+          <div key={winner.id} className="winner-feed__item">
+            <span className="winner-feed__name">{winner.name}</span>
+            <span className="winner-feed__action">ربح</span>
+            <span className="winner-feed__reward">{winner.reward}</span>
+            <span className="winner-feed__game">🎮 {winner.game}</span>
+            <span className="winner-feed__time">
+              {winner.time.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// الصفحة الرئيسية
+// ============================================================
 export default function WheelPage() {
   const [lastWin, setLastWin] = useState(null);
   const [spinCount, setSpinCount] = useState(0);
-  // ✅ يمكن إضافة حالة للتبويب إذا أردت لاحقاً
-  // const [activeTab, setActiveTab] = useState('machine');
 
   const handleSpinComplete = (prize) => {
     setLastWin(prize);
@@ -19,22 +88,18 @@ export default function WheelPage() {
 
   return (
     <div className="wheel-page">
+      {/* ✅ شريط الفائزين في الأعلى */}
+      <WinnerFeed />
+
       <div className="wheel-page__header">
-        {/* ✅ تحديث العنوان ليعكس ألعاب الحظ */}
         <h1>🎰 ألعاب الحظ</h1>
         <p>اختر لعبتك المفضلة واربح جوائز قيمة!</p>
       </div>
 
-      {/* ===== قسم الألعاب ===== */}
       <div className="wheel-page__body">
-        {/* ⏸️ تعليق الدولاب مؤقتاً لاختبار الماكينة */}
-        {/* <Wheel onSpinComplete={handleSpinComplete} /> */}
-
-        {/* ✅ عرض الماكينة فقط حالياً */}
         <Machine />
       </div>
 
-      {/* ===== إحصائيات (للدولاب – يمكن إبقاؤها أو تعديلها) ===== */}
       <div className="wheel-page__stats">
         <div className="wheel-page__stat-card">
           <span className="stat-label">عدد مرات اللعب</span>
@@ -52,7 +117,6 @@ export default function WheelPage() {
         </div>
       </div>
 
-      {/* ===== قواعد اللعبة (يمكن تعديلها لتشمل كلا اللعبتين) ===== */}
       <div className="wheel-page__rules">
         <h3>📋 قواعد الألعاب</h3>
         <ul>
