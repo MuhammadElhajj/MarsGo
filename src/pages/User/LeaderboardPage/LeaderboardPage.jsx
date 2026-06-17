@@ -1,8 +1,9 @@
-// src/pages/UserPages/LeaderboardPage/LeaderboardPage.jsx
+// src/pages/User/LeaderboardPage/LeaderboardPage.jsx
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  FiAward, FiUser, FiStar, FiTrendingUp, FiHeart, 
-  FiHash, FiLoader, FiShield, FiZap 
+  FiAward, FiUser, FiTrendingUp, FiHeart, 
+  FiHash, FiLoader, FiShield, FiZap
 } from 'react-icons/fi';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -37,6 +38,7 @@ const getCardClass = (index) => {
 };
 
 export default function LeaderboardPage() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -51,10 +53,11 @@ export default function LeaderboardPage() {
         const usersList = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
+          name: doc.data().name || doc.data().displayName || 'مستخدم',
+          avatar: doc.data().avatar || doc.data().photoURL || null,
           power: doc.data().power || 0,
           popularity: doc.data().popularity || 0,
           wins: doc.data().wins || 0,
-          displayName: doc.data().displayName || 'مستخدم',
           rank: doc.data().rank || 'عضو',
         }));
         setUsers(usersList);
@@ -82,6 +85,11 @@ export default function LeaderboardPage() {
         return list.sort((a, b) => (b.power + b.popularity) - (a.power + a.popularity));
     }
   }, [users, filter]);
+
+  // ===== التنقل إلى صفحة البروفايل =====
+  const handleUserClick = (userId) => {
+    navigate(`/profile/${userId}`);
+  };
 
   // ===== حالة التحميل =====
   if (loading) {
@@ -138,7 +146,19 @@ export default function LeaderboardPage() {
           <p className="leaderboard__empty">لا يوجد مستخدمون مسجلون بعد</p>
         ) : (
           sortedUsers.map((user, index) => (
-            <div key={user.id} className={getCardClass(index)}>
+            <div 
+              key={user.id} 
+              className={getCardClass(index)}
+              onClick={() => handleUserClick(user.id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleUserClick(user.id);
+                }
+              }}
+            >
               {/* المركز */}
               <div className="leaderboard__rank">
                 {getMedalIcon(index)}
@@ -147,13 +167,17 @@ export default function LeaderboardPage() {
 
               {/* الصورة الرمزية */}
               <div className="leaderboard__avatar">
-                <FiUser />
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="avatar-img" />
+                ) : (
+                  <FiUser />
+                )}
               </div>
 
               {/* معلومات المستخدم */}
               <div className="leaderboard__info">
                 <div className="leaderboard__name">
-                  {user.displayName}
+                  {user.name}
                   <span className="leaderboard__rank-badge">{user.rank}</span>
                 </div>
                 <div className="leaderboard__stats">
