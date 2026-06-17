@@ -1,4 +1,4 @@
-/* src/pages/UserPages/LeaderboardPage/LeaderboardPage.css */
+/* src/pages/User/LeaderboardPage/LeaderboardPage.css */
 .leaderboard-page {
   max-width: 820px;
   margin: 0 auto;
@@ -86,6 +86,7 @@
   border-radius: 14px;
   border: 1px solid transparent;
   transition: all 0.25s ease;
+  cursor: pointer;
 }
 
 .leaderboard__item:hover {
@@ -139,6 +140,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  overflow: hidden; /* ✅ يضمن اقتصاص الصورة بشكل دائري */
   background: var(--color-primary-alpha);
   display: flex;
   align-items: center;
@@ -148,6 +150,15 @@
   flex-shrink: 0;
 }
 
+/* ✅ تنسيق الصورة داخل الأفاتار */
+.leaderboard__avatar .avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ألوان خلفية الأفاتار للمراكز الأولى */
 .leaderboard__item.gold .leaderboard__avatar {
   background: #f1c40f33;
   color: #b7950b;
@@ -349,31 +360,14 @@
   background: #fdf2e9;
 }
 
-/* ===== الصورة الرمزية بشكل احترافي ===== */
-.leaderboard__avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--color-primary-alpha);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary);
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
+/* ✅ إضافة تأثير hover على الأفاتار */
 .leaderboard__item:hover .leaderboard__avatar {
   transform: scale(1.05);
 }
 
-/* تنسيق إضافي للبطاقات */
-.leaderboard__item {
-  transition: all 0.3s ease;
-}
-
-.leaderboard__item:hover {
-  transform: translateX(6px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+/* ✅ تنسيق الجوال للصورة */
+@media (max-width: 640px) {
+  .leaderboard__item:hover {
+    transform: translateX(2px);
+  }
 }
