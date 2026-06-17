@@ -16,8 +16,7 @@ export default function Layout() {
 
   // تحديد صفحة الدردشة لإخفاء الفوتر
   const location = useLocation();
-  const isChatPage = location.pathname === '/chat';
-
+  const isChatPage = location.pathname.startsWith('/chat');
   // حالات حجم الشاشة
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isMedium, setIsMedium] = useState(
@@ -77,7 +76,7 @@ export default function Layout() {
             <Outlet />
           </main>
           {!isChatPage && <Footer />}
-          <SupportButton />
+             {!isChatPage && <SupportButton />} 
         </div>
 
         {/* ===== السايدبار الأساسي (الأيمن) – يظهر كدرج على الجوال ===== */}

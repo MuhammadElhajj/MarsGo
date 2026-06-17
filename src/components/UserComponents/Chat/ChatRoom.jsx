@@ -3,7 +3,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
+import { 
+  collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
+  doc, getDoc, updateDoc, where 
+} from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 import Message from './Message';
@@ -34,31 +37,38 @@ export default function ChatRoom() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // جلب بيانات الغرفة
+  // ✅ جلب بيانات الغرفة باستخدام doc مباشرة
   useEffect(() => {
     if (!roomId) return;
-    const roomRef = collection(db, 'rooms');
-    const q = query(roomRef, where('id', '==', roomId));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
-        setRoom({ id: doc.id, ...doc.data() });
+
+    const roomRef = doc(db, 'rooms', roomId);
+    const unsubscribe = onSnapshot(roomRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setRoom({ id: docSnap.id, ...docSnap.data() });
       } else {
-        // غرفة غير موجودة
+        toast.error('الغرفة غير موجودة');
         navigate('/chat');
       }
+    }, (error) => {
+      console.error('خطأ في تحميل الغرفة:', error);
+      toast.error('حدث خطأ في تحميل المحادثة');
+      navigate('/chat');
     });
+
     return () => unsubscribe();
   }, [roomId, navigate]);
 
-  // جلب رسائل الغرفة
+  // ✅ جلب رسائل الغرفة
   useEffect(() => {
     if (!roomId) return;
+
+    const messagesRef = collection(db, 'messages');
     const q = query(
-      collection(db, 'messages'),
+      messagesRef,
       where('roomId', '==', roomId),
       orderBy('timestamp', 'asc')
     );
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -68,6 +78,7 @@ export default function ChatRoom() {
       setTimeout(() => scrollToBottom(), 100);
     }, (error) => {
       console.error('خطأ في تحميل الرسائل:', error);
+      toast.error('فشل تحميل الرسائل');
     });
 
     return () => unsubscribe();
@@ -77,12 +88,14 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
+  // ✅ إرسال رسالة + تحديث آخر رسالة
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || sending || !roomId) return;
 
     setSending(true);
     try {
+      // إضافة الرسالة
       await addDoc(collection(db, 'messages'), {
         roomId: roomId,
         uid: uid,
@@ -94,17 +107,14 @@ export default function ChatRoom() {
         power: power,
         rank: rank,
       });
-      // تحديث آخر رسالة في الغرفة
-      const roomRef = collection(db, 'rooms');
-      const q = query(roomRef, where('id', '==', roomId));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const docRef = snap.docs[0].ref;
-        await updateDoc(docRef, {
-          lastMessage: newMessage.trim(),
-          lastMessageTime: serverTimestamp(),
-        });
-      }
+
+      // ✅ تحديث آخر رسالة في الغرفة (باستخدام doc مباشرة)
+      const roomRef = doc(db, 'rooms', roomId);
+      await updateDoc(roomRef, {
+        lastMessage: newMessage.trim(),
+        lastMessageTime: serverTimestamp(),
+      });
+
       setNewMessage('');
       inputRef.current?.focus();
     } catch (error) {
@@ -122,8 +132,10 @@ export default function ChatRoom() {
   if (room.type === 'global') roomName = 'الدردشة العامة';
   else if (room.type === 'private') {
     const otherMember = room.members?.find(m => m !== uid);
-    // إذا كان لدينا أسماء مخزنة نستخدمها
+    // يمكننا جلب اسم المستخدم الآخر من userData المخزنة في الـ store، لكن سنكتفي بالاسم المخزن
     roomName = room.name || 'محادثة خاصة';
+  } else if (room.type === 'clan') {
+    roomName = room.name || 'المجموعة';
   }
 
   return (

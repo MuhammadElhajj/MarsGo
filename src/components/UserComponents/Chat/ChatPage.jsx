@@ -5,7 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useNavigate } from 'react-router-dom';
-import { FiMessageCircle, FiUsers, FiUser, FiPlus, FiSearch } from 'react-icons/fi';
+import { FiMessageCircle, FiPlus } from 'react-icons/fi';
 import './ChatPage.css';
 
 export default function ChatPage() {
@@ -29,11 +29,10 @@ export default function ChatPage() {
       const q = query(collection(db, 'rooms'), where('type', '==', 'global'));
       const snapshot = await getDocs(q);
       if (snapshot.empty) {
-        // إنشاء الغرفة العامة
         await setDoc(doc(db, 'rooms', 'global_room'), {
           type: 'global',
           name: 'الدردشة العامة',
-          members: [], // لا نضيف أعضاء، الجميع يمكنهم الانضمام
+          members: [],
           lastMessage: 'مرحباً بك في الدردشة العامة',
           lastMessageTime: serverTimestamp(),
           createdAt: serverTimestamp(),
@@ -70,52 +69,56 @@ export default function ChatPage() {
     // التأكد من وجود الغرفة العامة
     ensureGlobalRoom();
 
-    // جلب الغرف
+    // جلب الغرف الخاصة والعشائر (التي تحتوي على uid في members)
     const roomsRef = collection(db, 'rooms');
-    const q = query(
+    const privateQuery = query(
       roomsRef,
       where('members', 'array-contains', uid),
       orderBy('lastMessageTime', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const roomsList = snapshot.docs.map(doc => ({
+    const unsubscribePrivate = onSnapshot(privateQuery, async (snapshot) => {
+      const privateRooms = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      // إضافة الغرفة العامة إذا لم تكن موجودة في القائمة
-      const hasGlobal = roomsList.some(r => r.type === 'global');
-      if (!hasGlobal) {
-        // نحاول جلب الغرفة العامة بشكل منفصل (قد تكون موجودة لكن ليست في قائمة الـ members)
-        try {
-          const globalQ = query(collection(db, 'rooms'), where('type', '==', 'global'));
-          const globalSnap = await getDocs(globalQ);
-          if (!globalSnap.empty) {
-            const globalRoom = { id: globalSnap.docs[0].id, ...globalSnap.docs[0].data() };
-            // نضيفها إلى القائمة
-            roomsList.unshift(globalRoom);
-          }
-        } catch (error) {
-          console.error('خطأ في جلب الغرفة العامة:', error);
+      // جلب الغرفة العامة بشكل منفصل (بغض النظر عن members)
+      try {
+        const globalQuery = query(collection(db, 'rooms'), where('type', '==', 'global'));
+        const globalSnap = await getDocs(globalQuery);
+        let globalRoom = null;
+        if (!globalSnap.empty) {
+          globalRoom = { id: globalSnap.docs[0].id, ...globalSnap.docs[0].data() };
         }
-      }
 
-      // جمع الـ userIds من الغرف الخاصة لعرض أسمائهم
-      const privateRooms = roomsList.filter(r => r.type === 'private');
-      const userIds = privateRooms.flatMap(r => r.members || []).filter(id => id !== uid);
-      if (userIds.length > 0) {
-        await fetchUsersData(userIds);
-      }
+        // دمج القوائم: نضع الغرفة العامة في البداية إذا كانت موجودة
+        let roomsList = [];
+        if (globalRoom) {
+          roomsList.push(globalRoom);
+        }
+        roomsList = [...roomsList, ...privateRooms];
 
-      setRooms(roomsList);
-      setLoading(false);
+        // جمع الـ userIds من الغرف الخاصة لعرض أسمائهم
+        const privateRoomsList = roomsList.filter(r => r.type === 'private');
+        const userIds = privateRoomsList.flatMap(r => r.members || []).filter(id => id !== uid);
+        if (userIds.length > 0) {
+          await fetchUsersData(userIds);
+        }
+
+        setRooms(roomsList);
+        setLoading(false);
+      } catch (error) {
+        console.error('خطأ في جلب الغرفة العامة:', error);
+        setRooms(privateRooms);
+        setLoading(false);
+      }
     }, (error) => {
       console.error('خطأ في تحميل الغرف:', error);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsubscribePrivate();
   }, [uid]);
 
   const handleRoomClick = (roomId) => {
@@ -153,8 +156,8 @@ export default function ChatPage() {
 
             if (room.type === 'global') {
               displayName = 'الدردشة العامة';
+              imageUrl = null; // نستخدم الأفاتار الافتراضي
             } else if (room.type === 'private') {
-              // نبحث عن المستخدم الآخر لعرض اسمه
               const otherMemberId = room.members?.find(m => m !== uid);
               if (otherMemberId && usersMap[otherMemberId]) {
                 const otherUser = usersMap[otherMemberId];
