@@ -31,6 +31,7 @@ const PrivacyPolicy = lazy(() => import("./pages/User/PrivacyPolicy/PrivacyPolic
 import WheelPage from './components/UserComponents/WheelPage/WheelPage';
 import ChatPage from './components/UserComponents/Chat/ChatPage';
 // ==================== صفحات المدير (Admin) ====================
+import LeaderboardPage from './pages/User/LeaderboardPage/LeaderboardPage';
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
 const AdminUsersPage = lazy(() => import("./pages/Admin/AdminUsers"));
@@ -136,7 +137,8 @@ function App() {
           <Route path="/exchange" element={<ExchangePage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/about" element={<AboutPage />} />
+       
+       <Route path="/leaderboard" element={<LeaderboardPage />} />   <Route path="/about" element={<AboutPage />} />
          <Route path="/chat" element={<ChatPage />} />
          <Route path="/privacy-policy" element={<PrivacyPolicy />} /> <Route path="/topup" element={<TopUpPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
