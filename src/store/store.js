@@ -1,3 +1,4 @@
+
 // import { create } from 'zustand';
 // import { persist } from 'zustand/middleware';
 // import { doc, updateDoc, increment, onSnapshot, setDoc } from 'firebase/firestore';
@@ -17,7 +18,6 @@
 //       balance: 0,
 //       setBalance: (balance) => set({ balance }),
 
-//       // الاستماع لتغيرات الرصيد في الوقت الفعلي
 //       listenToBalance: (userId) => {
 //         if (!userId) return () => {};
 //         const userRef = doc(db, 'users', userId);
@@ -32,7 +32,6 @@
 //         return unsubscribe;
 //       },
 
-//       // ========== دوال خصم وإضافة الرصيد مع تحديث Firestore ==========
 //       deductBalance: async (amountUSD) => {
 //         const { user, balance, setBalance } = get();
 //         if (!user) {
@@ -71,48 +70,42 @@
 //         }
 //       },
 
-//       // ========== العملة ==========
 //       currency: 'USD',
 //       toggleCurrency: () => set((state) => ({ currency: state.currency === 'USD' ? 'SYP' : 'USD' })),
 
-//       // ========== الثيم ==========
 //       isDark: false,
 //       toggleTheme: () => set((state) => ({ isDark: !state.isDark })),
 
 //       // ========== سعر الصرف ==========
-//  // ========== سعر الصرف ==========
-// exchangeRate: 145,
-// setExchangeRate: (rate) => set({ exchangeRate: rate }),
+//       exchangeRate: 145,
+//       setExchangeRate: (rate) => set({ exchangeRate: rate }),
+//       listenToExchangeRate: () => {
+//         const unsub = onSnapshot(doc(db, 'exchangeRate', 'default'), (docSnap) => {
+//           if (docSnap.exists()) {
+//             const data = docSnap.data();
+//             if (data.value) {
+//               get().setExchangeRate(data.value);
+//             }
+//           }
+//         }, (error) => {
+//           console.error('خطأ في الاستماع لسعر الصرف:', error);
+//         });
+//         return unsub;
+//       },
 
-// // الاستماع لتغيرات سعر الصرف في الوقت الفعلي (من Firestore)
-// listenToExchangeRate: () => {
-//   const unsub = onSnapshot(doc(db, 'exchangeRate', 'default'), (docSnap) => {
-//     if (docSnap.exists()) {
-//       const data = docSnap.data();
-//       if (data.value) {
-//         get().setExchangeRate(data.value);
-//       }
-//     }
-//   }, (error) => {
-//     console.error('خطأ في الاستماع لسعر الصرف:', error);
-//   });
-//   return unsub;
-// },
-
-// // ========== إعدادات الإيداع ==========
-// listenToTopUpSettings: () => {
-//   const unsub = onSnapshot(doc(db, 'topUpSettings', 'default'), (docSnap) => {
-//     if (docSnap.exists()) {
-//       get().setTopUpSettings(docSnap.data());
-//     } else {
-//       // يمكنك إنشاء إعدادات افتراضية هنا إذا أردت
-//       get().setTopUpSettings(null);
-//     }
-//   }, (error) => {
-//     console.error('خطأ في الاستماع لإعدادات الإيداع:', error);
-//   });
-//   return unsub;
-// },
+//       // ========== إعدادات الإيداع ==========
+//       listenToTopUpSettings: () => {
+//         const unsub = onSnapshot(doc(db, 'topUpSettings', 'default'), (docSnap) => {
+//           if (docSnap.exists()) {
+//             get().setTopUpSettings(docSnap.data());
+//           } else {
+//             get().setTopUpSettings(null);
+//           }
+//         }, (error) => {
+//           console.error('خطأ في الاستماع لإعدادات الإيداع:', error);
+//         });
+//         return unsub;
+//       },
 
 //       // ========== الإشعارات ==========
 //       notifications: [],
@@ -137,8 +130,6 @@
 //       // ========== الألعاب ==========
 //       games: [],
 //       setGames: (games) => set({ games }),
-
-//       // ========== دوال إدارة الألعاب ==========
 //       loading: false,
 //       setLoading: (loading) => set({ loading }),
 
@@ -188,48 +179,43 @@
 //         }
 //       },
 
-//    deleteGame: async (id) => {
-//   const { games, setGames } = get();
-//   try {
-//     const { doc, deleteDoc, collection, getDocs } = await import('firebase/firestore');
-//     const { db } = await import('../firebase');
-    
-//     // 1. حذف اللعبة نفسها
-//     const gameRef = doc(db, 'games', id);
-//     await deleteDoc(gameRef);
-    
-//     // 2. حذف المحتوى المرتبط بها (gameContent)
-//     try {
-//       const contentRef = doc(db, 'gameContent', id);
-//       await deleteDoc(contentRef);
-//     } catch (contentErr) {
-//       // تجاهل إذا لم توجد وثيقة المحتوى
-//       console.log('No gameContent found for this game, skipping.');
-//     }
-    
-//     // 3. (اختياري) حذف جميع الباقات المرتبطة باللعبة
-//     try {
-//       const packagesRef = collection(db, 'games', id, 'packages');
-//       const packagesSnap = await getDocs(packagesRef);
-//       const deletePromises = packagesSnap.docs.map(docSnap => 
-//         deleteDoc(doc(db, 'games', id, 'packages', docSnap.id))
-//       );
-//       await Promise.all(deletePromises);
-//     } catch (pkgErr) {
-//       console.log('No packages found or error deleting packages:', pkgErr);
-//     }
-    
-//     // 4. تحديث الـ state بحذف اللعبة من القائمة
-//     const filteredGames = games.filter(g => g.id !== id);
-//     setGames(filteredGames);
-//     return true;
-//   } catch (error) {
-//     console.error('Error deleting game:', error);
-//     return false;
-//   }
-// },
+//       deleteGame: async (id) => {
+//         const { games, setGames } = get();
+//         try {
+//           const { doc, deleteDoc, collection, getDocs } = await import('firebase/firestore');
+//           const { db } = await import('../firebase');
+          
+//           const gameRef = doc(db, 'games', id);
+//           await deleteDoc(gameRef);
+          
+//           try {
+//             const contentRef = doc(db, 'gameContent', id);
+//             await deleteDoc(contentRef);
+//           } catch (contentErr) {
+//             console.log('No gameContent found for this game, skipping.');
+//           }
+          
+//           try {
+//             const packagesRef = collection(db, 'games', id, 'packages');
+//             const packagesSnap = await getDocs(packagesRef);
+//             const deletePromises = packagesSnap.docs.map(docSnap => 
+//               deleteDoc(doc(db, 'games', id, 'packages', docSnap.id))
+//             );
+//             await Promise.all(deletePromises);
+//           } catch (pkgErr) {
+//             console.log('No packages found or error deleting packages:', pkgErr);
+//           }
+          
+//           const filteredGames = games.filter(g => g.id !== id);
+//           setGames(filteredGames);
+//           return true;
+//         } catch (error) {
+//           console.error('Error deleting game:', error);
+//           return false;
+//         }
+//       },
 
-//       // ===== دوال باقات الألعاب (مكتملة) =====
+//       // ===== دوال باقات الألعاب =====
 //       fetchGamePackages: async (gameId) => {
 //         try {
 //           const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
@@ -288,6 +274,36 @@
 //         }
 //       },
 
+//       // ===== محتوى إضافي للألعاب =====
+//       fetchGameContent: async (gameId) => {
+//         try {
+//           const { doc, getDoc } = await import('firebase/firestore');
+//           const { db } = await import('../firebase');
+//           const docRef = doc(db, 'gameContent', gameId);
+//           const docSnap = await getDoc(docRef);
+//           if (docSnap.exists()) return docSnap.data();
+//           return null;
+//         } catch (error) {
+//           console.error('Error fetching game content:', error);
+//           return null;
+//         }
+//       },
+
+//       updateGameContent: async (gameId, contentData) => {
+//         try {
+//           const { doc, setDoc } = await import('firebase/firestore');
+//           const { db } = await import('../firebase');
+//           await setDoc(doc(db, 'gameContent', gameId), {
+//             ...contentData,
+//             updatedAt: new Date().toISOString(),
+//           }, { merge: true });
+//           return true;
+//         } catch (error) {
+//           console.error('Error updating game content:', error);
+//           return false;
+//         }
+//       },
+
 //       // ========== التطبيقات ==========
 //       apps: [],
 //       setApps: (apps) => set({ apps }),
@@ -326,10 +342,30 @@
 //       deleteApp: async (id) => {
 //         const { apps, setApps } = get();
 //         try {
-//           const { doc, deleteDoc } = await import('firebase/firestore');
+//           const { doc, deleteDoc, collection, getDocs } = await import('firebase/firestore');
 //           const { db } = await import('../firebase');
+          
 //           const appRef = doc(db, 'apps', id);
 //           await deleteDoc(appRef);
+          
+//           try {
+//             const contentRef = doc(db, 'appContent', id);
+//             await deleteDoc(contentRef);
+//           } catch (contentErr) {
+//             console.log('No appContent found for this app, skipping.');
+//           }
+          
+//           try {
+//             const packagesRef = collection(db, 'apps', id, 'packages');
+//             const packagesSnap = await getDocs(packagesRef);
+//             const deletePromises = packagesSnap.docs.map(docSnap => 
+//               deleteDoc(doc(db, 'apps', id, 'packages', docSnap.id))
+//             );
+//             await Promise.all(deletePromises);
+//           } catch (pkgErr) {
+//             console.log('No packages found or error deleting packages:', pkgErr);
+//           }
+          
 //           const filteredApps = apps.filter(a => a.id !== id);
 //           setApps(filteredApps);
 //           return true;
@@ -339,7 +375,7 @@
 //         }
 //       },
 
-//       // ===== دوال باقات التطبيقات (مكتملة) =====
+//       // ===== دوال باقات التطبيقات =====
 //       fetchAppPackages: async (appId) => {
 //         try {
 //           const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
@@ -385,7 +421,7 @@
 //         }
 //       },
 
-//           deleteAppPackage: async (appId, packageId) => {
+//       deleteAppPackage: async (appId, packageId) => {
 //         try {
 //           const { doc, deleteDoc } = await import('firebase/firestore');
 //           const { db } = await import('../firebase');
@@ -398,9 +434,35 @@
 //         }
 //       },
 
-//       // ========== الخدمات ==========
-//       services: [],
-//       setServices: (services) => set({ services }),
+//       // ===== محتوى إضافي للتطبيقات =====
+//       fetchAppContent: async (appId) => {
+//         try {
+//           const { doc, getDoc } = await import('firebase/firestore');
+//           const { db } = await import('../firebase');
+//           const docRef = doc(db, 'appContent', appId);
+//           const docSnap = await getDoc(docRef);
+//           if (docSnap.exists()) return docSnap.data();
+//           return null;
+//         } catch (error) {
+//           console.error('Error fetching app content:', error);
+//           return null;
+//         }
+//       },
+
+//       updateAppContent: async (appId, contentData) => {
+//         try {
+//           const { doc, setDoc } = await import('firebase/firestore');
+//           const { db } = await import('../firebase');
+//           await setDoc(doc(db, 'appContent', appId), {
+//             ...contentData,
+//             updatedAt: new Date().toISOString(),
+//           }, { merge: true });
+//           return true;
+//         } catch (error) {
+//           console.error('Error updating app content:', error);
+//           return false;
+//         }
+//       },
 
 //       // ========== الخدمات ==========
 //       services: [],
@@ -428,7 +490,6 @@
 //         return discount;
 //       },
 
-//       // ========== خصم التجار ==========
 //       merchantDiscountPercent: 0,
 //       setMerchantDiscountPercent: (percent) => set({ merchantDiscountPercent: percent }),
 //       getMerchantDiscountPercent: () => {
@@ -458,15 +519,12 @@
 //       topUpSettings: null,
 //       setTopUpSettings: (settings) => set({ topUpSettings: settings }),
 
-//       // ========== إعدادات المتجر (صور الخلفية، إلخ) ==========
 //       storeSettings: null,
 //       setStoreSettings: (settings) => set({ storeSettings: settings }),
 
-//       // ========== إعدادات الدفع (QR، حساب بنكي) ==========
 //       paymentSettings: null,
 //       setPaymentSettings: (settings) => set({ paymentSettings: settings }),
 
-//       // ========== شريط الأخبار المتحرك (Ticker) ==========
 //       tickerSettings: null,
 //       setTickerSettings: (settings) => set({ tickerSettings: settings }),
 
@@ -505,11 +563,26 @@
 //   )
 // );
 
+
+
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { doc, updateDoc, increment, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import toast from 'react-hot-toast';
+
+// ===== جدول جوائز الدولاب (بالنسب المئوية) =====
+const WHEEL_PRIZES = [
+  { value: 0.5, weight: 35 },
+  { value: 0.5, weight: 35 }, // 0.5 تظهر أكثر
+  { value: 1.5, weight: 15 },
+  { value: 3, weight: 8 },
+  { value: 7, weight: 4 },
+  { value: 15, weight: 2 },
+  { value: 50, weight: 0.8 },
+  { value: 500, weight: 0.2 },
+];
 
 export const useAppStore = create(
   persist(
@@ -518,8 +591,17 @@ export const useAppStore = create(
       user: null,
       userData: null,
       setUser: (user) => set({ user }),
-      setUserData: (data) => set({ userData: data }),
-
+      setUserData: (data) => set({
+        userData: data,
+        user: data?.user || data,
+        balance: data?.balance || 0,
+      }),
+      // ✅ الدالة الجديدة: تحديث كل شيء دفعة واحدة
+      setUserFull: (userData) => set({
+        user: userData,
+        userData: userData,
+        balance: userData?.balance || 0,
+      }),
       // ========== الرصيد ==========
       balance: 0,
       setBalance: (balance) => set({ balance }),
@@ -538,21 +620,22 @@ export const useAppStore = create(
         return unsubscribe;
       },
 
-      deductBalance: async (amountUSD) => {
+      // ===== دالة الخصم (للـ MGC) =====
+      deductBalance: async (amountMGC) => {
         const { user, balance, setBalance } = get();
         if (!user) {
           toast.error('يجب تسجيل الدخول أولاً');
           return false;
         }
-        if (balance < amountUSD) {
-          toast.error('رصيد غير كافٍ، يرجى شحن الرصيد أولاً');
+        if (balance < amountMGC) {
+          toast.error(`رصيد غير كافٍ، تحتاج ${amountMGC} MGC`);
           return false;
         }
         try {
           const userRef = doc(db, 'users', user.uid);
-          await updateDoc(userRef, { balance: increment(-amountUSD) });
-          setBalance(balance - amountUSD);
-          toast.success(`تم خصم ${amountUSD.toFixed(2)} $ من رصيدك`);
+          await updateDoc(userRef, { balance: increment(-amountMGC) });
+          setBalance(balance - amountMGC);
+          toast.success(`تم خصم ${amountMGC.toFixed(2)} MGC من رصيدك`);
           return true;
         } catch (error) {
           console.error('فشل الخصم:', error);
@@ -561,28 +644,116 @@ export const useAppStore = create(
         }
       },
 
-      addBalance: async (userId, amountUSD) => {
+      // ===== دالة إضافة الرصيد (للـ MGC) =====
+      addBalance: async (userId, amountMGC) => {
+        if (amountMGC <= 0) return false;
         try {
           const userRef = doc(db, 'users', userId);
-          await updateDoc(userRef, { balance: increment(amountUSD) });
+          await updateDoc(userRef, { balance: increment(amountMGC) });
           const { user, balance, setBalance } = get();
           if (user && user.uid === userId) {
-            setBalance(balance + amountUSD);
+            setBalance(balance + amountMGC);
           }
+          toast.success(`تم إضافة ${amountMGC.toFixed(2)} MGC إلى رصيدك`);
           return true;
         } catch (error) {
           console.error('فشل إضافة الرصيد:', error);
+          toast.error('حدث خطأ أثناء إضافة الرصيد');
           return false;
         }
       },
 
+      // ===== دالة الحصول على الرصيد الحالي =====
+      getBalance: () => {
+        const { balance } = get();
+        return balance;
+      },
+
+      // ===== دالة الدولاب =====
+      spinWheel: async () => {
+        const { user, balance, deductBalance, addBalance } = get();
+        const SPIN_COST = 0.25;
+
+        if (!user) {
+          toast.error('يجب تسجيل الدخول أولاً');
+          return { success: false, prize: null, message: 'يجب تسجيل الدخول' };
+        }
+
+        if (balance < SPIN_COST) {
+          toast.error(`رصيد غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+          return { success: false, prize: null, message: 'رصيد غير كافٍ' };
+        }
+
+        // اختيار الجائزة وفق النسب
+        const getRandomPrize = () => {
+          const totalWeight = WHEEL_PRIZES.reduce((sum, p) => sum + p.weight, 0);
+          let random = Math.random() * totalWeight;
+          for (const prize of WHEEL_PRIZES) {
+            random -= prize.weight;
+            if (random <= 0) return prize.value;
+          }
+          return WHEEL_PRIZES[0].value;
+        };
+
+        const prize = getRandomPrize();
+
+        // خصم تكلفة الدخول
+        const deductSuccess = await deductBalance(SPIN_COST);
+        if (!deductSuccess) {
+          return { success: false, prize: null, message: 'فشل الخصم' };
+        }
+
+        // إضافة الجائزة إذا كانت أكبر من 0
+        if (prize > 0) {
+          const addSuccess = await addBalance(user.uid, prize);
+          if (!addSuccess) {
+            toast.error('فشل إضافة الجائزة، يرجى التواصل مع الدعم');
+            return { success: false, prize: null, message: 'فشل إضافة الجائزة' };
+          }
+        }
+
+        // تسجيل الحدث في قاعدة البيانات (اختياري)
+        try {
+          const { collection, addDoc } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          await addDoc(collection(db, 'wheelHistory'), {
+            userId: user.uid,
+            username: user.displayName || 'مستخدم',
+            prize: prize,
+            cost: SPIN_COST,
+            timestamp: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.warn('فشل تسجيل تاريخ الدوران:', error);
+        }
+
+        return { success: true, prize };
+      },
+
+      // ===== دالة جلب تاريخ الدولاب (للإدارة أو للمستخدم) =====
+      fetchWheelHistory: async (userId = null) => {
+        try {
+          const { collection, getDocs, query, where, orderBy, limit } = await import('firebase/firestore');
+          const { db } = await import('../firebase');
+          let q = query(collection(db, 'wheelHistory'), orderBy('timestamp', 'desc'), limit(50));
+          if (userId) {
+            q = query(q, where('userId', '==', userId));
+          }
+          const snapshot = await getDocs(q);
+          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+          console.error('فشل جلب تاريخ الدولاب:', error);
+          return [];
+        }
+      },
+
+      // ========== باقي الدوال كما هي ==========
       currency: 'USD',
       toggleCurrency: () => set((state) => ({ currency: state.currency === 'USD' ? 'SYP' : 'USD' })),
 
       isDark: false,
       toggleTheme: () => set((state) => ({ isDark: !state.isDark })),
 
-      // ========== سعر الصرف ==========
       exchangeRate: 145,
       setExchangeRate: (rate) => set({ exchangeRate: rate }),
       listenToExchangeRate: () => {
@@ -599,7 +770,6 @@ export const useAppStore = create(
         return unsub;
       },
 
-      // ========== إعدادات الإيداع ==========
       listenToTopUpSettings: () => {
         const unsub = onSnapshot(doc(db, 'topUpSettings', 'default'), (docSnap) => {
           if (docSnap.exists()) {
@@ -613,7 +783,6 @@ export const useAppStore = create(
         return unsub;
       },
 
-      // ========== الإشعارات ==========
       notifications: [],
       unreadCount: 0,
       setNotifications: (notifications) => set({ 
@@ -633,7 +802,6 @@ export const useAppStore = create(
         return { notifications: newNotifs, unreadCount: 0 };
       }),
 
-      // ========== الألعاب ==========
       games: [],
       setGames: (games) => set({ games }),
       loading: false,
@@ -721,7 +889,6 @@ export const useAppStore = create(
         }
       },
 
-      // ===== دوال باقات الألعاب =====
       fetchGamePackages: async (gameId) => {
         try {
           const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
@@ -780,7 +947,6 @@ export const useAppStore = create(
         }
       },
 
-      // ===== محتوى إضافي للألعاب =====
       fetchGameContent: async (gameId) => {
         try {
           const { doc, getDoc } = await import('firebase/firestore');
@@ -810,7 +976,6 @@ export const useAppStore = create(
         }
       },
 
-      // ========== التطبيقات ==========
       apps: [],
       setApps: (apps) => set({ apps }),
 
@@ -881,7 +1046,6 @@ export const useAppStore = create(
         }
       },
 
-      // ===== دوال باقات التطبيقات =====
       fetchAppPackages: async (appId) => {
         try {
           const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
@@ -940,7 +1104,6 @@ export const useAppStore = create(
         }
       },
 
-      // ===== محتوى إضافي للتطبيقات =====
       fetchAppContent: async (appId) => {
         try {
           const { doc, getDoc } = await import('firebase/firestore');
@@ -970,15 +1133,12 @@ export const useAppStore = create(
         }
       },
 
-      // ========== الخدمات ==========
       services: [],
       setServices: (services) => set({ services }),
 
-      // ========== روابط التنقل ==========
       navLinks: [],
       setNavLinks: (links) => set({ navLinks: links }),
 
-      // ========== الخصومات العامة والخاصة ==========
       discounts: { games: 0, apps: 0, specific: {} },
       setDiscounts: (discounts) => set({ discounts }),
       getProductDiscount: (type, productId) => {
@@ -1003,7 +1163,6 @@ export const useAppStore = create(
         return state.userData?.customerType === 'merchant' ? state.merchantDiscountPercent : 0;
       },
 
-      // ========== إعدادات الإيداع (TopUp) ==========
       updateTopUpSettings: async (settings) => {
         try {
           const docRef = doc(db, 'topUpSettings', 'default');
@@ -1034,7 +1193,6 @@ export const useAppStore = create(
       tickerSettings: null,
       setTickerSettings: (settings) => set({ tickerSettings: settings }),
 
-      // ========== المنتجات الديناميكية ==========
       products: [],
       loadingProducts: false,
       setProducts: (products) => set({ products }),
@@ -1064,6 +1222,8 @@ export const useAppStore = create(
         currency: state.currency,
         isDark: state.isDark,
         userData: state.userData,
+        user: state.user,
+        balance: state.balance,
       }),
     }
   )

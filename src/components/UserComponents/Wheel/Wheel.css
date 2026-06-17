@@ -1,0 +1,153 @@
+/* src/components/UserComponents/Wheel/Wheel.css */
+.wheel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.wheel-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1/1;
+}
+
+.wheel-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(233, 69, 96, 0.3), 0 0 60px rgba(233, 69, 96, 0.1);
+}
+
+/* المؤشر الثابت (السهم) */
+.wheel-pointer {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.5rem;
+  color: #e94560;
+  text-shadow: 0 0 20px rgba(233, 69, 96, 0.8);
+  z-index: 10;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  line-height: 1;
+}
+
+/* زر الدوران */
+.wheel-spin-btn {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.8rem 2.5rem;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #e94560, #c23152);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+  z-index: 10;
+  white-space: nowrap;
+  font-family: 'Cairo', sans-serif;
+}
+
+.wheel-spin-btn:hover:not(:disabled) {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 6px 25px rgba(233, 69, 96, 0.6);
+}
+
+.wheel-spin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: translateX(-50%) scale(0.95);
+}
+
+/* نتيجة الدوران */
+.wheel-result {
+  margin-top: 1.5rem;
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  animation: popIn 0.5s ease;
+  text-align: center;
+  width: 100%;
+  max-width: 350px;
+}
+
+.wheel-result.win {
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ed573;
+  border: 1px solid #2ed573;
+}
+
+.wheel-result.lose {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+}
+
+/* معلومات إضافية */
+.wheel-info {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem 1.5rem;
+  background: var(--color-bg-secondary);
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  width: 100%;
+  max-width: 400px;
+}
+
+.wheel-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.wheel-info strong {
+  color: var(--color-primary);
+}
+
+/* تأثير الظهور */
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* استجابة للجوال */
+@media (max-width: 480px) {
+  .wheel-wrapper {
+    max-width: 300px;
+  }
+  .wheel-pointer {
+    font-size: 2rem;
+    top: -8px;
+  }
+  .wheel-spin-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
+    bottom: -15px;
+  }
+  .wheel-info p {
+    font-size: 0.8rem;
+  }
+  .wheel-result {
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+}

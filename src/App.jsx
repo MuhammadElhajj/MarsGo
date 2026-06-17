@@ -28,7 +28,8 @@ const CatalogPage = lazy(() => import("./pages/User/Catalog/CatalogPage"));
 const CategoryProductsPage = lazy(() => import("./pages/User/CategoryProductsPage/CategoryProductsPage"));
 const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePackagesPage"));
 const PrivacyPolicy = lazy(() => import("./pages/User/PrivacyPolicy/PrivacyPolicy"));
-
+import WheelPage from './components/UserComponents/WheelPage/WheelPage';
+import ChatPage from './components/UserComponents/Chat/ChatPage';
 // ==================== صفحات المدير (Admin) ====================
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
@@ -129,13 +130,14 @@ function App() {
           <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+        
+        <Route path="/wheel" element={<WheelPage />} />  <Route path="/profile" element={<ProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
           <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/about" element={<AboutPage />} />
-         
+         <Route path="/chat" element={<ChatPage />} />
          <Route path="/privacy-policy" element={<PrivacyPolicy />} /> <Route path="/topup" element={<TopUpPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
 <Route path="/category/:categoryId" element={<CategoryProductsPage />} />

@@ -1,0 +1,59 @@
+/* ===== الشريط السفلي للجوال ===== */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  padding: 0.4rem 0 env(safe-area-inset-bottom);
+  z-index: 50;
+  height: 65px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+  gap: 2px;
+  padding: 0.2rem 0.5rem;
+  min-width: 50px;
+  flex: 1;
+  font-size: 0.7rem;
+  position: relative;
+}
+
+.mobile-nav__item--active {
+  color: var(--color-primary);
+}
+
+.mobile-nav__item--active .mobile-nav__icon {
+  transform: scale(1.1);
+}
+
+.mobile-nav__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.mobile-nav__label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ===== دعم للشاشات التي بها نوتش ===== */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .mobile-nav {
+    padding-bottom: calc(0.4rem + env(safe-area-inset-bottom));
+  }
+}
