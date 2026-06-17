@@ -3,9 +3,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
-import { useTopUpSettings } from '../../context/TopUpSettingsContext';
-import { useNotifications } from '../../context/NotificationContext'; // إضافة
-import { useBalance } from '../../context/BalanceContext';
+import { useAppStore } from '../../store/store'; // ✅ استخدم الـ store بدلاً من السياق
 import Button from '../../components/GeneralComponents/Button/Button';
 import Loading from '../../components/GeneralComponents/Loading/Loading';
 import { showToast } from '../../components/GeneralComponents/ToastNotification/ToastNotification';
@@ -13,9 +11,12 @@ import './FinanceTopUpRequests.css';
 
 export default function FinanceTopUpRequests() {
   const { userData } = useAuth();
-  const { settings: topUpSettings, loading: settingsLoading } = useTopUpSettings();
-  const { addBalance } = useBalance();
-  const { addNotification } = useNotifications(); // إضافة
+  
+  // ✅ جلب الإعدادات من الـ store بدلاً من السياق
+  const topUpSettings = useAppStore((state) => state.topUpSettings);
+  const addBalance = useAppStore((state) => state.addBalance); // addBalance الآن يضيف للرصيد الحقيقي
+  const addNotification = useAppStore((state) => state.addNotification);
+  
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -38,26 +39,26 @@ export default function FinanceTopUpRequests() {
     if (!window.confirm(`تأكيد الموافقة على طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $؟`)) return;
     setActionLoading(request.id);
     try {
-      // إضافة الرصيد للمستخدم
+      // ✅ إضافة الرصيد الحقيقي للمستخدم (addBalance الآن يضيف للرصيد الحقيقي)
       const balanceAdded = await addBalance(request.userId, request.amount);
       if (!balanceAdded) throw new Error('فشل إضافة الرصيد');
 
-      // تحديث حالة الطلب
       await updateDoc(doc(db, 'topUpRequests', request.id), {
         status: 'approved',
         approvedBy: userData.uid,
         approvedAt: new Date(),
       });
 
-      // ✅ إشعار للمستخدم بنجاح الإيداع
-      await addNotification(
-        request.userId,
-        '💰 تم شحن رصيدك',
-        `تمت الموافقة على طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $ وتم إضافتها إلى رصيدك.`,
-        'order_completed', // أو نوع خاص topup_approved
-        request.id,
-        '/profile'
-      );
+      await addNotification({
+        userId: request.userId,
+        title: '💰 تم شحن رصيدك',
+        message: `تمت الموافقة على طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $ وتم إضافتها إلى رصيدك.`,
+        type: 'order_completed',
+        orderId: request.id,
+        link: '/profile',
+        read: false,
+        createdAt: new Date(),
+      });
 
       showToast(`✅ تمت الموافقة على الإيداع وإضافة ${request.amount} $ إلى رصيد العميل`, 'success');
     } catch (err) {
@@ -79,15 +80,16 @@ export default function FinanceTopUpRequests() {
         rejectReason: reason || '',
       });
 
-      // ✅ إشعار للمستخدم برفض الإيداع
-      await addNotification(
-        request.userId,
-        '❌ تم رفض طلب الإيداع',
-        `تم رفض طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $${reason ? ` السبب: ${reason}` : ''}.`,
-        'order_rejected',
-        request.id,
-        '/profile'
-      );
+      await addNotification({
+        userId: request.userId,
+        title: '❌ تم رفض طلب الإيداع',
+        message: `تم رفض طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $${reason ? ` السبب: ${reason}` : ''}.`,
+        type: 'order_rejected',
+        orderId: request.id,
+        link: '/profile',
+        read: false,
+        createdAt: new Date(),
+      });
 
       showToast(`❌ تم رفض طلب الإيداع #${request.id.slice(-6)}`, 'success');
     } catch (err) {
@@ -98,7 +100,7 @@ export default function FinanceTopUpRequests() {
     }
   };
 
-  if (settingsLoading || loading) return <Loading text="جاري تحميل طلبات الإيداع..." />;
+  if (loading) return <Loading text="جاري تحميل طلبات الإيداع..." />;
 
   return (
     <div className="finance-topup" dir="rtl">
