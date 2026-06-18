@@ -553,14 +553,14 @@ sendFriendRequest: async (toUserId) => {
 
 // ===== قبول طلب الصداقة =====
 // ===== قبول طلب الصداقة =====
-acceptFriendRequest: async (requestId, fromUserId, fromUserName) => {
+// ===== قبول طلب الصداقة =====
+acceptFriendRequest: async (requestId) => {
   const { user, userData } = get();
   if (!user) {
     toast.error('يجب تسجيل الدخول');
     return false;
   }
   try {
-    // جلب وثيقة الطلب للتأكد من صلاحيات المستخدم الحالي
     const requestRef = doc(db, 'friendRequests', requestId);
     const requestSnap = await getDoc(requestRef);
     if (!requestSnap.exists()) {
@@ -568,7 +568,6 @@ acceptFriendRequest: async (requestId, fromUserId, fromUserName) => {
       return false;
     }
     const requestData = requestSnap.data();
-    // التأكد من أن المستخدم الحالي هو المستهدف
     if (requestData.to !== user.uid) {
       toast.error('هذا الطلب ليس موجه لك');
       return false;
@@ -577,6 +576,8 @@ acceptFriendRequest: async (requestId, fromUserId, fromUserName) => {
       toast.error('تمت معالجة هذا الطلب مسبقاً');
       return false;
     }
+    const fromUserId = requestData.from;
+
     // تحديث الطلب إلى مقبول
     await updateDoc(requestRef, { status: 'accepted' });
 
@@ -584,24 +585,34 @@ acceptFriendRequest: async (requestId, fromUserId, fromUserName) => {
     const otherUserSnap = await getDoc(doc(db, 'users', fromUserId));
     const otherUserData = otherUserSnap.data();
 
+    // التأكد من أن friends موجودة كمصفوفة
+    const currentFriends = Array.isArray(userData?.friends) ? userData.friends : [];
+    const otherFriends = Array.isArray(otherUserData?.friends) ? otherUserData.friends : [];
+
     // تحديث قائمة الأصدقاء لكلا الطرفين
     const batch = writeBatch(db);
     batch.update(doc(db, 'users', user.uid), {
-      friends: [...(userData?.friends || []), fromUserId]
+      friends: [...currentFriends, fromUserId]
     });
     batch.update(doc(db, 'users', fromUserId), {
-      friends: [...(otherUserData?.friends || []), user.uid]
+      friends: [...otherFriends, user.uid]
     });
     await batch.commit();
 
-    // تحديث الحالة المحلية
-    const { friendRequests, friendsList } = get();
-    const newFriendsList = [...friendsList, { id: fromUserId, ...otherUserData }];
+    // تحديث الحالة المحلية (userData و friendsList)
+    const newFriendsList = [...(get().friendsList || []), { id: fromUserId, ...otherUserData }];
+    const newUserData = {
+      ...userData,
+      friends: [...currentFriends, fromUserId]
+    };
+
     set({
-      friendRequests: friendRequests.filter(r => r.id !== requestId),
+      userData: newUserData,                 // ✅ تحديث userData في الـ Store
       friendsList: newFriendsList,
+      friendRequests: get().friendRequests.filter(r => r.id !== requestId),
       pendingRequestsCount: Math.max(0, get().pendingRequestsCount - 1),
     });
+
     toast.success('تم قبول الصداقة');
     return true;
   } catch (error) {

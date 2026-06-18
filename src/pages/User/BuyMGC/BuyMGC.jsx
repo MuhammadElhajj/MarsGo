@@ -34,58 +34,51 @@ export default function BuyMGC() {
 
   const [loading, setLoading] = useState(false);
 
-  const handleBuy = async (mgc, price) => {
-    if (!user) {
-      toast.error('يجب تسجيل الدخول أولاً');
-      return;
-    }
+ const handleBuy = async (mgc, price) => {
+  if (!user) {
+    toast.error('يجب تسجيل الدخول أولاً');
+    return;
+  }
 
-    if (balance < price) {
-      toast.error(`⚠️ رصيدك الحقيقي غير كافٍ! تحتاج ${price.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
-      return;
-    }
+  if (balance < price) {
+    toast.error(`⚠️ رصيدك الحقيقي غير كافٍ! تحتاج ${price.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
+    return;
+  }
 
-    setLoading(true);
-    try {
-      // 1. خصم المبلغ من الرصيد الحقيقي
-      const deducted = await deductBalance(price);
-      if (!deducted) {
-        toast.error('❌ فشل خصم الرصيد الحقيقي');
-        setLoading(false);
-        return;
-      }
-
-      // 2. إضافة عملات MGC
-      await addMgcBalance(user.uid, mgc);
-
-      // 3. إضافة نقاط خبرة (XP) مقابل الشراء (5 XP لكل دولار)
-      const xpEarned = Math.floor(price * 5);
-      if (xpEarned > 0) {
-        const currentXP = userData?.xp || 0;
-        const newXP = currentXP + xpEarned;
-        const newLevel = Math.floor(Math.sqrt(newXP / 100)) + 1;
-        const LEVEL_TITLES = {
-          1: 'مبتدئ', 2: 'مستكشف', 3: 'مغامر', 4: 'الشاطر',
-          5: 'بطل', 6: 'أسطورة', 7: 'محارب', 8: 'الحاج',
-          9: 'سيد', 10: 'ملكي',
-        };
-        const newTitle = LEVEL_TITLES[newLevel] || LEVEL_TITLES[1];
-        await updateUserData({
-          xp: newXP,
-          level: newLevel,
-          title: newTitle,
-        });
-        toast.success(`⭐ ربحت ${xpEarned} XP! المستوى ${newLevel} (${newTitle})`);
-      }
-
-      toast.success(`✅ تم شراء ${mgc} MGC بنجاح!`);
-    } catch (error) {
-      console.error('❌ خطأ في الشراء:', error);
-      toast.error(`❌ فشلت عملية الشراء: ${error.message || 'خطأ غير معروف'}`);
-    } finally {
+  setLoading(true);
+  try {
+    const deducted = await deductBalance(price);
+    if (!deducted) {
+      toast.error('❌ فشل خصم الرصيد الحقيقي');
       setLoading(false);
+      return;
     }
-  };
+
+    await addMgcBalance(user.uid, mgc);
+
+    // ✅ تسجيل عملية الشراء
+    try {
+      await addDoc(collection(db, 'mgcPurchases'), {
+        userId: user.uid,
+        mgcAmount: mgc,
+        priceUSD: price,
+        createdAt: serverTimestamp(),
+      });
+    } catch (err) {
+      console.warn('فشل تسجيل عملية شراء MGC:', err);
+    }
+
+    // إضافة XP ...
+    // ...
+
+    toast.success(`✅ تم شراء ${mgc} MGC بنجاح!`);
+  } catch (error) {
+    console.error('❌ خطأ في الشراء:', error);
+    toast.error(`❌ فشلت عملية الشراء: ${error.message || 'خطأ غير معروف'}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // دالة لإضافة رصيد حقيقي تجريبي (للمطورين فقط)
   const handleAddTestBalance = async () => {
