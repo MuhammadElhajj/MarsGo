@@ -12,7 +12,7 @@ const actions = [
   { id: 'coins', label: 'عملات MGC', icon: <FiDollarSign />, path: '/buy-mgc', className: 'quick-actions__item--coins' },
   { id: 'referral', label: 'إحالة', icon: <FiShare2 />, path: '/referral', className: 'quick-actions__item--referral' },
   { id: 'sell', label: 'بيع MGC', icon: <FiTrendingDown />, path: '/sell-mgc', className: 'quick-actions__item--sell' },
-  { id: 'mianfriendspage', label: 'الأصدقاء', icon: <FiUsers />, path: '/mainfriendspage', className: 'quick-actions__item--friends' },
+  { id: 'mianfriendspage', label: 'الأصدقاء', icon: <FiUsers />, path: '/mianfriendspage', className: 'quick-actions__item--friends' },
 
   // ===== العناصر غير النشطة (معطلة) =====
   { id: 'gift', label: 'هدايا', icon: <FiGift />, path: null, className: 'quick-actions__item--disabled' },
