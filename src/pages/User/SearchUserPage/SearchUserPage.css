@@ -1,0 +1,406 @@
+/* src/pages/User/SearchUserPage/SearchUserPage.css */
+
+.search-user-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== الهيدر ===== */
+.search-user-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-user-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+/* ===== نموذج البحث ===== */
+.search-user-page__form {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.search-user-page__input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-secondary);
+  border-radius: 1.5rem;
+  border: 1.5px solid var(--color-border);
+  padding: 0.2rem 0.2rem 0.2rem 0.6rem;
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-user-page__input-wrapper:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+}
+
+.search-user-page__prefix {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.08);
+  padding: 0.3rem 0.7rem;
+  border-radius: 2rem;
+  margin-left: 0.3rem;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+.search-user-page__input {
+  flex: 1;
+  padding: 0.6rem 0.6rem;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  color: var(--color-text-primary);
+  outline: none;
+  min-width: 0;
+  direction: ltr;
+}
+
+.search-user-page__input::placeholder {
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  opacity: 0.6;
+}
+
+.search-user-page__clear-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.search-user-page__clear-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-text-primary);
+}
+
+.search-user-page__submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.6rem;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-user-page__submit-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.search-user-page__submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== قائمة الاقتراحات ===== */
+.search-user-page__suggestions {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 20;
+  padding: 0.3rem 0;
+}
+
+.search-user-page__suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-user-page__suggestion-item:hover {
+  background: rgba(79, 70, 229, 0.06);
+}
+
+.search-user-page__suggestion-avatar .avatar--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.search-user-page__suggestion-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.search-user-page__suggestion-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.search-user-page__suggestion-id {
+  font-size: 0.7rem;
+  font-family: 'Courier New', monospace;
+  color: var(--color-text-secondary);
+}
+
+.search-user-page__hint {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* ===== رسالة الخطأ ===== */
+.search-user-page__error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 500;
+  border-right: 3px solid #ef4444;
+}
+
+/* ===== نتيجة البحث ===== */
+.search-user-page__result {
+  animation: fadeIn 0.4s ease;
+}
+
+.search-user-page__result-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-user-page__result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.search-user-page__avatar-wrapper {
+  flex-shrink: 0;
+}
+
+.search-user-page__avatar-wrapper .avatar--xl {
+  width: 80px;
+  height: 80px;
+  border: 3px solid var(--color-accent);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.12);
+}
+
+.search-user-page__user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-user-page__user-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+  color: var(--color-text-primary);
+}
+
+.search-user-page__user-id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-bg-primary);
+  padding: 0.2rem 0.8rem;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border);
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+  width: fit-content;
+}
+
+.search-user-page__id-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.search-user-page__id-value {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--color-accent);
+  font-size: 0.95rem;
+  direction: ltr;
+}
+
+.search-user-page__copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.search-user-page__copy-btn:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+.search-user-page__user-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.search-user-page__user-stats span {
+  background: var(--color-bg-primary);
+  padding: 0.15rem 0.7rem;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border);
+}
+
+.search-user-page__user-actions .search-user-page__profile-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  border-radius: 2rem;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .search-user-page {
+    padding: 0.5rem;
+  }
+
+  .search-user-page__input-wrapper {
+    flex-wrap: wrap;
+    border-radius: 1.2rem;
+    padding: 0.3rem;
+  }
+
+  .search-user-page__prefix {
+    width: 100%;
+    text-align: center;
+    border-radius: 1.2rem 1.2rem 0 0;
+    margin: 0;
+    padding: 0.3rem;
+  }
+
+  .search-user-page__input {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+  }
+
+  .search-user-page__clear-btn {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .search-user-page__submit-btn {
+    width: 100%;
+    justify-content: center;
+    border-radius: 1.2rem;
+    margin-top: 0.2rem;
+  }
+
+  .search-user-page__suggestions {
+    top: calc(100% + 0.3rem);
+    max-height: 200px;
+  }
+
+  .search-user-page__result-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.2rem;
+  }
+
+  .search-user-page__avatar-wrapper .avatar--xl {
+    width: 70px;
+    height: 70px;
+  }
+
+  .search-user-page__user-id {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .search-user-page__user-stats {
+    justify-content: center;
+  }
+
+  .search-user-page__user-stats span {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-user-page__title {
+    font-size: 1.3rem;
+  }
+
+  .search-user-page__user-name {
+    font-size: 1.2rem;
+  }
+
+  .search-user-page__user-stats {
+    gap: 0.3rem 0.6rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -19,13 +19,8 @@ export default function PublicProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { userData: currentUser } = useAuth();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isFriend, setIsFriend] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [friendRequestStatus, setFriendRequestStatus] = useState('none');
-  const [pendingRequestId, setPendingRequestId] = useState(null);
-
+  
+  // جلب دوال الـ Store
   const {
     removeFriend,
     blockUser,
@@ -34,7 +29,17 @@ export default function PublicProfilePage() {
     sendFriendRequest,
     acceptFriendRequest,
     rejectFriendRequest,
+    supportUser,
+    mgcBalance,
   } = useAppStore();
+
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isFriend, setIsFriend] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [friendRequestStatus, setFriendRequestStatus] = useState('none');
+  const [pendingRequestId, setPendingRequestId] = useState(null);
+  const [supportLoading, setSupportLoading] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -101,6 +106,7 @@ export default function PublicProfilePage() {
     }
   };
 
+  // ===== دوال الصداقة =====
   const handleSendFriendRequest = async () => {
     const success = await sendFriendRequest(userId);
     if (success) {
@@ -139,6 +145,7 @@ export default function PublicProfilePage() {
     }
   };
 
+  // ===== دوال الحظر =====
   const handleBlock = async () => {
     const success = await blockUser(userId);
     if (success) {
@@ -155,6 +162,7 @@ export default function PublicProfilePage() {
     }
   };
 
+  // ===== دوال المراسلة =====
   const handleMessage = async () => {
     if (!currentUser) {
       toast.error('يجب تسجيل الدخول');
@@ -172,6 +180,21 @@ export default function PublicProfilePage() {
     }
   };
 
+  // ===== دالة الدعم (الشعبية) =====
+  const handleSupport = async () => {
+    if (supportLoading) return;
+    setSupportLoading(true);
+    const result = await supportUser(userId);
+    if (result.success) {
+      // تحديث الشعبية محلياً
+      setProfile(prev => ({
+        ...prev,
+        popularity: (prev?.popularity || 0) + 1
+      }));
+    }
+    setSupportLoading(false);
+  };
+
   if (loading) return <div className="public-profile-loading">جاري التحميل...</div>;
   if (!profile) return <div className="public-profile-error">المستخدم غير موجود</div>;
 
@@ -181,7 +204,9 @@ export default function PublicProfilePage() {
   const level = profile.level || 1;
   const xp = profile.xp || 0;
   const title = profile.title || null;
+  const hasEnoughMgc = mgcBalance >= 20;
 
+  // ===== أزرار الصداقة =====
   const renderFriendButton = () => {
     if (isFriend) {
       return (
@@ -218,10 +243,17 @@ export default function PublicProfilePage() {
 
   return (
     <div className="public-profile" dir="rtl">
+      {/* ===== الهيدر ===== */}
       <div className="public-profile__header">
-        <GoBackButton text="رجوع" />
+        <div className="public-profile__header-left">
+          <GoBackButton text="رجوع" />
+        </div>
+        <div className="public-profile__header-right">
+          <span className="public-profile__header-user">👤 User :  {profile.name}</span>
+        </div>
       </div>
 
+      {/* ===== الخلفية والصورة ===== */}
       <div className="public-profile__cover">
         <div className="public-profile__cover-bg"></div>
         <div className="public-profile__avatar-wrapper">
@@ -234,6 +266,7 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
+      {/* ===== معلومات المستخدم ===== */}
       <div className="public-profile__info">
         <h1 className="public-profile__name">{profile.name}</h1>
         {title && (
@@ -249,6 +282,7 @@ export default function PublicProfilePage() {
         <p className="public-profile__bio">{profile.bio || ''}</p>
       </div>
 
+      {/* ===== الإحصائيات ===== */}
       <div className="public-profile__stats-grid">
         <div className="stat-item">
           <FiHeart className="stat-icon" />
@@ -267,6 +301,7 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
+      {/* ===== التفاصيل ===== */}
       <div className="public-profile__details">
         <div className="detail-row">
           <FiCalendar className="detail-icon" />
@@ -280,12 +315,32 @@ export default function PublicProfilePage() {
         )}
       </div>
 
+      {/* ===== الأزرار ===== */}
       {!isOwnProfile && (
         <div className="public-profile__actions">
+          {/* زر الدعم (الشعبية) */}
+          <Button
+            onClick={handleSupport}
+            disabled={supportLoading || !hasEnoughMgc}
+            className={`action-btn support ${supportLoading ? 'loading' : ''}`}
+          >
+            {supportLoading ? (
+              '⏳ جاري...'
+            ) : (
+              <>
+                🌹 دعم
+                <span className="support-cost">-20 MGC</span>
+                <span className="support-badge">{profile.popularity || 0}</span>
+              </>
+            )}
+          </Button>
+
           {renderFriendButton()}
+
           <Button onClick={handleMessage} className="action-btn secondary">
             <FiMessageCircle /> مراسلة
           </Button>
+
           {isBlocked ? (
             <Button onClick={handleUnblock} variant="secondary" className="action-btn">
               <FiUserCheck /> إلغاء الحظر
@@ -298,6 +353,7 @@ export default function PublicProfilePage() {
         </div>
       )}
 
+      {/* ===== أصدقاء مشتركون ===== */}
       {!isOwnProfile && (
         <div className="public-profile__mutual-friends">
           <h3>أصدقاء مشتركون</h3>

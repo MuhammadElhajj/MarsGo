@@ -8,7 +8,8 @@ import AdminLayout from "./layouts/AdminLayout/AdminLayout";
 import VerifierLayout from "./layouts/VerifierLayout/VerifierLayout";
 import Loading from "./components/GeneralComponents/Loading/Loading";
 import AdminCategories from './components/AdminCoponent/AdminCategories/AdminCategories';
-
+// ==================== صفحات المستخدم ====================
+const SearchUserPage = lazy(() => import('./pages/User/SearchUserPage/SearchUserPage'));
 // ==================== صفحات العميل ====================
 const Login = lazy(() => import("./pages/User/Login/Login"));
 const Dashboard = lazy(() => import("./pages/User/Dashboard/Dashboard"));
@@ -143,7 +144,7 @@ function App() {
           <Route path="/profile/:userId" element={<PublicProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />
-       
+       <Route path="/search-user" element={<SearchUserPage />} />
        <Route path="/buy-mgc" element={<BuyMGC />} />
    <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />

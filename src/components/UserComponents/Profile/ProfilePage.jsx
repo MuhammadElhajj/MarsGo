@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FaUser, FaCalendarAlt, FaBox, FaDollarSign, FaBell, FaWhatsapp, 
-  FaEdit, FaSave, FaCheckCircle, FaInbox, FaUserFriends, FaUserPlus
+  FaEdit, FaSave, FaCheckCircle, FaInbox, FaUserFriends, FaUserPlus,
+  FaHeart, FaBolt, FaCopy, FaUserTag
 } from 'react-icons/fa';
-import { FiActivity } from 'react-icons/fi';
+import { FiActivity , FiSearch  } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import { useAppStore } from '../../../store/store';
 import useUserStats from '../../../hooks/useUserStats';
@@ -30,13 +31,12 @@ export default function ProfilePage() {
   
   const unreadCount = useAppStore((state) => state.unreadCount);
   const pendingRequestsCount = useAppStore((state) => state.pendingRequestsCount);
+  const copyUniqueId = useAppStore((state) => state.copyUniqueId);
 
   const [whatsappNumber, setWhatsappNumber] = useState(userData?.whatsappNumber || '');
   const [originalNumber, setOriginalNumber] = useState(userData?.whatsappNumber || '');
   const [editingWhatsapp, setEditingWhatsapp] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  // إزالة جلب آخر الطلبات (غير مطلوب الآن)
 
   if (!userData) return <div className="profile-page__loading">جاري التحميل...</div>;
 
@@ -63,14 +63,39 @@ export default function ProfilePage() {
 
   const friendsCount = userData.friends?.length || 0;
 
+  // نسخ المعرف الفريد
+  const handleCopyUniqueId = () => {
+    if (userData.uniqueId) {
+      copyUniqueId(userData.uniqueId);
+    } else {
+      showToast('لا يوجد معرف فريد للحساب', 'error');
+    }
+  };
+
   return (
     <div className="profile-page" dir="rtl">
+      {/* ===== الهيدر ===== */}
       <div className="profile-page__header">
-        <GoBackButton text="رجوع" />
-        <h1 className="profile-page__title">الملف الشخصي</h1>
+        <div className="profile-page__header-left">
+          <GoBackButton text="رجوع" />
+          <h1 className="profile-page__title">الملف الشخصي</h1>
+        </div>
       </div>
 
-      {/* كارد الأفاتار والمعلومات الشخصية + الرصيد وزر الإيداع */}
+      {/* ===== كارد البحث عن أصدقاء (كارد صغير فوق الكارد الأول) ===== */}
+     {/* ===== كارد البحث عن أصدقاء ===== */}
+<div className="profile-page__search-card">
+  <div className="profile-page__search-content">
+    {/* <FiSearch className="search-icon" size={24} /> */}
+    <div className="search-text">
+      <Link to="/search-user" className="search-link">
+        البحث عن أصدقاء <span className="arrow">→</span>
+      </Link>
+        </div>
+  </div>
+</div>
+
+      {/* ===== الكارد الأول (الصورة + الاسم + البريد + المعرف + الإحصائيات) ===== */}
       <div className="profile-page__avatar-card">
         <div className="profile-page__avatar-row">
           <div className="profile-page__avatar-image">
@@ -79,9 +104,40 @@ export default function ProfilePage() {
           <div className="profile-page__avatar-info">
             <h2 className="profile-page__name">{userData.name || 'مستخدم'}</h2>
             <p className="profile-page__email">{userData.email}</p>
+            
+            {/* المعرف الفريد */}
+            {userData.uniqueId && (
+              <div className="profile-page__unique-id">
+                <span className="unique-id-label">
+                  <FaUserTag /> المعرف:
+                </span>
+                <span className="unique-id-value">{userData.uniqueId}</span>
+                <button 
+                  className="unique-id-copy-btn"
+                  onClick={handleCopyUniqueId}
+                  title="نسخ المعرف"
+                >
+                  <FaCopy />
+                </button>
+              </div>
+            )}
+
+            {/* الإحصائيات (الأصدقاء + الشعبية + القوة) */}
+            <div className="profile-page__avatar-stats">
+              <span className="avatar-stat">
+                <FaUserFriends /> الأصدقاء: {friendsCount}
+              </span>
+              <span className="avatar-stat">
+                <FaHeart /> الشعبية: {userData.popularity || 0}
+              </span>
+              <span className="avatar-stat">
+                <FaBolt /> القوة: {userData.power || 0}
+              </span>
+            </div>
           </div>
         </div>
 
+        {/* الرصيد وزر الإيداع (يظل في الأسفل) */}
         <div className="profile-page__balance-section">
           <div className="balance-container">
             <BalanceDisplay />
@@ -90,6 +146,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* ===== باقي الكروت ===== */}
       <div className="profile-page__grid">
         {/* المعلومات الأساسية */}
         <div className="profile-page__card">

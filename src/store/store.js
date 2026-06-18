@@ -3,7 +3,8 @@ import { persist } from 'zustand/middleware';
 import { 
   doc, updateDoc, increment, onSnapshot, setDoc, 
   getDoc, addDoc, collection, serverTimestamp,
-  query, where, orderBy, getDocs, writeBatch, onSnapshot as onSnapshotFirestore
+  query, where, orderBy, getDocs, writeBatch, onSnapshot as onSnapshotFirestore ,
+  runTransaction ,limit  
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import toast from 'react-hot-toast';
@@ -423,7 +424,8 @@ markFriendRequestsAsSeen: async () => {
   }
 },
       // ===== إزالة صديق (مع تحديث القوائم) =====
-removeFriend: async (friendId) => {
+
+      removeFriend: async (friendId) => {
   const { user, userData, friendsList } = get();
   if (!user) return false;
   const currentFriends = userData?.friends || [];
@@ -706,6 +708,205 @@ fetchFriendsList: async () => {
 },
 
 
+// ===== نظام المعرف الفريد =====
+// ===== نظام المعرف الفريد =====
+// ===== نظام المعرف الفريد (تسلسلي تصاعدي) =====
+generateUniqueId: async () => {
+  const counterRef = doc(db, 'app_metadata', 'counters');
+  try {
+    // استخدام transaction لضمان الذرية ومنع التكرار
+    const result = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      let newCount = 1;
+      if (!counterDoc.exists()) {
+        // أول مستخدم: نضع العداد = 1
+        transaction.set(counterRef, { uniqueIdCounter: 1 });
+      } else {
+        const currentCount = counterDoc.data().uniqueIdCounter || 0;
+        newCount = currentCount + 1;
+        transaction.update(counterRef, { uniqueIdCounter: newCount });
+      }
+      return newCount;
+    });
+    // تنسيق الرقم إلى 8 خانات (مثل 00000001)
+    const paddedNumber = String(result).padStart(8, '0');
+    return `MGC_${paddedNumber}`;
+  } catch (error) {
+    console.error('فشل توليد المعرف الفريد:', error);
+    // احتياطي: استخدام الطابع الزمني
+    const fallbackId = `MGC_${Date.now().toString().slice(-8)}`;
+    return fallbackId;
+  }
+},
+
+searchByUniqueId: async (uniqueId) => {
+  if (!uniqueId || uniqueId.length < 3) {
+    toast.error('الرجاء إدخال معرف صحيح (مثل: NE1234)');
+    return null;
+  }
+  try {
+    const q = query(collection(db, 'users'), where('uniqueId', '==', uniqueId));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      toast.error('لا يوجد مستخدم بهذا المعرف');
+      return null;
+    }
+    return { id: snap.docs[0].id, ...snap.docs[0].data() };
+  } catch (error) {
+    console.error('خطأ في البحث:', error);
+    toast.error('حدث خطأ أثناء البحث');
+    return null;
+  }
+},
+// ===== البحث عن مستخدمين بادئة (للاقتراحات) =====
+searchUsersByPrefix: async (prefix) => {
+  if (!prefix || prefix.length < 2) return [];
+  try {
+    const startId = `MGC_${prefix}`;
+    const endId = `MGC_${prefix}\uf8ff`;
+    const q = query(
+      collection(db, 'users'),
+      where('uniqueId', '>=', startId),
+      where('uniqueId', '<=', endId),
+      orderBy('uniqueId'),
+      limit(10)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('خطأ في البحث بالبادئة:', error);
+    return [];
+  }
+},
+
+// ===== نظام دعم الشعبية (غير محدود) =====
+supportUser: async (targetUserId) => {
+  const { user, mgcBalance, deductMgcBalance, userData } = get();
+  const SUPPORT_COST = 20; // 20 MGC لكل دعم
+
+  if (!user) {
+    toast.error('يجب تسجيل الدخول أولاً');
+    return { success: false, error: 'يجب تسجيل الدخول' };
+  }
+
+  if (user.uid === targetUserId) {
+    toast.error('لا يمكنك دعم نفسك');
+    return { success: false, error: 'لا يمكنك دعم نفسك' };
+  }
+
+  // التحقق من رصيد MGC
+  if (mgcBalance < SUPPORT_COST) {
+    toast.error(`رصيد MGC غير كافٍ! تحتاج ${SUPPORT_COST} MGC، رصيدك: ${mgcBalance.toFixed(0)} MGC`);
+    return { success: false, error: 'رصيد MGC غير كافٍ' };
+  }
+
+  try {
+    // ✅ لا يوجد تحقق من الدعم المسبق - مسموح بالتكرار
+
+    // خصم MGC من الداعم
+    const deducted = await deductMgcBalance(SUPPORT_COST);
+    if (!deducted) {
+      return { success: false, error: 'فشل خصم MGC' };
+    }
+
+    // تسجيل عملية الدعم
+    await addDoc(collection(db, 'support_activities'), {
+      fromUserId: user.uid,
+      toUserId: targetUserId,
+      type: 'popularity',
+      value: 1,
+      cost: SUPPORT_COST,
+      createdAt: serverTimestamp(),
+    });
+
+    // زيادة الشعبية للمستخدم المستهدف (+1)
+    const targetRef = doc(db, 'users', targetUserId);
+    await updateDoc(targetRef, {
+      popularity: increment(1),
+    });
+
+    // إضافة XP بسيطة للمستخدم المستهدف (+5 XP لكل دعم)
+    await updateDoc(targetRef, {
+      xp: increment(5),
+    });
+
+    // تحديث الشعبية محلياً إذا كان المستهدف هو المستخدم الحالي
+    if (get().userData?.uid === targetUserId) {
+      const currentUserData = get().userData;
+      set({
+        userData: {
+          ...currentUserData,
+          popularity: (currentUserData.popularity || 0) + 1,
+          xp: (currentUserData.xp || 0) + 5,
+        }
+      });
+    }
+
+    // تحديث mgcBalance محلياً (بعد الخصم)
+    // deductMgcBalance تقوم بهذا تلقائياً
+
+    toast.success(`🌹 تم دعم المستخدم! -${SUPPORT_COST} MGC (+1 شعبية)`);
+    return { success: true, newBalance: get().mgcBalance };
+
+  } catch (error) {
+    console.error('فشل الدعم:', error);
+    toast.error('حدث خطأ أثناء الدعم');
+    return { success: false, error: error.message };
+  }
+},
+
+// التحقق من إجمالي الدعم المقدم لمستخدم معين (للعرض فقط)
+getTotalSupportCount: async (targetUserId) => {
+  try {
+    const q = query(
+      collection(db, 'support_activities'),
+      where('toUserId', '==', targetUserId),
+      where('type', '==', 'popularity')
+    );
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch (error) {
+    console.error('خطأ في جلب عدد الدعم:', error);
+    return 0;
+  }
+},
+
+// جلب آخر 10 داعمين لمستخدم معين (للشريط)
+getRecentSupporters: async (targetUserId, limit = 10) => {
+  try {
+    const q = query(
+      collection(db, 'support_activities'),
+      where('toUserId', '==', targetUserId),
+      where('type', '==', 'popularity'),
+      orderBy('createdAt', 'desc'),
+      limit(limit)
+    );
+    const snap = await getDocs(q);
+    const supporters = [];
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      const userSnap = await getDoc(doc(db, 'users', data.fromUserId));
+      if (userSnap.exists()) {
+        supporters.push({
+          id: data.fromUserId,
+          name: userSnap.data().name || 'مستخدم',
+          avatar: userSnap.data().avatar || null,
+          supportedAt: data.createdAt,
+        });
+      }
+    }
+    return supporters;
+  } catch (error) {
+    console.error('خطأ في جلب الداعمين:', error);
+    return [];
+  }
+},
+
+
+copyUniqueId: (uniqueId) => {
+  navigator.clipboard.writeText(uniqueId);
+  toast.success('تم نسخ المعرف: ' + uniqueId);
+},
       // ===== ماكينة الحظ الجديدة (تستخدم MGC) =====
       pullMachine: async () => {
         const { user, mgcBalance, deductMgcBalance, addMgcBalance, userData } = get();

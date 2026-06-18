@@ -469,3 +469,72 @@
     font-size: 0.5rem;
   }
 }
+
+/* ===== الهيدر المعدل ===== */
+.public-profile__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.public-profile__header-left {
+  display: flex;
+  align-items: center;
+}
+
+.public-profile__header-right {
+  display: flex;
+  align-items: center;
+}
+
+.public-profile__header-user {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  direction: ltr;
+}
+
+/* ===== زر الدعم ===== */
+.action-btn.support {
+  background: #ff6b6b;
+  border-color: #ff6b6b;
+  color: white;
+}
+
+.action-btn.support:hover:not(:disabled) {
+  background: #ee5a24;
+  border-color: #ee5a24;
+  transform: translateY(-2px);
+}
+
+.action-btn.support:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.support-cost {
+  font-size: 0.65rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 1rem;
+  margin-right: 0.2rem;
+}
+
+.support-badge {
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  margin-right: 0.2rem;
+}
+
+.action-btn.loading {
+  opacity: 0.7;
+  cursor: wait;
+}

@@ -37,18 +37,28 @@ const getCardClass = (index) => {
   return 'leaderboard__item';
 };
 
+// ===== حساب النقاط الإجمالية (للفلتر العام) =====
+const calculateTotalScore = (user) => {
+  const popularity = user.popularity || 0;
+  const power = user.power || 0;
+  const level = user.level || 1;
+  // إعطاء وزن أكبر للشعبية
+  return popularity + (power * 2) + (level * 5);
+};
+
 export default function LeaderboardPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('popularity'); // ✅ افتراضي: الشعبية
 
   // ===== جلب المستخدمين من Firestore =====
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const q = query(collection(db, 'users'), orderBy('power', 'desc'));
+        // ✅ الترتيب حسب الشعبية بشكل افتراضي
+        const q = query(collection(db, 'users'), orderBy('popularity', 'desc'));
         const snapshot = await getDocs(q);
         const usersList = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -58,6 +68,7 @@ export default function LeaderboardPage() {
           power: doc.data().power || 0,
           popularity: doc.data().popularity || 0,
           wins: doc.data().wins || 0,
+          level: doc.data().level || 1,
           rank: doc.data().rank || 'عضو',
         }));
         setUsers(usersList);
@@ -81,8 +92,9 @@ export default function LeaderboardPage() {
         return list.sort((a, b) => b.popularity - a.popularity);
       case 'wins':
         return list.sort((a, b) => b.wins - a.wins);
+      case 'all':
       default:
-        return list.sort((a, b) => (b.power + b.popularity) - (a.power + a.popularity));
+        return list.sort((a, b) => calculateTotalScore(b) - calculateTotalScore(a));
     }
   }, [users, filter]);
 
@@ -115,10 +127,10 @@ export default function LeaderboardPage() {
       {/* أزرار التصفية */}
       <div className="leaderboard__filters">
         <button 
-          className={filter === 'all' ? 'active' : ''} 
-          onClick={() => setFilter('all')}
+          className={filter === 'popularity' ? 'active' : ''} 
+          onClick={() => setFilter('popularity')}
         >
-          <FiTrendingUp /> الترتيب العام
+          <FiHeart /> الشعبية
         </button>
         <button 
           className={filter === 'power' ? 'active' : ''} 
@@ -127,16 +139,16 @@ export default function LeaderboardPage() {
           <FiZap /> نقاط القوة
         </button>
         <button 
-          className={filter === 'popularity' ? 'active' : ''} 
-          onClick={() => setFilter('popularity')}
-        >
-          <FiHeart /> الشعبية
-        </button>
-        <button 
           className={filter === 'wins' ? 'active' : ''} 
           onClick={() => setFilter('wins')}
         >
-          <FiAward /> عدد الانتصارات
+          <FiAward /> الانتصارات
+        </button>
+        <button 
+          className={filter === 'all' ? 'active' : ''} 
+          onClick={() => setFilter('all')}
+        >
+          <FiTrendingUp /> الترتيب العام
         </button>
       </div>
 
@@ -181,8 +193,8 @@ export default function LeaderboardPage() {
                   <span className="leaderboard__rank-badge">{user.rank}</span>
                 </div>
                 <div className="leaderboard__stats">
-                  <span className="stat"><FiZap /> {user.power}</span>
                   <span className="stat"><FiHeart /> {user.popularity}</span>
+                  <span className="stat"><FiZap /> {user.power}</span>
                   <span className="stat"><FiAward /> {user.wins}</span>
                 </div>
               </div>
@@ -201,7 +213,7 @@ export default function LeaderboardPage() {
       {/* الفوتر */}
       <div className="leaderboard__footer">
         <p>إجمالي المتصدرين: <strong>{sortedUsers.length}</strong> مستخدم</p>
-        <p>يتم تحديث الترتيب تلقائياً بناءً على النشاط</p>
+        <p>يتم تحديث الترتيب تلقائياً بناءً على الشعبية والنشاط</p>
       </div>
     </div>
   );
