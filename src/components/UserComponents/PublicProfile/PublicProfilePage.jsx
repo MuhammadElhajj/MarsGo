@@ -10,7 +10,8 @@ import Button from '../../../components/GeneralComponents/Button/Button';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import {
   FiUsers, FiHeart, FiZap, FiCalendar, FiMessageCircle,
-  FiUserPlus, FiUserMinus, FiUserX, FiUserCheck, FiAward, FiStar
+  FiUserPlus, FiUserMinus, FiUserX, FiUserCheck, FiAward, FiStar,
+  FiUser, FiCopy, FiMapPin, FiClock, FiShare2
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import './PublicProfilePage.css';
@@ -19,8 +20,7 @@ export default function PublicProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { userData: currentUser } = useAuth();
-  
-  // جلب دوال الـ Store
+
   const {
     removeFriend,
     blockUser,
@@ -31,6 +31,7 @@ export default function PublicProfilePage() {
     rejectFriendRequest,
     supportUser,
     mgcBalance,
+    copyUniqueId,
   } = useAppStore();
 
   const [profile, setProfile] = useState(null);
@@ -106,12 +107,11 @@ export default function PublicProfilePage() {
     }
   };
 
-  // ===== دوال الصداقة =====
   const handleSendFriendRequest = async () => {
     const success = await sendFriendRequest(userId);
     if (success) {
       setFriendRequestStatus('pending_sent');
-      toast.success('تم إرسال طلب الصداقة');
+
     }
   };
 
@@ -145,7 +145,6 @@ export default function PublicProfilePage() {
     }
   };
 
-  // ===== دوال الحظر =====
   const handleBlock = async () => {
     const success = await blockUser(userId);
     if (success) {
@@ -162,7 +161,6 @@ export default function PublicProfilePage() {
     }
   };
 
-  // ===== دوال المراسلة =====
   const handleMessage = async () => {
     if (!currentUser) {
       toast.error('يجب تسجيل الدخول');
@@ -180,19 +178,23 @@ export default function PublicProfilePage() {
     }
   };
 
-  // ===== دالة الدعم (الشعبية) =====
   const handleSupport = async () => {
     if (supportLoading) return;
     setSupportLoading(true);
     const result = await supportUser(userId);
     if (result.success) {
-      // تحديث الشعبية محلياً
       setProfile(prev => ({
         ...prev,
         popularity: (prev?.popularity || 0) + 1
       }));
     }
     setSupportLoading(false);
+  };
+
+  const handleCopyId = () => {
+    if (profile?.uniqueId) {
+      copyUniqueId(profile.uniqueId);
+    }
   };
 
   if (loading) return <div className="public-profile-loading">جاري التحميل...</div>;
@@ -206,19 +208,18 @@ export default function PublicProfilePage() {
   const title = profile.title || null;
   const hasEnoughMgc = mgcBalance >= 20;
 
-  // ===== أزرار الصداقة =====
   const renderFriendButton = () => {
     if (isFriend) {
       return (
         <Button onClick={handleRemoveFriend} variant="danger" className="action-btn">
-          <FiUserMinus /> إلغاء الصداقة
+          <FiUserMinus style={{ color: '#ef4444' }} /> إلغاء الصداقة
         </Button>
       );
     }
     if (friendRequestStatus === 'pending_sent') {
       return (
         <Button variant="secondary" className="action-btn" disabled>
-          <FiUserPlus /> بانتظار الموافقة
+          <FiClock style={{ color: '#f59e0b' }} /> بانتظار الموافقة
         </Button>
       );
     }
@@ -226,17 +227,17 @@ export default function PublicProfilePage() {
       return (
         <>
           <Button onClick={handleAcceptRequest} variant="primary" className="action-btn">
-            <FiUserCheck /> قبول
+            <FiCheck style={{ color: '#10b981' }} /> قبول
           </Button>
           <Button onClick={handleRejectRequest} variant="danger" className="action-btn">
-            <FiUserMinus /> رفض
+            <FiX style={{ color: '#ef4444' }} /> رفض
           </Button>
         </>
       );
     }
     return (
       <Button onClick={handleSendFriendRequest} variant="primary" className="action-btn">
-        <FiUserPlus /> إرسال طلب صداقة
+        <FiUserPlus style={{ color: '#3b82f6' }} /> إرسال طلب
       </Button>
     );
   };
@@ -245,11 +246,10 @@ export default function PublicProfilePage() {
     <div className="public-profile" dir="rtl">
       {/* ===== الهيدر ===== */}
       <div className="public-profile__header">
-        <div className="public-profile__header-left">
-          <GoBackButton text="رجوع" />
-        </div>
-        <div className="public-profile__header-right">
-          <span className="public-profile__header-user">👤 User :  {profile.name}</span>
+        <GoBackButton text="رجوع" />
+        <div className="public-profile__header-user">
+          <span>{profile.name}</span>
+          <FiUser style={{ color: '#8b5cf6', marginLeft: '0.4rem' }} />
         </div>
       </div>
 
@@ -258,67 +258,76 @@ export default function PublicProfilePage() {
         <div className="public-profile__cover-bg"></div>
         <div className="public-profile__avatar-wrapper">
           <Avatar src={profile.avatar} name={profile.name} size="xl" className="public-profile__avatar" />
-          {!isOwnProfile && (
-            <div className="public-profile__status-dot">
-              <span className="status-dot online"></span>
+        </div>
+      </div>
+
+      {/* ===== بطاقة المعلومات المدمجة (أفقية) ===== */}
+      <div className="public-profile__info-card">
+        {/* الصف الأول: الأفاتار + الاسم + المعرف + المستوى + XP + الرتبة */}
+        <div className="public-profile__info-row">
+          <div className="public-profile__info-avatar">
+            <Avatar src={profile.avatar} name={profile.name} size="md" />
+          </div>
+          <div className="public-profile__info-details">
+            <h1 className="public-profile__info-name">{profile.name}</h1>
+            <div className="public-profile__info-meta">
+              <span className="meta-item">
+                <FiCopy style={{ color: '#8b5cf6', fontSize: '0.7rem' }} />
+                <span className="meta-id">{profile.uniqueId}</span>
+                <button className="copy-id-btn" onClick={handleCopyId} title="نسخ المعرف">
+                  <FiCopy style={{ fontSize: '0.6rem' }} />
+                </button>
+              </span>
+              <span className="meta-item">
+                <FiAward style={{ color: '#f59e0b', fontSize: '0.7rem' }} />
+                المستوى {level}
+              </span>
+              <span className="meta-item">
+                <FiStar style={{ color: '#10b981', fontSize: '0.7rem' }} />
+                {xp} XP
+              </span>
+              <span className="meta-item">
+                <FiUser style={{ color: '#3b82f6', fontSize: '0.7rem' }} />
+                {profile.rank || 'عضو'}
+              </span>
+              {title && (
+                <span className="meta-item title-badge">
+                  <FiAward style={{ color: '#f59e0b', fontSize: '0.7rem' }} />
+                  {title}
+                </span>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* ===== معلومات المستخدم ===== */}
-      <div className="public-profile__info">
-        <h1 className="public-profile__name">{profile.name}</h1>
-        {title && (
-          <div className="public-profile__title-badge">
-            <FiAward className="title-icon" /> {title}
           </div>
-        )}
-        <div className="public-profile__level-xp">
-          <span className="level-badge">المستوى {level}</span>
-          <span className="xp-badge">{xp} XP</span>
         </div>
-        <p className="public-profile__rank">{profile.rank || 'عضو'}</p>
-        <p className="public-profile__bio">{profile.bio || ''}</p>
-      </div>
 
-      {/* ===== الإحصائيات ===== */}
-      <div className="public-profile__stats-grid">
-        <div className="stat-item">
-          <FiHeart className="stat-icon" />
-          <span className="stat-value">{profile.popularity || 0}</span>
-          <span className="stat-label">الشعبية</span>
-        </div>
-        <div className="stat-item">
-          <FiZap className="stat-icon" />
-          <span className="stat-value">{profile.power || 0}</span>
-          <span className="stat-label">القوة</span>
-        </div>
-        <div className="stat-item">
-          <FiUsers className="stat-icon" />
-          <span className="stat-value">{profile.friends?.length || 0}</span>
-          <span className="stat-label">الأصدقاء</span>
-        </div>
-      </div>
-
-      {/* ===== التفاصيل ===== */}
-      <div className="public-profile__details">
-        <div className="detail-row">
-          <FiCalendar className="detail-icon" />
-          <span>انضم في {formattedDate}</span>
-        </div>
-        {profile.lastSeen && (
-          <div className="detail-row">
-            <FiMessageCircle className="detail-icon" />
-            <span>آخر ظهور: {profile.lastSeen?.toDate?.().toLocaleString('ar-EG') || '—'}</span>
+        {/* الصف الثاني: الإحصائيات (الشعبية، القوة، الأصدقاء) */}
+        <div className="public-profile__info-stats">
+          <div className="stat-item">
+            <FiHeart style={{ color: '#ef4444', fontSize: '1.1rem' }} />
+            <span className="stat-value">{profile.popularity || 0}</span>
+            <span className="stat-label">شعبية</span>
           </div>
-        )}
+          <div className="stat-item">
+            <FiZap style={{ color: '#f59e0b', fontSize: '1.1rem' }} />
+            <span className="stat-value">{profile.power || 0}</span>
+            <span className="stat-label">قوة</span>
+          </div>
+          <div className="stat-item">
+            <FiUsers style={{ color: '#3b82f6', fontSize: '1.1rem' }} />
+            <span className="stat-value">{profile.friends?.length || 0}</span>
+            <span className="stat-label">أصدقاء</span>
+          </div>
+          <div className="stat-item">
+            <FiCalendar style={{ color: '#8b5cf6', fontSize: '1.1rem' }} />
+            <span className="stat-value">{formattedDate}</span>
+            <span className="stat-label">انضم</span>
+          </div>
+        </div>
       </div>
 
       {/* ===== الأزرار ===== */}
       {!isOwnProfile && (
         <div className="public-profile__actions">
-          {/* زر الدعم (الشعبية) */}
           <Button
             onClick={handleSupport}
             disabled={supportLoading || !hasEnoughMgc}
@@ -328,7 +337,8 @@ export default function PublicProfilePage() {
               '⏳ جاري...'
             ) : (
               <>
-                🌹 دعم
+                <FiHeart style={{ color: '#fff' }} />
+                دعم
                 <span className="support-cost">-20 MGC</span>
                 <span className="support-badge">{profile.popularity || 0}</span>
               </>
@@ -338,25 +348,28 @@ export default function PublicProfilePage() {
           {renderFriendButton()}
 
           <Button onClick={handleMessage} className="action-btn secondary">
-            <FiMessageCircle /> مراسلة
+            <FiMessageCircle style={{ color: '#10b981' }} /> مراسلة
           </Button>
 
           {isBlocked ? (
             <Button onClick={handleUnblock} variant="secondary" className="action-btn">
-              <FiUserCheck /> إلغاء الحظر
+              <FiUserCheck style={{ color: '#10b981' }} /> إلغاء الحظر
             </Button>
           ) : (
             <Button onClick={handleBlock} variant="danger" className="action-btn">
-              <FiUserX /> حظر
+              <FiUserX style={{ color: '#ef4444' }} /> حظر
             </Button>
           )}
         </div>
       )}
 
-      {/* ===== أصدقاء مشتركون ===== */}
+      {/* ===== الأصدقاء المشتركون ===== */}
       {!isOwnProfile && (
         <div className="public-profile__mutual-friends">
-          <h3>أصدقاء مشتركون</h3>
+          <h3>
+            <FiUsers style={{ color: '#3b82f6', marginLeft: '0.4rem' }} />
+            أصدقاء مشتركون
+          </h3>
           <p className="mutual-count">لا يوجد أصدقاء مشتركون</p>
         </div>
       )}

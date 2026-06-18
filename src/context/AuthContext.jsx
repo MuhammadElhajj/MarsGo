@@ -1,6 +1,7 @@
+
 // import { createContext, useContext, useEffect, useState } from "react";
 // import { onAuthStateChanged } from "firebase/auth";
-// import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+// import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 // import { auth, db } from "../firebase";
 // import { useAppStore } from '../store/store';
 
@@ -17,6 +18,8 @@
 //   const setStoreUserData = useAppStore((state) => state.setUserData);
 //   const setStoreBalance = useAppStore((state) => state.setBalance);          // الرصيد الحقيقي
 //   const setStoreMgcBalance = useAppStore((state) => state.setMgcBalance);    // رصيد MGC
+//   // ✅ جلب دالة توليد المعرف الفريد
+//   const generateUniqueId = useAppStore((state) => state.generateUniqueId);
 
 //   useEffect(() => {
 //     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -44,6 +47,14 @@
 //           data = docSnap.data();
 //           // ✅ التحقق من وجود الحقول الجديدة وإضافتها بقيم افتراضية إذا كانت مفقودة
 //           let needsUpdate = false;
+
+//           // التحقق من وجود uniqueId
+//           if (!data.uniqueId) {
+// const uniqueId = await generateUniqueId();
+//             data.uniqueId = uniqueId;
+//             needsUpdate = true;
+//           }
+
 //           if (!data.customerType) {
 //             data.customerType = 'customer';
 //             needsUpdate = true;
@@ -101,6 +112,7 @@
 //             data.freeCoupons = [];
 //             needsUpdate = true;
 //           }
+
 //           if (needsUpdate) {
 //             await updateDoc(userRef, {
 //               customerType: data.customerType,
@@ -117,34 +129,40 @@
 //               pityCounter: data.pityCounter,
 //               coupons: data.coupons,
 //               freeCoupons: data.freeCoupons,
+//               uniqueId: data.uniqueId, // ✅ إضافة المعرف الفريد
 //             });
 //           }
-//         } else {
-//           // ✅ مستخدم جديد: نضيف جميع الحقول المطلوبة
-//           data = {
-//             name: firebaseUser.displayName || "مستخدم جديد",
-//             email: firebaseUser.email,
-//             role: "customer",
-//             verifierType: "basic",
-//             customerType: "customer",
-//             avatar: firebaseUser.photoURL || "",
-//             createdAt: new Date(),
-//             friends: [],
-//             blockedUsers: [],
-//             popularity: 0,
-//             power: 0,
-//             rank: 'عضو',
-//             balance: 0,          // الرصيد الحقيقي
-//             mgcBalance: 0,       // رصيد MGC
-//             xp: 0,
-//             level: 1,
-//             title: null,
-//             pityCounter: 0,
-//             coupons: [],
-//             freeCoupons: [],
-//           };
-//           await setDoc(userRef, data);
-//         }
+//        } else {
+//   // ✅ مستخدم جديد: نضيف جميع الحقول المطلوبة
+//   // توليد معرف فريد قبل إنشاء الوثيقة (بدون معاملات)
+//   const displayName = firebaseUser.displayName || "مستخدم جديد";
+//   const uniqueId = await generateUniqueId();  // ✅ تم إزالة displayName
+
+//   data = {
+//     name: displayName,
+//     email: firebaseUser.email,
+//     role: "customer",
+//     verifierType: "basic",
+//     customerType: "customer",
+//     avatar: firebaseUser.photoURL || "",
+//     createdAt: new Date(),
+//     friends: [],
+//     blockedUsers: [],
+//     popularity: 0,
+//     power: 0,
+//     rank: 'عضو',
+//     balance: 0,
+//     mgcBalance: 0,
+//     xp: 0,
+//     level: 1,
+//     title: null,
+//     pityCounter: 0,
+//     coupons: [],
+//     freeCoupons: [],
+//     uniqueId: uniqueId,
+//   };
+//   await setDoc(userRef, data);
+// }
 //         data.uid = firebaseUser.uid;
 
 //         // ✅ تحديث الحالة المحلية
@@ -212,9 +230,10 @@
 
 // export const useAuth = () => useContext(AuthContext);
 
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useAppStore } from '../store/store';
 
@@ -263,10 +282,34 @@ export function AuthProvider({ children }) {
 
           // التحقق من وجود uniqueId
           if (!data.uniqueId) {
-const uniqueId = await generateUniqueId();
+            const uniqueId = await generateUniqueId();
             data.uniqueId = uniqueId;
             needsUpdate = true;
           }
+
+          // ============================================================
+          // 🔽 **إضافة حقول الإحالة للمستخدمين القدامى (اختياري)**
+          // في حال كنت تريد إضافة الحقول للمستخدمين الموجودين مسبقاً،
+          // يمكنك إلغاء التعليق على هذا القسم.
+          // ============================================================
+          /*
+          if (data.referredBy === undefined) {
+            data.referredBy = null;
+            needsUpdate = true;
+          }
+          if (data.referralBalance === undefined) {
+            data.referralBalance = 0;
+            needsUpdate = true;
+          }
+          if (data.totalReferralEarnings === undefined) {
+            data.totalReferralEarnings = 0;
+            needsUpdate = true;
+          }
+          if (data.referralRewardClaimed === undefined) {
+            data.referralRewardClaimed = false;
+            needsUpdate = true;
+          }
+          */
 
           if (!data.customerType) {
             data.customerType = 'customer';
@@ -345,37 +388,68 @@ const uniqueId = await generateUniqueId();
               uniqueId: data.uniqueId, // ✅ إضافة المعرف الفريد
             });
           }
-       } else {
-  // ✅ مستخدم جديد: نضيف جميع الحقول المطلوبة
-  // توليد معرف فريد قبل إنشاء الوثيقة (بدون معاملات)
-  const displayName = firebaseUser.displayName || "مستخدم جديد";
-  const uniqueId = await generateUniqueId();  // ✅ تم إزالة displayName
+        } else {
+          // ============================================================
+          // ✅ **مستخدم جديد: نضيف جميع الحقول المطلوبة**
+          // 🔽 **هنا تمت إضافة قراءة كود الإحالة من الرابط وحفظه**
+          // ============================================================
 
-  data = {
-    name: displayName,
-    email: firebaseUser.email,
-    role: "customer",
-    verifierType: "basic",
-    customerType: "customer",
-    avatar: firebaseUser.photoURL || "",
-    createdAt: new Date(),
-    friends: [],
-    blockedUsers: [],
-    popularity: 0,
-    power: 0,
-    rank: 'عضو',
-    balance: 0,
-    mgcBalance: 0,
-    xp: 0,
-    level: 1,
-    title: null,
-    pityCounter: 0,
-    coupons: [],
-    freeCoupons: [],
-    uniqueId: uniqueId,
-  };
-  await setDoc(userRef, data);
-}
+          // ----- قراءة كود الإحالة من الرابط (ref) -----
+          let referredBy = null;
+          try {
+            const queryParams = new URLSearchParams(window.location.search);
+            const refCode = queryParams.get('ref'); // مثال: MGC_00000001
+            if (refCode) {
+              const q = query(collection(db, 'users'), where('uniqueId', '==', refCode));
+              const snap = await getDocs(q);
+              if (!snap.empty) {
+                referredBy = snap.docs[0].id; // نأخذ uid المستخدم المُحيل
+                console.log(`✅ تم العثور على المُحيل: ${referredBy}`);
+              } else {
+                console.warn(`⚠️ لم يتم العثور على مستخدم بالمعرف: ${refCode}`);
+              }
+            }
+          } catch (err) {
+            console.warn('⚠️ خطأ في قراءة كود الإحالة:', err);
+          }
+          // ----- انتهى جزء الإحالة -----
+
+          // توليد معرف فريد قبل إنشاء الوثيقة
+          const displayName = firebaseUser.displayName || "مستخدم جديد";
+          const uniqueId = await generateUniqueId();
+
+          data = {
+            name: displayName,
+            email: firebaseUser.email,
+            role: "customer",
+            verifierType: "basic",
+            customerType: "customer",
+            avatar: firebaseUser.photoURL || "",
+            createdAt: new Date(),
+            friends: [],
+            blockedUsers: [],
+            popularity: 0,
+            power: 0,
+            rank: 'عضو',
+            balance: 0,
+            mgcBalance: 0,
+            xp: 0,
+            level: 1,
+            title: null,
+            pityCounter: 0,
+            coupons: [],
+            freeCoupons: [],
+            uniqueId: uniqueId,
+            // ============================================================
+            // 🔽 **الحقول الجديدة لنظام الإحالة** (تم إضافتها هنا)
+            // ============================================================
+            referredBy: referredBy,           // ✅ المُحيل (uid)
+            referralBalance: 0,               // ✅ رصيد الإحالات المحجوز
+            totalReferralEarnings: 0,         // ✅ إجمالي ما تم تحويله إلى الرصيد الرئيسي
+            referralRewardClaimed: false,     // ✅ لمنع تكرار المكافأة (اختياري)
+          };
+          await setDoc(userRef, data);
+        }
         data.uid = firebaseUser.uid;
 
         // ✅ تحديث الحالة المحلية

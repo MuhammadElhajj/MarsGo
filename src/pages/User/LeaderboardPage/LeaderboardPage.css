@@ -61,12 +61,6 @@
   color: var(--color-text-primary);
 }
 
-.leaderboard__filters button.active {
-  /* background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 4px 12px var(--color-primary-alpha); */
-}
 
 /* ===== قائمة المتصدرين ===== */
 .leaderboard__list {

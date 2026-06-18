@@ -1,9 +1,12 @@
 // src/pages/FinanceVerifier/FinanceTopUpRequests.jsx
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { 
+  collection, query, where, onSnapshot, updateDoc, doc,
+  getDoc, addDoc, increment, serverTimestamp, getDocs
+} from 'firebase/firestore';
 import { useAuth } from '../../context/AuthContext';
-import { useAppStore } from '../../store/store'; // ✅ استخدم الـ store بدلاً من السياق
+import { useAppStore } from '../../store/store';
 import Button from '../../components/GeneralComponents/Button/Button';
 import Loading from '../../components/GeneralComponents/Loading/Loading';
 import { showToast } from '../../components/GeneralComponents/ToastNotification/ToastNotification';
@@ -12,9 +15,8 @@ import './FinanceTopUpRequests.css';
 export default function FinanceTopUpRequests() {
   const { userData } = useAuth();
   
-  // ✅ جلب الإعدادات من الـ store بدلاً من السياق
   const topUpSettings = useAppStore((state) => state.topUpSettings);
-  const addBalance = useAppStore((state) => state.addBalance); // addBalance الآن يضيف للرصيد الحقيقي
+  const addBalance = useAppStore((state) => state.addBalance);
   const addNotification = useAppStore((state) => state.addNotification);
   
   const [requests, setRequests] = useState([]);
@@ -35,13 +37,87 @@ export default function FinanceTopUpRequests() {
     return () => unsubscribe();
   }, [userData]);
 
+  // ============================================================
+  // ✅ دالة صرف مكافأة الإحالة (تُستدعى عند أول إيداع معتمد)
+  // ============================================================
+  const handleReferralReward = async (userId) => {
+    try {
+      // 1. جلب بيانات المستخدم
+      const userRef = doc(db, 'users', userId);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) return;
+      const userData = userSnap.data();
+
+      // 2. التحقق من وجود مُحيل
+      if (!userData.referredBy) return;
+
+      // 3. التحقق من أن هذا هو أول إيداع للمستخدم
+      const depositQuery = query(
+        collection(db, 'topUpRequests'),
+        where('userId', '==', userId),
+        where('status', '==', 'approved')
+      );
+      const depositSnap = await getDocs(depositQuery);
+      if (depositSnap.size > 1) return; // ليس أول إيداع
+
+      // 4. التحقق من عدم وجود مكافأة مسجلة مسبقاً
+      const rewardQuery = query(
+        collection(db, 'referral_rewards'),
+        where('referredId', '==', userId)
+      );
+      const rewardSnap = await getDocs(rewardQuery);
+      if (!rewardSnap.empty) return; // تم صرف المكافأة سابقاً
+
+      // 5. إضافة 20 MGC إلى referralBalance للمُحيل
+      const referrerId = userData.referredBy;
+      await updateDoc(doc(db, 'users', referrerId), {
+        referralBalance: increment(20),
+      });
+
+      // 6. تسجيل المكافأة في referral_rewards (حالة pending)
+      await addDoc(collection(db, 'referral_rewards'), {
+        referrerId: referrerId,
+        referredId: userId,
+        rewardAmount: 20,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
+
+      // 7. تحديث userRef لمنع تكرار المكافأة (اختياري)
+      await updateDoc(userRef, {
+        referralRewardClaimed: true,
+      });
+
+      // 8. إشعار للمُحيل
+      try {
+        await addNotification({
+          userId: referrerId,
+          title: '🎉 مكافأة إحالة جديدة!',
+          message: `تم إضافة 20 MGC إلى رصيد إحالاتك. اجمع 100 MGC لصرفها.`,
+          type: 'referral_reward',
+          read: false,
+          createdAt: new Date(),
+        });
+      } catch (notifErr) {
+        console.warn('فشل إرسال الإشعار:', notifErr);
+      }
+
+      console.log(`✅ تم إضافة 20 MGC إلى رصيد إحالات المستخدم ${referrerId}`);
+    } catch (err) {
+      console.error('فشل صرف مكافأة الإحالة:', err);
+    }
+  };
+
   const handleApprove = async (request) => {
     if (!window.confirm(`تأكيد الموافقة على طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $؟`)) return;
     setActionLoading(request.id);
     try {
-      // ✅ إضافة الرصيد الحقيقي للمستخدم (addBalance الآن يضيف للرصيد الحقيقي)
+      // إضافة الرصيد الحقيقي للمستخدم
       const balanceAdded = await addBalance(request.userId, request.amount);
       if (!balanceAdded) throw new Error('فشل إضافة الرصيد');
+
+      // ✅ صرف مكافأة الإحالة (إذا كانت مستوفية للشروط)
+      await handleReferralReward(request.userId);
 
       await updateDoc(doc(db, 'topUpRequests', request.id), {
         status: 'approved',

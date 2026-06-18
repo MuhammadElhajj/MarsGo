@@ -9,8 +9,10 @@ import VerifierLayout from "./layouts/VerifierLayout/VerifierLayout";
 import Loading from "./components/GeneralComponents/Loading/Loading";
 import AdminCategories from './components/AdminCoponent/AdminCategories/AdminCategories';
 // ==================== صفحات المستخدم ====================
+const SellMGC = lazy(() => import('./pages/User/SellMGC/SellMGC'));
 const SearchUserPage = lazy(() => import('./pages/User/SearchUserPage/SearchUserPage'));
 // ==================== صفحات العميل ====================
+const ReferralPage = lazy(() => import('./pages/User/ReferralPage/ReferralPage'));
 const Login = lazy(() => import("./pages/User/Login/Login"));
 const Dashboard = lazy(() => import("./pages/User/Dashboard/Dashboard"));
 const TransferPage = lazy(() => import("./pages/User/Transfer/TransferPage"));
@@ -40,6 +42,7 @@ const FriendsPage  = lazy(() => import('./pages/User/FriendsPage/FriendsPage'));
 const MyActivitiesPage = lazy(() => import('./pages/User/MyActivities/MyActivitiesPage'));
 // ==================== صفحات المدير (Admin) ====================
 import LeaderboardPage from './pages/User/LeaderboardPage/LeaderboardPage';
+const MainFriendPage = lazy(() => import('./pages/User/MainFriendPage/MainFriendPage'));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
 const AdminUsersPage = lazy(() => import("./pages/Admin/AdminUsers"));
@@ -139,11 +142,12 @@ function App() {
           <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/chat/room/:roomId" element={<ChatRoom />} />
           <Route path="/wheel" element={<WheelPage />} />
-    
+    <Route path="/referral" element={<ReferralPage />} />
     <Route path="/my-activities" element={<MyActivitiesPage />} />      <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<PublicProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
-          <Route path="/exchange" element={<ExchangePage />} />
+   <Route path="/mianfriendspage" element={<MainFriendPage />} />
+   <Route path="/sell-mgc" element={<SellMGC />} />       <Route path="/exchange" element={<ExchangePage />} />
        <Route path="/search-user" element={<SearchUserPage />} />
        <Route path="/buy-mgc" element={<BuyMGC />} />
    <Route path="/my-orders" element={<MyOrdersPage />} />

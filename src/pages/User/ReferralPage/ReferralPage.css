@@ -1,0 +1,491 @@
+/* src/pages/User/ReferralPage/ReferralPage.css */
+
+.referral-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== الهيدر (زر الرجوع على اليسار، العنوان على اليمين) ===== */
+.referral-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.referral-page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.header-icon {
+  font-size: 1.6rem;
+}
+
+/* ===== أيقونات البطاقات ===== */
+.card-icon {
+  font-size: 1.3rem;
+}
+
+/* ===== البطاقات ===== */
+.referral-page__card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.referral-page__card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.referral-page__card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  color: var(--color-text-primary);
+}
+
+/* ===== رابط الإحالة ===== */
+.referral-link-box {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 0.6rem;
+  padding: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
+.referral-link-input {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-family: monospace;
+  color: var(--color-text-primary);
+  outline: none;
+  direction: ltr;
+}
+
+.referral-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.referral-copy-btn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+}
+
+.referral-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ===== الإحصائيات ===== */
+.referral-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem 0.4rem;
+  background: var(--color-bg-primary);
+  border-radius: 0.6rem;
+  border: 1px solid var(--color-border);
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== شريط التقدم ===== */
+.referral-progress {
+  margin: 0.8rem 0 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-primary);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), #a855f7);
+  border-radius: 1rem;
+  transition: width 0.5s ease;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.2rem;
+}
+
+/* ===== زر الصرف ===== */
+.claim-btn {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 2rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.claim-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.claim-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   ✅ قسم الإحالات – التبويبات (الأزرار المطلوب تعديلها)
+   ============================================================ */
+.referral-page__referrals {
+  margin-top: 1.5rem;
+}
+
+.referral-page__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+/* 🔹 الأزرار الأساسية */
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1.2rem;
+  background: transparent;
+  border: none;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+
+/* تأثير hover */
+.tab-btn:hover {
+  background: rgba(79, 70, 229, 0.06);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+}
+
+/* 🔹 الزر النشط (المحدد) */
+.tab-btn.active {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.25);
+  font-weight: 600;
+}
+
+.tab-btn.active:hover {
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.35);
+  transform: translateY(-2px);
+}
+
+/* 🔹 أيقونة داخل الزر – تنسيق إضافي */
+.tab-btn svg {
+  font-size: 1.1rem;
+  transition: transform 0.2s;
+}
+
+.tab-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.tab-btn.active svg {
+  color: #fff;
+}
+
+/* 🔹 عدد الإحالات بجوار الزر (اختياري) */
+.tab-btn .count-badge {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.05rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-right: 0.2rem;
+}
+
+.tab-btn.active .count-badge {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== قائمة الإحالات ===== */
+.referral-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  border: 1px dashed var(--color-border);
+}
+
+/* ===== شرح النظام ===== */
+.referral-page__info {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.2rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.referral-page__info h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--color-text-primary);
+}
+
+.info-icon {
+  font-size: 1.3rem;
+}
+
+.referral-page__info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.referral-page__info ul li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.referral-page__info ul li:last-child {
+  border-bottom: none;
+}
+
+.referral-page__info ul li svg {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+/* ===== حالة التحميل ===== */
+.referral-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   ✅ استجابة الجوال
+   ============================================================ */
+@media (max-width: 640px) {
+  .referral-page {
+    padding: 0.5rem;
+  }
+
+  .referral-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
+  .stat-item {
+    padding: 0.4rem 0.2rem;
+  }
+
+  .stat-icon {
+    font-size: 1.1rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.55rem;
+  }
+
+  .referral-link-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .referral-copy-btn {
+    justify-content: center;
+  }
+
+  .referral-page__title {
+    font-size: 1.3rem;
+  }
+
+  .referral-page__card,
+  .referral-page__info {
+    padding: 0.8rem 1rem;
+  }
+
+  .referral-page__card h3 {
+    font-size: 1rem;
+  }
+
+  .referral-page__header {
+    gap: 0.5rem;
+  }
+
+  .header-icon {
+    font-size: 1.3rem;
+  }
+
+  /* 🔹 تبويبات الجوال – عمودية */
+  .referral-page__tabs {
+    flex-direction: column;
+    gap: 0.3rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .tab-btn {
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  .recent-item {
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .referral-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+  }
+
+  .stat-item {
+    padding: 0.3rem 0.1rem;
+  }
+
+  .stat-icon {
+    font-size: 0.9rem;
+  }
+
+  .stat-value {
+    font-size: 0.85rem;
+  }
+
+  .stat-label {
+    font-size: 0.5rem;
+  }
+
+  .referral-page__title {
+    font-size: 1.1rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

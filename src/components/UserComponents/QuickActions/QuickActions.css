@@ -1,19 +1,12 @@
 /* src/components/UserComponents/QuickActions/QuickActions.css */
+
 .quick-actions {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0.75rem;
-  padding: 1rem 0.5rem;
-  background: var(--color-bg-secondary);
-  border-radius: 1.25rem;
-  margin: 1rem 0;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s;
-}
-
-.quick-actions:hover {
-  box-shadow: var(--shadow-md);
+  padding: 0.5rem 0;
+  margin: 0.5rem 0;
+  transition: all 0.2s ease;
 }
 
 .quick-actions__item {
@@ -22,7 +15,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  padding: 0.75rem 0.3rem;
+  padding: 0.5rem 0.2rem;
   cursor: pointer;
   transition: all 0.25s ease;
   color: var(--color-text-secondary);
@@ -35,8 +28,6 @@
 
 .quick-actions__item:hover {
   transform: translateY(-3px);
-  color: var(--color-accent);
-  background: rgba(79, 70, 229, 0.05);
 }
 
 .quick-actions__icon {
@@ -46,18 +37,15 @@
   width: 50px;
   height: 50px;
   border-radius: 14px;
-  background: var(--color-bg-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--color-bg-secondary);
   transition: all 0.3s ease;
   font-size: 1.6rem;
-  color: var(--color-text-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .quick-actions__item:hover .quick-actions__icon {
-  background: var(--color-accent);
-  color: white;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .quick-actions__label {
@@ -71,7 +59,64 @@
 }
 
 .quick-actions__item:hover .quick-actions__label {
-  color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+/* ===== ألوان الأيقونات المخصصة ===== */
+
+/* شحن - أزرق */
+.quick-actions__item--topup .quick-actions__icon {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+.quick-actions__item--topup:hover .quick-actions__icon {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+/* عملات MGC - بنفسجي */
+.quick-actions__item--coins .quick-actions__icon {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+.quick-actions__item--coins:hover .quick-actions__icon {
+  background: #8b5cf6;
+  color: white;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+}
+
+/* إحالة - أخضر */
+.quick-actions__item--referral .quick-actions__icon {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+.quick-actions__item--referral:hover .quick-actions__icon {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+/* مفاتيح - برتقالي */
+.quick-actions__item--keys .quick-actions__icon {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.quick-actions__item--keys:hover .quick-actions__icon {
+  background: #f59e0b;
+  color: white;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+/* عناصر - أحمر وردي */
+.quick-actions__item--items .quick-actions__icon {
+  color: #ec4899;
+  background: rgba(236, 72, 153, 0.1);
+}
+.quick-actions__item--items:hover .quick-actions__icon {
+  background: #ec4899;
+  color: white;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
 }
 
 /* ===== استجابة للجوال ===== */
@@ -79,12 +124,11 @@
   .quick-actions {
     grid-template-columns: repeat(5, 1fr);
     gap: 0.4rem;
-    padding: 0.75rem 0.3rem;
-    border-radius: 1rem;
+    padding: 0.5rem 0;
   }
 
   .quick-actions__item {
-    padding: 0.5rem 0.1rem;
+    padding: 0.3rem 0.1rem;
   }
 
   .quick-actions__icon {
@@ -103,8 +147,7 @@
   .quick-actions {
     grid-template-columns: repeat(5, 1fr);
     gap: 0.2rem;
-    padding: 0.5rem 0.1rem;
-    border-radius: 0.75rem;
+    padding: 0.3rem 0;
   }
 
   .quick-actions__icon {
@@ -120,14 +163,24 @@
 }
 
 /* ===== دعم الوضع الداكن ===== */
-.dark .quick-actions {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
+.dark .quick-actions__icon {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.dark .quick-actions__icon {
-  background: var(--color-bg-primary);
-  color: var(--color-text-secondary);
+.dark .quick-actions__item--topup .quick-actions__icon {
+  background: rgba(59, 130, 246, 0.15);
+}
+.dark .quick-actions__item--coins .quick-actions__icon {
+  background: rgba(139, 92, 246, 0.15);
+}
+.dark .quick-actions__item--referral .quick-actions__icon {
+  background: rgba(16, 185, 129, 0.15);
+}
+.dark .quick-actions__item--keys .quick-actions__icon {
+  background: rgba(245, 158, 11, 0.15);
+}
+.dark .quick-actions__item--items .quick-actions__icon {
+  background: rgba(236, 72, 153, 0.15);
 }
 
 .dark .quick-actions__item:hover .quick-actions__icon {
@@ -135,6 +188,75 @@
   color: white;
 }
 
-.dark .quick-actions__item:hover {
-  background: rgba(79, 70, 229, 0.12);
+.dark .quick-actions__item:hover .quick-actions__label {
+  color: var(--color-text-primary);
+}
+
+/* بيع MGC - أحمر برتقالي */
+.quick-actions__item--sell .quick-actions__icon {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+.quick-actions__item--sell:hover .quick-actions__icon {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+/* الأصدقاء - أزرق */
+.quick-actions__item--friends .quick-actions__icon {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+.quick-actions__item--friends:hover .quick-actions__icon {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+/* عناصر فارغة (placeholder) */
+.quick-actions__item--placeholder .quick-actions__icon {
+  color: #9ca3af;
+  background: rgba(156, 163, 175, 0.1);
+}
+
+.quick-actions__item--placeholder:hover .quick-actions__icon {
+  background: #9ca3af;
+  color: white;
+  box-shadow: 0 4px 14px rgba(156, 163, 175, 0.3);
+}
+
+.quick-actions__item--placeholder:hover {
+  transform: translateY(-3px);
+  color: #9ca3af;
+}
+
+/* ===== العناصر غير النشطة (معطلة) ===== */
+.quick-actions__item--disabled .quick-actions__icon {
+  color: #9ca3af;
+  background: rgba(156, 163, 175, 0.08);
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.quick-actions__item--disabled:hover .quick-actions__icon {
+  transform: none;
+  box-shadow: none;
+  background: rgba(156, 163, 175, 0.08);
+  color: #9ca3af;
+}
+
+.quick-actions__item--disabled:hover {
+  transform: none;
+  color: #9ca3af;
+  background: transparent;
+}
+
+.quick-actions__item--disabled .quick-actions__label {
+  color: #9ca3af;
+  opacity: 0.5;
+}
+
+.quick-actions__item--disabled:hover .quick-actions__label {
+  color: #9ca3af;
 }

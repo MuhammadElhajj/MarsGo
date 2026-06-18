@@ -1,0 +1,409 @@
+/* src/pages/User/MainFriendPage/MainFriendPage.css */
+
+.main-friend-page {
+  max-width: 800px;
+  margin: 0 auto;
+ 
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== الهيدر ===== */
+.main-friend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.main-friend-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.main-friend-title-icon {
+  font-size: 1.6rem;
+}
+
+.main-friend-stats {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.main-friend-stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--color-bg-secondary);
+  padding: 0.2rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.main-friend-stat-badge svg {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.main-friend-stat-badge--requests {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
+}
+
+.main-friend-stat-badge--requests svg {
+  color: #92400e;
+}
+
+/* ===== التبويبات ===== */
+.main-friend-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.main-friend-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1.2rem;
+  background: transparent;
+  border: none;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.main-friend-tab:hover {
+  background: rgba(79, 70, 229, 0.06);
+  color: var(--color-text-primary);
+}
+
+.main-friend-tab.active {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.2);
+}
+
+.main-friend-tab svg {
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+
+.main-friend-tab:hover svg {
+  transform: scale(1.1);
+}
+
+/* ===== المحتوى ===== */
+.main-friend-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* ===== البطاقات (الأصدقاء، الطلبات، البحث، الاقتراحات) ===== */
+.main-friend-item,
+.main-friend-request-item,
+.main-friend-search-result,
+.main-friend-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.main-friend-item:hover,
+.main-friend-request-item:hover,
+.main-friend-search-result:hover,
+.main-friend-suggestion-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(79, 70, 229, 0.1);
+}
+
+/* ===== معلومات العنصر ===== */
+.main-friend-info,
+.main-friend-request-info,
+.main-friend-result-info,
+.main-friend-suggestion-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.main-friend-name,
+.main-friend-request-name,
+.main-friend-result-name,
+.main-friend-suggestion-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+}
+
+.main-friend-id,
+.main-friend-request-time,
+.main-friend-result-id,
+.main-friend-suggestion-id {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.main-friend-request-time svg {
+  font-size: 0.8rem;
+}
+
+/* ===== الأزرار داخل البطاقات ===== */
+.main-friend-actions,
+.main-friend-request-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.main-friend-actions .btn,
+.main-friend-request-actions .btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+
+/* ===== حالة فارغة ===== */
+.main-friend-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px dashed var(--color-border);
+  font-size: 0.9rem;
+}
+
+/* ===== البحث ===== */
+.main-friend-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.main-friend-search-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.main-friend-search-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 2rem;
+  padding: 0 1rem;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.main-friend-search-wrapper:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+}
+
+.main-friend-search-icon {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.main-friend-search-input {
+  flex: 1;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.main-friend-search-input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+/* ===== الاقتراحات ===== */
+.main-friend-suggestions {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.main-friend-suggestions-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: var(--color-text-primary);
+}
+
+.main-friend-suggestions-title svg {
+  font-size: 1.1rem;
+}
+
+/* ===== حالات التحميل ===== */
+.main-friend-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1.2rem;
+  color: var(--color-text-secondary);
+}
+
+.main-friend-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.main-friend-suggestions-loading,
+.main-friend-suggestions-empty {
+  text-align: center;
+  padding: 1rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+ 
+
+  .main-friend-title {
+    font-size: 1.2rem;
+  }
+
+  .main-friend-title-icon {
+    font-size: 1.3rem;
+  }
+
+  .main-friend-tabs {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding-bottom: 0.3rem;
+  }
+
+  .main-friend-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .main-friend-item,
+  .main-friend-request-item,
+  .main-friend-search-result,
+  .main-friend-suggestion-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .main-friend-actions,
+  .main-friend-request-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .main-friend-search-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .main-friend-search-wrapper {
+    border-radius: 1.5rem;
+  }
+
+  .main-friend-stats {
+    gap: 0.3rem;
+  }
+
+  .main-friend-stat-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .main-friend-stat-badge svg {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .main-friend-title {
+    font-size: 1rem;
+  }
+
+  .main-friend-tab {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .main-friend-item,
+  .main-friend-request-item,
+  .main-friend-search-result,
+  .main-friend-suggestion-item {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .main-friend-name {
+    font-size: 0.8rem;
+  }
+
+  .main-friend-id,
+  .main-friend-request-time,
+  .main-friend-result-id,
+  .main-friend-suggestion-id {
+    font-size: 0.6rem;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

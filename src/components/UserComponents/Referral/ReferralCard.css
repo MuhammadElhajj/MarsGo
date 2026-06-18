@@ -1,0 +1,92 @@
+/* src/components/UserComponents/Referral/ReferralCard.css */
+
+.referral-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--color-bg-primary);
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.referral-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.referral-card__avatar {
+  flex-shrink: 0;
+}
+
+.referral-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.referral-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.referral-card__status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.status-icon {
+  font-size: 1rem;
+}
+
+.status-icon.claimed {
+  color: #10b981;
+}
+
+.status-icon.pending {
+  color: #f59e0b;
+}
+
+.status-text.claimed {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.status-text.pending {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+.referral-card__action {
+  flex-shrink: 0;
+}
+
+.referral-card__action .btn {
+  width: auto;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+}
+
+/* استجابة للجوال */
+@media (max-width: 480px) {
+  .referral-card {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .referral-card__action {
+    width: 100%;
+  }
+
+  .referral-card__action .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

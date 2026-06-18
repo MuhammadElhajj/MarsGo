@@ -1,169 +1,237 @@
 /* src/pages/User/BuyMGC/BuyMGC.css */
+
 .buy-mgc {
   max-width: 900px;
   margin: 0 auto;
-
+  padding: 0.5rem 1rem;
+  animation: fadeIn 0.3s ease;
 }
 
+/* ===== الهيدر ===== */
 .buy-mgc__header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
   margin-bottom: 0.5rem;
 }
 
 .buy-mgc__header h1 {
-  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--color-text-primary);
-}
-
-/* ✅ بطاقة الرصيد الدولاري */
-.buy-mgc__balance-card {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  border-radius: 1rem;
-  padding: 1rem 1.5rem;
-  margin: 0.5rem 0 1.5rem;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.balance-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-}
-
-.balance-label {
-  opacity: 0.8;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.balance-amount {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #a5b4fc;
-}
-
-.balance-hint {
-  font-size: 0.75rem;
-  opacity: 0.6;
   margin: 0;
 }
 
+.buy-mgc__header h1 svg {
+  font-size: 1.8rem;
+}
+/* ===== النص الفرعي ===== */
 .buy-mgc__subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.6rem;
   color: var(--color-text-secondary);
-  margin-bottom: 2rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
+.buy-mgc__subtitle svg {
+  font-size: 1rem;
+}
+
+/* ===== شبكة الباقات ===== */
 .buy-mgc__packages {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
 }
 
+/* ===== بطاقة الباقة ===== */
 .buy-mgc__card {
   background: var(--color-bg-secondary);
-  border-radius: 1.2rem;
-  padding: 1.5rem;
+  border-radius: 1rem;
+  padding: 1.5rem 1.2rem;
   text-align: center;
   border: 1px solid var(--color-border);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
 .buy-mgc__card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
+  border-color: rgba(79, 70, 229, 0.15);
 }
 
+/* ===== عدد MGC ===== */
 .buy-mgc__mgc {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
-.mgc-icon {
+.buy-mgc__mgc .mgc-icon {
+  font-size: 1.8rem;
   color: var(--color-accent);
-  font-size: 2rem;
 }
 
+/* ===== السعر ===== */
 .buy-mgc__price {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .price-amount {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--color-accent);
 }
 
 .price-discount {
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #10b981;
-  background: rgba(16, 185, 129, 0.15);
-  padding: 0.15rem 0.6rem;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 0.1rem 0.6rem;
   border-radius: 1rem;
 }
 
+.price-discount svg {
+  font-size: 0.7rem;
+}
+
+/* ===== السعر لكل MGC ===== */
 .buy-mgc__per-mgc {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
 }
 
+/* ===== زر الشراء ===== */
 .buy-mgc__btn {
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-weight: 600;
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
 }
 
+.buy-mgc__btn:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+/* ===== الملاحظة السفلية ===== */
 .buy-mgc__note {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
-  padding: 1rem;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.2rem;
   background: var(--color-bg-secondary);
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   border: 1px solid var(--color-border);
+}
+
+.buy-mgc__note svg {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 640px) {
+  .buy-mgc {
+    padding: 0.5rem;
+  }
+
+  .buy-mgc__packages {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .buy-mgc__card {
+    padding: 1.2rem 0.8rem;
+  }
+
+  .buy-mgc__mgc {
+    font-size: 1.6rem;
+  }
+
+  .buy-mgc__mgc .mgc-icon {
+    font-size: 1.4rem;
+  }
+
+  .price-amount {
+    font-size: 1.3rem;
+  }
+
+  .buy-mgc__header h1 {
+    font-size: 1.3rem;
+  }
+
+  .buy-mgc__subtitle {
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
   .buy-mgc__packages {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
   }
+
+  .buy-mgc__card {
+    padding: 1rem 0.6rem;
+  }
+
   .buy-mgc__mgc {
-    font-size: 1.8rem;
+    font-size: 1.3rem;
   }
+
   .price-amount {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
   }
-  .buy-mgc__balance-card {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.8rem 1rem;
+
+  .buy-mgc__btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
   }
-  .balance-amount {
-    font-size: 1.2rem;
+}
+
+/* ===== حركة الظهور ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

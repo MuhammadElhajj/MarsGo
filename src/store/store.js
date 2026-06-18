@@ -104,6 +104,8 @@ export const useAppStore = create(
       mgcBalance: 0,
       setMgcBalance: (mgcBalance) => set({ mgcBalance }),
 
+      // ========== رصيد الإحالات (محجوز) ==========
+referralBalance: 0,  // ✅ أضف هذا السطر
       // ===== تحديث بيانات المستخدم (يستخدم في AuthContext) =====
       setUserData: (data) => set({
         userData: data,
@@ -112,11 +114,20 @@ export const useAppStore = create(
         mgcBalance: data?.mgcBalance || 0,    // رصيد MGC
       }),
 
+      setUserData: (data) => set({
+  userData: data,
+  user: data?.user || data,
+  balance: data?.balance || 0,
+  mgcBalance: data?.mgcBalance || 0,
+  referralBalance: data?.referralBalance || 0,  // ✅ أضف هذا
+}),
+
       setUserFull: (userData) => set({
         user: userData,
         userData: userData,
         balance: userData?.balance || 0,
         mgcBalance: userData?.mgcBalance || 0,
+        referralBalance: userData?.referralBalance || 0,
       }),
 
       // ===== الاستماع لتحديثات الرصيد =====
@@ -663,7 +674,62 @@ rejectFriendRequest: async (requestId) => {
   }
 },
 
+// ===== جلب قائمة الإحالات مع حالة الإيداع =====
+getRecentReferrals: async (limitCount = 10) => {
+  const { user } = get();
+  if (!user) return [];
+  try {
+    // جلب جميع سجلات الإحالة للمستخدم
+    const q = query(
+      collection(db, 'referral_rewards'),
+      where('referrerId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    const snap = await getDocs(q);
+    const referrals = [];
 
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      const referredId = data.referredId;
+      
+      // جلب بيانات المستخدم المحال
+      const userSnap = await getDoc(doc(db, 'users', referredId));
+      if (!userSnap.exists()) continue;
+      const userData = userSnap.data();
+      
+      // التحقق مما إذا كان المستخدم قد قام بأول إيداع معتمد
+      const depositQuery = query(
+        collection(db, 'topUpRequests'),
+        where('userId', '==', referredId),
+        where('status', '==', 'approved'),
+        orderBy('createdAt', 'asc'),
+        limit(1)
+      );
+      const depositSnap = await getDocs(depositQuery);
+      const hasDeposited = !depositSnap.empty;
+      
+      // حساب المكافأة (إذا كانت قد صرفت أم لا)
+      const rewardStatus = data.status; // 'pending' أو 'claimed'
+
+      referrals.push({
+        id: doc.id,
+        referredId: referredId,
+        name: userData.name || 'مستخدم',
+        avatar: userData.avatar || null,
+        uniqueId: userData.uniqueId || null,
+        hasDeposited: hasDeposited,
+        rewardAmount: data.rewardAmount || 20,
+        rewardStatus: rewardStatus, // 'pending' أو 'claimed'
+        createdAt: data.createdAt,
+      });
+    }
+    return referrals;
+  } catch (error) {
+    console.error('خطأ في جلب الإحالات:', error);
+    return [];
+  }
+},
 // ===== جلب طلبات الصداقة الواردة (غير المقروءة) =====
 fetchFriendRequests: async () => {
   const { user } = get();
@@ -902,6 +968,249 @@ getRecentSupporters: async (targetUserId, limit = 10) => {
   }
 },
 
+
+// ===== نظام الإحالة =====
+// الحصول على رابط الإحالة
+getReferralLink: () => {
+  const { userData } = get();
+  if (!userData?.uniqueId) return null;
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/?ref=${userData.uniqueId}`;
+},
+
+// جلب عدد الإحالات الناجحة (المكافآت التي تم صرفها)
+getReferralCount: async () => {
+  const { user } = get();
+  if (!user) return 0;
+  try {
+    const q = query(
+      collection(db, 'referral_rewards'),
+      where('referrerId', '==', user.uid),
+      where('status', '==', 'claimed')
+    );
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch (error) {
+    console.error('خطأ في جلب عدد الإحالات:', error);
+    return 0;
+  }
+},
+// ===== بيع MGC =====
+sellMgc: async (mgcAmount) => {
+  const { user, mgcBalance, deductMgcBalance, addBalance } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+  if (mgcAmount <= 0) {
+    toast.error('الكمية يجب أن تكون أكبر من صفر');
+    return false;
+  }
+  if (mgcAmount > mgcBalance) {
+    toast.error(`الرصيد المتاح هو ${mgcBalance} MGC فقط`);
+    return false;
+  }
+
+  const RATE = 0.007; // 1 MGC = 0.007 USD (100 MGC = 0.70 USD)
+  const usdAmount = mgcAmount * RATE;
+
+  try {
+    // خصم MGC
+    const deducted = await deductMgcBalance(mgcAmount);
+    if (!deducted) {
+      toast.error('فشل خصم MGC');
+      return false;
+    }
+
+    // إضافة رصيد حقيقي
+    const added = await addBalance(user.uid, usdAmount);
+    if (!added) {
+      // استرجاع MGC في حال فشل الإضافة (يمكن تحسينه)
+      toast.error('فشل إضافة الرصيد، تم استرجاع MGC');
+      await addMgcBalance(user.uid, mgcAmount);
+      return false;
+    }
+
+    // تسجيل عملية البيع
+    await addDoc(collection(db, 'mgcSales'), {
+      userId: user.uid,
+      mgcAmount: mgcAmount,
+      usdReceived: usdAmount,
+      rate: RATE,
+      timestamp: serverTimestamp(),
+    });
+
+    toast.success(`✅ تم بيع ${mgcAmount} MGC مقابل ${usdAmount.toFixed(2)} $`);
+    return true;
+  } catch (error) {
+    console.error('فشل بيع MGC:', error);
+    toast.error('حدث خطأ أثناء البيع');
+    return false;
+  }
+},
+
+// ===== جلب سجل بيع MGC =====
+getMgcSalesHistory: async () => {
+  const { user } = get();
+  if (!user) return [];
+  try {
+    const q = query(
+      collection(db, 'mgcSales'),
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc'),
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('خطأ في جلب سجل البيع:', error);
+    return [];
+  }
+}, 
+
+// ===== جلب اقتراحات الأصدقاء (مستخدمين حقيقيين) =====
+fetchSuggestedFriends: async () => {
+  const { user, userData } = get();
+  if (!user) return [];
+
+  try {
+    // 1. جلب جميع المستخدمين
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const allUsers = usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // 2. تصفية المستخدمين:
+    //    - ليس المستخدم الحالي
+    //    - ليس في قائمة الأصدقاء
+    //    - ليس في قائمة المحظورين
+    //    - لم يتم إرسال طلب صداقة له (معلقة)
+    const friends = userData?.friends || [];
+    const blocked = userData?.blockedUsers || [];
+
+    // جلب الطلبات المعلقة التي أرسلها المستخدم
+    const sentRequestsSnap = await getDocs(query(
+      collection(db, 'friendRequests'),
+      where('from', '==', user.uid),
+      where('status', '==', 'pending')
+    ));
+    const sentRequestIds = sentRequestsSnap.docs.map(doc => doc.data().to);
+
+    // جلب الطلبات المعلقة التي وصلت للمستخدم
+    const receivedRequestsSnap = await getDocs(query(
+      collection(db, 'friendRequests'),
+      where('to', '==', user.uid),
+      where('status', '==', 'pending')
+    ));
+    const receivedRequestIds = receivedRequestsSnap.docs.map(doc => doc.data().from);
+
+    // دمج جميع المعرفات المستثناة
+    const excludeIds = new Set([
+      user.uid,
+      ...friends,
+      ...blocked,
+      ...sentRequestIds,
+      ...receivedRequestIds,
+    ]);
+
+    // 3. ترشيح المستخدمين
+    const suggested = allUsers
+      .filter(u => !excludeIds.has(u.id))
+      .slice(0, 10); // حد أقصى 10 اقتراحات
+
+    return suggested;
+  } catch (error) {
+    console.error('خطأ في جلب اقتراحات الأصدقاء:', error);
+    return [];
+  }
+},
+
+// جلب قائمة الإحالات الأخيرة
+getRecentReferrals: async (limitCount = 5) => {
+  const { user } = get();
+  if (!user) return [];
+  try {
+    const q = query(
+      collection(db, 'referral_rewards'),
+      where('referrerId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(limitCount)
+    );
+    const snap = await getDocs(q);
+    const referrals = [];
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      const referredSnap = await getDoc(doc(db, 'users', data.referredId));
+      if (referredSnap.exists()) {
+        referrals.push({
+          id: doc.id,
+          name: referredSnap.data().name || 'مستخدم',
+          amount: data.rewardAmount,
+          status: data.status,
+          createdAt: data.createdAt,
+        });
+      }
+    }
+    return referrals;
+  } catch (error) {
+    console.error('خطأ في جلب الإحالات:', error);
+    return [];
+  }
+},
+
+// صرف مكافآت الإحالة (عندما يصل الرصيد إلى 100)
+claimReferralRewards: async () => {
+  const { user, userData, referralBalance } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+  if (referralBalance < 100) {
+    toast.error(`رصيد الإحالات غير كافٍ! تحتاج 100 MGC، لديك ${referralBalance} MGC`);
+    return false;
+  }
+
+  try {
+    const userRef = doc(db, 'users', user.uid);
+    const batch = writeBatch(db);
+
+    // 1. نقل الرصيد من referralBalance إلى balance
+    batch.update(userRef, {
+      balance: increment(referralBalance),
+      referralBalance: 0,
+      totalReferralEarnings: increment(referralBalance),
+    });
+
+    // 2. تحديث حالة جميع سجلات الإحالة المعلقة إلى 'claimed'
+    const q = query(
+      collection(db, 'referral_rewards'),
+      where('referrerId', '==', user.uid),
+      where('status', '==', 'pending')
+    );
+    const snap = await getDocs(q);
+    snap.docs.forEach(docSnap => {
+      batch.update(docSnap.ref, {
+        status: 'claimed',
+        claimedAt: serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
+
+    // تحديث الحالة المحلية
+    const newBalance = (get().balance || 0) + referralBalance;
+    set({
+      balance: newBalance,
+      userData: { ...userData, referralBalance: 0, totalReferralEarnings: (userData.totalReferralEarnings || 0) + referralBalance },
+      referralBalance: 0,
+    });
+
+    toast.success(`✅ تم تحويل ${referralBalance} MGC إلى رصيدك الرئيسي!`);
+    return true;
+  } catch (error) {
+    console.error('فشل صرف المكافآت:', error);
+    toast.error('حدث خطأ أثناء صرف المكافآت');
+    return false;
+  }
+},
 
 copyUniqueId: (uniqueId) => {
   navigator.clipboard.writeText(uniqueId);
