@@ -1,15 +1,15 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom'; // Link موجود مسبقاً
+// src/pages/User/ProfilePage/ProfilePage.jsx
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   FaUser, FaCalendarAlt, FaBox, FaDollarSign, FaBell, FaWhatsapp, 
-  FaEdit, FaSave, FaCheckCircle, FaInbox, FaTrophy, FaList, FaWallet,
-  FaArrowLeft, FaDownload, FaHistory, FaUserFriends, FaUserPlus  // أضفت أيقونات الأصدقاء
+  FaEdit, FaSave, FaCheckCircle, FaInbox, FaUserFriends, FaUserPlus
 } from 'react-icons/fa';
+import { FiActivity } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import { useAppStore } from '../../../store/store';
 import useUserStats from '../../../hooks/useUserStats';
 import useUserSpending from '../../../hooks/useUserSpending';
-import SpendingProgress from '../../../components/UserComponents/SpendingProgress/SpendingProgress';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import Avatar from '../../../components/GeneralComponents/Avatar/Avatar';
 import Input from '../../../components/GeneralComponents/Input/Input';
@@ -20,11 +20,7 @@ import TopUpButton from '../../../components/GeneralComponents/TopUpButton/TopUp
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import useFormattedPrice from '../../../hooks/useFormattedPrice';
-import Loading from '../../../components/GeneralComponents/Loading/Loading';
 import './ProfilePage.css';
-
-// Lazy load DepositHistory
-const DepositHistory = lazy(() => import('../../../components/UserComponents/TopUp/DepositHistory/DepositHistory'));
 
 export default function ProfilePage() {
   const { userData, updateUserData } = useAuth();
@@ -33,36 +29,14 @@ export default function ProfilePage() {
   const { formatPrice } = useFormattedPrice();
   
   const unreadCount = useAppStore((state) => state.unreadCount);
-  const pendingRequestsCount = useAppStore((state) => state.pendingRequestsCount); // ✅ عدد طلبات الصداقة
+  const pendingRequestsCount = useAppStore((state) => state.pendingRequestsCount);
 
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [recentOrdersLoading, setRecentOrdersLoading] = useState(true);
   const [whatsappNumber, setWhatsappNumber] = useState(userData?.whatsappNumber || '');
   const [originalNumber, setOriginalNumber] = useState(userData?.whatsappNumber || '');
   const [editingWhatsapp, setEditingWhatsapp] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!userData?.uid) return;
-    const fetchRecentOrders = async () => {
-      try {
-        const q = query(
-          collection(db, 'orders'),
-          where('userId', '==', userData.uid),
-          orderBy('createdAt', 'desc'),
-          limit(3)
-        );
-        const snapshot = await getDocs(q);
-        const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setRecentOrders(orders);
-      } catch (err) {
-        console.error('خطأ في جلب آخر الطلبات:', err);
-      } finally {
-        setRecentOrdersLoading(false);
-      }
-    };
-    fetchRecentOrders();
-  }, [userData]);
+  // إزالة جلب آخر الطلبات (غير مطلوب الآن)
 
   if (!userData) return <div className="profile-page__loading">جاري التحميل...</div>;
 
@@ -87,26 +61,7 @@ export default function ProfilePage() {
   };
   const isSaved = originalNumber !== '' && !editingWhatsapp;
 
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      pending_verification: 'قيد التدقيق',
-      awaiting_customer_resubmit: 'بانتظار تعديلك',
-      verified_pending_execution: 'تم التدقيق',
-      rejected: 'مرفوض',
-      completed: 'مكتمل'
-    };
-    return statusMap[status] || status;
-  };
-
-  const getStatusClass = (status) => `status-${status}`;
-
-  const formatAmount = (value) => {
-    if (value === undefined || value === null) return '0.00';
-    const num = typeof value === 'number' ? value : parseFloat(value);
-    if (isNaN(num)) return '0.00';
-    const ceilValue = Math.ceil(num * 100) / 100;
-    return ceilValue.toFixed(2);
-  };
+  const friendsCount = userData.friends?.length || 0;
 
   return (
     <div className="profile-page" dir="rtl">
@@ -223,12 +178,12 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ✅ كارد الأصدقاء وطلبات الصداقة الجديد */}
+        {/* الأصدقاء */}
         <div className="profile-page__card">
           <h3><FaUserFriends /> الأصدقاء</h3>
           <div className="profile-page__friend-buttons">
             <Link to="/friends" className="friend-btn">
-              <FaUserFriends /> الأصدقاء
+              <FaUserFriends /> الأصدقاء ({friendsCount})
             </Link>
             <Link to="/friends?tab=requests" className="friend-btn friend-btn--requests">
               <FaUserPlus /> طلبات الصداقة
@@ -238,50 +193,19 @@ export default function ProfilePage() {
             </Link>
           </div>
         </div>
-      </div>
 
-      {/* سجل الإيداعات */}
-      <Suspense fallback={<Loading text="جاري تحميل سجل الإيداعات..." />}>
-        <DepositHistory />
-      </Suspense>
-
-      {/* آخر الطلبات */}
-      <div className="profile-page__orders-section">
-        <div className="profile-page__card profile-page__card--wide">
-          <h3><FaList /> آخر الطلبات</h3>
-          {recentOrdersLoading ? (
-            <div className="profile-page__loading-small">جاري التحميل...</div>
-          ) : recentOrders.length === 0 ? (
-            <p className="profile-page__empty">لا توجد طلبات بعد</p>
-          ) : (
-            <div className="profile-page__recent-orders">
-              {recentOrders.map(order => {
-                const amount = order.finalPriceUSD || order.finalPrice || order.amount;
-                const currencySymbol = order.currency === 'USD' ? '$' : 'USD';
-                return (
-                  <div key={order.id} className="profile-page__order-item">
-                    <div className="profile-page__order-id">#{order.id.slice(-6)}</div>
-                    <div className="profile-page__order-type">
-                      {order.type === 'transfer' ? 'تحويل' : order.type === 'gaming' ? 'شحن ألعاب' : order.type}
-                    </div>
-                    <div className="profile-page__order-amount">
-                      {formatAmount(amount)} {currencySymbol}
-                    </div>
-                    <div className={`profile-page__order-status ${getStatusClass(order.status)}`}>
-                      {getStatusLabel(order.status)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          <Link to="/my-orders" className="profile-page__link">عرض كل الطلبات →</Link>
+        {/* نشاطاتي */}
+        <div className="profile-page__card">
+          <h3><FiActivity /> نشاطاتي</h3>
+          <div className="profile-page__activity-link">
+            <Link to="/my-activities" className="activity-link">
+              عرض جميع نشاطاتي <span className="arrow">→</span>
+            </Link>
+            <p className="profile-page__activity-hint">
+              استعراض الإيداعات والطلبات السابقة
+            </p>
+          </div>
         </div>
-      </div>
-
-      {/* مستوى الولاء */}
-      <div className="profile-page__card">
-        <SpendingProgress />
       </div>
     </div>
   );

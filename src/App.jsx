@@ -36,7 +36,7 @@ import ChatRoom from './components/UserComponents/Chat/ChatRoom';
 const PublicProfilePage = lazy(() => import('./components/UserComponents/PublicProfile/PublicProfilePage'));
 const FriendsPage  = lazy(() => import('./pages/User/FriendsPage/FriendsPage'));
 // import  PublicProfilePage from'./components/UserComponents/PublicProfile/PublicProfilePage';
-
+const MyActivitiesPage = lazy(() => import('./pages/User/MyActivities/MyActivitiesPage'));
 // ==================== صفحات المدير (Admin) ====================
 import LeaderboardPage from './pages/User/LeaderboardPage/LeaderboardPage';
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
@@ -138,7 +138,8 @@ function App() {
           <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/chat/room/:roomId" element={<ChatRoom />} />
           <Route path="/wheel" element={<WheelPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+    
+    <Route path="/my-activities" element={<MyActivitiesPage />} />      <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<PublicProfilePage />} />
           <Route path="/crypto" element={<CryptoPage />} />
           <Route path="/exchange" element={<ExchangePage />} />

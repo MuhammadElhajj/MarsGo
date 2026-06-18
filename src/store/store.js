@@ -392,29 +392,70 @@ export const useAppStore = create(
         }
       },
 
-      // ===== دوال الصداقات =====
-      addFriend: async (friendId) => {
-        const { user, userData } = get();
-        if (!user) return false;
-        const currentFriends = userData?.friends || [];
-        if (currentFriends.includes(friendId)) return true;
-        const newFriends = [...currentFriends, friendId];
-        await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
-        set({ userData: { ...userData, friends: newFriends } });
-        toast.success('تمت إضافة الصديق');
-        return true;
-      },
-
-      removeFriend: async (friendId) => {
-        const { user, userData } = get();
-        if (!user) return false;
-        const currentFriends = userData?.friends || [];
-        const newFriends = currentFriends.filter(id => id !== friendId);
-        await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
-        set({ userData: { ...userData, friends: newFriends } });
-        toast.success('تم إزالة الصديق');
-        return true;
-      },
+     
+// ===== تعليم جميع الطلبات كمقروءة (عند فتح صفحة الطلبات) =====
+markFriendRequestsAsSeen: async () => {
+  const { user } = get();
+  if (!user) return;
+  try {
+    const q = query(
+      collection(db, 'friendRequests'),
+      where('to', '==', user.uid),
+      where('status', '==', 'pending'),
+      where('seen', '==', false)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    const batch = writeBatch(db);
+    snap.docs.forEach(docSnap => {
+      batch.update(docSnap.ref, { seen: true });
+    });
+    await batch.commit();
+    // تحديث العداد محلياً
+    set({ pendingRequestsCount: 0 });
+    // تحديث friendRequests بتعيين seen = true لكل الطلبات (أو يمكننا إعادة جلبها)
+    // لكننا سنقوم بتحديث friendRequests بتعديل القائمة الحالية
+    const { friendRequests } = get();
+    const updatedRequests = friendRequests.map(req => ({ ...req, seen: true }));
+    set({ friendRequests: updatedRequests });
+  } catch (error) {
+    console.error('فشل تعليم الطلبات كمقروءة:', error);
+  }
+},
+      // ===== إزالة صديق (مع تحديث القوائم) =====
+removeFriend: async (friendId) => {
+  const { user, userData, friendsList } = get();
+  if (!user) return false;
+  const currentFriends = userData?.friends || [];
+  if (!currentFriends.includes(friendId)) {
+    toast.error('هذا المستخدم ليس صديقاً لك');
+    return false;
+  }
+  try {
+    // تحديث قائمة أصدقاء المستخدم الحالي
+    const newFriends = currentFriends.filter(id => id !== friendId);
+    await updateDoc(doc(db, 'users', user.uid), { friends: newFriends });
+    // أيضاً نقوم بإزالة المستخدم الحالي من قائمة أصدقاء الطرف الآخر (لكننا لا نستطيع تحديثها مباشرة دون معرفة uid الطرف الآخر، لكن يمكننا جلبها وتحديثها)
+    // الأفضل: تحديث قائمة أصدقاء الطرف الآخر (اختياري، لكنه مطلوب)
+    const otherUserSnap = await getDoc(doc(db, 'users', friendId));
+    if (otherUserSnap.exists()) {
+      const otherFriends = otherUserSnap.data()?.friends || [];
+      const newOtherFriends = otherFriends.filter(id => id !== user.uid);
+      await updateDoc(doc(db, 'users', friendId), { friends: newOtherFriends });
+    }
+    // تحديث الحالة المحلية
+    set({
+      userData: { ...userData, friends: newFriends },
+      friendsList: friendsList.filter(f => f.id !== friendId),
+    });
+    toast.success('تم إزالة الصديق');
+    return true;
+  } catch (error) {
+    console.error('فشل إزالة الصديق:', error);
+    toast.error('حدث خطأ أثناء إزالة الصديق');
+    return false;
+  }
+},
 
       // ===== دوال الحظر =====
       blockUser: async (userId) => {
@@ -440,7 +481,177 @@ export const useAppStore = create(
         return true;
       },
 
-      // ===== جلب طلبات الصداقة الواردة =====
+
+
+// ===== استماع حي لطلبات الصداقة (عداد الشارة) =====
+listenToFriendRequests: () => {
+  const { user } = get();
+  if (!user) return () => {};
+  const q = query(
+    collection(db, 'friendRequests'),
+    where('to', '==', user.uid),
+    where('status', '==', 'pending'),
+    where('seen', '==', false)
+  );
+  return onSnapshot(q, (snap) => {
+    const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    set({ friendRequests: requests, pendingRequestsCount: requests.length });
+  }, (err) => console.error('خطأ استماع طلبات الصداقة:', err));
+},
+// ===== إرسال طلب صداقة (موجود عندك addFriend لكن راح ننشئ طلب صداقة) =====
+// ===== إرسال طلب صداقة =====
+sendFriendRequest: async (toUserId) => {
+  const { user, userData } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+  if (user.uid === toUserId) {
+    toast.error('لا يمكنك إرسال طلب لنفسك');
+    return false;
+  }
+  // التحقق من أن المستخدم ليس صديقاً بالفعل
+  const friends = userData?.friends || [];
+  if (friends.includes(toUserId)) {
+    toast.error('هذا المستخدم موجود بالفعل في قائمة أصدقائك');
+    return false;
+  }
+  // التحقق من وجود طلب معلق
+  const pendingQuery = query(
+    collection(db, 'friendRequests'),
+    where('from', '==', user.uid),
+    where('to', '==', toUserId),
+    where('status', '==', 'pending')
+  );
+  const pendingSnap = await getDocs(pendingQuery);
+  if (!pendingSnap.empty) {
+    toast('طلب صداقة قيد الانتظار مسبقاً');
+    return false;
+  }
+  // التحقق من وجود طلب مقبول سابقاً (حالة نادرة)
+  const acceptedQuery = query(
+    collection(db, 'friendRequests'),
+    where('from', '==', user.uid),
+    where('to', '==', toUserId),
+    where('status', '==', 'accepted')
+  );
+  const acceptedSnap = await getDocs(acceptedQuery);
+  if (!acceptedSnap.empty) {
+    toast('أنتم أصدقاء بالفعل');
+    return false;
+  }
+  await addDoc(collection(db, 'friendRequests'), {
+    from: user.uid,
+    to: toUserId,
+    status: 'pending',
+    seen: false,
+    createdAt: serverTimestamp(),
+  });
+  toast.success('تم إرسال طلب الصداقة');
+  return true;
+},
+
+// ===== قبول طلب الصداقة =====
+// ===== قبول طلب الصداقة =====
+acceptFriendRequest: async (requestId, fromUserId, fromUserName) => {
+  const { user, userData } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+  try {
+    // جلب وثيقة الطلب للتأكد من صلاحيات المستخدم الحالي
+    const requestRef = doc(db, 'friendRequests', requestId);
+    const requestSnap = await getDoc(requestRef);
+    if (!requestSnap.exists()) {
+      toast.error('الطلب غير موجود');
+      return false;
+    }
+    const requestData = requestSnap.data();
+    // التأكد من أن المستخدم الحالي هو المستهدف
+    if (requestData.to !== user.uid) {
+      toast.error('هذا الطلب ليس موجه لك');
+      return false;
+    }
+    if (requestData.status !== 'pending') {
+      toast.error('تمت معالجة هذا الطلب مسبقاً');
+      return false;
+    }
+    // تحديث الطلب إلى مقبول
+    await updateDoc(requestRef, { status: 'accepted' });
+
+    // جلب بيانات المستخدم الآخر
+    const otherUserSnap = await getDoc(doc(db, 'users', fromUserId));
+    const otherUserData = otherUserSnap.data();
+
+    // تحديث قائمة الأصدقاء لكلا الطرفين
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'users', user.uid), {
+      friends: [...(userData?.friends || []), fromUserId]
+    });
+    batch.update(doc(db, 'users', fromUserId), {
+      friends: [...(otherUserData?.friends || []), user.uid]
+    });
+    await batch.commit();
+
+    // تحديث الحالة المحلية
+    const { friendRequests, friendsList } = get();
+    const newFriendsList = [...friendsList, { id: fromUserId, ...otherUserData }];
+    set({
+      friendRequests: friendRequests.filter(r => r.id !== requestId),
+      friendsList: newFriendsList,
+      pendingRequestsCount: Math.max(0, get().pendingRequestsCount - 1),
+    });
+    toast.success('تم قبول الصداقة');
+    return true;
+  } catch (error) {
+    console.error('فشل قبول الطلب:', error);
+    toast.error('حدث خطأ أثناء قبول الطلب');
+    return false;
+  }
+},
+
+// ===== رفض طلب الصداقة =====
+// ===== رفض طلب الصداقة =====
+rejectFriendRequest: async (requestId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+  try {
+    const requestRef = doc(db, 'friendRequests', requestId);
+    const requestSnap = await getDoc(requestRef);
+    if (!requestSnap.exists()) {
+      toast.error('الطلب غير موجود');
+      return false;
+    }
+    const requestData = requestSnap.data();
+    if (requestData.to !== user.uid) {
+      toast.error('هذا الطلب ليس موجه لك');
+      return false;
+    }
+    if (requestData.status !== 'pending') {
+      toast.error('تمت معالجة هذا الطلب مسبقاً');
+      return false;
+    }
+    await updateDoc(requestRef, { status: 'rejected' });
+    // تحديث الحالة المحلية
+    set((state) => ({
+      friendRequests: state.friendRequests.filter(r => r.id !== requestId),
+      pendingRequestsCount: Math.max(0, state.pendingRequestsCount - 1),
+    }));
+    toast.success('تم رفض الطلب');
+    return true;
+  } catch (error) {
+    console.error('فشل رفض الطلب:', error);
+    toast.error('حدث خطأ أثناء رفض الطلب');
+    return false;
+  }
+},
+
+
+// ===== جلب طلبات الصداقة الواردة (غير المقروءة) =====
 fetchFriendRequests: async () => {
   const { user } = get();
   if (!user) return;
@@ -458,110 +669,7 @@ fetchFriendRequests: async () => {
     console.error('خطأ جلب طلبات الصداقة:', error);
   }
 },
-
-// ===== استماع حي لطلبات الصداقة (عداد الشارة) =====
-listenToFriendRequests: () => {
-  const { user } = get();
-  if (!user) return () => {};
-  const q = query(
-    collection(db, 'friendRequests'),
-    where('to', '==', user.uid),
-    where('status', '==', 'pending'),
-    where('seen', '==', false)
-  );
-  return onSnapshot(q, (snap) => {
-    const requests = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    set({ friendRequests: requests, pendingRequestsCount: requests.length });
-  }, (err) => console.error('خطأ استماع طلبات الصداقة:', err));
-},
-
-// ===== إرسال طلب صداقة (موجود عندك addFriend لكن راح ننشئ طلب صداقة) =====
-sendFriendRequest: async (toUserId) => {
-  const { user } = get();
-  if (!user) return false;
-  try {
-    // منع إرسال طلب لنفسك أو لشخص موجود بالأصدقاء
-    const alreadyFriend = get().friendsList?.some(f => f.id === toUserId);
-    if (alreadyFriend) {
-      toast.error('المستخدم موجود بقائمتك بالفعل');
-      return false;
-    }
-    // التأكد من عدم وجود طلب مسبق
-    const existing = await getDocs(query(
-      collection(db, 'friendRequests'),
-      where('from', '==', user.uid),
-      where('to', '==', toUserId),
-      where('status', '==', 'pending')
-    ));
-    if (!existing.empty) {
-      toast('تم إرسال طلب مسبقاً');
-      return false;
-    }
-    await addDoc(collection(db, 'friendRequests'), {
-      from: user.uid,
-      to: toUserId,
-      status: 'pending',
-      seen: false,
-      createdAt: serverTimestamp(),
-    });
-    toast.success('تم إرسال طلب الصداقة');
-    return true;
-  } catch (error) {
-    console.error('فشل إرسال طلب الصداقة:', error);
-    toast.error('حدث خطأ');
-    return false;
-  }
-},
-
-// ===== قبول طلب الصداقة =====
-acceptFriendRequest: async (requestId, fromUserId, fromUserName) => {
-  const { user, userData } = get();
-  if (!user) return false;
-  try {
-    // تحديث الطلب إلى مقبول
-    await updateDoc(doc(db, 'friendRequests', requestId), { status: 'accepted' });
-    // إضافة المستخدمين إلى قوائم الأصدقاء
-    const batch = writeBatch(db);
-    batch.update(doc(db, 'users', user.uid), {
-      friends: [...(userData?.friends || []), fromUserId]
-    });
-    batch.update(doc(db, 'users', fromUserId), {
-      friends: [...(userData?.friends || []), user.uid]  // سيحتاج جلب بيانات الطرف الآخر، يمكن استخدام increment
-    });
-    await batch.commit();
-    // تحديث الحالة المحلية
-    const { friendRequests, friendsList } = get();
-    set({
-      friendRequests: friendRequests.filter(r => r.id !== requestId),
-      friendsList: [...friendsList, { id: fromUserId, name: fromUserName }],
-      pendingRequestsCount: Math.max(0, get().pendingRequestsCount - 1),
-    });
-    toast.success('تم قبول الصداقة');
-    return true;
-  } catch (error) {
-    console.error('فشل قبول الطلب:', error);
-    toast.error('حدث خطأ');
-    return false;
-  }
-},
-
-// ===== رفض طلب الصداقة =====
-rejectFriendRequest: async (requestId) => {
-  try {
-    await updateDoc(doc(db, 'friendRequests', requestId), { status: 'rejected' });
-    set((state) => ({
-      friendRequests: state.friendRequests.filter(r => r.id !== requestId),
-      pendingRequestsCount: Math.max(0, state.pendingRequestsCount - 1),
-    }));
-    toast.success('تم رفض الطلب');
-    return true;
-  } catch (error) {
-    console.error('فشل رفض الطلب:', error);
-    toast.error('حدث خطأ');
-    return false;
-  }
-},
-
+// ===== جلب قائمة الأصدقاء (مع البيانات) =====
 // ===== جلب قائمة الأصدقاء (مع البيانات) =====
 fetchFriendsList: async () => {
   const { user } = get();
@@ -573,7 +681,6 @@ fetchFriendsList: async () => {
       set({ friendsList: [] });
       return;
     }
-    // جلب بيانات المستخدمين الأصدقاء (يمكن استخدام in queries)
     const friendsData = [];
     for (const fid of friendsIds) {
       const fSnap = await getDoc(doc(db, 'users', fid));

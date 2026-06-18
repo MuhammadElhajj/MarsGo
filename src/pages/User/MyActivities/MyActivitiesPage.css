@@ -1,0 +1,483 @@
+/* src/pages/User/MyActivities/MyActivitiesPage.css */
+
+.my-activities-page {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  animation: fadeIn 0.3s ease;
+  background: var(--color-bg-primary);
+  min-height: 100vh;
+}
+
+.my-activities-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.my-activities-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+/* ===== الإحصائيات ===== */
+.my-activities-page__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 0.8rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.stat-number {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: 0.1rem;
+}
+
+/* ===== التبويبات ===== */
+.my-activities-page__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.tab-btn.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* ===== القائمة ===== */
+.my-activities-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  display: flex;
+  gap: 0.75rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  transition: all 0.2s;
+}
+
+.activity-item:hover {
+  transform: translateX(-3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.activity-icon-wrapper {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+.status-icon.approved,
+.status-icon.completed {
+  color: #10b981;
+}
+
+.status-icon.rejected {
+  color: #ef4444;
+}
+
+.status-icon.pending {
+  color: #f59e0b;
+}
+
+.activity-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.activity-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.activity-status {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.6rem;
+  border-radius: 1rem;
+  font-weight: 500;
+}
+
+.status-approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.activity-details {
+  display: flex;
+  gap: 0.8rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-bottom: 0.2rem;
+}
+
+.activity-amount {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+}
+
+.activity-method,
+.activity-type {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.activity-date {
+  font-size: 0.65rem;
+  color: var(--color-text-secondary);
+}
+
+/* ===== حالة فارغة ===== */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--color-text-secondary);
+  opacity: 0.4;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ===== زر تحميل المزيد ===== */
+.load-more-btn {
+  width: 100%;
+  padding: 0.6rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.load-more-btn:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== استجابة ===== */
+@media (max-width: 768px) {
+  .my-activities-page {
+    padding: 0.5rem;
+  }
+
+  .my-activities-page__stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 1rem;
+  }
+
+  .tab-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .activity-item {
+    padding: 0.6rem 0.8rem;
+  }
+
+  .activity-title {
+    font-size: 0.8rem;
+  }
+
+  .activity-amount {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-activities-page__stats {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.4rem;
+  }
+
+  .stat-card {
+    padding: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 0.9rem;
+  }
+
+  .stat-label {
+    font-size: 0.55rem;
+  }
+
+  .tab-btn {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .activity-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .activity-details {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .activity-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .status-icon {
+    font-size: 1rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== الوضع الداكن ===== */
+.dark .my-activities-page__stats .stat-card {
+  background: var(--color-bg-secondary);
+}
+
+.dark .activity-item {
+  background: var(--color-bg-secondary);
+}
+
+.dark .empty-state {
+  background: var(--color-bg-secondary);
+}
+
+.dark .load-more-btn {
+  background: var(--color-bg-secondary);
+}
+
+.dark .load-more-btn:hover:not(:disabled) {
+  background: var(--color-accent);
+}
+
+/* ===== مستوى الإنفاق ===== */
+.my-activities-page__spending {
+  margin-bottom: 1.5rem;
+}
+
+.spending-card {
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.spending-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.spending-icon {
+  font-size: 1.4rem;
+  color: var(--color-accent);
+}
+
+.spending-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+}
+
+.spending-level {
+  margin-right: auto;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.1);
+  padding: 0.15rem 0.8rem;
+  border-radius: 2rem;
+}
+
+.spending-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.spending-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), #a855f7);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.spending-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.spending-total {
+  font-weight: 500;
+}
+
+.spending-next {
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.spending-max {
+  font-weight: 600;
+  color: #10b981;
+}
+
+/* ===== نشاطات MGC ===== */
+.mgc-icon-wrapper {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.mgc-icon {
+  font-size: 1.2rem;
+}
+
+.mgc-icon.wheel {
+  color: #8b5cf6;
+}
+
+.mgc-icon.machine {
+  color: #f59e0b;
+}
+
+.mgc-icon.purchase {
+  color: #10b981;
+}
+
+.mgc-item .activity-amount {
+  color: #8b5cf6;
+}
+
+/* استجابة للجوال */
+@media (max-width: 480px) {
+  .spending-header {
+    flex-wrap: wrap;
+  }
+  .spending-level {
+    margin-right: 0;
+  }
+  .spending-info {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}

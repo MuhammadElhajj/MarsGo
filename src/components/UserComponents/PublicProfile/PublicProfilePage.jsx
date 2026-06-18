@@ -1,16 +1,16 @@
 // src/pages/User/PublicProfile/PublicProfilePage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useAppStore } from '../../../store/store';
 import { useAuth } from '../../../context/AuthContext';
 import Avatar from '../../../components/GeneralComponents/Avatar/Avatar';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
-import { 
-  FiUsers, FiHeart, FiZap, FiCalendar, FiMessageCircle, 
-  FiUserPlus, FiUserMinus, FiUserX, FiUserCheck, FiAward, FiStar 
+import {
+  FiUsers, FiHeart, FiZap, FiCalendar, FiMessageCircle,
+  FiUserPlus, FiUserMinus, FiUserX, FiUserCheck, FiAward, FiStar
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import './PublicProfilePage.css';
@@ -23,8 +23,18 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isFriend, setIsFriend] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [friendRequestStatus, setFriendRequestStatus] = useState('none');
+  const [pendingRequestId, setPendingRequestId] = useState(null);
 
-  const { addFriend, removeFriend, blockUser, unblockUser, createPrivateRoom } = useAppStore();
+  const {
+    removeFriend,
+    blockUser,
+    unblockUser,
+    createPrivateRoom,
+    sendFriendRequest,
+    acceptFriendRequest,
+    rejectFriendRequest,
+  } = useAppStore();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -39,6 +49,7 @@ export default function PublicProfilePage() {
             setIsFriend(friends.includes(userId));
             const blocked = currentUser.blockedUsers || [];
             setIsBlocked(blocked.includes(userId));
+            await checkFriendRequestStatus(userId);
           }
         } else {
           toast.error('المستخدم غير موجود');
@@ -54,19 +65,78 @@ export default function PublicProfilePage() {
     fetchProfile();
   }, [userId, currentUser, navigate]);
 
-  if (loading) return <div className="public-profile-loading">جاري التحميل...</div>;
-  if (!profile) return <div className="public-profile-error">المستخدم غير موجود</div>;
+  const checkFriendRequestStatus = async (targetUserId) => {
+    if (!currentUser) return;
+    try {
+      const sentQuery = query(
+        collection(db, 'friendRequests'),
+        where('from', '==', currentUser.uid),
+        where('to', '==', targetUserId),
+        where('status', '==', 'pending')
+      );
+      const sentSnap = await getDocs(sentQuery);
+      if (!sentSnap.empty) {
+        setFriendRequestStatus('pending_sent');
+        setPendingRequestId(sentSnap.docs[0].id);
+        return;
+      }
 
-  const isOwnProfile = currentUser?.uid === userId;
+      const receivedQuery = query(
+        collection(db, 'friendRequests'),
+        where('from', '==', targetUserId),
+        where('to', '==', currentUser.uid),
+        where('status', '==', 'pending')
+      );
+      const receivedSnap = await getDocs(receivedQuery);
+      if (!receivedSnap.empty) {
+        setFriendRequestStatus('pending_received');
+        setPendingRequestId(receivedSnap.docs[0].id);
+        return;
+      }
 
-  const handleAddFriend = async () => {
-    const success = await addFriend(userId);
-    if (success) setIsFriend(true);
+      setFriendRequestStatus('none');
+      setPendingRequestId(null);
+    } catch (err) {
+      console.error('خطأ في التحقق من طلبات الصداقة:', err);
+    }
+  };
+
+  const handleSendFriendRequest = async () => {
+    const success = await sendFriendRequest(userId);
+    if (success) {
+      setFriendRequestStatus('pending_sent');
+      toast.success('تم إرسال طلب الصداقة');
+    }
+  };
+
+  const handleAcceptRequest = async () => {
+    if (!pendingRequestId) return;
+    const success = await acceptFriendRequest(pendingRequestId);
+    if (success) {
+      setIsFriend(true);
+      setFriendRequestStatus('friend');
+      setPendingRequestId(null);
+      toast.success('تم قبول الصداقة');
+    }
+  };
+
+  const handleRejectRequest = async () => {
+    if (!pendingRequestId) return;
+    const success = await rejectFriendRequest(pendingRequestId);
+    if (success) {
+      setFriendRequestStatus('none');
+      setPendingRequestId(null);
+      toast.success('تم رفض الطلب');
+    }
   };
 
   const handleRemoveFriend = async () => {
     const success = await removeFriend(userId);
-    if (success) setIsFriend(false);
+    if (success) {
+      setIsFriend(false);
+      setFriendRequestStatus('none');
+      toast.success('تم إلغاء الصداقة');
+    }
   };
 
   const handleBlock = async () => {
@@ -102,22 +172,56 @@ export default function PublicProfilePage() {
     }
   };
 
+  if (loading) return <div className="public-profile-loading">جاري التحميل...</div>;
+  if (!profile) return <div className="public-profile-error">المستخدم غير موجود</div>;
+
+  const isOwnProfile = currentUser?.uid === userId;
   const joinDate = profile.createdAt?.toDate?.() || new Date(profile.createdAt);
   const formattedDate = joinDate.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-
-  // مستوى المستخدم وخبرته
   const level = profile.level || 1;
   const xp = profile.xp || 0;
   const title = profile.title || null;
 
+  const renderFriendButton = () => {
+    if (isFriend) {
+      return (
+        <Button onClick={handleRemoveFriend} variant="danger" className="action-btn">
+          <FiUserMinus /> إلغاء الصداقة
+        </Button>
+      );
+    }
+    if (friendRequestStatus === 'pending_sent') {
+      return (
+        <Button variant="secondary" className="action-btn" disabled>
+          <FiUserPlus /> بانتظار الموافقة
+        </Button>
+      );
+    }
+    if (friendRequestStatus === 'pending_received') {
+      return (
+        <>
+          <Button onClick={handleAcceptRequest} variant="primary" className="action-btn">
+            <FiUserCheck /> قبول
+          </Button>
+          <Button onClick={handleRejectRequest} variant="danger" className="action-btn">
+            <FiUserMinus /> رفض
+          </Button>
+        </>
+      );
+    }
+    return (
+      <Button onClick={handleSendFriendRequest} variant="primary" className="action-btn">
+        <FiUserPlus /> إرسال طلب صداقة
+      </Button>
+    );
+  };
+
   return (
     <div className="public-profile" dir="rtl">
-      {/* الهيدر مع زر الرجوع */}
       <div className="public-profile__header">
         <GoBackButton text="رجوع" />
       </div>
 
-      {/* القسم العلوي: الخلفية + الصورة */}
       <div className="public-profile__cover">
         <div className="public-profile__cover-bg"></div>
         <div className="public-profile__avatar-wrapper">
@@ -130,7 +234,6 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
-      {/* القسم الثاني: الاسم واللقب */}
       <div className="public-profile__info">
         <h1 className="public-profile__name">{profile.name}</h1>
         {title && (
@@ -146,7 +249,6 @@ export default function PublicProfilePage() {
         <p className="public-profile__bio">{profile.bio || ''}</p>
       </div>
 
-      {/* القسم الثالث: الإحصائيات */}
       <div className="public-profile__stats-grid">
         <div className="stat-item">
           <FiHeart className="stat-icon" />
@@ -165,7 +267,6 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
-      {/* القسم الرابع: معلومات إضافية */}
       <div className="public-profile__details">
         <div className="detail-row">
           <FiCalendar className="detail-icon" />
@@ -179,18 +280,9 @@ export default function PublicProfilePage() {
         )}
       </div>
 
-      {/* القسم الخامس: الأزرار */}
       {!isOwnProfile && (
         <div className="public-profile__actions">
-          {isFriend ? (
-            <Button onClick={handleRemoveFriend} variant="danger" className="action-btn">
-              <FiUserMinus /> إلغاء الصداقة
-            </Button>
-          ) : (
-            <Button onClick={handleAddFriend} className="action-btn primary">
-              <FiUserPlus /> إضافة صديق
-            </Button>
-          )}
+          {renderFriendButton()}
           <Button onClick={handleMessage} className="action-btn secondary">
             <FiMessageCircle /> مراسلة
           </Button>
@@ -206,7 +298,6 @@ export default function PublicProfilePage() {
         </div>
       )}
 
-      {/* القسم السادس: الأصدقاء المشتركين (اختياري) */}
       {!isOwnProfile && (
         <div className="public-profile__mutual-friends">
           <h3>أصدقاء مشتركون</h3>
