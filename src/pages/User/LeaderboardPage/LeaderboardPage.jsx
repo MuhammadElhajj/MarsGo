@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fi';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
+import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import './LeaderboardPage.css';
 
 // ===== أيقونات الميداليات =====
@@ -42,7 +43,6 @@ const calculateTotalScore = (user) => {
   const popularity = user.popularity || 0;
   const power = user.power || 0;
   const level = user.level || 1;
-  // إعطاء وزن أكبر للشعبية
   return popularity + (power * 2) + (level * 5);
 };
 
@@ -50,14 +50,13 @@ export default function LeaderboardPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('popularity'); // ✅ افتراضي: الشعبية
+  const [filter, setFilter] = useState('popularity');
 
   // ===== جلب المستخدمين من Firestore =====
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        // ✅ الترتيب حسب الشعبية بشكل افتراضي
         const q = query(collection(db, 'users'), orderBy('popularity', 'desc'));
         const snapshot = await getDocs(q);
         const usersList = snapshot.docs.map(doc => ({
@@ -98,15 +97,13 @@ export default function LeaderboardPage() {
     }
   }, [users, filter]);
 
-  // ===== التنقل إلى صفحة البروفايل =====
   const handleUserClick = (userId) => {
     navigate(`/profile/${userId}`);
   };
 
-  // ===== حالة التحميل =====
   if (loading) {
     return (
-      <div className="leaderboard-page leaderboard-loading">
+      <div className="leaderboard-loading">
         <FiLoader className="loading-spinner" />
         <p>جاري تحميل قائمة المتصدرين...</p>
       </div>
@@ -115,14 +112,19 @@ export default function LeaderboardPage() {
 
   return (
     <div className="leaderboard-page">
-      {/* الهيدر */}
+      {/* زر الرجوع */}
+      <div className="leaderboard__back">
+        <GoBackButton text="رجوع" />
       <div className="leaderboard__header">
         <h2>
-          <FiAward className="header-icon" />
+          {/* <FiAward className="header-icon" /> */}
           قائمة المتصدرين
         </h2>
-        <p>ترتيب الأكثر تأثيراً ونشاطاً في المنصة</p>
       </div>
+      </div>
+        {/* <p>ترتيب الأكثر تأثيراً ونشاطاً في المنصة</p> */}
+
+      {/* الهيدر */}
 
       {/* أزرار التصفية */}
       <div className="leaderboard__filters">
