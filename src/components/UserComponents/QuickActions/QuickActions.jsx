@@ -10,8 +10,8 @@ import './QuickActions.css';
 
 const actions = [
   // ===== العناصر النشطة =====
-  { id: 'topup', label: 'شحن', icon: <FiZap />, path: '/topup', className: 'quick-actions__item--topup' },
-  { id: 'coins', label: 'عملات MGC', icon: <FiDollarSign />, path: '/buy-mgc', className: 'quick-actions__item--coins' },
+  { id: 'topup', label: 'ايداع', icon: <FiZap />, path: '/topup', className: 'quick-actions__item--topup' },
+  { id: 'coins', label: 'شراء MGC', icon: <FiDollarSign />, path: '/buy-mgc', className: 'quick-actions__item--coins' },
   { id: 'referral', label: 'إحالة', icon: <FiShare2 />, path: '/referral', className: 'quick-actions__item--referral' },
   { id: 'sell', label: 'بيع MGC', icon: <FiTrendingDown />, path: '/sell-mgc', className: 'quick-actions__item--sell' },
   { id: 'mianfriendspage', label: 'الأصدقاء', icon: <FiUsers />, path: '/mianfriendspage', className: 'quick-actions__item--friends' },

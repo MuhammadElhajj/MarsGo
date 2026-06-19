@@ -77,8 +77,8 @@ export default function VerifyCodePage() {
         sessionStorage.removeItem('verify_email');
         sessionStorage.removeItem('verify_uid');
         await signOut(auth);
-        setMessage('✅ تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.');
-        setTimeout(() => navigate('/login'), 2000);
+setMessage(' تم تفعيل حسابك بنجاح! اهلا بك في مارسفو...');
+setTimeout(() => navigate('/dashboard', { replace: true }), 1000);
       } else {
         setError(result.data.message || 'كود غير صحيح، يرجى المحاولة مرة أخرى');
       }
