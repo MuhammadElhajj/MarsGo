@@ -60,6 +60,8 @@ const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminVerifiers = lazy(() => import("./components/AdminCoponent/AdminVerifiers/AdminVerifiers"));
 const ExternalStoreImport = lazy(() => import("./pages/Admin/ExternalStoreImport/ExternalStoreImport"));
 // ==================== صفحات المستخدم ====================
+// ==================== صفحات المستخدم ====================
+const SupervisorCandidacyPage = lazy(() => import('./pages/User/SupervisorCandidacy/SupervisorCandidacyPage'));
 const ClansListPage = lazy(() => import('./pages/User/ClansPage/ClansListPage'));
 const ClanPage = lazy(() => import('./pages/User/ClansPage/ClanPage'));
 const CreateClanPage = lazy(() => import('./pages/User/ClansPage/CreateClanPage'));
@@ -157,8 +159,9 @@ function App() {
           <Route path="/crypto" element={<CryptoPage />} />
    <Route path="/mianfriendspage" element={<MainFriendPage />} />
    <Route path="/sell-mgc" element={<SellMGC />} />       <Route path="/exchange" element={<ExchangePage />} />
-       <Route path="/search-user" element={<SearchUserPage />} />
-     // داخل مسارات المستخدم
+     
+     <Route path="/supervisor-candidacy" element={<SupervisorCandidacyPage />} />  <Route path="/search-user" element={<SearchUserPage />} />
+
 <Route path="/clans" element={<ClansListPage />} />
 <Route path="/clan/:clanId" element={<ClanPage />} />
 <Route path="/clan/create" element={<CreateClanPage />} />

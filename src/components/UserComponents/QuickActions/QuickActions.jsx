@@ -2,7 +2,9 @@
 import { useNavigate } from 'react-router-dom';
 import { 
   FiDollarSign, FiBox, FiZap, FiShare2, FiTrendingDown, FiUsers,
-  FiTag, FiShoppingBag, FiTool, FiTarget, FiAward, FiStar // ✅ أضفنا FiStar
+  FiTag, FiShoppingBag, FiTool, FiTarget, FiAward, FiStar,
+  FiFlag,   // للكلانات
+  FiShield  // للمشرف
 } from 'react-icons/fi';
 import './QuickActions.css';
 
@@ -13,16 +15,14 @@ const actions = [
   { id: 'referral', label: 'إحالة', icon: <FiShare2 />, path: '/referral', className: 'quick-actions__item--referral' },
   { id: 'sell', label: 'بيع MGC', icon: <FiTrendingDown />, path: '/sell-mgc', className: 'quick-actions__item--sell' },
   { id: 'mianfriendspage', label: 'الأصدقاء', icon: <FiUsers />, path: '/mianfriendspage', className: 'quick-actions__item--friends' },
-  { id: 'missions', label: 'مهام', icon: <FiTarget />, path: '/quests', className: 'quick-actions__item--missions' },
+  { id: 'missions', label: 'مهام', icon: <FiTarget />, path: '/missions', className: 'quick-actions__item--missions' },
   { id: 'memberships', label: 'عضويات', icon: <FiAward />, path: '/memberships', className: 'quick-actions__item--memberships' },
-  // ✅ تقييمات (جديد)
   { id: 'reviews', label: 'تقييمات', icon: <FiStar />, path: '/reviews', className: 'quick-actions__item--reviews' },
 
-  // ===== العناصر غير النشطة (معطلة) =====
-// أضف هذا العنصر إلى قائمة الإجراءات النشطة
-{ id: 'clans', label: 'كلانات', icon: <FiUsers />, path: '/clans', className: 'quick-actions__item--clans' },
-  { id: 'store', label: 'متجر', icon: <FiShoppingBag />, path: null, className: 'quick-actions__item--disabled' },
-  ];
+  // ===== الأقسام الجديدة =====
+  { id: 'clans', label: 'كلانات', icon: <FiFlag />, path: '/clans', className: 'quick-actions__item--clans' },
+  { id: 'supervisor', label: 'ترشح مشرف', icon: <FiShield />, path: '/supervisor-candidacy', className: 'quick-actions__item--supervisor' },
+];
 
 export default function QuickActions() {
   const navigate = useNavigate();

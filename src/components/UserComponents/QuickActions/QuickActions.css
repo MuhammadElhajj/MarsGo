@@ -304,3 +304,13 @@
   color: white;
   box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
 }
+
+.quick-actions__item--supervisor .quick-actions__icon {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.quick-actions__item--supervisor:hover .quick-actions__icon {
+  background: #f59e0b;
+  color: white;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
