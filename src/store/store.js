@@ -1633,13 +1633,18 @@ getRecentReferrals: async (limitCount = 5) => {
       const data = doc.data();
       const referredSnap = await getDoc(doc(db, 'users', data.referredId));
       if (referredSnap.exists()) {
-        referrals.push({
-          id: doc.id,
-          name: referredSnap.data().name || 'مستخدم',
-          amount: data.rewardAmount,
-          status: data.status,
-          createdAt: data.createdAt,
-        });
+       // داخل دالة getRecentReferrals
+referrals.push({
+  id: doc.id,
+  referredId: referredId,
+  name: userData.name || 'مستخدم',
+  avatar: userData.avatar || null,
+  uniqueId: userData.uniqueId || null,
+  hasDeposited: hasDeposited,
+  rewardAmount: data.rewardAmount || 20,
+  status: data.status,   // ✅ بدلاً من rewardStatus
+  createdAt: data.createdAt,
+});
       }
     }
     return referrals;

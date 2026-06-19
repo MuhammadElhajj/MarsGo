@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../store/store';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import './SignupPage.css'; // سيتم إنشاؤه
+import './SignupPage.css';
 import Logo1 from "../../../assets/logo-light.png";
-
+import { FiEyeOff , FiEye } from 'react-icons/fi';
 const DEFAULT_PHONE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 350'%3E%3Crect width='200' height='350' fill='%234f46e5'/%3E%3Ccircle cx='100' cy='120' r='40' fill='%23ffffff' opacity='0.8'/%3E%3Crect x='60' y='180' width='80' height='10' rx='5' fill='%23ffffff' opacity='0.6'/%3E%3Crect x='50' y='210' width='100' height='10' rx='5' fill='%23ffffff' opacity='0.4'/%3E%3Crect x='70' y='240' width='60' height='10' rx='5' fill='%23ffffff' opacity='0.3'/%3E%3Ctext x='100' y='300' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EMarsGo%3C/text%3E%3C/svg%3E";
 
 const isStrongPassword = (password) => /^.{6,}$/.test(password);
@@ -66,7 +66,7 @@ export default function SignupPage() {
         sessionStorage.setItem('referralCode', code);
       } else {
         setReferralUser(null);
-        setReferralError('⚠️ كود الإحالة غير صحيح');
+        setReferralError(' كود الإحالة غير صحيح');
       }
     } catch (err) {
       setReferralError('حدث خطأ في التحقق');
@@ -121,6 +121,11 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       console.log("📧 Email being used for signup:", email);
+
+      // ✅ تخزين الاسم مؤقتاً ليستخدمه AuthContext عند إنشاء المستند
+      if (name.trim()) {
+        sessionStorage.setItem('temp_user_name', name.trim());
+      }
 
       const result = await sendVerificationCode({ email: user.email, uid: user.uid });
       if (result.data.success) {
@@ -221,7 +226,7 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex="-1"
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? <FiEyeOff/> : <FiEye/>}
                 </button>
               </div>
               {passwordError && <div className="signup-error" style={{ background: '#fef3c7', color: '#92400e' }}>{passwordError}</div>}
