@@ -5,39 +5,32 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--color-bg-primary);
-  border-radius: 12px;
+  background-color: #f0f2f5; /* لون خلفية واتساب */
+  border-radius: 0;
   overflow: hidden;
 }
 
-/* ===== الهيدر (مثل واتساب) ===== */
+/* ===== الهيدر ===== */
 .chat-page__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 1.2rem;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg-secondary);
+  padding: 0.6rem 1.2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9edef;
   flex-shrink: 0;
-  min-height: 64px;
+  min-height: 60px;
 }
 
 .chat-page__header h2 {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
-  color: var(--color-text-primary);
-}
-
-.chat-page__header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  color: #111b21;
 }
 
 .chat-page__new-chat-btn {
-  background: var(--color-primary);
-  color: white;
+  background: none;
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -47,26 +40,24 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  color: #54656f;
 }
 
 .chat-page__new-chat-btn:hover {
-  transform: scale(1.05);
-  background: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* ===== قائمة الغرف ===== */
 .chat-page__rooms-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0.25rem 0;
-  background-color: var(--color-bg-primary);
+  padding: 0.5rem 0;
+  background-color: #ffffff;
 }
 
 /* تخصيص شريط التمرير */
 .chat-page__rooms-list::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .chat-page__rooms-list::-webkit-scrollbar-track {
@@ -74,12 +65,8 @@
 }
 
 .chat-page__rooms-list::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: #d1d7db;
   border-radius: 10px;
-}
-
-.chat-page__rooms-list::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
 }
 
 /* ===== عنصر الغرفة الواحد ===== */
@@ -87,40 +74,28 @@
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  padding: 0.7rem 1.2rem;
+  padding: 0.6rem 1.2rem;
   cursor: pointer;
-  transition: background 0.15s;
-  border-bottom: 1px solid var(--color-border-light, rgba(0,0,0,0.04));
+  transition: background 0.15s ease;
+  border-bottom: 1px solid #f0f2f5;
   position: relative;
 }
 
 .chat-page__room-item:hover {
-  background: var(--color-bg-secondary);
-}
-
-.dark .chat-page__room-item {
-  border-bottom-color: rgba(255,255,255,0.04);
-}
-
-.dark .chat-page__room-item:hover {
-  background: rgba(255,255,255,0.04);
+  background: #f0f2f5;
 }
 
 /* ===== الأفاتار ===== */
 .chat-page__room-avatar {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--color-primary-alpha);
+  flex-shrink: 0;
+  background: #d1d7db;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  flex-shrink: 0;
-  position: relative;
 }
 
 .chat-page__room-avatar img {
@@ -135,26 +110,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(135deg, #25D366, #128C7E);
   color: #fff;
   font-weight: 700;
   font-size: 1.4rem;
-}
-
-/* النقطة الخضراء (الحالة) */
-.chat-page__room-status {
-  position: absolute;
-  bottom: 1px;
-  right: 1px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--color-bg-primary);
-  background-color: #31a24c;
-}
-
-.chat-page__room-status.offline {
-  background-color: #8e8e8e;
 }
 
 /* ===== معلومات الغرفة ===== */
@@ -165,17 +124,17 @@
 
 .chat-page__room-name {
   font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 0.2rem;
-  font-size: 0.95rem;
+  color: #111b21;
+  margin-bottom: 0.1rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
 .chat-page__room-last-msg {
-  font-size: 0.82rem;
-  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  color: #667781;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -188,18 +147,19 @@
   align-items: flex-end;
   gap: 0.2rem;
   flex-shrink: 0;
+  min-width: 40px;
 }
 
 .chat-page__room-time {
   font-size: 0.7rem;
-  color: var(--color-text-muted);
+  color: #667781;
   white-space: nowrap;
 }
 
 .chat-page__room-unread {
-  background: var(--color-primary);
+  background: #25D366; /* لون واتساب الأخضر */
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
   min-width: 20px;
   height: 20px;
@@ -217,15 +177,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  color: #667781;
   gap: 0.5rem;
   padding: 2rem;
   text-align: center;
+  background: #ffffff;
 }
 
 .chat-page__empty svg {
   font-size: 3.5rem;
-  color: var(--color-border);
+  color: #d1d7db;
 }
 
 .chat-page__empty p {
@@ -245,62 +206,137 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--color-text-secondary);
+  color: #667781;
   font-size: 1.1rem;
+  background: #ffffff;
 }
 
-/* ===== استجابة للجوال ===== */
-@media (max-width: 480px) {
+/* ============================================================
+   الوضع الداكن (واتساب دارك مود)
+   ============================================================ */
+.dark .chat-page {
+  background-color: #0b141a;
+}
+
+.dark .chat-page__header {
+  background-color: #1f2c33;
+  border-bottom-color: #2a3942;
+}
+
+.dark .chat-page__header h2 {
+  color: #e9edef;
+}
+
+.dark .chat-page__new-chat-btn {
+  color: #aebac1;
+}
+
+.dark .chat-page__new-chat-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .chat-page__rooms-list {
+  background-color: #111b21;
+}
+
+.dark .chat-page__room-item {
+  border-bottom-color: #1f2c33;
+}
+
+.dark .chat-page__room-item:hover {
+  background: #1f2c33;
+}
+
+.dark .chat-page__room-name {
+  color: #e9edef;
+}
+
+.dark .chat-page__room-last-msg {
+  color: #aebac1;
+}
+
+.dark .chat-page__room-time {
+  color: #aebac1;
+}
+
+.dark .chat-page__empty {
+  background: #111b21;
+  color: #aebac1;
+}
+
+.dark .chat-page__empty svg {
+  color: #2a3942;
+}
+
+.dark .chat-page__loading {
+  background: #111b21;
+  color: #aebac1;
+}
+
+.dark .chat-page__room-avatar-placeholder {
+  background: linear-gradient(135deg, #25D366, #075e54);
+}
+
+/* ============================================================
+   استجابة للجوال
+   ============================================================ */
+@media (max-width: 640px) {
   .chat-page__header {
-    padding: 0.6rem 0.8rem;
+    padding: 0.4rem 1rem;
     min-height: 54px;
   }
-  
+
   .chat-page__header h2 {
     font-size: 1.1rem;
   }
-  
+
   .chat-page__new-chat-btn {
     width: 34px;
     height: 34px;
-    font-size: 1rem;
   }
-  
+
   .chat-page__room-item {
-    padding: 0.5rem 0.8rem;
+    padding: 0.5rem 1rem;
     gap: 0.7rem;
   }
-  
+
   .chat-page__room-avatar {
     width: 44px;
     height: 44px;
-    font-size: 1rem;
   }
-  
+
   .chat-page__room-name {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
-  
+
   .chat-page__room-last-msg {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
   }
-  
+
   .chat-page__room-time {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
   }
-  
+
   .chat-page__room-unread {
-    font-size: 0.55rem;
-    min-width: 16px;
-    height: 16px;
+    font-size: 0.6rem;
+    min-width: 18px;
+    height: 18px;
     padding: 0 4px;
   }
-  
+
   .chat-page__empty svg {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
   }
-  
+
   .chat-page__empty p {
     font-size: 0.95rem;
   }
+}
+
+.chat-page__header-left {
+  display: flex;
+}
+
+.chat-page__header-avatar {
+  margin-right: 10px;
 }

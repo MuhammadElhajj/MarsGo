@@ -310,6 +310,7 @@ referralBalance: 0,  // ✅ أضف هذا السطر
           type: 'private',
           members: [user.uid, otherUserId],
           name: `${userData?.name || 'مستخدم'} و ${otherUserName}`,
+          // name: `${otherUserName}`,
           imageUrl: userData?.avatar || null,
           lastMessage: '',
           lastMessageTime: null,

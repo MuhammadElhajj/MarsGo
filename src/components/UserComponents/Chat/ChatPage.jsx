@@ -31,7 +31,7 @@ export default function ChatPage() {
       if (snapshot.empty) {
         await setDoc(doc(db, 'rooms', 'global_room'), {
           type: 'global',
-          name: 'الدردشة العامة',
+          name: 'عالمي',
           members: [],
           lastMessage: 'مرحباً بك في الدردشة العامة',
           lastMessageTime: serverTimestamp(),

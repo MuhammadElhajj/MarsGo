@@ -1,209 +1,19 @@
 /* src/components/UserComponents/Chat/Message.css */
+
+/* ===== الحاوية الرئيسية ===== */
 .message {
   display: flex;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.5rem;
-  max-width: 85%;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  margin-bottom: 0.3rem;
+  max-width: 88%;
   align-items: flex-start;
+  animation: messageAppear 0.2s ease-out;
 }
 
 .message--own {
   align-self: flex-end;
-  flex-direction: row-reverse; /* الأفاتار جهة اليمين، والمحتوى جهة اليسار */
-}
-
-.message--other {
-  align-self: flex-start;
-}
-
-/* ===== الأفاتار ===== */
-.message__avatar {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: bold;
-  font-size: 1rem;
-  border: 2px solid transparent;
-}
-
-.message--own .message__avatar {
-  border-color: var(--color-text-primary);
-}
-
-.message--other .message__avatar {
-  border-color: var(--color-border);
-}
-
-.message__avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.message__avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 1.2rem;
-}
-
-/* ===== محتوى الرسالة ===== */
-.message__content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-/* ===== الرأس (الاسم، اللقب، الشارات، الوقت) ===== */
-.message__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.3rem 0.6rem;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-}
-
-.message--own .message__header {
-  justify-content: flex-end;
-}
-
-.message__name {
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-size: 0.9rem;
-}
-
-.message__rank {
-  font-weight: 600;
-  color: var(--color-primary);
-  background: var(--color-primary-alpha);
-  padding: 0.1rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.65rem;
-  white-space: nowrap;
-}
-
-.message__badges {
-  display: inline-flex;
-  gap: 0.3rem;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-}
-
-.message__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  white-space: nowrap;
-}
-
-.message__time {
-  font-size: 0.6rem;
-  color: var(--color-text-muted);
-  margin-left: auto;
-}
-
-.message--own .message__time {
-  margin-left: 0;
-  margin-right: auto;
-}
-
-/* ===== فقاعة النص (مثل واتساب) ===== */
-.message__bubble {
-  padding: 0.5rem 0.8rem;
-  border-radius: 12px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: background 0.2s;
-}
-
-.message--own .message__bubble {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-  border-bottom-right-radius: 4px;
-}
-
-.message--other .message__bubble {
-  background: var(--color-bg-primary);
-  border-color: var(--color-border);
-  border-bottom-left-radius: 4px;
-}
-
-.message__text {
-  font-size: 0.95rem;
-  line-height: 1.4;
-  color: var(--color-text-primary);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* ===== استجابة للجوال ===== */
-@media (max-width: 480px) {
-  .message {
-    max-width: 95%;
-    padding: 0.4rem 0.4rem;
-  }
-  .message__avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
-  }
-  .message__name {
-    font-size: 0.8rem;
-  }
-  .message__rank {
-    font-size: 0.55rem;
-    padding: 0.05rem 0.4rem;
-  }
-  .message__badges {
-    font-size: 0.6rem;
-  }
-  .message__time {
-    font-size: 0.55rem;
-  }
-  .message__bubble {
-    padding: 0.4rem 0.6rem;
-  }
-  .message__text {
-    font-size: 0.85rem;
-  }
-}
-
-/* src/components/UserComponents/Chat/Message.css */
-
-/* ===== الحاوية الرئيسية للرسالة ===== */
-.message {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.5rem;
-  max-width: 85%;
-  align-items: flex-start;
-  animation: messageAppear 0.25s ease-out;
-}
-
-.message--own {
-  align-self: flex-end;
-  flex-direction: row-reverse; /* الأفاتار جهة اليمين، والمحتوى جهة اليسار */
+  flex-direction: row-reverse;
 }
 
 .message--other {
@@ -213,7 +23,7 @@
 @keyframes messageAppear {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.98);
+    transform: translateY(4px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -224,25 +34,32 @@
 /* ===== الأفاتار ===== */
 .message__avatar {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--color-primary);
+  background: var(--color-avatar-bg, #d1d7db);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-weight: bold;
-  font-size: 1rem;
-  border: 2px solid var(--color-border);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 2px solid var(--color-avatar-border, transparent);
+  transition: transform 0.2s, border-color 0.2s;
+  margin-top: 0.2rem;
 }
 
+.message__avatar:hover {
+  transform: scale(1.04);
+}
 
+.message--own .message__avatar {
+  --color-avatar-border: #25D366;
+}
 
 .message--other .message__avatar {
-  border-color: var(--color-border);
+  --color-avatar-border: var(--color-border, #e9edef);
 }
 
 .message__avatar-img {
@@ -257,8 +74,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-text-primary);
-  font-size: 1.2rem;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 /* ===== محتوى الرسالة ===== */
@@ -267,143 +85,270 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
-/* ===== الرأس (الاسم، اللقب، الشارات، الوقت) ===== */
+/* ===== رأس الرسالة ===== */
 .message__header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.3rem 0.6rem;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0 0.2rem;
 }
 
-.message--own .message__header {
-  justify-content: flex-end;
+.message__header--other {
+  align-items: flex-start;
+}
+
+.message__header--own {
+  align-items: flex-end;
+}
+
+.message__user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .message__name {
   font-weight: 700;
-  color: var(--color-text-primary);
   font-size: 0.9rem;
+  color: var(--color-text-primary, #111b21);
+}
+
+.message--own .message__name {
+  color: #25D366;
+}
+
+.message__title-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.05rem 0.5rem;
+  border-radius: 10px;
+  white-space: nowrap;
 }
 
 .message__rank {
   font-weight: 600;
-  color: var(--color-primary);
-  background: var(--color-primary-alpha);
-  padding: 0.1rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.65rem;
-  white-space: nowrap;
-}
-
-.message__badges {
-  display: inline-flex;
-  gap: 0.3rem;
   font-size: 0.7rem;
-  color: var(--color-text-muted);
-}
-
-.message__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 10px;
   white-space: nowrap;
+  background: rgba(37, 211, 102, 0.1);
+  color: #25D366;
 }
 
-.message__time {
-  font-size: 0.6rem;
-  color: var(--color-text-muted);
-  margin-left: auto;
-}
-
-.message--own .message__time {
-  margin-left: 0;
-  margin-right: auto;
+.message__level {
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 10px;
+  white-space: nowrap;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 
 /* ===== فقاعة النص ===== */
+.message__bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
 .message__bubble {
-  padding: 0.6rem 0.9rem;
-  border-radius: 14px;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
-  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.message--own .message__bubble {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+.message__bubble--own {
+  background: #25D366;
   color: #fff;
   border-bottom-right-radius: 4px;
-  box-shadow: 0 2px 8px rgba(var(--color-primary-rgb, 79, 70, 229), 0.25);
+  box-shadow: 0 1px 4px rgba(37, 211, 102, 0.15);
 }
 
-.message--other .message__bubble {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
+.message__bubble--other {
+  background: var(--color-bg-secondary, #ffffff);
+  color: var(--color-text-primary, #111b21);
   border-bottom-left-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-/* تحسين الظل في الوضع الداكن */
-.dark .message--other .message__bubble {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-}
-
-.dark .message--own .message__bubble {
-  box-shadow: 0 2px 12px rgba(var(--color-primary-rgb, 79, 70, 229), 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-border, #e9edef);
 }
 
 .message__text {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.4;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-/* تأثير hover بسيط */
-.message__bubble:hover {
-  transform: scale(1.005);
-  transition: transform 0.15s;
+/* ===== زمن الإرسال ===== */
+.message__time {
+  font-size: 0.6rem;
+  margin-top: 0.2rem;
+  direction: ltr;
+  text-align: right;
+  letter-spacing: 0.3px;
 }
 
-/* ===== استجابة للجوال ===== */
-@media (max-width: 480px) {
+.message__time--own {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.message__time--other {
+  color: var(--color-text-muted, #667781);
+}
+
+/* ============================================================
+   الوضع الداكن (يتم تطبيقه تلقائياً عبر متغيرات CSS)
+   ============================================================ */
+.dark .message__name {
+  color: var(--color-text-primary, #e9edef);
+}
+
+.dark .message--own .message__name {
+  color: #25D366;
+}
+
+.dark .message__header--other {
+  color: var(--color-text-secondary, #aebac1);
+}
+
+.dark .message__header--own {
+  color: #25D366;
+}
+
+.dark .message__bubble--other {
+  background: var(--color-bg-secondary, #1f2c33);
+  color: var(--color-text-primary, #e9edef);
+  border-color: var(--color-border, #2a3942);
+}
+
+.dark .message__bubble--own {
+  background: #25D366;
+  color: #fff;
+}
+
+.dark .message__time--other {
+  color: var(--color-text-muted, #aebac1);
+}
+
+.dark .message__time--own {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dark .message__avatar {
+  background: var(--color-avatar-bg, #2a3942);
+}
+
+.dark .message__avatar-placeholder {
+  background: linear-gradient(135deg, #25D366, #075e54);
+}
+
+.dark .message__rank {
+  background: rgba(37, 211, 102, 0.15);
+}
+
+.dark .message__level {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.dark .message__title-badge {
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.dark .message--own .message__avatar {
+  border-color: #25D366;
+}
+
+.dark .message--other .message__avatar {
+  border-color: var(--color-border, #2a3942);
+}
+
+/* ============================================================
+   استجابة للجوال
+   ============================================================ */
+@media (max-width: 640px) {
   .message {
-    max-width: 95%;
-    padding: 0.4rem 0.4rem;
+    max-width: 92%;
+    padding: 0.2rem 0.3rem;
+    gap: 0.4rem;
   }
+
   .message__avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 0.8rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.7rem;
+    margin-top: 0.15rem;
   }
+
   .message__name {
     font-size: 0.8rem;
   }
-  .message__rank {
-    font-size: 0.55rem;
+
+  .message__title-badge,
+  .message__rank,
+  .message__level {
+    font-size: 0.6rem;
     padding: 0.05rem 0.4rem;
   }
-  .message__badges {
-    font-size: 0.6rem;
-  }
-  .message__time {
-    font-size: 0.55rem;
-  }
+
   .message__bubble {
     padding: 0.4rem 0.6rem;
-    border-radius: 12px;
+    border-radius: 10px;
   }
+
   .message__text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .message__time {
+    font-size: 0.55rem;
+    margin-top: 0.15rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .message {
+    max-width: 96%;
+    padding: 0.15rem 0.2rem;
+    gap: 0.3rem;
+  }
+
+  .message__avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.6rem;
+  }
+
+  .message__name {
+    font-size: 0.7rem;
+  }
+
+  .message__title-badge,
+  .message__rank,
+  .message__level {
+    font-size: 0.55rem;
+    padding: 0.05rem 0.35rem;
+  }
+
+  .message__text {
+    font-size: 0.75rem;
+  }
+
+  .message__bubble {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .message__time {
+    font-size: 0.5rem;
   }
 }

@@ -149,16 +149,17 @@ export default function ChatRoom() {
 
   let roomName = room.name;
   let roomSubtitle = '';
+  
   if (room.type === 'global') {
     roomName = 'الدردشة العامة';
-    roomSubtitle = 'محادثة عامة';
+    roomSubtitle = 'متصل';
   } else if (room.type === 'private') {
     const otherMember = room.members?.find(m => m !== uid);
     roomName = room.name || 'محادثة خاصة';
-    roomSubtitle = 'محادثة خاصة';
+    roomSubtitle = 'متصل';
   } else if (room.type === 'clan') {
     roomName = room.name || 'المجموعة';
-    roomSubtitle = `مجموعة (${room.members?.length || 0} عضو)`;
+    roomSubtitle = `${room.members?.length || 0} أعضاء`;
   }
 
   return (
@@ -179,7 +180,7 @@ export default function ChatRoom() {
           <div className="chat-room__title">{roomName}</div>
           <div className="chat-room__subtitle">
             <span className="chat-room__status-dot"></span>
-            {roomSubtitle || 'متصل'}
+            {roomSubtitle}
           </div>
         </div>
       </div>
@@ -196,7 +197,7 @@ export default function ChatRoom() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ===== منطقة الإدخال (تصميم واتساب) ===== */}
+      {/* ===== منطقة الإدخال ===== */}
       <form className="chat-room__input-area" onSubmit={sendMessage}>
         <button type="button" className="chat-room__emoji-btn" title="إيموجي">
           <FiSmile size={22} />
