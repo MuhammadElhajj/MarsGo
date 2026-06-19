@@ -1,0 +1,350 @@
+/* src/pages/User/QuestsPage/QuestsPage.css */
+
+.quests-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== الهيدر ===== */
+.quests-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.quests-page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.header-icon {
+  font-size: 1.6rem;
+}
+
+/* ===== الإحصائيات ===== */
+.quests-page__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== قائمة المهام ===== */
+.quests-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.quest-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.quest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quest-card.completed {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.03);
+}
+
+.quest-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.quest-card__icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.quest-card__info {
+  flex: 1;
+}
+
+.quest-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.quest-card__description {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 0.2rem 0 0;
+}
+
+.quest-card__reward {
+  flex-shrink: 0;
+}
+
+.reward-amount {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.quest-card__progress {
+  margin-top: 0.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-primary);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), #10b981);
+  border-radius: 1rem;
+  transition: width 0.4s ease;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.2rem;
+}
+
+.quest-card__actions {
+  margin-top: 0.5rem;
+}
+
+.claim-btn {
+  width: 100%;
+  padding: 0.4rem;
+  font-size: 0.85rem;
+  border-radius: 2rem;
+}
+
+.progress-btn {
+  width: 100%;
+  padding: 0.3rem;
+  font-size: 0.8rem;
+  border-radius: 2rem;
+}
+
+.claimed-badge {
+  display: inline-block;
+  padding: 0.2rem 0.8rem;
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ===== العضويات ===== */
+.quests-page__memberships {
+  margin-top: 1.5rem;
+}
+
+.memberships-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.title-icon {
+  font-size: 1.4rem;
+}
+
+.memberships-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.membership-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-align: center;
+}
+
+.membership-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.membership-card.active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.03);
+}
+
+.membership-card__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.membership-icon {
+  font-size: 2rem;
+}
+
+.membership-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.membership-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.membership-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  text-align: right;
+}
+
+.membership-perks li {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  padding: 0.2rem 0;
+}
+
+.perk-icon {
+  color: #10b981;
+  font-size: 0.8rem;
+}
+
+.membership-btn {
+  width: 100%;
+  padding: 0.4rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.membership-btn.active {
+  background: #10b981;
+  color: white;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .quests-page {
+    padding: 0.5rem;
+  }
+
+  .quests-page__stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
+  .stat-item {
+    padding: 0.4rem;
+  }
+
+  .stat-icon {
+    font-size: 1rem;
+  }
+
+  .stat-value {
+    font-size: 0.9rem;
+  }
+
+  .stat-label {
+    font-size: 0.55rem;
+  }
+
+  .quest-card__header {
+    flex-wrap: wrap;
+  }
+
+  .quest-card__title {
+    font-size: 0.9rem;
+  }
+
+  .quest-card__description {
+    font-size: 0.7rem;
+  }
+
+  .reward-amount {
+    font-size: 0.8rem;
+  }
+
+  .memberships-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

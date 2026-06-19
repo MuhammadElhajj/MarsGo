@@ -19,11 +19,15 @@ const TransferPage = lazy(() => import("./pages/User/Transfer/TransferPage"));
 const CryptoPage = lazy(() => import("./pages/User/Crypto/CryptoPage"));
 const ExchangePage = lazy(() => import("./pages/User/Exchange/ExchangePage"));
 const AboutPage = lazy(() => import("./pages/User/About/AboutPage"));
+const ReviewsPage = lazy(() => import('./pages/User/ReviewsPage/ReviewsPage'));
 const MyOrdersPage = lazy(() => import("./pages/User/MyOrders/MyOrdersPage"));
 const NotificationsPage = lazy(() => import("./pages/User/Notifications/NotificationsPage"));
 const ProfilePage = lazy(() => import("./components/UserComponents/Profile/ProfilePage"));
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 const GamingPage = lazy(() => import("./pages/User/Gaming/GamingPage"));
+// ==================== صفحات المستخدم ====================
+const MissionsPage = lazy(() => import('./pages/User/MissionsPage/MissionsPage'));
+const MembershipsPage = lazy(() => import('./pages/User/MembershipsPage/MembershipsPage'));
 const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/User/ForgotPassword/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/User/ResetPassword/ResetPasswordPage"));
@@ -55,12 +59,16 @@ const AdminServicesPage = lazy(() => import("./pages/Admin/AdminServicesPage"));
 const AdminTicker = lazy(() => import("./pages/Admin/AdminTicker"));
 const AdminVerifiers = lazy(() => import("./components/AdminCoponent/AdminVerifiers/AdminVerifiers"));
 const ExternalStoreImport = lazy(() => import("./pages/Admin/ExternalStoreImport/ExternalStoreImport"));
+// ==================== صفحات المستخدم ====================
+const ClansListPage = lazy(() => import('./pages/User/ClansPage/ClansListPage'));
+const ClanPage = lazy(() => import('./pages/User/ClansPage/ClanPage'));
+const CreateClanPage = lazy(() => import('./pages/User/ClansPage/CreateClanPage'));
 const AdminTopUpSettings = lazy(() => import("./pages/Admin/AdminTopUpSettings/AdminTopUpSettings"));
 const AdminDiscountSettings = lazy(() => import("./pages/Admin/AdminDiscountSettings/AdminDiscountSettings"));
 const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSettings/AdminMerchantSettings"));
 const AdminUnifiedCatalog = lazy(() => import("./pages/Admin/AdminUnifiedCatalog/AdminUnifiedCatalog"));
 const ContentManager = lazy(() => import("./components/AdminCoponent/ContentManager/ContentManager"));
-
+const QuestsPage = lazy(() => import('./pages/User/QuestsPage/QuestsPage'));
 // ==================== صفحات المدقق (Verifier) ====================
 const VerifierDashboard = lazy(() => import("./pages/Verifier/VerifierDashboard"));
 const VerifierOrdersPage = lazy(() => import("./pages/Verifier/VerifierOrders"));
@@ -141,7 +149,8 @@ function App() {
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/chat/room/:roomId" element={<ChatRoom />} />
-          <Route path="/wheel" element={<WheelPage />} />
+     
+     <Route path="/quests" element={<QuestsPage />} />     <Route path="/wheel" element={<WheelPage />} />
     <Route path="/referral" element={<ReferralPage />} />
     <Route path="/my-activities" element={<MyActivitiesPage />} />      <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<PublicProfilePage />} />
@@ -149,12 +158,18 @@ function App() {
    <Route path="/mianfriendspage" element={<MainFriendPage />} />
    <Route path="/sell-mgc" element={<SellMGC />} />       <Route path="/exchange" element={<ExchangePage />} />
        <Route path="/search-user" element={<SearchUserPage />} />
-       <Route path="/buy-mgc" element={<BuyMGC />} />
+     // داخل مسارات المستخدم
+<Route path="/clans" element={<ClansListPage />} />
+<Route path="/clan/:clanId" element={<ClanPage />} />
+<Route path="/clan/create" element={<CreateClanPage />} />
+     {/* مسارات المهام والعضويات */}
+<Route path="/missions" element={<MissionsPage />} />
+<Route path="/memberships" element={<MembershipsPage />} />  <Route path="/buy-mgc" element={<BuyMGC />} />
    <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/about" element={<AboutPage />} />
-        
+        <Route path="/reviews" element={<ReviewsPage />} />
         <Route path="/friends" element={<FriendsPage />} />  <Route path="/chat" element={<ChatPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/topup" element={<TopUpPage />} />

@@ -1,0 +1,279 @@
+/* src/pages/User/MissionsPage/MissionsPage.css */
+
+.missions-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== حالة التحميل ===== */
+.missions-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== الهيدر ===== */
+.missions-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.missions-page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.header-icon {
+  font-size: 1.6rem;
+}
+
+/* ===== الإحصائيات ===== */
+.missions-page__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== المهام ===== */
+.missions-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.mission-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mission-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mission-card.completed {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.03);
+}
+
+/* ===== رأس المهمة ===== */
+.mission-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.6rem;
+}
+
+.mission-card__icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mission-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mission-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.mission-card__description {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.mission-card__reward {
+  flex-shrink: 0;
+}
+
+.reward-amount {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.15rem 0.6rem;
+  border-radius: 2rem;
+}
+
+/* ===== شريط التقدم ===== */
+.mission-card__progress {
+  margin: 0.4rem 0;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-primary);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 1rem;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.2rem;
+}
+
+/* ===== الأزرار ===== */
+.mission-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.3rem;
+}
+
+.claim-btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+
+.progress-btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 2rem;
+}
+
+.claimed-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .missions-page {
+    padding: 0.5rem;
+  }
+
+  .missions-page__stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
+  .stat-item {
+    padding: 0.4rem 0.2rem;
+  }
+
+  .stat-icon {
+    font-size: 1.1rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.55rem;
+  }
+
+  .mission-card {
+    padding: 0.8rem;
+  }
+
+  .mission-card__header {
+    flex-wrap: wrap;
+  }
+
+  .mission-card__actions {
+    justify-content: stretch;
+  }
+
+  .mission-card__actions .btn {
+    width: 100%;
+  }
+
+  .missions-page__title {
+    font-size: 1.2rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

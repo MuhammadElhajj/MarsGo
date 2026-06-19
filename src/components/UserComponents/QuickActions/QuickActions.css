@@ -260,3 +260,47 @@
 .quick-actions__item--disabled:hover .quick-actions__label {
   color: #9ca3af;
 }
+
+
+/* ===== مهام – بنفسجي ===== */
+.quick-actions__item--missions .quick-actions__icon {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+.quick-actions__item--missions:hover .quick-actions__icon {
+  background: #8b5cf6;
+  color: white;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+}
+
+/* ===== عضويات – ذهبي ===== */
+.quick-actions__item--memberships .quick-actions__icon {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.quick-actions__item--memberships:hover .quick-actions__icon {
+  background: #f59e0b;
+  color: white;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+/* ===== تقييمات – ذهبي ===== */
+.quick-actions__item--reviews .quick-actions__icon {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.quick-actions__item--reviews:hover .quick-actions__icon {
+  background: #f59e0b;
+  color: white;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+/* ===== كلانات – بنفسجي ===== */
+.quick-actions__item--clans .quick-actions__icon {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+.quick-actions__item--clans:hover .quick-actions__icon {
+  background: #8b5cf6;
+  color: white;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+}

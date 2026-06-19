@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { 
   FiDollarSign, FiBox, FiZap, FiShare2, FiTrendingDown, FiUsers,
-  FiGift, FiCreditCard, FiTag, FiShoppingBag, FiTool
+  FiTag, FiShoppingBag, FiTool, FiTarget, FiAward, FiStar // ✅ أضفنا FiStar
 } from 'react-icons/fi';
 import './QuickActions.css';
 
@@ -13,14 +13,16 @@ const actions = [
   { id: 'referral', label: 'إحالة', icon: <FiShare2 />, path: '/referral', className: 'quick-actions__item--referral' },
   { id: 'sell', label: 'بيع MGC', icon: <FiTrendingDown />, path: '/sell-mgc', className: 'quick-actions__item--sell' },
   { id: 'mianfriendspage', label: 'الأصدقاء', icon: <FiUsers />, path: '/mianfriendspage', className: 'quick-actions__item--friends' },
+  { id: 'missions', label: 'مهام', icon: <FiTarget />, path: '/quests', className: 'quick-actions__item--missions' },
+  { id: 'memberships', label: 'عضويات', icon: <FiAward />, path: '/memberships', className: 'quick-actions__item--memberships' },
+  // ✅ تقييمات (جديد)
+  { id: 'reviews', label: 'تقييمات', icon: <FiStar />, path: '/reviews', className: 'quick-actions__item--reviews' },
 
   // ===== العناصر غير النشطة (معطلة) =====
-  { id: 'gift', label: 'هدايا', icon: <FiGift />, path: null, className: 'quick-actions__item--disabled' },
-  { id: 'cards', label: 'بطاقات', icon: <FiCreditCard />, path: null, className: 'quick-actions__item--disabled' },
-  { id: 'offers', label: 'عروض', icon: <FiTag />, path: null, className: 'quick-actions__item--disabled' },
+// أضف هذا العنصر إلى قائمة الإجراءات النشطة
+{ id: 'clans', label: 'كلانات', icon: <FiUsers />, path: '/clans', className: 'quick-actions__item--clans' },
   { id: 'store', label: 'متجر', icon: <FiShoppingBag />, path: null, className: 'quick-actions__item--disabled' },
-  { id: 'services', label: 'خدمات', icon: <FiTool />, path: null, className: 'quick-actions__item--disabled' },
-];
+  ];
 
 export default function QuickActions() {
   const navigate = useNavigate();
@@ -39,6 +41,9 @@ export default function QuickActions() {
           className={`quick-actions__item ${action.className}`}
           onClick={() => handleClick(action.path)}
           style={{ cursor: action.path ? 'pointer' : 'default' }}
+          role="button"
+          tabIndex={action.path ? 0 : -1}
+          aria-label={action.label}
         >
           <div className="quick-actions__icon">{action.icon}</div>
           <span className="quick-actions__label">{action.label}</span>

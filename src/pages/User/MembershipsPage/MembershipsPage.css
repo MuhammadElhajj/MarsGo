@@ -1,0 +1,218 @@
+/* src/pages/User/MembershipsPage/MembershipsPage.css */
+
+.memberships-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ===== الهيدر ===== */
+.memberships-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.memberships-page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.header-icon {
+  font-size: 1.6rem;
+}
+
+/* ===== النص الفرعي ===== */
+.memberships-page__subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ===== شبكة العضويات ===== */
+.memberships-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+/* ===== بطاقة العضوية ===== */
+.membership-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem 1.2rem 1.2rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.membership-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.membership-card.active {
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+}
+
+/* ===== شارة التفعيل ===== */
+.membership-card__badge {
+  min-height: 24px;
+}
+
+.active-badge {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  border-radius: 2rem;
+}
+
+/* ===== الأيقونة ===== */
+.membership-card__icon-wrapper {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.membership-card__icon {
+  font-size: 2.5rem;
+}
+
+/* ===== الاسم والسعر ===== */
+.membership-card__name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.2rem;
+}
+
+.membership-card__price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f59e0b;
+  margin-bottom: 0.8rem;
+}
+
+/* ===== المزايا ===== */
+.membership-card__perks {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.2rem;
+  text-align: right;
+  flex: 1;
+}
+
+.membership-card__perks li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.membership-card__perks li:last-child {
+  border-bottom: none;
+}
+
+.perk-icon {
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+/* ===== زر الشراء ===== */
+.membership-card__btn {
+  width: 100%;
+  padding: 0.6rem;
+  font-weight: 700;
+  border-radius: 2rem;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+  background: var(--color-accent);
+  color: white;
+}
+
+.membership-card__btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.membership-card__btn.active {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.membership-card__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== الملاحظة السفلية ===== */
+.memberships-page__note {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .memberships-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .memberships-page {
+    padding: 0.5rem;
+  }
+
+  .memberships-page__title {
+    font-size: 1.2rem;
+  }
+
+  .membership-card {
+    padding: 1.2rem 1rem;
+  }
+
+  .membership-card__icon-wrapper {
+    font-size: 2rem;
+  }
+
+  .membership-card__name {
+    font-size: 1.1rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

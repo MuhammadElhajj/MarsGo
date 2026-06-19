@@ -495,7 +495,401 @@ markFriendRequestsAsSeen: async () => {
       },
 
 
+// ============================================================
+// ===== نظام الكلانات (Clans) =====
+// ============================================================
 
+// ===== إنشاء كلان جديد =====
+createClan: async (clanData) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return { success: false, error: 'يجب تسجيل الدخول' };
+  }
+
+  const { name, description, type, imageUrl } = clanData;
+  if (!name || name.trim().length < 3) {
+    toast.error('اسم الكلان يجب أن يكون 3 أحرف على الأقل');
+    return { success: false, error: 'اسم غير صالح' };
+  }
+
+  try {
+    const clanRef = await addDoc(collection(db, 'clans'), {
+      name: name.trim(),
+      description: description?.trim() || '',
+      type: type || 'public',
+      imageUrl: imageUrl || null,
+      ownerId: user.uid,
+      members: [user.uid],
+      moderators: [user.uid],
+      points: 0,
+      memberCount: 1,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    // إنشاء غرفة دردشة للكلان
+    const roomId = `clan_${clanRef.id}`;
+    await setDoc(doc(db, 'rooms', roomId), {
+      type: 'clan',
+      clanId: clanRef.id,
+      members: [user.uid],
+      name: `دردشة ${name.trim()}`,
+      imageUrl: imageUrl || null,
+      lastMessage: '',
+      lastMessageTime: null,
+      createdAt: serverTimestamp(),
+    });
+
+    toast.success(`✅ تم إنشاء كلان "${name.trim()}" بنجاح!`);
+    return { success: true, clanId: clanRef.id };
+  } catch (error) {
+    console.error('فشل إنشاء الكلان:', error);
+    toast.error('حدث خطأ أثناء إنشاء الكلان');
+    return { success: false, error: error.message };
+  }
+},
+
+// ===== جلب الكلانات التي أنا عضو فيها =====
+fetchMyClans: async () => {
+  const { user } = get();
+  if (!user) return [];
+
+  try {
+    const q = query(
+      collection(db, 'clans'),
+      where('members', 'array-contains', user.uid),
+      orderBy('memberCount', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('خطأ في جلب الكلانات:', error);
+    return [];
+  }
+},
+
+// ===== جلب جميع الكلانات العامة (للاستكشاف) =====
+fetchPublicClans: async () => {
+  try {
+    const q = query(
+      collection(db, 'clans'),
+      where('type', '==', 'public'),
+      orderBy('memberCount', 'desc'),
+      limit(50)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('خطأ في جلب الكلانات العامة:', error);
+    return [];
+  }
+},
+
+// ===== جلب بيانات كلان معين =====
+fetchClan: async (clanId) => {
+  try {
+    const docSnap = await getDoc(doc(db, 'clans', clanId));
+    if (!docSnap.exists()) {
+      toast.error('الكلان غير موجود');
+      return null;
+    }
+    return { id: docSnap.id, ...docSnap.data() };
+  } catch (error) {
+    console.error('خطأ في جلب الكلان:', error);
+    return null;
+  }
+},
+
+// ===== الانضمام إلى كلان عام =====
+joinClan: async (clanId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+
+  try {
+    const clanRef = doc(db, 'clans', clanId);
+    const clanSnap = await getDoc(clanRef);
+    if (!clanSnap.exists()) {
+      toast.error('الكلان غير موجود');
+      return false;
+    }
+
+    const clanData = clanSnap.data();
+    if (clanData.members.includes(user.uid)) {
+      toast.error('أنت بالفعل عضو في هذا الكلان');
+      return false;
+    }
+
+    if (clanData.type === 'private') {
+      toast.error('هذا الكلان خاص، يرجى انتظار دعوة');
+      return false;
+    }
+
+    // إضافة المستخدم إلى الكلان
+    await updateDoc(clanRef, {
+      members: arrayUnion(user.uid),
+      memberCount: increment(1),
+      updatedAt: serverTimestamp(),
+    });
+
+    // إضافة المستخدم إلى غرفة الدردشة
+    const roomId = `clan_${clanId}`;
+    await updateDoc(doc(db, 'rooms', roomId), {
+      members: arrayUnion(user.uid),
+    });
+
+    toast.success(`✅ تم الانضمام إلى "${clanData.name}" بنجاح!`);
+    return true;
+  } catch (error) {
+    console.error('فشل الانضمام:', error);
+    toast.error('حدث خطأ أثناء الانضمام');
+    return false;
+  }
+},
+
+// ===== مغادرة الكلان =====
+leaveClan: async (clanId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+
+  try {
+    const clanRef = doc(db, 'clans', clanId);
+    const clanSnap = await getDoc(clanRef);
+    if (!clanSnap.exists()) {
+      toast.error('الكلان غير موجود');
+      return false;
+    }
+
+    const clanData = clanSnap.data();
+    if (!clanData.members.includes(user.uid)) {
+      toast.error('أنت لست عضواً في هذا الكلان');
+      return false;
+    }
+
+    // التحقق: إذا كان المالك يغادر، يجب نقل الملكية أو حذف الكلان
+    if (clanData.ownerId === user.uid) {
+      const otherMembers = clanData.members.filter(id => id !== user.uid);
+      if (otherMembers.length === 0) {
+        // حذف الكلان إذا لم يبقَ أعضاء
+        await deleteDoc(clanRef);
+        toast.success('تم حذف الكلان لعدم وجود أعضاء');
+        return true;
+      } else {
+        // نقل الملكية إلى أول عضو
+        const newOwner = otherMembers[0];
+        await updateDoc(clanRef, {
+          ownerId: newOwner,
+          members: arrayRemove(user.uid),
+          memberCount: increment(-1),
+          updatedAt: serverTimestamp(),
+        });
+        toast.success(`✅ تم نقل ملكية الكلان إلى عضو آخر`);
+        return true;
+      }
+    }
+
+    // إزالة المستخدم من الكلان
+    await updateDoc(clanRef, {
+      members: arrayRemove(user.uid),
+      memberCount: increment(-1),
+      updatedAt: serverTimestamp(),
+    });
+
+    // إزالة من غرفة الدردشة
+    const roomId = `clan_${clanId}`;
+    await updateDoc(doc(db, 'rooms', roomId), {
+      members: arrayRemove(user.uid),
+    });
+
+    toast.success('✅ تم مغادرة الكلان بنجاح');
+    return true;
+  } catch (error) {
+    console.error('فشل المغادرة:', error);
+    toast.error('حدث خطأ أثناء المغادرة');
+    return false;
+  }
+},
+
+// ===== إرسال دعوة للانضمام إلى كلان =====
+inviteToClan: async (clanId, invitedUserId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+
+  try {
+    // التحقق من وجود الكلان
+    const clanSnap = await getDoc(doc(db, 'clans', clanId));
+    if (!clanSnap.exists()) {
+      toast.error('الكلان غير موجود');
+      return false;
+    }
+
+    // التحقق من أن المستخدم الحالي مشرف أو مالك
+    const clanData = clanSnap.data();
+    if (!clanData.moderators.includes(user.uid) && clanData.ownerId !== user.uid) {
+      toast.error('ليس لديك صلاحية لدعوة أعضاء');
+      return false;
+    }
+
+    // التحقق من وجود دعوة سابقة
+    const existingQuery = query(
+      collection(db, 'clanInvites'),
+      where('clanId', '==', clanId),
+      where('invitedUserId', '==', invitedUserId),
+      where('status', '==', 'pending')
+    );
+    const existingSnap = await getDocs(existingQuery);
+    if (!existingSnap.empty) {
+      toast.error('تم إرسال دعوة مسبقاً');
+      return false;
+    }
+
+    await addDoc(collection(db, 'clanInvites'), {
+      clanId,
+      invitedUserId,
+      invitedBy: user.uid,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+    });
+
+    toast.success('✅ تم إرسال الدعوة بنجاح');
+    return true;
+  } catch (error) {
+    console.error('فشل إرسال الدعوة:', error);
+    toast.error('حدث خطأ أثناء إرسال الدعوة');
+    return false;
+  }
+},
+
+// ===== قبول دعوة الكلان =====
+acceptClanInvite: async (inviteId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+
+  try {
+    const inviteRef = doc(db, 'clanInvites', inviteId);
+    const inviteSnap = await getDoc(inviteRef);
+    if (!inviteSnap.exists()) {
+      toast.error('الدعوة غير موجودة');
+      return false;
+    }
+
+    const inviteData = inviteSnap.data();
+    if (inviteData.invitedUserId !== user.uid) {
+      toast.error('هذه الدعوة ليست موجهة لك');
+      return false;
+    }
+
+    if (inviteData.status !== 'pending') {
+      toast.error('تمت معالجة هذه الدعوة مسبقاً');
+      return false;
+    }
+
+    const clanId = inviteData.clanId;
+    const clanRef = doc(db, 'clans', clanId);
+    const clanSnap = await getDoc(clanRef);
+    if (!clanSnap.exists()) {
+      toast.error('الكلان غير موجود');
+      return false;
+    }
+
+    // إضافة المستخدم إلى الكلان
+    await updateDoc(clanRef, {
+      members: arrayUnion(user.uid),
+      memberCount: increment(1),
+      updatedAt: serverTimestamp(),
+    });
+
+    // إضافة إلى غرفة الدردشة
+    const roomId = `clan_${clanId}`;
+    await updateDoc(doc(db, 'rooms', roomId), {
+      members: arrayUnion(user.uid),
+    });
+
+    // تحديث حالة الدعوة
+    await updateDoc(inviteRef, { status: 'accepted' });
+
+    toast.success(`✅ تم الانضمام إلى الكلان بنجاح!`);
+    return true;
+  } catch (error) {
+    console.error('فشل قبول الدعوة:', error);
+    toast.error('حدث خطأ أثناء قبول الدعوة');
+    return false;
+  }
+},
+
+// ===== رفض دعوة الكلان =====
+rejectClanInvite: async (inviteId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
+
+  try {
+    const inviteRef = doc(db, 'clanInvites', inviteId);
+    const inviteSnap = await getDoc(inviteRef);
+    if (!inviteSnap.exists()) {
+      toast.error('الدعوة غير موجودة');
+      return false;
+    }
+
+    const inviteData = inviteSnap.data();
+    if (inviteData.invitedUserId !== user.uid) {
+      toast.error('هذه الدعوة ليست موجهة لك');
+      return false;
+    }
+
+    await updateDoc(inviteRef, { status: 'rejected' });
+    toast.success('تم رفض الدعوة');
+    return true;
+  } catch (error) {
+    console.error('فشل رفض الدعوة:', error);
+    toast.error('حدث خطأ أثناء رفض الدعوة');
+    return false;
+  }
+},
+
+// ===== جلب دعوات الكلان الواردة =====
+fetchClanInvites: async () => {
+  const { user } = get();
+  if (!user) return [];
+
+  try {
+    const q = query(
+      collection(db, 'clanInvites'),
+      where('invitedUserId', '==', user.uid),
+      where('status', '==', 'pending')
+    );
+    const snapshot = await getDocs(q);
+    const invites = [];
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      // جلب اسم الكلان
+      const clanSnap = await getDoc(doc(db, 'clans', data.clanId));
+      invites.push({
+        id: docSnap.id,
+        ...data,
+        clanName: clanSnap.exists() ? clanSnap.data().name : 'غير معروف',
+      });
+    }
+    return invites;
+  } catch (error) {
+    console.error('خطأ في جلب دعوات الكلان:', error);
+    return [];
+  }
+},
 // ===== استماع حي لطلبات الصداقة (عداد الشارة) =====
 listenToFriendRequests: () => {
   const { user } = get();
@@ -1122,7 +1516,56 @@ fetchSuggestedFriends: async () => {
     return [];
   }
 },
+// ===== دوال إحصاءات المهام =====
+getWheelCount: async () => {
+  const { user } = get();
+  if (!user) return 0;
+  try {
+    const q = query(collection(db, 'wheelHistory'), where('userId', '==', user.uid));
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch { return 0; }
+},
 
+getMachineCount: async () => {
+  const { user } = get();
+  if (!user) return 0;
+  try {
+    const q = query(collection(db, 'machineHistory'), where('userId', '==', user.uid));
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch { return 0; }
+},
+
+getDepositCount: async () => {
+  const { user } = get();
+  if (!user) return 0;
+  try {
+    const q = query(collection(db, 'topUpRequests'), where('userId', '==', user.uid), where('status', '==', 'approved'));
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch { return 0; }
+},
+
+getOrdersCount: async () => {
+  const { user } = get();
+  if (!user) return 0;
+  try {
+    const q = query(collection(db, 'orders'), where('userId', '==', user.uid), where('status', '==', 'completed'));
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch { return 0; }
+},
+
+getReferralCount: async () => {
+  const { user } = get();
+  if (!user) return 0;
+  try {
+    const q = query(collection(db, 'referral_rewards'), where('referrerId', '==', user.uid), where('status', '==', 'claimed'));
+    const snap = await getDocs(q);
+    return snap.size;
+  } catch { return 0; }
+},
 // جلب قائمة الإحالات الأخيرة
 getRecentReferrals: async (limitCount = 5) => {
   const { user } = get();
