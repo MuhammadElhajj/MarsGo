@@ -958,6 +958,55 @@ sendFriendRequest: async (toUserId) => {
   return true;
 },
 
+// ===== نظام أرقام الفيزا والرقم السري =====
+// تخزين مؤقت للأرقام المستخدمة (يمكن نقلها إلى Firestore لاحقاً)
+visaNumbers: [],
+setVisaNumbers: (visaNumbers) => set({ visaNumbers }),
+
+// دالة لتوليد رقم فيزا فريد (16 رقم) من uid المستخدم
+generateVisaNumber: async (userId) => {
+  // 1. استخراج 8 أرقام من userId باستخدام hash بسيط
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    hash = ((hash << 5) - hash) + userId.charCodeAt(i);
+    hash = hash & hash; // تحويل إلى 32-bit integer
+  }
+  // تحويل القيمة المطلقة إلى 8 أرقام (مع padding بالأصفار)
+  const numericPart = Math.abs(hash).toString().slice(0, 8).padStart(8, '0');
+  // تكرار الجزء الرقمي مرتين ليكون 16 رقم
+  const fullVisa = numericPart + numericPart;
+
+  // 2. التحقق من عدم تكرار الرقم (محلياً وفي Firestore)
+  const { visaNumbers, user } = get();
+  if (visaNumbers.includes(fullVisa)) {
+    // إذا تكرر، نعدل الرقم بإضافة 1 إلى الجزء الأول (مع الحفاظ على 8 خانات)
+    const incremented = (parseInt(numericPart) + 1).toString().padStart(8, '0');
+    const newVisa = incremented + incremented;
+    // نتحقق مجدداً (يمكن تكرار العملية حتى نجد رقماً فريداً)
+    if (visaNumbers.includes(newVisa)) {
+      // في حالة نادرة جداً، نستخدم timestamp كحل أخير
+      const fallback = Date.now().toString().slice(-8).padStart(8, '0');
+      return fallback + fallback;
+    }
+    // تحديث القائمة المحلية
+    set({ visaNumbers: [...visaNumbers, newVisa] });
+    return newVisa;
+  }
+
+  // تخزين الرقم الجديد
+  set({ visaNumbers: [...visaNumbers, fullVisa] });
+  return fullVisa;
+},
+
+// دالة لتوليد رقم سري عشوائي (4-6 أرقام)
+generateVisaSecret: () => {
+  const length = Math.floor(Math.random() * 3) + 4; // 4, 5, أو 6
+  let secret = '';
+  for (let i = 0; i < length; i++) {
+    secret += Math.floor(Math.random() * 10);
+  }
+  return secret;
+},
 // ===== قبول طلب الصداقة =====
 // ===== قبول طلب الصداقة =====
 // ===== قبول طلب الصداقة =====
@@ -1365,11 +1414,12 @@ getRecentSupporters: async (targetUserId, limit = 10) => {
 
 // ===== نظام الإحالة =====
 // الحصول على رابط الإحالة
+// ===== نظام الإحالة =====
 getReferralLink: () => {
   const { userData } = get();
   if (!userData?.uniqueId) return null;
   const baseUrl = window.location.origin;
-  return `${baseUrl}/?ref=${userData.uniqueId}`;
+  return `${baseUrl}/signup?ref=${userData.uniqueId}`; // ✅ تغيير المسار إلى /signup
 },
 
 // جلب عدد الإحالات الناجحة (المكافآت التي تم صرفها)

@@ -35,7 +35,7 @@ export default function Dashboard() {
   const { stats, loading: statsLoading } = useStats();
   const { stats: userStats, loading: userStatsLoading } = useUserStats();
   const navigate = useNavigate();
-
+const mgcBalance = useAppStore((state) => state.mgcBalance);
   // ===== الألعاب =====
   const { games, setGames } = useAppStore();
   const [gamesLoading, setGamesLoading] = useState(!games || games.length === 0);
@@ -116,16 +116,24 @@ export default function Dashboard() {
       
       {/* ✅ بطاقة الفيزا الجديدة - تحل مكان الرصيد وزر الإيداع */}
       <div className="dashboard__visa-wrapper">
-        <VisaCard 
+        {/* <VisaCard 
           balance={balance} 
           cardHolderName={userData?.name || 'MarsGo User'}
           cardNumber="8888 8888 8888 8888"
           brand="MarsGo Visa"
-        />
+        /> */}
+ <VisaCard 
+  balance={balance} 
+  mgcBalance={mgcBalance}
+  cardHolderName={userData?.name || 'MarsGo User'}
+  cardNumber={userData?.visaNumber}
+  brand="MarsGo Visa"
+  secret={userData?.visaSecret}
+/>
       </div>
 
-      {/* <PaymentMethods/> */}
 <QuickActions />
+      <PaymentMethods/>
       {/* يمكن الاحتفاظ بـ SpendingProgress إذا أردت، أو إزالته */}
       {/* <SpendingProgress /> */}
 

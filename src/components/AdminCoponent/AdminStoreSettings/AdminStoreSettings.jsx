@@ -1,21 +1,40 @@
-import { useState } from 'react';
-import { useStoreSettings } from '../../../context/StoreSettingsContext';
+import { useState, useEffect } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../../firebase';
+import { useAppStore } from '../../../store/store';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
 import Button from '../../GeneralComponents/Button/Button';
+import toast from 'react-hot-toast';
 import './AdminStoreSettings.css';
 
 export default function AdminStoreSettings() {
-  const { settings, updateSettings } = useStoreSettings();
+  // ✅ استخدم useAppStore بدلاً من useStoreSettings
+  const storeSettings = useAppStore((state) => state.storeSettings);
+  const setStoreSettings = useAppStore((state) => state.setStoreSettings);
+
   const [uploading, setUploading] = useState(false);
-  
-  // حالة رفع صورة الخلفية (القسم القديم)
   const [backgroundPreview, setBackgroundPreview] = useState('');
-  
-  // حالة رفع صورة الهاتف (القسم الجديد)
   const [phonePreview, setPhonePreview] = useState('');
   const [uploadingPhone, setUploadingPhone] = useState(false);
 
-  // دالة حفظ صورة الخلفية
+  // ===== دالة حفظ بيانات المتجر في Firestore =====
+  const updateSettingsInFirestore = async (data) => {
+    try {
+      const docRef = doc(db, 'storeSettings', 'default');
+      await setDoc(docRef, data, { merge: true });
+      // تحديث الـ store المحلي
+      const updatedSettings = { ...storeSettings, ...data };
+      setStoreSettings(updatedSettings);
+      toast.success('تم حفظ الإعدادات بنجاح');
+      return true;
+    } catch (err) {
+      console.error(err);
+      toast.error('فشل حفظ الإعدادات');
+      return false;
+    }
+  };
+
+  // ===== صورة الخلفية =====
   const handleBackgroundImageComplete = (url) => {
     setBackgroundPreview(url);
   };
@@ -23,8 +42,7 @@ export default function AdminStoreSettings() {
   const handleSaveBackground = async () => {
     if (!backgroundPreview) return;
     setUploading(true);
-    // استخدام الحقل الجديد backgroundImageUrl
-    await updateSettings({ backgroundImageUrl: backgroundPreview });
+    await updateSettingsInFirestore({ backgroundImageUrl: backgroundPreview });
     setUploading(false);
     setBackgroundPreview('');
   };
@@ -32,13 +50,12 @@ export default function AdminStoreSettings() {
   const handleRemoveBackground = async () => {
     if (window.confirm('هل تريد إزالة خلفية صفحة الترحيب؟')) {
       setUploading(true);
-      // إرسال سلسلة فارغة لحذف الصورة
-      await updateSettings({ backgroundImageUrl: '' });
+      await updateSettingsInFirestore({ backgroundImageUrl: '' });
       setUploading(false);
     }
   };
 
-  // دالة حفظ صورة الهاتف
+  // ===== صورة الهاتف =====
   const handlePhoneImageComplete = (url) => {
     setPhonePreview(url);
   };
@@ -46,8 +63,7 @@ export default function AdminStoreSettings() {
   const handleSavePhoneImage = async () => {
     if (!phonePreview) return;
     setUploadingPhone(true);
-    // استخدام الحقل الجديد loginPhoneImageUrl
-    await updateSettings({ loginPhoneImageUrl: phonePreview });
+    await updateSettingsInFirestore({ loginPhoneImageUrl: phonePreview });
     setUploadingPhone(false);
     setPhonePreview('');
   };
@@ -55,12 +71,12 @@ export default function AdminStoreSettings() {
   const handleRemovePhoneImage = async () => {
     if (window.confirm('هل تريد إزالة صورة الهاتف من صفحة تسجيل الدخول؟')) {
       setUploadingPhone(true);
-      await updateSettings({ loginPhoneImageUrl: '' });
+      await updateSettingsInFirestore({ loginPhoneImageUrl: '' });
       setUploadingPhone(false);
     }
   };
 
-  if (!settings) return <div>جاري التحميل...</div>;
+  if (!storeSettings) return <div>جاري التحميل...</div>;
 
   return (
     <div className="admin-store-settings">
@@ -69,8 +85,8 @@ export default function AdminStoreSettings() {
         <h2>🎨 إعدادات خلفية صفحة الترحيب</h2>
         <div className="current-background">
           <p>الخلفية الحالية:</p>
-          {settings.backgroundImageUrl ? (
-            <img src={settings.backgroundImageUrl} alt="الخلفية" />
+          {storeSettings.backgroundImageUrl ? (
+            <img src={storeSettings.backgroundImageUrl} alt="الخلفية" />
           ) : (
             <div className="no-image">لا توجد خلفية مخصصة (سيظهر لون افتراضي)</div>
           )}
@@ -94,7 +110,7 @@ export default function AdminStoreSettings() {
           <Button onClick={handleSaveBackground} disabled={uploading || !backgroundPreview}>
             {uploading ? 'جاري الحفظ...' : 'حفظ الصورة كخلفية'}
           </Button>
-          {settings.backgroundImageUrl && (
+          {storeSettings.backgroundImageUrl && (
             <Button variant="danger" onClick={handleRemoveBackground} disabled={uploading}>
               إزالة الخلفية
             </Button>
@@ -109,8 +125,8 @@ export default function AdminStoreSettings() {
         
         <div className="current-background">
           <p>الصورة الحالية:</p>
-          {settings.loginPhoneImageUrl ? (
-            <img src={settings.loginPhoneImageUrl} alt="صورة الهاتف" style={{ maxWidth: '200px', border: '1px solid #ddd', borderRadius: '12px' }} />
+          {storeSettings.loginPhoneImageUrl ? (
+            <img src={storeSettings.loginPhoneImageUrl} alt="صورة الهاتف" style={{ maxWidth: '200px', border: '1px solid #ddd', borderRadius: '12px' }} />
           ) : (
             <div className="no-image">لا توجد صورة مخصصة (سيظهر إطار فارغ أو نص افتراضي)</div>
           )}
@@ -136,7 +152,7 @@ export default function AdminStoreSettings() {
           <Button onClick={handleSavePhoneImage} disabled={uploadingPhone || !phonePreview}>
             {uploadingPhone ? 'جاري الحفظ...' : 'حفظ صورة الهاتف'}
           </Button>
-          {settings.loginPhoneImageUrl && (
+          {storeSettings.loginPhoneImageUrl && (
             <Button variant="danger" onClick={handleRemovePhoneImage} disabled={uploadingPhone}>
               إزالة الصورة
             </Button>

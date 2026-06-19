@@ -14,13 +14,16 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  z-index: 60 !important;
 }
 
 /* القسم القابل للتمرير */
 .sidebar__scrollable {
   flex: 1;
   overflow-y: auto;
+  padding: 0 5px;
   padding-bottom: 1rem;
+
 }
 
 /* القسم الثابت في الأسفل */
@@ -255,9 +258,9 @@
 /* ===== زر الإغلاق (يظهر فقط في الجوال) ===== */
 .sidebar__close-btn {
   display: none;
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+  
+  top: 0.75rem;
+  left: 0.75rem;
   background: #ef4444;
   border: none;
   border-radius: 50%;
@@ -270,6 +273,7 @@
   color: white;
   font-size: 1rem;
   transition: background 0.2s;
+  padding: 0 !important;
 }
 .sidebar__close-btn:hover {
   background: #dc2626;
@@ -303,17 +307,22 @@
   color: var(--color-text-secondary);
 }
 
-/* ===== استجابة الجوال ===== */
+/* ============================================================
+   استجابة الجوال (المعدلة)
+   ============================================================ */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
-    top: 0;
+    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر مباشرة */
     right: 0;
     bottom: 0;
-    z-index: 25;
+   
     transform: translateX(100%);
     box-shadow: none;
-    padding-top: 4rem;
+    padding-top: 0;            /* ✅ إزالة padding الزائد */
+    height: calc(100vh - 4rem); /* ✅ ملء المساحة المتبقية */
+    width: 280px !important;   /* تصغير قليلاً للجوال */
+    border-left: 1px solid var(--color-border);
   }
 
   .sidebar--open {
@@ -323,6 +332,9 @@
 
   .sidebar__close-btn {
     display: flex;
+    top: 0.75rem;
+    left: 0.75rem;
+            margin: 5px !important;
   }
 
   .sidebar__user-card {
@@ -337,7 +349,6 @@
     font-size: 0.7rem;
   }
 
-
   .spinner-small {
     width: 22px;
     height: 22px;
@@ -345,6 +356,11 @@
   }
   .sidebar-skeleton p {
     font-size: 0.65rem;
+  }
+
+  /* ضبط القسم الثابت في الأسفل */
+  .sidebar__fixed-bottom {
+    padding: 0.5rem 0.75rem;
   }
 }
 

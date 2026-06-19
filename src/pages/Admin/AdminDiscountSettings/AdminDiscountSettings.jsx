@@ -1,20 +1,32 @@
 // src/pages/Admin/AdminDiscountSettings.jsx
 import { useState, useEffect } from 'react';
-import { useDiscount } from '../../../context/DiscountContext';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../../firebase';
+import { useAppStore } from '../../../store/store';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import Input from '../../../components/GeneralComponents/Input/Input';
-import { useGames } from '../../../context/GamesContext';
-import { useApps } from '../../../context/AppsContext';
+import toast from 'react-hot-toast';
 import './AdminDiscountSettings.css';
 
 export default function AdminDiscountSettings() {
-  const { discounts, updateDiscounts, loading } = useDiscount();
-  const { games } = useGames();
-  const { apps } = useApps();
+  // ✅ استخدم الـ store فقط
+  const discounts = useAppStore((state) => state.discounts);
+  const setDiscounts = useAppStore((state) => state.setDiscounts);
+  const games = useAppStore((state) => state.games);
+  const apps = useAppStore((state) => state.apps);
+
   const [form, setForm] = useState({ games: 0, apps: 0, specific: {} });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (discounts) setForm(discounts);
+    if (discounts) {
+      setForm(discounts);
+      setLoading(false);
+    } else {
+      // إذا لم تكن موجودة، نضع قيماً افتراضية
+      setForm({ games: 0, apps: 0, specific: {} });
+      setLoading(false);
+    }
   }, [discounts]);
 
   const handleGeneralChange = (field, value) => {
@@ -31,8 +43,15 @@ export default function AdminDiscountSettings() {
   };
 
   const handleSave = async () => {
-    await updateDiscounts(form);
-    alert('تم حفظ إعدادات الخصم');
+    try {
+      const docRef = doc(db, 'discountSettings', 'default');
+      await setDoc(docRef, form, { merge: true });
+      setDiscounts(form); // تحديث الـ store
+      toast.success('تم حفظ إعدادات الخصم بنجاح');
+    } catch (err) {
+      console.error(err);
+      toast.error('فشل حفظ الإعدادات');
+    }
   };
 
   if (loading) return <div>جاري التحميل...</div>;

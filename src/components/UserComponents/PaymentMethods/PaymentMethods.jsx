@@ -25,7 +25,7 @@ export default function PaymentMethods() {
 
   return (
     <div className="payment-methods">
-      <h4 className="payment-methods__title">طرق الدفع المقبولة قريباً</h4>
+      {/* <h4 className="payment-methods__title">طرق الدفع المقبولة قريباً</h4> */}
       <div className="payment-methods__marquee">
         <div className="payment-methods__track">
           {paymentMethods.concat(paymentMethods).map((method, index) => (

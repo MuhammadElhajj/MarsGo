@@ -25,6 +25,7 @@ const NotificationsPage = lazy(() => import("./pages/User/Notifications/Notifica
 const ProfilePage = lazy(() => import("./components/UserComponents/Profile/ProfilePage"));
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
 const GamingPage = lazy(() => import("./pages/User/Gaming/GamingPage"));
+import SignupPage from "./pages/User/Login/SignupPage";
 // ==================== صفحات المستخدم ====================
 const MissionsPage = lazy(() => import('./pages/User/MissionsPage/MissionsPage'));
 const MembershipsPage = lazy(() => import('./pages/User/MembershipsPage/MembershipsPage'));
@@ -132,10 +133,15 @@ function App() {
       />
       <Routes>
         {/* صفحة تسجيل الدخول */}
-        <Route
-          path="/login"
-          element={(!user || (user && !emailVerified)) ? <Login /> : <Navigate to="/dashboard" />}
-        />
+       // في App.jsx، ضمن Routes
+<Route
+  path="/login"
+  element={(!user || (user && !emailVerified)) ? <Login /> : <Navigate to="/dashboard" />}
+/>
+<Route
+  path="/signup"
+  element={(!user || (user && !emailVerified)) ? <SignupPage /> : <Navigate to="/dashboard" />}
+/>
 
         {/* صفحة إدخال كود التفعيل */}
         <Route path="/verify-code" element={<VerifyCodePage />} />

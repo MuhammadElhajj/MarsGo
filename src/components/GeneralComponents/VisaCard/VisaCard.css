@@ -212,3 +212,186 @@
 }
 
 /* دعم الوضع الداكن (بالفعل مناسب) */
+
+
+
+
+
+/* ===== الرقم السري ===== */
+.visa-card__secret {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.visa-card__secret span {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.visa-card__secret strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+/* تعديل الـ details لاستيعاب العناصر بشكل مرن */
+.visa-card__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+/* استجابة الجوال (تعديل بسيط) */
+@media (max-width: 640px) {
+  .visa-card__details {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .visa-card__secret {
+    align-self: flex-start;
+  }
+}
+
+/* ===== الرصيدان جنباً إلى جنب ===== */
+.visa-card__balances {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0.25rem 0;
+}
+
+.visa-card__balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.visa-card__balance span {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.visa-card__balance strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* لون خاص لرصيد MGC */
+.visa-card__balance.mgc strong {
+  color: #fbbf24;
+}
+
+/* ===== الرقم السري (سطر منفصل) ===== */
+.visa-card__secret-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.visa-card__secret-row span {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.visa-card__secret-row strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 1px;
+  color: #fbbf24; /* لون ذهبي مميز */
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+
+  .visa-card__secret-row {
+    width: 100%;
+  }
+}
+
+/* ===== صف المعلومات (الرصيد + MGC + السري) ===== */
+.visa-card__info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0;
+}
+
+.visa-card__info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 70px;
+}
+
+.visa-card__info-item span {
+  display: block;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.visa-card__info-item strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* لون خاص لرصيد MGC */
+.visa-card__info-item.mgc strong {
+  color: #fbbf24;
+}
+
+/* لون خاص للرقم السري */
+.visa-card__info-item.secret strong {
+  color: #fbbf24;
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .visa-card__info-row {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  
+  .visa-card__info-item {
+    min-width: 60px;
+    flex: 1 1 30%;
+  }
+  
+  .visa-card__info-item strong {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .visa-card__info-item {
+    min-width: 50px;
+    flex: 1 1 28%;
+  }
+  
+  .visa-card__info-item strong {
+    font-size: 0.65rem;
+  }
+  
+  .visa-card__info-item span {
+    font-size: 0.5rem;
+  }
+}

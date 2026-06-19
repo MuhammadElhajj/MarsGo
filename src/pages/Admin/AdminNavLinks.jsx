@@ -1,20 +1,45 @@
+// src/pages/Admin/AdminNavLinks.jsx
 import { useState } from 'react';
-import { useNavLinks } from '../../context/NavLinksContext';
+import { useAppStore } from '../../store/store'; // ✅ استخدم الـ store
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase';
 import Button from '../../components/GeneralComponents/Button/Button';
 import Input from '../../components/GeneralComponents/Input/Input';
+import toast from 'react-hot-toast';
 import './AdminNavLinks.css';
 
 export default function AdminNavLinks() {
-  const { links, loading, addLink, updateLink, deleteLink } = useNavLinks();
+  const { navLinks, setNavLinks } = useAppStore((state) => ({
+    navLinks: state.navLinks,
+    setNavLinks: state.setNavLinks,
+  }));
+
+  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
     name: '', url: '', isExternal: false, order: 0, isActive: true, icon: '',
   });
 
+  // دالة جلب الروابط من Firestore وتحديث الـ store
+  const fetchNavLinks = async () => {
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'navigationLinks'), orderBy('order', 'asc'));
+      const snapshot = await getDocs(q);
+      const links = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setNavLinks(links);
+    } catch (err) {
+      console.error('فشل جلب الروابط:', err);
+      toast.error('فشل تحميل روابط التنقل');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const openAdd = () => {
     setEditing(null);
-    setForm({ name: '', url: '', isExternal: false, order: links.length, isActive: true, icon: '' });
+    setForm({ name: '', url: '', isExternal: false, order: navLinks.length, isActive: true, icon: '' });
     setModalOpen(true);
   };
 
@@ -29,16 +54,38 @@ export default function AdminNavLinks() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editing) {
-      await updateLink(editing.id, form);
-    } else {
-      await addLink(form);
+    try {
+      if (editing) {
+        await updateDoc(doc(db, 'navigationLinks', editing.id), {
+          ...form,
+          updatedAt: new Date(),
+        });
+        toast.success('تم تحديث الرابط');
+      } else {
+        await addDoc(collection(db, 'navigationLinks'), {
+          ...form,
+          createdAt: new Date(),
+        });
+        toast.success('تمت إضافة الرابط');
+      }
+      setModalOpen(false);
+      await fetchNavLinks(); // تحديث القائمة
+    } catch (err) {
+      console.error(err);
+      toast.error('فشل الحفظ');
     }
-    setModalOpen(false);
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('حذف الرابط؟')) await deleteLink(id);
+    if (!window.confirm('حذف الرابط؟')) return;
+    try {
+      await deleteDoc(doc(db, 'navigationLinks', id));
+      toast.success('تم حذف الرابط');
+      await fetchNavLinks();
+    } catch (err) {
+      console.error(err);
+      toast.error('فشل الحذف');
+    }
   };
 
   if (loading) return <div>جاري تحميل الروابط...</div>;
@@ -54,7 +101,7 @@ export default function AdminNavLinks() {
           <tr><th>الترتيب</th><th>الأيقونة</th><th>الاسم</th><th>الرابط</th><th>نوع</th><th>الحالة</th><th>إجراءات</th></tr>
         </thead>
         <tbody>
-          {links.map(link => (
+          {navLinks.map(link => (
             <tr key={link.id}>
               <td>{link.order}</td>
               <td>{link.icon || '—'}</td>

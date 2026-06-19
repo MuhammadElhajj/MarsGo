@@ -24,7 +24,8 @@ export default function BuyMGC() {
   const user = useAppStore((state) => state.user);
   const userData = useAppStore((state) => state.userData);
   const balance = useAppStore((state) => state.balance);
-  
+  const mgcBalance = useAppStore((state) => state.mgcBalance);
+
   const deductBalance = useAppStore((state) => state.deductBalance);
   const addMgcBalance = useAppStore((state) => state.addMgcBalance);
 
@@ -105,13 +106,14 @@ export default function BuyMGC() {
   </h1>
 </div>
 
-      <VisaCard
-        balance={balance}
-        cardHolderName={userData?.name || 'MarsGo User'}
-        cardNumber="4532 1234 5678 9012"
-        brand="MarsGo"
-        expiryDate="**/**"
-      />
+   <VisaCard 
+  balance={balance} 
+  mgcBalance={mgcBalance}
+  cardHolderName={userData?.name || 'MarsGo User'}
+  cardNumber={userData?.visaNumber || '8888 8888 8888 8888'}  // ✅ رقم فريد
+  brand="MarsGo Visa"
+  secret={userData?.visaSecret}  // ✅ الرقم السري
+/>
 
       <p className="buy-mgc__subtitle">
         <FiShoppingBag style={{ color: '#8b5cf6', marginLeft: '0.3rem' }} />

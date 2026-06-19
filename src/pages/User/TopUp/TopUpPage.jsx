@@ -22,6 +22,7 @@ export default function TopUpPage() {
   const exchangeRate = useAppStore((state) => state.exchangeRate);
   const topUpSettings = useAppStore((state) => state.topUpSettings);
   const addNotification = useAppStore((state) => state.addNotification);
+const mgcBalance = useAppStore((state) => state.mgcBalance);
 
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [amount, setAmount] = useState('');
@@ -196,12 +197,14 @@ export default function TopUpPage() {
         <h2>شحن الرصيد</h2>
       </div>
 
-      <VisaCard 
-        balance={balance} 
-        cardHolderName={userData?.name || 'MarsGo User'}
-        cardNumber="8888 8888 8888 8888"
-        brand="MarsGo Visa"
-      />
+     <VisaCard 
+  balance={balance} 
+  mgcBalance={mgcBalance}
+  cardHolderName={userData?.name || 'MarsGo User'}
+  cardNumber={userData?.visaNumber}  // ✅ رقم فريد
+  brand="MarsGo Visa"
+  secret={userData?.visaSecret}  // ✅ الرقم السري
+/>
 
       {!hasWhatsapp && <WhatsappWarning />}
 
@@ -227,7 +230,7 @@ export default function TopUpPage() {
         ))}
       </div>
 <PaymentMethods/>
-      <pay/>
+      
 
       {selectedMethod && activeAccount && (
         <div className="selected-method-details">

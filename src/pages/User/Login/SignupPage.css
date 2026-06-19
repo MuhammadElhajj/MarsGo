@@ -1,0 +1,304 @@
+/* src/pages/User/Login/SignupPage.css */
+
+/* ========== الحاوية الرئيسية ========== */
+.signup-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  direction: rtl;
+  gap: 2rem;
+  padding: 2rem 1rem;
+}
+
+/* ========== صف الأعمدة (الصورة + النموذج) ========== */
+.signup-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch;
+  justify-content: center;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  height: 75vh;
+}
+
+/* ========== العمود الأيسر (صورة الهاتف) ========== */
+.signup-phone {
+  display: none;
+  flex: 1;
+  max-width: 380px;
+}
+@media (min-width: 992px) {
+  .signup-phone {
+    display: block;
+  }
+}
+
+/* ========== العمود الأيمن (نموذج إنشاء الحساب) ========== */
+.signup-form-container {
+  flex: 1;
+  max-width: 380px;
+  width: 100%;
+}
+
+.signup-card {
+  background: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  padding: 32px 40px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* ========== الشعار والعنوان ========== */
+.signup-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-direction: column;
+}
+
+.Signup-Logo--img {
+  width: 150px;
+}
+
+.signup-title {
+  font-size: 16px !important;
+  color: #262626;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* ========== حقول الإدخال ========== */
+.input-group {
+  margin-bottom: 12px;
+}
+.input-group input {
+  width: 100%;
+  padding: 12px 12px;
+  background: #fafafa;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #262626;
+  transition: border 0.2s;
+}
+.input-group input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+  background: #ffffff;
+}
+.input-group input::placeholder {
+  color: #8e8e8e;
+}
+
+/* ===== مجموعة كلمة المرور مع زر العين ===== */
+.password-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-group input {
+  flex: 1;
+  padding-left: 2.5rem;
+}
+.password-toggle {
+  position: absolute;
+  left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.2rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.password-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ===== كود الإحالة ===== */
+.referral-group {
+  position: relative;
+}
+.referral-input {
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+.referral-error {
+  font-size: 12px;
+  margin-top: 4px;
+}
+.referral-success {
+  font-size: 12px;
+  color: #10b981;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ===== زر إنشاء الحساب ===== */
+.signup-submit {
+  background: #0095f6;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.signup-submit:hover:not(:disabled) {
+  background: #1877f2;
+}
+.signup-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== رسائل الخطأ ===== */
+.signup-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* ===== الفاصل "أو" ===== */
+.signup-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+.divider-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8e8e8e;
+  background: #ffffff;
+  padding: 0 18px;
+}
+.signup-divider::before,
+.signup-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dbdbdb;
+}
+
+/* ===== الروابط السفلية ===== */
+.signup-footer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #262626;
+  border-top: 1px solid #dbdbdb;
+  padding-top: 20px;
+}
+.switch-btn {
+  background: none;
+  border: none;
+  color: #0095f6;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+.switch-btn:hover {
+  text-decoration: underline;
+}
+
+/* ===== تذييل الصفحة ===== */
+.signup-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 20px;
+  margin: 0 0 12px;
+}
+.signup-footer-links a {
+  font-size: 12px;
+  color: #8e8e8e;
+  text-decoration: none;
+}
+.signup-footer-links a:hover {
+  text-decoration: underline;
+}
+.signup-copyright {
+  text-align: center;
+  font-size: 12px;
+  color: #8e8e8e;
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 991px) {
+  .signup-container {
+    padding: 1rem;
+    gap: 1rem;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+  }
+  .signup-wrapper {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: auto;
+    padding: 0;
+    gap: 1rem;
+  }
+  .signup-phone {
+    display: none;
+  }
+  .signup-form-container {
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
+  }
+  .signup-card {
+    width: 100%;
+    padding: 24px 20px;
+    margin-bottom: 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  .signup-title {
+    font-size: 28px;
+  }
+  .signup-footer-links {
+    gap: 8px 16px;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-card {
+    padding: 20px 16px;
+  }
+  .signup-title {
+    font-size: 24px;
+  }
+  .signup-submit {
+    font-size: 13px;
+    padding: 15px;
+  }
+  .switch-btn {
+    font-size: 13px;
+  }
+  .signup-footer-links a {
+    font-size: 11px;
+  }
+  .signup-copyright {
+    font-size: 11px;
+  }
+}

@@ -1,32 +1,35 @@
-// components/AdminCoponent/AdminTicker/AdminTicker.jsx
+// src/pages/Admin/AdminTicker.jsx
 import { useState, useEffect } from 'react';
-import { useTicker } from '../../context/TickerContext';
+import { useAppStore } from '../../store/store';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import Button from '../../components/GeneralComponents/Button/Button';
 import Input from '../../components/GeneralComponents/Input/Input';
+import toast from 'react-hot-toast';
 import './AdminTicker.css';
 
 export default function AdminTicker() {
-  const { settings, updateSettings } = useTicker();
+  // ✅ استخدم useAppStore بدلاً من useTicker
+  const tickerSettings = useAppStore((state) => state.tickerSettings);
+  const setTickerSettings = useAppStore((state) => state.setTickerSettings);
+
   const [text, setText] = useState('');
   const [segments, setSegments] = useState([]);
   const [speed, setSpeed] = useState(30);
   const [direction, setDirection] = useState('right-to-left');
   const [isActive, setIsActive] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  // أداة لتحليل النص إلى أجزاء حسب الكلمات المخصصة (للتعديل اليدوي)
-  // لكن سنعطي المدير إمكانية إضافة كلمات مخصصة مع تنسيقها
   const [newWord, setNewWord] = useState({ text: '', color: '#ff0000', fontWeight: 'bold', fontFamily: 'inherit' });
 
   useEffect(() => {
-    if (settings) {
-      setText(settings.text || '');
-      setSegments(settings.segments || []);
-      setSpeed(settings.speed || 30);
-      setDirection(settings.direction || 'right-to-left');
-      setIsActive(settings.isActive !== false);
+    if (tickerSettings) {
+      setText(tickerSettings.text || '');
+      setSegments(tickerSettings.segments || []);
+      setSpeed(tickerSettings.speed || 30);
+      setDirection(tickerSettings.direction || 'right-to-left');
+      setIsActive(tickerSettings.isActive !== false);
     }
-  }, [settings]);
+  }, [tickerSettings]);
 
   const addSegment = () => {
     if (!newWord.text.trim()) return;
@@ -46,19 +49,34 @@ export default function AdminTicker() {
     setSegments(newSegments);
   };
 
+  // ✅ دالة حفظ محلية تحدث الـ store و Firestore
   const handleSave = async () => {
     setSaving(true);
-    await updateSettings({
+    const data = {
       text: segments.map(s => s.text).join(''),
       segments,
       speed,
       direction,
-      isActive
-    });
-    setSaving(false);
+      isActive,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      // حفظ في Firestore
+      const docRef = doc(db, 'tickerSettings', 'default');
+      await setDoc(docRef, data, { merge: true });
+      // تحديث الـ store المحلي
+      setTickerSettings(data);
+      toast.success('تم حفظ إعدادات شريط الأخبار بنجاح');
+    } catch (err) {
+      console.error(err);
+      toast.error('فشل حفظ الإعدادات');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (!settings) return <div>جاري التحميل...</div>;
+  if (!tickerSettings) return <div>جاري التحميل...</div>;
 
   return (
     <div className="admin-ticker">

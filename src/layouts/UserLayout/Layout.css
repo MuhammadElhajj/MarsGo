@@ -1,157 +1,7 @@
-/* ========== الحاوية الرئيسية ========== */
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;      /* ارتفاع كامل الشاشة */
-  overflow: hidden;   /* منع التمرير المزدوج */
-}
-
-/* ========== الهيدر ========== */
-/* نعتمد على class .header الموجود في Header.css */
-/* نضمن أنه ثابت في الأعلى */
-.header {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  flex-shrink: 0;
-}
-
-/* ========== الجسم الرئيسي ========== */
-.app-body {
-  display: flex;
-  flex: 1;            /* يأخذ المساحة المتبقية بعد الهيدر */
-  overflow: hidden;   /* التمرير سيكون داخل app-content-wrapper */
-}
-
-/* ========== السايدبار ========== */
-.sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  background-color: var(--color-bg-secondary);
-  overflow-y: auto;   /* تمرير داخلي للسايدبار */
-  height: 100%;
-}
-
-/* ========== حاوية المحتوى والفوتنر ========== */
-.app-content-wrapper {
-  flex: 1;            /* يأخذ باقي المساحة */
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;   /* هذا هو العنصر الذي يتم التمرير فيه */
-  height: 100%;
-}
-
-/* ========== المحتوى الرئيسي (الصفحات) ========== */
-.app-content {
-  flex: 1;            /* يدفع الفوتر للأسفل إذا كان المحتوى قليلاً */
-  padding: 1rem 5rem;
-  /* background-color: var(--color-bg-primary); */
-  background-color: var(--color-bg-primary);
-}
-
-/* ========== الفوتر ========== */
-.footer {
-  flex-shrink: 0;     /* لا يتقلص */
-  background-color: var(--color-bg-secondary);
-  border-top: 1px solid var(--color-border);
-  padding: 1.5rem;
-  margin-top: auto;   /* يبقى في الأسفل دائماً */
-}
-
-/* ========== الجوال ========== */
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    right: -260px;
-    bottom: 0;
-    z-index: 25;
-    transition: right 0.3s ease;
-    width: 260px;
-    box-shadow: none;
-    padding-top: 4rem; /* مساحة للهيدر */
-  }
-
-  .sidebar--open {
-    right: 0;
-    box-shadow: var(--shadow-md);
-  }
-
-  .sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 20;
-    display: block;
-  }
-
-  .app-content {
-             /* يدفع الفوتر للأسفل إذا كان المحتوى قليلاً */
-  padding: 0.5rem ;
- 
-}
-
-}
-
-/* ضبط الهوامش إذا لزم الأمر */
-.navigation-bar {
-  position: sticky;
-  top: 4rem; /* تحت الهيدر مباشرة */
-  z-index: 15;
-}
-
-
-
-
-/* تحديث */
-/* ===== شريط البحث المخصص للجوال ===== */
-.layout__search-mobile {
-  display: none; /* مخفي على الشاشات الكبيرة */
-  width: 100%;
-  background-color: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border);
-  box-sizing: border-box;
-}
-
-/* في الجوال: نظهره أسفل النافيغيشن بار مباشرة دون أي مسافات */
-@media (max-width: 768px) {
-  .layout__search-mobile {
-    display: block;
-    position: sticky;
-    /* top: calc(4rem + 50px); تحت الهيدر (4rem) + شريط التنقل (50px) */
-    z-index: 20;
-    background-color: var(--color-bg-primary);
-    padding: 0; /* ✅ إزالة أي padding */
-    margin: 0;
-  }
-  
-  /* ✅ جعل الـ search-container داخل layout ممتد بالكامل */
-  .layout__search-mobile .search-container {
-    max-width: 100%;
-    width: 100%;
-    border-radius: 0;
-  }
-  
-  /* ✅ حقل الإدخال يأخذ العرض الكامل مع إزالة أي حدود جانبية */
-  .layout__search-mobile .search-input-wrapper {
-    width: 100%;
-  }
-  
-  .layout__search-mobile .search-input {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-  }
-}
-
-
-
-
-
-
+/* ============================================================
+   التعديلات المطلوبة في Layout.css
+   (احتفظ بكل ما هو موجود وأضف/عدل الأجزاء التالية)
+   ============================================================ */
 
 /* ========== الحاوية الرئيسية ========== */
 .app-layout {
@@ -174,7 +24,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-  direction: ltr; /* لضمان ترتيب flex من اليسار لليمين */
+  direction: ltr;
 }
 
 /* ========== السايدبار الثانوي (الأيسر) ========== */
@@ -238,7 +88,7 @@
   box-sizing: border-box;
 }
 
-/* ========== أنماط الجوال ========== */
+/* ========== أنماط الجوال (المعدلة) ========== */
 @media (max-width: 768px) {
   .layout__search-mobile {
     display: block;
@@ -265,19 +115,21 @@
     font-size: 1rem;
   }
 
-  /* إخفاء السايدبارين الثابتين وتحويلهما إلى دروج منزلقة */
+  /* ===== السايدبار الثانوي (الأيسر) - يبدأ من تحت الهيدر ===== */
   .secondary-sidebar {
     position: fixed;
-    top: 0;
+    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
     left: -220px;
     bottom: 0;
     z-index: 45;
     width: 220px;
-    padding-top: 4rem;
+    padding-top: 0;            /* ✅ إزالة padding الإضافي */
     border-right: 1px solid var(--color-border);
     box-shadow: none;
     background-color: var(--color-bg-primary);
     transition: left 0.3s ease;
+    height: calc(100vh - 4rem); /* ✅ ملء المساحة المتبقية */
+    overflow-y: auto;
   }
   .secondary-sidebar--open {
     left: 0;
@@ -285,24 +137,30 @@
   }
   .secondary-sidebar-overlay {
     position: fixed;
-    inset: 0;
+    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 40;
     display: block;
   }
 
+  /* ===== السايدبار الأساسي (الأيمن) - يبدأ من تحت الهيدر ===== */
   .sidebar {
     position: fixed;
-    top: 0;
+    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
     right: -280px;
     bottom: 0;
     z-index: 35;
     width: 280px;
-    padding-top: 4rem;
+    padding-top: 0;            /* ✅ إزالة padding الإضافي */
     border-left: 1px solid var(--color-border);
     box-shadow: none;
     background-color: var(--color-bg-primary);
     transition: right 0.3s ease;
+    height: calc(100vh - 4rem); /* ✅ ملء المساحة المتبقية */
+    overflow-y: auto;
   }
   .sidebar--open {
     right: 0;
@@ -310,7 +168,10 @@
   }
   .sidebar-overlay {
     position: fixed;
-    inset: 0;
+    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 30;
     display: block;
@@ -331,30 +192,10 @@
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ========== باقي التنسيقات الموجودة ========== */
-/* ... (كل ما لديك) ... */
-
 /* ===== تنسيق خاص لصفحات الدردشة ===== */
 .app-content.chat-page-layout {
-  padding: 0 !important;        /* إزالة الهوامش */
-  overflow: hidden !important;  /* منع التمرير الزائد */
+  padding: 0 !important;
+  overflow: hidden !important;
   display: flex;
   flex-direction: column;
   height: 100%;
