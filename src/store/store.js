@@ -107,12 +107,6 @@ export const useAppStore = create(
       // ========== رصيد الإحالات (محجوز) ==========
 referralBalance: 0,  // ✅ أضف هذا السطر
       // ===== تحديث بيانات المستخدم (يستخدم في AuthContext) =====
-      setUserData: (data) => set({
-        userData: data,
-        user: data?.user || data,
-        balance: data?.balance || 0,          // الرصيد الحقيقي
-        mgcBalance: data?.mgcBalance || 0,    // رصيد MGC
-      }),
 
       setUserData: (data) => set({
   userData: data,
