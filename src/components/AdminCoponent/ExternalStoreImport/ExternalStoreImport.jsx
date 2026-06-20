@@ -1,289 +1,30 @@
 // src/components/AdminCoponent/ExternalStoreImport/ExternalStoreImport.jsx
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { doc, setDoc, getDoc, collection, getDocs, query, orderBy, where, writeBatch } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import { fetchStoreProducts } from '../../../services/apiStoreService';
+import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import Button from '../../GeneralComponents/Button/Button';
 import Input from '../../GeneralComponents/Input/Input';
-import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
 import {
   FiSearch, FiArrowUp, FiArrowDown, FiStar, FiFilter, FiSave, FiRefreshCw, FiX,
   FiPlus, FiEdit, FiTrash2, FiToggleLeft, FiToggleRight, FiFolder, FiSettings,
 } from 'react-icons/fi';
+
+// استيراد المكونات الفرعية
+import { SubCategoryManager } from './components/SubCategoryManager';
+import { CategoryMappingManager } from './components/CategoryMappingManager';
+import { ProductCardItem } from './components/ProductCardItem';
+import { useParentItems } from './hooks/useParentItems';
+import { useProducts } from './hooks/useProducts';
+import { generateSlug, getQuantityType } from './utils/helpers';
+
 import './ExternalStoreImport.css';
 
-// -------------------- Helper --------------------
-function generateSlug(text) {
-  return text.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-}
-
-// -------------------- SubCategory Manager (للتصنيفات الأخرى) --------------------
-function SubCategoryManager({ categoryId, onSubCategoriesChange }) {
-  const [subCategories, setSubCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    imageUrl: '',
-    description: '',
-    available: true,
-  });
-
-  const loadSubCategories = useCallback(async () => {
-    if (!categoryId) return;
-    setLoading(true);
-    try {
-      const q = query(collection(db, `subCategories_${categoryId}`), orderBy('order', 'asc'));
-      const snapshot = await getDocs(q);
-      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSubCategories(items);
-      if (onSubCategoriesChange) onSubCategoriesChange(items);
-    } catch (err) {
-      console.error(err);
-      showToast('فشل تحميل الأقسام الفرعية', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [categoryId, onSubCategoriesChange]);
-
-  useEffect(() => { loadSubCategories(); }, [loadSubCategories]);
-
-  const handleNameChange = (e) => {
-    const name = e.target.value;
-    setFormData(prev => ({
-      ...prev,
-      name,
-      slug: generateSlug(name),
-    }));
-  };
-
-  const saveSubCategory = async () => {
-    if (!formData.name.trim()) {
-      showToast('الاسم مطلوب', 'error');
-      return;
-    }
-    if (!formData.slug.trim()) {
-      showToast('الـ slug مطلوب', 'error');
-      return;
-    }
-    const existing = subCategories.find(sc => sc.slug === formData.slug && sc.id !== editing);
-    if (existing) {
-      showToast('هذا الـ slug موجود مسبقاً', 'error');
-      return;
-    }
-    const id = editing || formData.slug;
-    const dataToSave = {
-      name: formData.name.trim(),
-      slug: formData.slug.trim(),
-      description: formData.description.trim(),
-      imageUrl: formData.imageUrl,
-      available: formData.available,
-      order: subCategories.length,
-      updatedAt: new Date().toISOString(),
-    };
-    try {
-      await setDoc(doc(db, `subCategories_${categoryId}`, id), dataToSave, { merge: true });
-      showToast(editing ? 'تم التعديل' : 'تمت الإضافة', 'success');
-      setEditing(null);
-      setFormData({ name: '', slug: '', imageUrl: '', description: '', available: true });
-      loadSubCategories();
-    } catch (err) {
-      console.error(err);
-      showToast('فشل الحفظ', 'error');
-    }
-  };
-
-  const deleteSubCategory = async (id, name) => {
-    if (!window.confirm(`حذف "${name}"؟ سيؤثر على المنتجات المرتبطة.`)) return;
-    try {
-      await deleteDoc(doc(db, `subCategories_${categoryId}`, id));
-      const productsRef = collection(db, 'products');
-      const q = query(productsRef, where('parentId', '==', id));
-      const snapshot = await getDocs(q);
-      for (const docSnap of snapshot.docs) {
-        await setDoc(doc(db, 'products', docSnap.id), { parentId: null }, { merge: true });
-      }
-      showToast('تم الحذف', 'success');
-      loadSubCategories();
-    } catch (err) {
-      console.error(err);
-      showToast('فشل الحذف', 'error');
-    }
-  };
-
-  const editSubCategory = (item) => {
-    setEditing(item.id);
-    setFormData({
-      name: item.name,
-      slug: item.slug,
-      imageUrl: item.imageUrl || '',
-      description: item.description || '',
-      available: item.available !== false,
-    });
-  };
-
-  const toggleAvailable = async (item) => {
-    try {
-      await setDoc(doc(db, `subCategories_${categoryId}`, item.id), {
-        available: !item.available,
-        updatedAt: new Date().toISOString(),
-      }, { merge: true });
-      showToast(`${item.name} ${!item.available ? 'تم تفعيله' : 'تم تعطيله'}`, 'success');
-      loadSubCategories();
-    } catch (err) {
-      console.error(err);
-      showToast('فشل التحديث', 'error');
-    }
-  };
-
-  if (loading) return <div className="loading-placeholder">⏳ جاري التحميل...</div>;
-
-  return (
-    <div className="subcategory-manager card">
-      <h4><FiFolder /> إدارة الأقسام الفرعية ({categoryId === 'games' ? 'ألعاب' : categoryId === 'apps' ? 'تطبيقات' : 'خدمات'})</h4>
-      <div className="subcategory-form">
-        <Input placeholder="الاسم (مثال: ببجي عالمي)" value={formData.name} onChange={handleNameChange} />
-        <Input placeholder="Slug (للرابط)" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })} />
-        <Input placeholder="وصف قصير" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
-        <ImageUpload onUploadComplete={(url) => setFormData({ ...formData, imageUrl: url })} maxSizeMB={0.5} storagePath={`subcategories/${categoryId}`} label="صورة" />
-        <label className="checkbox-label"><input type="checkbox" checked={formData.available} onChange={(e) => setFormData({ ...formData, available: e.target.checked })} /> متاح</label>
-        <div className="form-actions">
-          <Button onClick={saveSubCategory} size="sm"><FiSave /> {editing ? 'تعديل' : 'إضافة'}</Button>
-          {editing && <Button onClick={() => { setEditing(null); setFormData({ name: '', slug: '', imageUrl: '', description: '', available: true }); }} variant="outline" size="sm">إلغاء</Button>}
-        </div>
-      </div>
-      <div className="subcategories-list">
-        {subCategories.map(item => (
-          <div key={item.id} className="subcategory-item">
-            {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="subcat-thumb" />}
-            <div className="subcat-info">
-              <strong>{item.name}</strong>
-              <span className="slug">{item.slug}</span>
-              {item.description && <p>{item.description}</p>}
-            </div>
-            <div className="subcat-actions">
-              <button onClick={() => toggleAvailable(item)} className="icon-btn">{item.available ? <FiToggleRight color="green" /> : <FiToggleLeft />}</button>
-              <button onClick={() => editSubCategory(item)} className="icon-btn"><FiEdit /></button>
-              <button onClick={() => deleteSubCategory(item.id, item.name)} className="icon-btn delete"><FiTrash2 /></button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// -------------------- CategoryMappingManager --------------------
-function CategoryMappingManager({ externalCategories, onMappingChange, initialMappings, initialHierarchicalConfig }) {
-  const [mappings, setMappings] = useState(initialMappings || {});
-  const [hierarchicalConfig, setHierarchicalConfig] = useState(
-    initialHierarchicalConfig || { games: { separator: ' - ' }, apps: { separator: ' - ' } }
-  );
-  const [loading, setLoading] = useState(false);
-  const internalOptions = [
-    { value: 'games', label: 'ألعاب' }, { value: 'apps', label: 'تطبيقات' },
-    { value: 'services', label: 'خدمات' }, { value: 'topup', label: 'شحن رصيد' }, { value: 'crypto', label: 'عملات رقمية' }
-  ];
-  const saveSettings = async () => {
-    setLoading(true);
-    try {
-      await setDoc(doc(db, 'config', 'categoryMappings'), mappings);
-      await setDoc(doc(db, 'config', 'hierarchicalConfig'), hierarchicalConfig);
-      showToast('تم حفظ إعدادات التصنيف', 'success');
-      if (onMappingChange) onMappingChange({ mappings, hierarchicalConfig });
-    } catch (err) { showToast('فشل الحفظ', 'error'); }
-    setLoading(false);
-  };
-  return (
-    <div className="mapping-manager card">
-      <h4><FiSettings /> تعيين التصنيفات الخارجية</h4>
-      <div className="mapping-grid">
-        {externalCategories.map(cat => (
-          <div key={cat} className="mapping-row">
-            <span className="external-cat">{cat}</span>
-            <select value={mappings[cat] || 'services'} onChange={(e) => setMappings({ ...mappings, [cat]: e.target.value })}>
-              {internalOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
-          </div>
-        ))}
-      </div>
-      <h4>إعدادات الفاصل</h4>
-      <div className="hierarchical-config">
-        <Input label="ألعاب - الفاصل" value={hierarchicalConfig.games?.separator || ' - '} onChange={(e) => setHierarchicalConfig({ ...hierarchicalConfig, games: { separator: e.target.value } })} />
-        <Input label="تطبيقات - الفاصل" value={hierarchicalConfig.apps?.separator || ' - '} onChange={(e) => setHierarchicalConfig({ ...hierarchicalConfig, apps: { separator: e.target.value } })} />
-      </div>
-      <Button onClick={saveSettings} disabled={loading} variant="secondary" size="sm"><FiSave /> حفظ</Button>
-    </div>
-  );
-}
-
-// -------------------- مكون بطاقة المنتج المحسن (memoized) --------------------
-const ProductCardItem = memo(({ 
-  product, 
-  markupPercent, 
-  isPopular, 
-  imageUrl, 
-  onTogglePopular, 
-  onImportSingle, 
-  isImporting,
-  selectedParentId 
-}) => {
-  const finalPrice = product.price * (1 + markupPercent / 100);
-  const [localImageUrl, setLocalImageUrl] = useState(imageUrl);
-
-  const handleImageUpload = (url) => {
-    setLocalImageUrl(url);
-    // إعلام المكون الرئيسي بتحديث الصورة (نمرر url مع المعرّف)
-    onTogglePopular(product.id, url);
-  };
-
-  const handleTogglePopular = () => {
-    onTogglePopular(product.id);
-  };
-
-  return (
-    <div className="product-card">
-      <div className="product-card__image">
-        {localImageUrl ? <img src={localImageUrl} alt={product.name} loading="lazy" /> : <div className="image-placeholder">📦</div>}
-        <div className="image-upload-wrapper">
-          <ImageUpload 
-            onUploadComplete={handleImageUpload} 
-            maxSizeMB={0.5} 
-            storagePath={`store_import/products/${product.id}`} 
-            label="صورة خاصة" 
-            className="small-upload" 
-          />
-        </div>
-      </div>
-      <div className="product-card__info">
-        <h3 title={product.name}>{product.name}</h3>
-        <span className="category-badge">{product.category_name || 'عام'}</span>
-        <div className="prices">
-          <span className="original-price">{product.price} $</span>
-          <span className="final-price">{finalPrice.toFixed(2)} $</span>
-        </div>
-        <div className="stock">المخزون: {product.stock ?? 'غير محدد'}</div>
-      </div>
-      <div className="product-card__actions">
-        <button className={`popular-btn ${isPopular ? 'active' : ''}`} onClick={handleTogglePopular}>
-          <FiStar /> {isPopular ? 'مميز' : 'تمييز'}
-        </button>
-        <Button onClick={() => onImportSingle(product)} disabled={!selectedParentId || isImporting}>
-          {isImporting ? 'جاري...' : 'استيراد كباقة'}
-        </Button>
-      </div>
-    </div>
-  );
-});
-
-// -------------------- المكون الرئيسي --------------------
 export default function ExternalStoreImport() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [importing, setImporting] = useState({});
+  // استخدام hooks
+  const { products, loading: productsLoading, loadProducts } = useProducts();
   const [markupPercent, setMarkupPercent] = useState(10);
   const [selectedTargetCategoryId, setSelectedTargetCategoryId] = useState('games');
   const [globalCategoryImage, setGlobalCategoryImage] = useState('');
@@ -292,14 +33,13 @@ export default function ExternalStoreImport() {
   const [categoryMappings, setCategoryMappings] = useState({});
   const [hierarchicalConfig, setHierarchicalConfig] = useState({ games: { separator: ' - ' }, apps: { separator: ' - ' } });
   const [showMappingManager, setShowMappingManager] = useState(false);
-
-  const [parentItems, setParentItems] = useState([]);
+  const { items: parentItems, refetch: refetchParents } = useParentItems(selectedTargetCategoryId);
   const [selectedParentId, setSelectedParentId] = useState(null);
   const [selectedParentGlobalImage, setSelectedParentGlobalImage] = useState('');
 
+  // فلترة وترتيب
   const [visibleCount, setVisibleCount] = useState(50);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -307,58 +47,9 @@ export default function ExternalStoreImport() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [showOnlyPopular, setShowOnlyPopular] = useState(false);
+  const [importing, setImporting] = useState({});
 
-  // --- جلب الألعاب/التطبيقات ---
-  const loadParentItems = useCallback(async () => {
-    if (selectedTargetCategoryId !== 'games' && selectedTargetCategoryId !== 'apps') return;
-    try {
-      const collectionName = selectedTargetCategoryId;
-      const q = query(collection(db, collectionName), orderBy('order', 'asc'));
-      const snapshot = await getDocs(q);
-      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      const counts = {};
-      for (const item of items) {
-        const packagesRef = collection(db, collectionName, item.id, 'packages');
-        const packagesSnap = await getDocs(packagesRef);
-        counts[item.id] = packagesSnap.size;
-      }
-
-      const itemsWithCounts = items.map(item => ({
-        ...item,
-        packageCount: counts[item.id] || 0,
-      }));
-      setParentItems(itemsWithCounts);
-    } catch (err) {
-      console.error(err);
-      showToast('فشل تحميل الألعاب/التطبيقات', 'error');
-    }
-  }, [selectedTargetCategoryId]);
-
-  useEffect(() => {
-    if (selectedTargetCategoryId === 'games' || selectedTargetCategoryId === 'apps') {
-      loadParentItems();
-    } else {
-      setParentItems([]);
-    }
-    setSelectedParentId(null);
-    setSelectedParentGlobalImage('');
-  }, [selectedTargetCategoryId, loadParentItems]);
-
-  // --- جلب المنتجات الخارجية ---
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchStoreProducts();
-      setProducts(data);
-      setProductImages({});
-      setGlobalCategoryImage('');
-      setPopularProducts(new Set());
-      setVisibleCount(50);
-    } catch (err) { showToast('فشل تحميل المنتجات', 'error'); }
-    finally { setLoading(false); }
-  }, []);
-
+  // جلب إعدادات التصنيف
   const loadMappingSettings = useCallback(async () => {
     try {
       const mappingsDoc = await getDoc(doc(db, 'config', 'categoryMappings'));
@@ -368,9 +59,18 @@ export default function ExternalStoreImport() {
     } catch (err) { console.error(err); }
   }, []);
 
-  useEffect(() => { loadProducts(); loadMappingSettings(); }, []);
+  useEffect(() => {
+    loadProducts();
+    loadMappingSettings();
+  }, []);
 
-  // --- البيانات المشتقة ---
+  // عند تغيير التصنيف المستهدف، نعيد تعيين الأب المختار
+  useEffect(() => {
+    setSelectedParentId(null);
+    setSelectedParentGlobalImage('');
+  }, [selectedTargetCategoryId]);
+
+  // البيانات المشتقة
   const externalCategories = useMemo(() => [...new Set(products.map(p => p.category_name).filter(Boolean))], [products]);
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -403,7 +103,7 @@ export default function ExternalStoreImport() {
     setIsLoadingMore(false);
   }, []);
 
-  // --- منطق الاستيراد ---
+  // منطق الاستيراد – مع إضافة الحقول الجديدة
   const importToPackages = useCallback(async (productsToImport) => {
     if (!selectedTargetCategoryId || (selectedTargetCategoryId !== 'games' && selectedTargetCategoryId !== 'apps')) {
       showToast('الاستيراد ممكن فقط للألعاب أو التطبيقات', 'error');
@@ -425,6 +125,10 @@ export default function ExternalStoreImport() {
       const packageId = prod.id.toString();
       const packageDocRef = doc(packagesRef, packageId);
 
+      // ✅ إضافة معطيات الكمية المتغيرة
+      const qtyValues = prod.qty_values || { min: 1, max: 1 };
+      const quantityType = getQuantityType(qtyValues);
+
       const packageData = {
         name: prod.name,
         price: finalPrice,
@@ -438,6 +142,10 @@ export default function ExternalStoreImport() {
         externalProductId: prod.id,
         externalAnyKey: '',
         isPopular: popularProducts.has(prod.id),
+        // ✅ الحقول الجديدة للكمية المتغيرة
+        quantityType: quantityType,
+        minQuantity: qtyValues.min ?? 1,
+        maxQuantity: qtyValues.max ?? 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -448,14 +156,14 @@ export default function ExternalStoreImport() {
     try {
       await batch.commit();
       showToast(`تم استيراد ${addedCount} باقة بنجاح`, 'success');
-      loadParentItems();
+      refetchParents();
       return true;
     } catch (err) {
       console.error(err);
       showToast(`فشل الاستيراد: ${err.message}`, 'error');
       return false;
     }
-  }, [selectedTargetCategoryId, selectedParentId, markupPercent, selectedParentGlobalImage, productImages, globalCategoryImage, popularProducts, loadParentItems]);
+  }, [selectedTargetCategoryId, selectedParentId, markupPercent, selectedParentGlobalImage, productImages, globalCategoryImage, popularProducts, refetchParents]);
 
   const handleImportSingle = useCallback(async (product) => {
     if (!selectedParentId) { showToast('اختر لعبة أو تطبيقاً أولاً', 'error'); return; }
@@ -471,12 +179,7 @@ export default function ExternalStoreImport() {
     setLoading(false);
   }, [selectedParentId, importToPackages, filteredAndSortedProducts]);
 
-  // --- معالجات واجهة المستخدم ---
-  const handleParentImageUpload = useCallback((url) => {
-    setSelectedParentGlobalImage(url);
-    showToast('تم رفع الصورة الموحدة للباقات', 'success');
-  }, []);
-
+  // معالجات أخرى
   const resetFilters = useCallback(() => {
     setSearchTerm('');
     setFilterExternalCategory('');
@@ -486,13 +189,6 @@ export default function ExternalStoreImport() {
     setSortBy('name');
     setSortOrder('asc');
   }, []);
-
-  const saveCategoryImage = useCallback(async () => {
-    if (selectedTargetCategoryId && globalCategoryImage) {
-      await setDoc(doc(db, 'categoryImages', selectedTargetCategoryId), { imageUrl: globalCategoryImage, updatedAt: new Date().toISOString() }, { merge: true });
-      showToast('تم حفظ صورة القسم', 'success');
-    }
-  }, [selectedTargetCategoryId, globalCategoryImage]);
 
   const togglePopular = useCallback((productId, imageUrl = null) => {
     if (imageUrl !== null) {
@@ -506,8 +202,14 @@ export default function ExternalStoreImport() {
     }
   }, []);
 
-  // --- العرض ---
-  if (loading && products.length === 0) return <div className="import-loading">جاري تحميل البيانات...</div>;
+  const saveCategoryImage = useCallback(async () => {
+    if (selectedTargetCategoryId && globalCategoryImage) {
+      await setDoc(doc(db, 'categoryImages', selectedTargetCategoryId), { imageUrl: globalCategoryImage, updatedAt: new Date().toISOString() }, { merge: true });
+      showToast('تم حفظ صورة القسم', 'success');
+    }
+  }, [selectedTargetCategoryId, globalCategoryImage]);
+
+  if (productsLoading && products.length === 0) return <div className="import-loading">جاري تحميل البيانات...</div>;
 
   const selectedParent = parentItems.find(p => p.id === selectedParentId);
   const titleLabel = selectedTargetCategoryId === 'games' ? 'اللعبة' : 'التطبيق';
