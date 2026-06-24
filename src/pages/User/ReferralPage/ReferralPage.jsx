@@ -91,7 +91,7 @@ export default function ReferralPage() {
     <div className="referral-page" dir="rtl">
       {/* ===== الهيدر ===== */}
       <div className="referral-page__header">
-        <GoBackButton text="رجوع" />
+        {/* <GoBackButton text="رجوع" /> */}
         <h1 className="referral-page__title">
           <FiShare2 className="header-icon" style={{ color: '#10b981' }} />
           دعوة الأصدقاء

@@ -3,7 +3,7 @@
 .referral-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0.5rem;
+ 
   animation: fadeIn 0.3s ease;
 }
 
@@ -39,7 +39,7 @@
 .referral-page__card {
   background: var(--color-bg-secondary);
   border-radius: 1rem;
-  padding: 1.2rem 1.5rem;
+  /* padding: 1.2rem 1.5rem; */
   margin-bottom: 1.2rem;
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s, box-shadow 0.2s;
@@ -305,7 +305,7 @@
 .referral-page__info {
   background: var(--color-bg-secondary);
   border-radius: 1rem;
-  padding: 1.2rem 1.5rem;
+
   box-shadow: var(--shadow-sm);
 }
 
@@ -376,9 +376,6 @@
    ✅ استجابة الجوال
    ============================================================ */
 @media (max-width: 640px) {
-  .referral-page {
-    padding: 0.5rem;
-  }
 
   .referral-stats-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -414,11 +411,7 @@
     font-size: 1.3rem;
   }
 
-  .referral-page__card,
-  .referral-page__info {
-    padding: 0.8rem 1rem;
-  }
-
+  
   .referral-page__card h3 {
     font-size: 1rem;
   }
