@@ -481,3 +481,130 @@
     font-size: 0.45rem;
   }
 }
+
+/* ===== الأصدقاء المشتركون ===== */
+.public-profile__mutual-friends {
+  margin-top: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1.25rem;
+  padding: 1.2rem 1.5rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.public-profile__mutual-friends h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.8rem 0;
+  color: var(--color-text-primary);
+}
+
+.mutual-count-badge {
+  background: var(--color-accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.05rem 0.5rem;
+  border-radius: 1rem;
+  margin-right: 0.5rem;
+}
+
+.mutual-count {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.mutual-friends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.8rem;
+}
+
+.mutual-friend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.2rem;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  min-width: 70px;
+}
+
+.mutual-friend-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent);
+}
+
+.mutual-friend-avatar {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.mutual-friend-name {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ===== استجابة الجوال ===== */
+@media (max-width: 640px) {
+  .public-profile__mutual-friends {
+    padding: 0.8rem 1rem;
+  }
+
+  .mutual-friends-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .mutual-friend-avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .mutual-friend-name {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .mutual-friends-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.3rem;
+  }
+
+  .mutual-friend-avatar {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .mutual-friend-name {
+    font-size: 0.55rem;
+  }
+}
+
+/* ===== دعم الوضع الداكن ===== */
+.dark .mutual-friend-item {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border);
+}
+
+.dark .mutual-friend-item:hover {
+  border-color: var(--color-accent);
+}

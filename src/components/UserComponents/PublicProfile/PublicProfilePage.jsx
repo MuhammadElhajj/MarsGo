@@ -11,7 +11,7 @@ import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoB
 import {
   FiUsers, FiHeart, FiZap, FiCalendar, FiMessageCircle,
   FiUserPlus, FiUserMinus, FiUserX, FiUserCheck, FiAward, FiStar,
-  FiUser, FiCopy, FiMapPin, FiClock, FiShare2
+  FiUser, FiCopy, FiMapPin, FiClock, FiShare2, FiCheck, FiX
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import './PublicProfilePage.css';
@@ -42,6 +42,48 @@ export default function PublicProfilePage() {
   const [pendingRequestId, setPendingRequestId] = useState(null);
   const [supportLoading, setSupportLoading] = useState(false);
 
+  // ✅ حالات الأصدقاء المشتركون
+  const [mutualFriends, setMutualFriends] = useState([]);
+  const [mutualFriendsLoading, setMutualFriendsLoading] = useState(false);
+
+  // ✅ دالة جلب الأصدقاء المشتركون
+  const fetchMutualFriends = async (profileData) => {
+    if (!currentUser || !profileData) return;
+    if (currentUser.uid === userId) return; // لا نعرض في ملفك الشخصي
+
+    setMutualFriendsLoading(true);
+    try {
+      const currentUserFriends = currentUser.friends || [];
+      const targetUserFriends = profileData.friends || [];
+
+      // حساب التقاطع
+      const mutualIds = currentUserFriends.filter(id => targetUserFriends.includes(id));
+
+      if (mutualIds.length === 0) {
+        setMutualFriends([]);
+        setMutualFriendsLoading(false);
+        return;
+      }
+
+      // جلب بيانات الأصدقاء المشتركون
+      const friendsData = [];
+      for (const fid of mutualIds) {
+        const userSnap = await getDoc(doc(db, 'users', fid));
+        if (userSnap.exists()) {
+          friendsData.push({
+            id: fid,
+            ...userSnap.data(),
+          });
+        }
+      }
+      setMutualFriends(friendsData);
+    } catch (err) {
+      console.error('خطأ في جلب الأصدقاء المشتركون:', err);
+    } finally {
+      setMutualFriendsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) return;
@@ -57,6 +99,8 @@ export default function PublicProfilePage() {
             setIsBlocked(blocked.includes(userId));
             await checkFriendRequestStatus(userId);
           }
+          // ✅ استدعاء جلب الأصدقاء المشتركون
+          await fetchMutualFriends(data);
         } else {
           toast.error('المستخدم غير موجود');
           navigate('/chat');
@@ -111,7 +155,6 @@ export default function PublicProfilePage() {
     const success = await sendFriendRequest(userId);
     if (success) {
       setFriendRequestStatus('pending_sent');
-
     }
   };
 
@@ -363,14 +406,42 @@ export default function PublicProfilePage() {
         </div>
       )}
 
-      {/* ===== الأصدقاء المشتركون ===== */}
+      {/* ===== الأصدقاء المشتركون (النسخة النهائية) ===== */}
       {!isOwnProfile && (
         <div className="public-profile__mutual-friends">
           <h3>
             <FiUsers style={{ color: '#3b82f6', marginLeft: '0.4rem' }} />
             أصدقاء مشتركون
+            {mutualFriends.length > 0 && (
+              <span className="mutual-count-badge">{mutualFriends.length}</span>
+            )}
           </h3>
-          <p className="mutual-count">لا يوجد أصدقاء مشتركون</p>
+
+          {mutualFriendsLoading ? (
+            <p className="mutual-count">جاري تحميل الأصدقاء المشتركون...</p>
+          ) : mutualFriends.length === 0 ? (
+            <p className="mutual-count">لا يوجد أصدقاء مشتركون</p>
+          ) : (
+            <div className="mutual-friends-grid">
+              {mutualFriends.map((friend) => (
+                <div
+                  key={friend.id}
+                  className="mutual-friend-item"
+                  onClick={() => navigate(`/profile/${friend.id}`)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <Avatar
+                    src={friend.avatar}
+                    name={friend.name}
+                    size="md"
+                    className="mutual-friend-avatar"
+                  />
+                  <span className="mutual-friend-name">{friend.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
