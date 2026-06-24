@@ -14,7 +14,7 @@ import {
   FiCheckCircle, FiXCircle, FiClock
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import './ClansPage.css';
+import './ClansListPage.css';
 
 export default function ClansListPage() {
   const navigate = useNavigate();
