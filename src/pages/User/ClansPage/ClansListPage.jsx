@@ -14,6 +14,7 @@ import {
   FiCheckCircle, FiXCircle, FiClock
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+// import './ClansListPage.css';
 import './ClansListPage.css';
 
 export default function ClansListPage() {
@@ -133,7 +134,7 @@ export default function ClansListPage() {
           className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`}
           onClick={() => setActiveTab('my')}
         >
-          <FiUsers /> كلاناتي ({myClans.length})
+          <FiUsers /> كلاني ({myClans.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'explore' ? 'active' : ''}`}

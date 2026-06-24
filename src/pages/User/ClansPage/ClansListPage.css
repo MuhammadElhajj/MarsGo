@@ -5,7 +5,7 @@
 .clans-list-page {
   max-width: 900px;
   margin: 0 auto;
-  padding: 1rem;
+  
   animation: fadeIn 0.3s ease;
 }
 
@@ -272,15 +272,9 @@
    ============================================================ */
 
 @media (max-width: 768px) {
-  .clans-list-page {
-    padding: 0.5rem;
-  }
 
-  .clans-list-page__header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
+
+
 
   .clans-list-page__title {
     font-size: 1.2rem;
@@ -337,9 +331,7 @@
 }
 
 @media (max-width: 480px) {
-  .clans-list-page {
-    padding: 0.25rem;
-  }
+
 
   .clans-list-page__title {
     font-size: 1rem;
