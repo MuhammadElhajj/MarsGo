@@ -1184,38 +1184,38 @@ getRecentReferrals: async (limitCount = 10) => {
     const snap = await getDocs(q);
     const referrals = [];
 
-    for (const doc of snap.docs) {
-      const data = doc.data();
+    // ✅ تغيير اسم المتغير من `doc` إلى `docSnap` لتجنب التعارض مع دالة `doc`
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
       const referredId = data.referredId;
       
       // جلب بيانات المستخدم المحال
-      const userSnap = await getDoc(doc(db, 'users', referredId));
+      const userSnap = await getDoc(doc(db, 'users', referredId)); // ✅ doc هي الدالة المستوردة
       if (!userSnap.exists()) continue;
       const userData = userSnap.data();
       
       // التحقق مما إذا كان المستخدم قد قام بأول إيداع معتمد
+      // ✅ إزالة orderBy لتجنب الحاجة إلى فهرس مركب
       const depositQuery = query(
         collection(db, 'topUpRequests'),
         where('userId', '==', referredId),
-        where('status', '==', 'approved'),
-        orderBy('createdAt', 'asc'),
-        limit(1)
+        where('status', '==', 'approved')
       );
       const depositSnap = await getDocs(depositQuery);
       const hasDeposited = !depositSnap.empty;
       
-      // حساب المكافأة (إذا كانت قد صرفت أم لا)
-      const rewardStatus = data.status; // 'pending' أو 'claimed'
+      // الحالة (pending أو claimed)
+      const rewardStatus = data.status || 'pending';
 
       referrals.push({
-        id: doc.id,
+        id: docSnap.id,                     // ✅ استخدام docSnap.id
         referredId: referredId,
         name: userData.name || 'مستخدم',
         avatar: userData.avatar || null,
         uniqueId: userData.uniqueId || null,
         hasDeposited: hasDeposited,
         rewardAmount: data.rewardAmount || 20,
-        rewardStatus: rewardStatus, // 'pending' أو 'claimed'
+        rewardStatus: rewardStatus,
         createdAt: data.createdAt,
       });
     }
@@ -1668,43 +1668,9 @@ getReferralCount: async () => {
     return snap.size;
   } catch { return 0; }
 },
-// جلب قائمة الإحالات الأخيرة
-getRecentReferrals: async (limitCount = 5) => {
-  const { user } = get();
-  if (!user) return [];
-  try {
-    const q = query(
-      collection(db, 'referral_rewards'),
-      where('referrerId', '==', user.uid),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-    const snap = await getDocs(q);
-    const referrals = [];
-    for (const doc of snap.docs) {
-      const data = doc.data();
-      const referredSnap = await getDoc(doc(db, 'users', data.referredId));
-      if (referredSnap.exists()) {
-       // داخل دالة getRecentReferrals
-referrals.push({
-  id: doc.id,
-  referredId: referredId,
-  name: userData.name || 'مستخدم',
-  avatar: userData.avatar || null,
-  uniqueId: userData.uniqueId || null,
-  hasDeposited: hasDeposited,
-  rewardAmount: data.rewardAmount || 20,
-  status: data.status,   // ✅ بدلاً من rewardStatus
-  createdAt: data.createdAt,
-});
-      }
-    }
-    return referrals;
-  } catch (error) {
-    console.error('خطأ في جلب الإحالات:', error);
-    return [];
-  }
-},
+
+
+
 
 // صرف مكافآت الإحالة (عندما يصل الرصيد إلى 100)
 claimReferralRewards: async () => {
