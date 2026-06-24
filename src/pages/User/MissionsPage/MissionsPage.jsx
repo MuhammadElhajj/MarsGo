@@ -242,7 +242,7 @@ export default function MissionsPage() {
     <div className="missions-page" dir="rtl">
       {/* ===== الهيدر ===== */}
       <div className="missions-page__header">
-        <GoBackButton text="رجوع" />
+        {/* <GoBackButton text="رجوع" /> */}
         <h1 className="missions-page__title">
           <FiCalendar className="header-icon" style={{ color: '#f59e0b' }} />
           المهام الأسبوعية

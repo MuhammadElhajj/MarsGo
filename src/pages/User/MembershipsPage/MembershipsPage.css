@@ -3,7 +3,7 @@
 .memberships-page {
   max-width: 900px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+
   animation: fadeIn 0.3s ease;
 }
 
@@ -176,6 +176,7 @@
   color: var(--color-text-secondary);
   font-size: 0.85rem;
   text-align: center;
+  margin-bottom: 10px;
 }
 
 /* ===== استجابة الجوال ===== */
@@ -185,9 +186,7 @@
     gap: 1rem;
   }
 
-  .memberships-page {
-    padding: 0.5rem;
-  }
+ 
 
   .memberships-page__title {
     font-size: 1.2rem;

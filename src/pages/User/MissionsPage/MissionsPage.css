@@ -3,7 +3,7 @@
 .missions-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+  
   animation: fadeIn 0.3s ease;
 }
 
@@ -221,9 +221,7 @@
 
 /* ===== استجابة الجوال ===== */
 @media (max-width: 640px) {
-  .missions-page {
-    padding: 0.5rem;
-  }
+
 
   .missions-page__stats {
     grid-template-columns: repeat(3, 1fr);

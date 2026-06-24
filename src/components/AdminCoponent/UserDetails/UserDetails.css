@@ -1,0 +1,284 @@
+/* src/pages/Admin/UserDetails/UserDetails.css */
+.user-details {
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: userDetailsFadeIn 0.3s ease;
+  direction: rtl;
+}
+
+.user-details__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-details__title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+/* البطاقة الشخصية */
+.user-details__profile-card {
+  display: flex;
+  gap: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.user-details__profile-avatar {
+  flex-shrink: 0;
+}
+
+.user-details__profile-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.user-details__profile-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem 0;
+  color: var(--color-text-primary);
+}
+
+.user-details__profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.user-details__profile-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.user-details__profile-role {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.user-details__profile-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.user-details__profile-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--color-bg-primary);
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border-light);
+}
+
+/* بطاقات الإحصائيات */
+.user-details__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-details__stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.user-details__stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.user-details__stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.user-details__stat-card--primary .user-details__stat-icon {
+  background: rgba(79, 70, 229, 0.12);
+  color: #4f46e5;
+}
+.user-details__stat-card--success .user-details__stat-icon {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.user-details__stat-card--danger .user-details__stat-icon {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.user-details__stat-card--warning .user-details__stat-icon {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+.user-details__stat-card--purple .user-details__stat-icon {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+}
+.user-details__stat-card--info .user-details__stat-icon {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+.user-details__stat-card--pink .user-details__stat-icon {
+  background: rgba(236, 72, 153, 0.12);
+  color: #ec4899;
+}
+.user-details__stat-card--green .user-details__stat-icon {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.user-details__stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-details__stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.user-details__stat-value {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+/* الأقسام */
+.user-details__section {
+  background: var(--color-bg-secondary);
+  border-radius: 1.25rem;
+  padding: 1.2rem 1.5rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+
+.user-details__section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary);
+  border-right: 3px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+.user-details__table-wrapper {
+  overflow-x: auto;
+}
+
+.user-details__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.user-details__table th,
+.user-details__table td {
+  padding: 0.5rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.user-details__table th {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+}
+
+.user-details__table tr:hover td {
+  background: rgba(79, 70, 229, 0.03);
+}
+
+.user-details__empty {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.user-details__status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.user-details__status-badge--completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+.user-details__status-badge--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.user-details__status-badge--pending_verification,
+.user-details__status-badge--awaiting_customer_resubmit,
+.user-details__status-badge--verified_pending_execution {
+  background: #fef3c7;
+  color: #92400e;
+}
+.user-details__status-badge--claimed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.user-details__status-badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* استجابة */
+@media (max-width: 768px) {
+  .user-details__profile-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .user-details__profile-meta {
+    justify-content: center;
+  }
+  .user-details__profile-stats {
+    justify-content: center;
+  }
+  .user-details__stats-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@keyframes userDetailsFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

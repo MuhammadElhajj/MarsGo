@@ -95,17 +95,20 @@ export default function MembershipsPage() {
   return (
     <div className="memberships-page" dir="rtl">
       <div className="memberships-page__header">
-        <GoBackButton text="رجوع" />
+        {/* <GoBackButton text="رجوع" /> */}
         <h1 className="memberships-page__title">
           <FiShieldAlt className="header-icon" style={{ color: '#f59e0b' }} />
           العضويات المدفوعة
         </h1>
       </div>
 
+    
       <div className="memberships-page__subtitle">
         <p>ارتقِ بتجربتك مع عضويات مارسغو واحصل على مزايا حصرية ومكافآت مضاعفة</p>
       </div>
-
+  <div className="memberships-page__note">
+        <p>💡 جميع العضويات تُفعّل فوراً وتستمر لمدة 30 يوماً من تاريخ الشراء.</p>
+      </div>
       <div className="memberships-grid">
         {MEMBERSHIPS.map((m) => {
           const Icon = m.icon;
@@ -146,9 +149,6 @@ export default function MembershipsPage() {
         })}
       </div>
 
-      <div className="memberships-page__note">
-        <p>💡 جميع العضويات تُفعّل فوراً وتستمر لمدة 30 يوماً من تاريخ الشراء.</p>
-      </div>
     </div>
   );
 }

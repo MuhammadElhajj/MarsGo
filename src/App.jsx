@@ -58,7 +58,8 @@ const SearchPage  = lazy(() => import("./pages/User/SearchPage/SearchPage"));
 // ============================================================
 //  صفحات المدير (Admin Pages) – تحميل كسول
 // ============================================================
-const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard/AdminDashboard"));
+const AdminUserDetails = lazy(() => import("./components/AdminCoponent/UserDetails/UserDetails"));
 const AdminOrdersPage = lazy(() => import("./pages/Admin/AdminOrders"));
 const AdminUsersPage = lazy(() => import("./pages/Admin/AdminUsers"));
 const AdManagementPage = lazy(() => import("./pages/Admin/AdManagementPage"));
@@ -224,6 +225,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="services" element={<AdminServicesPage />} />
+          <Route path="user/:userId" element={<AdminUserDetails />} />
           <Route path="store-settings" element={<AdminStoreSettingsPage />} />
           <Route path="catalog" element={<AdminUnifiedCatalog />} />
           <Route
