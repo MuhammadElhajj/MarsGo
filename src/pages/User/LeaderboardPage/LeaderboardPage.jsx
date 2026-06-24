@@ -114,7 +114,6 @@ export default function LeaderboardPage() {
     <div className="leaderboard-page">
       {/* زر الرجوع */}
       <div className="leaderboard__back">
-        <GoBackButton text="رجوع" />
       <div className="leaderboard__header">
         <h2>
           {/* <FiAward className="header-icon" /> */}

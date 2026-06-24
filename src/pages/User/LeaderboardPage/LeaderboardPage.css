@@ -2,7 +2,7 @@
 .leaderboard-page {
   max-width: 820px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+ 
   direction: rtl;
   font-family: 'Cairo', sans-serif;
   animation: fadeIn 0.3s ease;
@@ -356,9 +356,6 @@ font-size: 1rem;
    استجابة للجوال
    ============================================================ */
 @media (max-width: 640px) {
-  .leaderboard-page {
-    padding: 0.5rem;
-  }
 
   .leaderboard__header h2 {
     font-size: 1.4rem;

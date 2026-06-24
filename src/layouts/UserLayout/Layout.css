@@ -113,6 +113,7 @@
     border-top: none;
     padding: 0.75rem 1rem;
     font-size: 1rem;
+    display: none;
   }
 
   /* ===== السايدبار الثانوي (الأيسر) - يبدأ من تحت الهيدر ===== */

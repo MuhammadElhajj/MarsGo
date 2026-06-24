@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom"; // ✅ استيراد مرة واحدة
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "../../components/UserComponents/Header/Header";
 import Sidebar from "../../components/UserComponents/Sidebar/Sidebar";
 import SecondarySidebar from "../../components/UserComponents/SecondarySidebar/SecondarySidebar";
@@ -7,17 +7,18 @@ import MobileNav from "../../components/UserComponents/MobileNav/MobileNav";
 import Footer from "../../components/UserComponents/Footer/Footer";
 import Search from "../../components/GeneralComponents/Search/Search";
 import SupportButton from "../../components/GeneralComponents/SupportButton/SupportButton";
+import Breadcrumb from "../../components/GeneralComponents/Breadcrumb/Breadcrumb"; // ✅ إضافة
 import './Layout.css';
 
 export default function Layout() {
   // حالات السايدبارين
-  const [sidebarOpen, setSidebarOpen] = useState(false);      // الأيمن (الأساسي)
-  const [secondaryOpen, setSecondaryOpen] = useState(false);  // الأيسر (الثانوي)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [secondaryOpen, setSecondaryOpen] = useState(false);
 
-  // تحديد صفحة الدردشة لإخفاء الفوتر
   const location = useLocation();
- const isChatRoom = location.pathname.startsWith('/chat/room/');
+  const isChatRoom = location.pathname.startsWith('/chat/room/');
   const isChatPage = location.pathname.startsWith('/chat');
+
   // حالات حجم الشاشة
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isMedium, setIsMedium] = useState(
@@ -33,7 +34,6 @@ export default function Layout() {
       setIsMobile(mobile);
       setIsMedium(medium);
 
-      // إغلاق السايدبارين تلقائياً عند التكبير
       if (!mobile) {
         setSidebarOpen(false);
         setSecondaryOpen(false);
@@ -49,7 +49,7 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
-      {/* الهيدر مع أزرار التحكم لكلا السايدبارين */}
+      {/* الهيدر */}
       <Header
         onToggleSidebar={toggleSidebar}
         onToggleSecondary={toggleSecondary}
@@ -58,35 +58,42 @@ export default function Layout() {
 
       {/* شريط البحث – يظهر فقط على الجوال */}
       <div className="layout__search-mobile">
-        {/* <Search placeholder="ابحث عن خدمة، لعبة، تطبيق، طلب..." /> */}
-        {!isChatPage && <Search placeholder="ابحث عن خدمة، لعبة، تطبيق، طلب..." />} 
+        {!isChatPage && <Search placeholder="ابحث عن خدمة، لعبة، تطبيق، طلب..." />}
       </div>
 
       <div className="app-body">
-        {/* ===== السايدبار الثانوي (الأيسر) – يختفي على الجوال ===== */}
+        {/* ===== السايدبار الثانوي (الأيسر) ===== */}
         {!isMobile && (
           <SecondarySidebar
             isOpen={secondaryOpen}
             onClose={() => setSecondaryOpen(false)}
-            isMedium={isMedium}        // لتفعيل وضع الأيقونات فقط
+            isMedium={isMedium}
           />
         )}
 
-        {/* ===== المحتوى الأساسي + الفوتر ===== */}
+        {/* ===== المحتوى الأساسي ===== */}
         <div className="app-content-wrapper">
+          {/* ✅ Breadcrumb ثابت أسفل الهيدر وفوق المحتوى */}
+          {!isChatPage && (
+            <div className="layout__breadcrumb-wrapper">
+              <Breadcrumb />
+            </div>
+          )}
+
           <main className={`app-content ${isChatPage ? 'chat-page-layout' : ''}`}>
             <Outlet />
           </main>
+
           {!isChatPage && <Footer />}
-             {!isChatPage && <SupportButton />} 
+          {!isChatPage && <SupportButton />}
         </div>
 
-        {/* ===== السايدبار الأساسي (الأيمن) – يظهر كدرج على الجوال ===== */}
+        {/* ===== السايدبار الأساسي (الأيمن) ===== */}
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* ===== الشريط السفلي للجوال (يحل محل الثانوي) ===== */}
-    {isMobile && !isChatRoom && <MobileNav />}
+      {/* ===== الشريط السفلي للجوال ===== */}
+      {isMobile && !isChatRoom && <MobileNav />}
     </div>
   );
 }

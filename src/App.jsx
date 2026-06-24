@@ -53,6 +53,7 @@ const FriendsPage = lazy(() => import("./pages/User/FriendsPage/FriendsPage"));
 const MyActivitiesPage = lazy(() => import("./pages/User/MyActivities/MyActivitiesPage"));
 import LeaderboardPage from "./pages/User/LeaderboardPage/LeaderboardPage"; // سياق عادي
 const MainFriendPage = lazy(() => import("./pages/User/MainFriendPage/MainFriendPage"));
+const SearchPage  = lazy(() => import("./pages/User/SearchPage/SearchPage"));
 
 // ============================================================
 //  صفحات المدير (Admin Pages) – تحميل كسول
@@ -166,6 +167,7 @@ function App() {
           element={user && emailVerified ? <Layout /> : <Navigate to="/login" />}
         >
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/apps/*" element={<AppsPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/gaming/*" element={<GamingPage />} />
