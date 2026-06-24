@@ -81,6 +81,8 @@ const AdminMerchantSettings = lazy(() => import("./pages/Admin/AdminMerchantSett
 const AdminUnifiedCatalog = lazy(() => import("./pages/Admin/AdminUnifiedCatalog/AdminUnifiedCatalog"));
 const ContentManager = lazy(() => import("./components/AdminCoponent/ContentManager/ContentManager"));
 const QuestsPage = lazy(() => import("./pages/User/QuestsPage/QuestsPage"));
+const AdminMissions = lazy(() => import('./pages/Admin/AdminMissions/AdminMissions'));
+
 
 // ============================================================
 //  صفحات المدقق (Verifier Pages) – تحميل كسول
@@ -231,7 +233,8 @@ function App() {
           <Route
             path="external-store-import"
             element={<ExternalStoreImport />}
-          />
+          /> 
+          <Route path="missions" element={<AdminMissions />} />
           <Route path="content/:type/:itemId" element={<ContentManager />} />
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="ticker" element={<AdminTicker />} />

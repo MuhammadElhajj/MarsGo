@@ -1,0 +1,181 @@
+/* src/components/AdminCoponent/AdminMissions/MissionCard/MissionCard.css */
+
+.mission-card {
+  display: grid;
+  grid-template-columns: 50px 50px 1.2fr 1.5fr 90px 60px 70px 90px 120px;
+  gap: 0.4rem;
+  padding: 0.8rem 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  transition: background 0.2s;
+}
+
+.mission-card:hover {
+  background: rgba(79, 70, 229, 0.03);
+}
+
+.mission-card:last-child {
+  border-bottom: none;
+}
+
+.mission-card--inactive {
+  opacity: 0.6;
+}
+
+.mission-card__order {
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mission-card__icon {
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.mission-card__name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.mission-card__description {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mission-card__duration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.mission-card__duration .duration-icon {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+}
+
+.mission-card__duration small {
+  font-size: 0.6rem;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.mission-card__target {
+  text-align: center;
+  font-weight: 500;
+}
+
+.mission-card__reward {
+  text-align: center;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.mission-card__status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.status-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  border-radius: 1rem;
+  transition: all 0.2s;
+}
+
+.status-toggle.active {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.status-toggle.inactive {
+  color: #9ca3af;
+  background: rgba(156, 163, 175, 0.1);
+}
+
+.status-toggle svg {
+  font-size: 1.2rem;
+}
+
+.membership-badge {
+  font-size: 0.6rem;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  white-space: nowrap;
+}
+
+.mission-card__actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.mission-card__actions .btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+/* استجابة للجوال (تحويل إلى بطاقات عمودية) */
+@media (max-width: 768px) {
+  .mission-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .mission-card__order,
+  .mission-card__icon,
+  .mission-card__target,
+  .mission-card__reward,
+  .mission-card__duration {
+    text-align: right;
+    justify-content: flex-start;
+  }
+
+  .mission-card__name {
+    font-size: 1rem;
+  }
+
+  .mission-card__description {
+    white-space: normal;
+  }
+
+  .mission-card__status {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .mission-card__actions {
+    justify-content: stretch;
+  }
+
+  .mission-card__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

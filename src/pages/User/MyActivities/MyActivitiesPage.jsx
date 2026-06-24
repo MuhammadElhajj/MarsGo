@@ -360,7 +360,7 @@ export default function MyActivitiesPage() {
   return (
     <div className="my-activities-page" dir="rtl">
       <div className="my-activities-page__header">
-        <GoBackButton text="رجوع" />
+        {/* <GoBackButton text="رجوع" /> */}
         <h1 className="my-activities-page__title">نشاطاتي</h1>
       </div>
 

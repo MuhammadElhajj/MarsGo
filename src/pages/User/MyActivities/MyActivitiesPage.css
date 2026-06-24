@@ -4,7 +4,6 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
   animation: fadeIn 0.3s ease;
   background: var(--color-bg-primary);
   min-height: 100vh;
@@ -265,9 +264,7 @@
 
 /* ===== استجابة ===== */
 @media (max-width: 768px) {
-  .my-activities-page {
-    padding: 0.5rem;
-  }
+
 
   .my-activities-page__stats {
     grid-template-columns: repeat(3, 1fr);

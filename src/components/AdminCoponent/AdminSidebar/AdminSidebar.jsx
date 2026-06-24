@@ -1,6 +1,7 @@
 // src/components/AdminCoponent/AdminSidebar/AdminSidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import './AdminSidebar.css';
+import { FiTarget } from 'react-icons/fi';
 import ExchangeRateWidget from '../../GeneralComponents/ExchangeRateWidget/ExchangeRateWidget'; // ✅ استيراد الـ widget
 import { lazy, Suspense } from 'react';
 import { FiBox, FiFolder, FiShoppingCart, FiDownload, FiGrid } from 'react-icons/fi';
@@ -22,7 +23,12 @@ export default function AdminSidebar({ isOpen, onClose }) {
           <li><Link to="/admin" className={linkClass('/admin')} onClick={handleLinkClick}>📊 لوحة التحكم</Link></li>
           <li><Link to="/admin/orders" className={linkClass('/admin/orders')} onClick={handleLinkClick}>📋 إدارة الطلبات</Link></li>
           <li><Link to="/admin/users" className={linkClass('/admin/users')} onClick={handleLinkClick}>👥 إدارة المستخدمين</Link></li>
-   
+    {/* ✅ رابط إدارة المهام (جديد) */}
+          <li>
+            <Link to="/admin/missions" className={linkClass('/admin/missions')} onClick={handleLinkClick}>
+              <FiTarget className="admin-sidebar__icon" /> إدارة المهام
+            </Link>
+          </li>
           <li><Link to="/admin/ads" className={linkClass('/admin/ads')} onClick={handleLinkClick}>📢 إدارة الإعلانات</Link></li>
          <li><Link to="/admin/topup-settings" className={linkClass('/admin/topup-settings')} onClick={handleLinkClick}>💰 إعدادات الإيداع</Link></li>
     <li><Link to="/admin/discounts" className={linkClass('/admin/discounts')} onClick={handleLinkClick}>🏷️ إدارة الخصومات</Link></li>

@@ -116,20 +116,20 @@
     display: none;
   }
 
-  /* ===== السايدبار الثانوي (الأيسر) - يبدأ من تحت الهيدر ===== */
+  
   .secondary-sidebar {
     position: fixed;
-    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
+    top: 4rem;                
     left: -220px;
     bottom: 0;
     z-index: 45;
     width: 220px;
-    padding-top: 0;            /* ✅ إزالة padding الإضافي */
+    padding-top: 0;           
     border-right: 1px solid var(--color-border);
     box-shadow: none;
     background-color: var(--color-bg-primary);
     transition: left 0.3s ease;
-    height: calc(100vh - 4rem); /* ✅ ملء المساحة المتبقية */
+    height: calc(100vh - 4rem);
     overflow-y: auto;
   }
   .secondary-sidebar--open {
@@ -138,7 +138,7 @@
   }
   .secondary-sidebar-overlay {
     position: fixed;
-    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
+    top: 4rem;                
     left: 0;
     right: 0;
     bottom: 0;
@@ -147,20 +147,20 @@
     display: block;
   }
 
-  /* ===== السايدبار الأساسي (الأيمن) - يبدأ من تحت الهيدر ===== */
+  
   .sidebar {
     position: fixed;
-    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
+    top: 4rem;              
     right: -280px;
     bottom: 0;
     z-index: 35;
     width: 280px;
-    padding-top: 0;            /* ✅ إزالة padding الإضافي */
+    padding-top: 0;          
     border-left: 1px solid var(--color-border);
     box-shadow: none;
     background-color: var(--color-bg-primary);
     transition: right 0.3s ease;
-    height: calc(100vh - 4rem); /* ✅ ملء المساحة المتبقية */
+    height: calc(100vh - 4rem);
     overflow-y: auto;
   }
   .sidebar--open {
@@ -169,7 +169,7 @@
   }
   .sidebar-overlay {
     position: fixed;
-    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر */
+    top: 4rem;            
     left: 0;
     right: 0;
     bottom: 0;
@@ -193,7 +193,7 @@
   }
 }
 
-/* ===== تنسيق خاص لصفحات الدردشة ===== */
+
 .app-content.chat-page-layout {
   padding: 0 !important;
   overflow: hidden !important;
@@ -202,7 +202,7 @@
   height: 100%;
 }
 
-/* ✅ في الجوال أيضاً */
+
 @media (max-width: 768px) {
   .app-content.chat-page-layout {
     padding: 0 !important;

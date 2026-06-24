@@ -1,5 +1,5 @@
 :root {
-  /* الوضع الفاتح (افتراضي) */
+
   --color-bg-primary: #ffffff;       /* رمادي فاتح */
   --color-bg-secondary: #ffffff;
   --color-text-primary: #111827;
@@ -18,7 +18,6 @@
   --radius-lg: 1rem;
 }
 
-/* إعدادات الوضع الداكن (تُفعّل يدوياً لاحقاً) */
 .dark {
   --color-bg-primary: #1f2937;
   --color-bg-secondary: #111827;
@@ -32,4 +31,4 @@
   margin-top: 10px !important;
 }
 
-/* تحسين التباين للوضع الفاتح */
+

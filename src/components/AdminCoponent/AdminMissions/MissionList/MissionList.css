@@ -1,0 +1,49 @@
+/* src/components/AdminCoponent/AdminMissions/MissionList/MissionList.css */
+
+.mission-list {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.mission-list__header {
+  display: grid;
+  grid-template-columns: 50px 50px 1.2fr 1.5fr 90px 60px 70px 90px 120px;
+  gap: 0.4rem;
+  padding: 0.8rem 1rem;
+  background: var(--color-bg-primary);
+  border-bottom: 2px solid var(--color-border);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  align-items: center;
+}
+
+.mission-list__col {
+  text-align: right;
+}
+
+.mission-list__col--order { text-align: center; }
+.mission-list__col--icon { text-align: center; }
+.mission-list__col--duration { text-align: center; }
+.mission-list__col--target { text-align: center; }
+.mission-list__col--reward { text-align: center; }
+.mission-list__col--actions { text-align: left; }
+
+.mission-list__loading,
+.mission-list__empty {
+  text-align: center;
+  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  color: var(--color-text-secondary);
+}
+
+/* استجابة للجوال (تحويل إلى بطاقات) */
+@media (max-width: 768px) {
+  .mission-list__header {
+    display: none;
+  }
+}

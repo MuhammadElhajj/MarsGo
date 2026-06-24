@@ -1,0 +1,150 @@
+/* src/components/AdminCoponent/AdminMissions/MissionForm/MissionForm.css */
+
+.mission-form {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mission-form__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mission-form__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.mission-form__close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.2rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.mission-form__close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-danger);
+}
+
+.mission-form__body {
+  padding: 1.5rem;
+}
+
+.mission-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-color {
+  width: 60px;
+  height: 40px;
+  padding: 0.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  background: var(--color-bg-primary);
+}
+
+.mission-form__checkbox {
+  margin: 0.5rem 0 1rem;
+}
+
+.mission-form__checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.mission-form__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.mission-form__actions .btn {
+  flex: 1;
+}
+
+/* استجابة للجوال */
+@media (max-width: 768px) {
+  .mission-form__grid {
+    grid-template-columns: 1fr;
+  }
+  .mission-form__body {
+    padding: 1rem;
+  }
+  .mission-form__actions {
+    flex-direction: column;
+  }
+}
+
+/* src/components/AdminCoponent/AdminMissions/MissionForm/MissionForm.css */
+
+/* ... التنسيقات الموجودة ... */
+
+.form-hint {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.2rem;
+  display: block;
+}
+
+/* استجابة الجوال */
+@media (max-width: 768px) {
+  /* ... */
+}

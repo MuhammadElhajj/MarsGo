@@ -12,13 +12,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [emailVerified, setEmailVerified] = useState(false);
 
-  // ✅ جلب دوال الـ Store لتحديثها
+  // دوال الـ Store لتحديثها
   const setStoreUser = useAppStore((state) => state.setUser);
   const setStoreUserData = useAppStore((state) => state.setUserData);
   const setStoreBalance = useAppStore((state) => state.setBalance);
   const setStoreMgcBalance = useAppStore((state) => state.setMgcBalance);
   
-  // ✅ جلب دوال توليد المعرف الفريد والفيزا والرقم السري
+  // دوال توليد المعرف الفريد والفيزا والرقم السري
   const generateUniqueId = useAppStore((state) => state.generateUniqueId);
   const generateVisaNumber = useAppStore((state) => state.generateVisaNumber);
   const generateVisaSecret = useAppStore((state) => state.generateVisaSecret);
@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // ✅ التحقق من البريد الإلكتروني
+        // التحقق من البريد الإلكتروني
         if (!firebaseUser.emailVerified) {
           setUser(firebaseUser);
           setUserData(null);
@@ -39,26 +39,22 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        // البريد مفعل: نجلب البيانات من Firestore
         const userRef = doc(db, "users", firebaseUser.uid);
         const docSnap = await getDoc(userRef);
         let data;
         if (docSnap.exists()) {
           data = docSnap.data();
           let needsUpdate = false;
+          const now = new Date();
 
-          // ===== التحقق من وجود uniqueId =====
+          // ===== التحقق من الحقول الأساسية وإضافتها إذا كانت مفقودة =====
           if (!data.uniqueId) {
-            const uniqueId = await generateUniqueId();
-            data.uniqueId = uniqueId;
+            data.uniqueId = await generateUniqueId();
             needsUpdate = true;
           }
-
-          // ===== إضافة visaNumber و visaSecret للمستخدمين القدامى =====
           if (!data.visaNumber) {
             try {
-              const newVisa = await generateVisaNumber(firebaseUser.uid);
-              data.visaNumber = newVisa;
+              data.visaNumber = await generateVisaNumber(firebaseUser.uid);
               needsUpdate = true;
             } catch (err) {
               console.warn('⚠️ فشل توليد رقم الفيزا:', err);
@@ -68,8 +64,6 @@ export function AuthProvider({ children }) {
             data.visaSecret = generateVisaSecret();
             needsUpdate = true;
           }
-
-          // ===== باقي الحقول الاختيارية =====
           if (!data.customerType) {
             data.customerType = 'customer';
             needsUpdate = true;
@@ -127,6 +121,40 @@ export function AuthProvider({ children }) {
             needsUpdate = true;
           }
 
+          // ===== حقول الإحالة (للتأكد من وجودها) =====
+          if (data.referralBalance === undefined) {
+            data.referralBalance = 0;
+            needsUpdate = true;
+          }
+          if (data.totalReferralEarnings === undefined) {
+            data.totalReferralEarnings = 0;
+            needsUpdate = true;
+          }
+          if (data.referralRewardClaimed === undefined) {
+            data.referralRewardClaimed = false;
+            needsUpdate = true;
+          }
+          if (data.referredBy === undefined) {
+            data.referredBy = null;
+            needsUpdate = true;
+          }
+
+          // ===== حقول العضوية (للاستخدام في الإحصائيات والمهام) =====
+          if (data.membership === undefined) {
+            data.membership = null; // يمكن أن تكون 'adventurer', 'marsgo', 'master', 'legendary'
+            needsUpdate = true;
+          }
+          if (data.membershipExpiry === undefined) {
+            data.membershipExpiry = null; // تاريخ انتهاء العضوية
+            needsUpdate = true;
+          }
+
+          // ===== آخر نشاط (يُحدّث كل مرة يسجل فيها الدخول) =====
+          if (data.lastActive === undefined || data.lastActive !== now) {
+            data.lastActive = now;
+            needsUpdate = true;
+          }
+
           // ===== حفظ التحديثات إذا لزم الأمر =====
           if (needsUpdate) {
             await updateDoc(userRef, {
@@ -147,6 +175,13 @@ export function AuthProvider({ children }) {
               uniqueId: data.uniqueId,
               visaNumber: data.visaNumber,
               visaSecret: data.visaSecret,
+              referralBalance: data.referralBalance,
+              totalReferralEarnings: data.totalReferralEarnings,
+              referralRewardClaimed: data.referralRewardClaimed,
+              referredBy: data.referredBy,
+              membership: data.membership,
+              membershipExpiry: data.membershipExpiry,
+              lastActive: data.lastActive,
             });
           }
         } else {
@@ -154,19 +189,14 @@ export function AuthProvider({ children }) {
           // ✅ **مستخدم جديد: نضيف جميع الحقول المطلوبة**
           // ============================================================
 
-          // ===== قراءة كود الإحالة (من sessionStorage أو الرابط) =====
           let referredBy = null;
           let refCode = null;
           try {
-            // 1. محاولة قراءة من sessionStorage (من SignupPage)
             refCode = sessionStorage.getItem('referralCode');
-            
-            // 2. إذا لم يكن في sessionStorage، نقرأ من الرابط
             if (!refCode) {
               const queryParams = new URLSearchParams(window.location.search);
               refCode = queryParams.get('ref');
             }
-            
             if (refCode) {
               const q = query(collection(db, 'users'), where('uniqueId', '==', refCode));
               const snap = await getDocs(q);
@@ -180,24 +210,16 @@ export function AuthProvider({ children }) {
           } catch (err) {
             console.warn('⚠️ خطأ في قراءة كود الإحالة:', err);
           } finally {
-            // مسح sessionStorage بعد الاستخدام (سواء نجح أو فشل)
-            if (refCode) {
-              sessionStorage.removeItem('referralCode');
-            }
+            if (refCode) sessionStorage.removeItem('referralCode');
           }
 
-          // ===== قراءة الاسم المؤقت من sessionStorage =====
           const tempName = sessionStorage.getItem('temp_user_name');
-          if (tempName) {
-            sessionStorage.removeItem('temp_user_name');
-          }
+          if (tempName) sessionStorage.removeItem('temp_user_name');
 
-          // تحديد اسم العرض
           let displayName = firebaseUser.displayName;
           if (!displayName && tempName) {
             displayName = tempName;
           } else if (!displayName) {
-            // استخراج الاسم من البريد الإلكتروني كحل احتياطي
             const emailPart = firebaseUser.email?.split('@')[0] || '';
             displayName = emailPart
               .replace(/[._-]/g, ' ')
@@ -206,10 +228,10 @@ export function AuthProvider({ children }) {
             if (!displayName) displayName = 'مستخدم';
           }
 
-          // توليد المعرف الفريد ورقم الفيزا والرقم السري
           const uniqueId = await generateUniqueId();
           const visaNumber = await generateVisaNumber(firebaseUser.uid);
           const visaSecret = generateVisaSecret();
+          const now = new Date();
 
           data = {
             name: displayName,
@@ -218,7 +240,9 @@ export function AuthProvider({ children }) {
             verifierType: "basic",
             customerType: "customer",
             avatar: firebaseUser.photoURL || "",
-            createdAt: new Date(),
+            createdAt: now,
+            updatedAt: now,
+            lastActive: now,
             friends: [],
             blockedUsers: [],
             popularity: 0,
@@ -240,10 +264,13 @@ export function AuthProvider({ children }) {
             referralBalance: 0,
             totalReferralEarnings: 0,
             referralRewardClaimed: false,
+            // حقول العضوية
+            membership: null,
+            membershipExpiry: null,
           };
           await setDoc(userRef, data);
 
-          // ===== ✅ إنشاء سجل إحالة فوراً (الحالة pending) إذا كان هناك مُحيل =====
+          // إنشاء سجل إحالة فوراً إذا كان هناك مُحيل
           if (referredBy) {
             try {
               await addDoc(collection(db, 'referral_rewards'), {
@@ -259,21 +286,23 @@ export function AuthProvider({ children }) {
             }
           }
         }
+
+        // إضافة uid إلى data
         data.uid = firebaseUser.uid;
 
-        // ✅ تحديث الحالة المحلية
+        // تحديث الحالة المحلية
         setUserData(data);
         setUser(firebaseUser);
         setEmailVerified(true);
 
-        // ✅ مزامنة الـ Store مع البيانات الكاملة
+        // مزامنة الـ Store مع البيانات الكاملة
         setStoreUser(firebaseUser);
         setStoreUserData(data);
         setStoreBalance(data.balance || 0);
         setStoreMgcBalance(data.mgcBalance || 0);
 
       } else {
-        // ✅ تسجيل الخروج: مسح الحالة المحلية والـ Store
+        // تسجيل الخروج: مسح الحالة المحلية والـ Store
         setUser(null);
         setUserData(null);
         setEmailVerified(false);
@@ -292,7 +321,7 @@ export function AuthProvider({ children }) {
     if (!user) return false;
     try {
       const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, updates);
+      await updateDoc(userRef, { ...updates, updatedAt: new Date() });
       const newData = { ...userData, ...updates };
       setUserData(newData);
       setStoreUserData(newData);
