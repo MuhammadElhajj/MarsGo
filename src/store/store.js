@@ -4,7 +4,7 @@ import {
   doc, updateDoc, increment, onSnapshot, setDoc, 
   getDoc, addDoc, collection, serverTimestamp,
   query, where, orderBy, getDocs, writeBatch, onSnapshot as onSnapshotFirestore ,
-  runTransaction ,limit  
+  runTransaction ,limit,arrayUnion, arrayRemove
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import toast from 'react-hot-toast';
@@ -509,6 +509,17 @@ createClan: async (clanData) => {
   }
 
   try {
+    // ✅ التحقق الجديد: هل المستخدم عضو في أي كلان آخر؟
+    const myClansQuery = query(collection(db, 'clans'), where('members', 'array-contains', user.uid));
+    const myClansSnap = await getDocs(myClansQuery);
+    if (!myClansSnap.empty) {
+      const existingClanDoc = myClansSnap.docs[0];
+      const existingClanData = existingClanDoc.data();
+      toast.error(`لا يمكنك إنشاء كلان جديد لأنك عضو بالفعل في كلان "${existingClanData.name}". يرجى مغادرة الكلان الحالي أولاً.`);
+      return { success: false, error: 'عضو في كلان آخر' };
+    }
+
+    // إنشاء الكلان الجديد
     const clanRef = await addDoc(collection(db, 'clans'), {
       name: name.trim(),
       description: description?.trim() || '',
@@ -516,6 +527,7 @@ createClan: async (clanData) => {
       imageUrl: imageUrl || null,
       ownerId: user.uid,
       members: [user.uid],
+      memberRoles: { [user.uid]: 'owner' }, // ✅ إضافة الأدوار
       moderators: [user.uid],
       points: 0,
       memberCount: 1,
@@ -605,6 +617,7 @@ joinClan: async (clanId) => {
   }
 
   try {
+    // 1. التحقق من وجود الكلان المستهدف
     const clanRef = doc(db, 'clans', clanId);
     const clanSnap = await getDoc(clanRef);
     if (!clanSnap.exists()) {
@@ -613,24 +626,42 @@ joinClan: async (clanId) => {
     }
 
     const clanData = clanSnap.data();
+
+    // 2. التحقق: هل المستخدم عضو في هذا الكلان بالفعل؟
     if (clanData.members.includes(user.uid)) {
       toast.error('أنت بالفعل عضو في هذا الكلان');
       return false;
     }
 
+    // 3. التحقق الجديد: هل المستخدم عضو في أي كلان آخر؟
+    const myClansQuery = query(collection(db, 'clans'), where('members', 'array-contains', user.uid));
+    const myClansSnap = await getDocs(myClansQuery);
+    if (!myClansSnap.empty) {
+      // يوجد كلان واحد على الأقل (نفترض أنه لا يمكن أن يكون في أكثر من واحد)
+      const existingClanDoc = myClansSnap.docs[0];
+      const existingClanData = existingClanDoc.data();
+      // إذا كان الكلان الموجود ليس هو الكلان الذي يحاول الانضمام إليه
+      if (existingClanDoc.id !== clanId) {
+        toast.error(`أنت بالفعل عضو في كلان "${existingClanData.name}". يرجى مغادرة الكلان الحالي أولاً.`);
+        return false;
+      }
+    }
+
+    // 4. التأكد من أن الكلان عام (إذا كان خاصاً، يمنع الانضمام المباشر)
     if (clanData.type === 'private') {
       toast.error('هذا الكلان خاص، يرجى انتظار دعوة');
       return false;
     }
 
-    // إضافة المستخدم إلى الكلان
+    // 5. إضافة المستخدم إلى الكلان
     await updateDoc(clanRef, {
       members: arrayUnion(user.uid),
+      [`memberRoles.${user.uid}`]: 'member', // ✅ تعيين دور عضو
       memberCount: increment(1),
       updatedAt: serverTimestamp(),
     });
 
-    // إضافة المستخدم إلى غرفة الدردشة
+    // 6. إضافة المستخدم إلى غرفة الدردشة الخاصة بالكلان
     const roomId = `clan_${clanId}`;
     await updateDoc(doc(db, 'rooms', roomId), {
       members: arrayUnion(user.uid),
@@ -642,6 +673,32 @@ joinClan: async (clanId) => {
     console.error('فشل الانضمام:', error);
     toast.error('حدث خطأ أثناء الانضمام');
     return false;
+  }
+},
+
+// store.js
+assignClanRole: async (clanId, targetUid, newRole) => {
+  const { user } = get();
+  if (!user) return { success: false, error: 'يجب تسجيل الدخول' };
+
+  try {
+    const clanRef = doc(db, 'clans', clanId);
+    const clanSnap = await getDoc(clanRef);
+    if (!clanSnap.exists()) return { success: false, error: 'الكلان غير موجود' };
+
+    const clanData = clanSnap.data();
+    if (clanData.ownerId !== user.uid) {
+      return { success: false, error: 'المالك فقط يمكنه تغيير المناصب' };
+    }
+
+    await updateDoc(clanRef, {
+      [`memberRoles.${targetUid}`]: newRole,
+      updatedAt: serverTimestamp(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: error.message };
   }
 },
 

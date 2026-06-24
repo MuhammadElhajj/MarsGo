@@ -1,0 +1,426 @@
+/* ============================================================
+   CLANS LIST PAGE - Activity Page Style
+   ============================================================ */
+
+.clans-list-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.clans-list-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.clans-list-page__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex: 1;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.header-icon {
+  font-size: 1.6rem;
+}
+
+/* ===== التبويبات ===== */
+.clans-list-page__tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.clans-list-page__tabs .tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.clans-list-page__tabs .tab-btn:hover {
+  background: rgba(79, 70, 229, 0.06);
+  color: var(--color-text-primary);
+}
+
+.clans-list-page__tabs .tab-btn.active {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.2);
+}
+
+.clans-list-page__tabs .tab-btn .badge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 1rem;
+}
+
+/* ===== قائمة الكلانات ===== */
+.clans-list-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===== بطاقة الكلان (مُحسّنة) ===== */
+.clan-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.clan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent);
+}
+
+.clan-card__cover {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.clan-card__cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.clan-card__cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-accent), #7c3aed);
+  color: white;
+}
+
+.clan-card__avatar {
+  position: absolute;
+  bottom: -16px;
+  left: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid var(--color-bg-primary);
+  object-fit: cover;
+  background: var(--color-bg-primary);
+}
+
+.clan-card__private-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.15rem 0.6rem;
+  border-radius: 2rem;
+  font-size: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  backdrop-filter: blur(4px);
+}
+
+.clan-card__info {
+  padding: 1rem 1.2rem 0.8rem;
+  flex: 1;
+}
+
+.clan-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
+.clan-card__name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.clan-card__tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: rgba(79, 70, 229, 0.1);
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.3rem;
+  font-family: monospace;
+}
+
+.clan-card__description {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.clan-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.8rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.clan-card__stat {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.clan-card__actions {
+  padding: 0.6rem 1.2rem 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.join-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ===== بطاقة الدعوة ===== */
+.invite-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1.2rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.invite-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.invite-clan {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.invite-from {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.invite-date {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.invite-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.invite-actions .btn {
+  padding: 0.25rem 0.8rem;
+  font-size: 0.75rem;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .clans-list-page {
+    padding: 0.5rem;
+  }
+
+  .clans-list-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .clans-list-page__title {
+    font-size: 1.2rem;
+  }
+
+  .clans-list-page__tabs {
+    gap: 0.3rem;
+  }
+
+  .clans-list-page__tabs .tab-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .clan-card__cover {
+    height: 100px;
+  }
+
+  .clan-card__avatar {
+    width: 40px;
+    height: 40px;
+    bottom: -12px;
+    left: 12px;
+  }
+
+  .clan-card__info {
+    padding: 0.8rem 1rem 0.6rem;
+  }
+
+  .clan-card__name {
+    font-size: 0.95rem;
+  }
+
+  .clan-card__description {
+    font-size: 0.75rem;
+  }
+
+  .clan-card__stats {
+    font-size: 0.65rem;
+  }
+
+  .invite-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .invite-actions {
+    justify-content: flex-end;
+  }
+
+  .clan-card__actions {
+    padding: 0.4rem 1rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .clans-list-page {
+    padding: 0.25rem;
+  }
+
+  .clans-list-page__title {
+    font-size: 1rem;
+  }
+
+  .clans-list-page__tabs .tab-btn {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .clan-card__cover {
+    height: 80px;
+  }
+
+  .clan-card__avatar {
+    width: 32px;
+    height: 32px;
+    bottom: -10px;
+    left: 10px;
+    border-width: 2px;
+  }
+
+  .clan-card__name {
+    font-size: 0.85rem;
+  }
+
+  .clan-card__tag {
+    font-size: 0.6rem;
+  }
+
+  .clan-card__description {
+    font-size: 0.7rem;
+  }
+
+  .clan-card__stats {
+    font-size: 0.6rem;
+  }
+
+  .invite-clan {
+    font-size: 0.85rem;
+  }
+
+  .invite-from {
+    font-size: 0.7rem;
+  }
+
+  .invite-actions .btn {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+  }
+}
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+.dark .clan-card {
+  background: var(--color-bg-secondary);
+}
+
+.dark .clan-card__avatar {
+  border-color: var(--color-bg-secondary);
+}
+
+.dark .invite-card {
+  background: var(--color-bg-secondary);
+}
+
+.dark .clan-card__private-badge {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

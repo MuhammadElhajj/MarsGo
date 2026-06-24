@@ -3,10 +3,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../store/store';
 import { useAuth } from '../../../context/AuthContext';
+import { db } from '../../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import Avatar from '../../../components/GeneralComponents/Avatar/Avatar';
-import { FiUsers, FiPlus, FiUserPlus, FiLock, FiUnlock, FiChevronLeft } from 'react-icons/fi';
+import { 
+  FiUsers, FiPlus, FiUserPlus, FiLock, FiUnlock, 
+  FiChevronLeft, FiTag, FiCpu, FiUsers as FiMembers,
+  FiCheckCircle, FiXCircle, FiClock
+} from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import './ClansPage.css';
 
@@ -27,17 +33,42 @@ export default function ClansListPage() {
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('my');
+  const [inviters, setInviters] = useState({});
+
+  // جلب بيانات المرسلين للدعوات
+  const fetchInviters = async (invitesList) => {
+    const invitersMap = {};
+    for (const invite of invitesList) {
+      if (invite.invitedBy && !invitersMap[invite.invitedBy]) {
+        try {
+          const userSnap = await getDoc(doc(db, 'users', invite.invitedBy));
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            invitersMap[invite.invitedBy] = data.name || data.displayName || 'مستخدم';
+          } else {
+            invitersMap[invite.invitedBy] = 'مستخدم غير معروف';
+          }
+        } catch (err) {
+          console.warn('خطأ في جلب بيانات المرسل:', err);
+          invitersMap[invite.invitedBy] = 'مستخدم';
+        }
+      }
+    }
+    setInviters(invitersMap);
+  };
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       const my = await fetchMyClans();
       setMyClans(my);
-      // ✅ التعديل هنا: استخدم اسم مختلف عن "public"
       const publicClans = await fetchPublicClans();
       setPublicClans(publicClans);
       const inv = await fetchClanInvites();
       setInvites(inv);
+      if (inv.length > 0) {
+        await fetchInviters(inv);
+      }
       setLoading(false);
     };
     loadData();
@@ -85,10 +116,10 @@ export default function ClansListPage() {
   }
 
   return (
-    <div className="clans-page" dir="rtl">
-      <div className="clans-page__header">
+    <div className="clans-list-page" dir="rtl">
+      <div className="clans-list-page__header">
         <GoBackButton text="رجوع" />
-        <h1 className="clans-page__title">
+        <h1 className="clans-list-page__title">
           <FiUsers className="header-icon" style={{ color: '#8b5cf6' }} />
           الكلانات
         </h1>
@@ -97,7 +128,7 @@ export default function ClansListPage() {
         </Button>
       </div>
 
-      <div className="clans-page__tabs">
+      <div className="clans-list-page__tabs">
         <button
           className={`tab-btn ${activeTab === 'my' ? 'active' : ''}`}
           onClick={() => setActiveTab('my')}
@@ -114,12 +145,12 @@ export default function ClansListPage() {
           className={`tab-btn ${activeTab === 'invites' ? 'active' : ''}`}
           onClick={() => setActiveTab('invites')}
         >
-          <FiUserPlus /> دعوات ({invites.length})
+          <FiClock /> دعوات ({invites.length})
           {invites.length > 0 && <span className="badge">{invites.length}</span>}
         </button>
       </div>
 
-      <div className="clans-page__list">
+      <div className="clans-list-page__list">
         {activeTab === 'my' && (
           <>
             {myClans.length === 0 ? (
@@ -152,13 +183,15 @@ export default function ClansListPage() {
             ) : (
               publicClans.map((clan) => {
                 const isMember = myClans.some(c => c.id === clan.id);
+                const isPrivate = clan.type === 'private';
                 return (
                   <ClanCard
                     key={clan.id}
                     clan={clan}
                     onClick={() => handleClanClick(clan.id)}
-                    showJoin={!isMember}
+                    showJoin={!isMember && !isPrivate}
                     onJoin={() => handleJoinClan(clan.id)}
+                    isPrivate={isPrivate}
                   />
                 );
               })
@@ -176,15 +209,20 @@ export default function ClansListPage() {
               invites.map((invite) => (
                 <div key={invite.id} className="invite-card">
                   <div className="invite-info">
-                    <span className="invite-clan">{invite.clanName}</span>
-                    <span className="invite-from">دعوة من: {invite.invitedBy}</span>
+                    <span className="invite-clan">{invite.clanName || 'كلان غير معروف'}</span>
+                    <span className="invite-from">
+                      دعوة من: {inviters[invite.invitedBy] || 'مستخدم'}
+                    </span>
+                    <span className="invite-date">
+                      {invite.createdAt?.toDate?.().toLocaleDateString('ar-EG') || ''}
+                    </span>
                   </div>
                   <div className="invite-actions">
                     <Button onClick={() => handleAcceptInvite(invite.id)} variant="primary" size="sm">
-                      قبول
+                      <FiCheckCircle /> قبول
                     </Button>
                     <Button onClick={() => handleRejectInvite(invite.id)} variant="danger" size="sm">
-                      رفض
+                      <FiXCircle /> رفض
                     </Button>
                   </div>
                 </div>
@@ -197,25 +235,48 @@ export default function ClansListPage() {
   );
 }
 
-// ===== مكون بطاقة الكلان =====
-function ClanCard({ clan, onClick, showJoin, onJoin }) {
+// ===== مكون بطاقة الكلان (مُحسّن) =====
+function ClanCard({ clan, onClick, showJoin, onJoin, isPrivate = false }) {
+  const imageSrc = clan.coverImageUrl || clan.imageUrl || null;
+  const memberCount = clan.memberCount || 0;
+  const maxMembers = clan.maxMembers || 50;
+
   return (
     <div className="clan-card" onClick={onClick} role="button" tabIndex={0}>
-      <div className="clan-card__image">
-        {clan.imageUrl ? (
-          <img src={clan.imageUrl} alt={clan.name} />
+      <div className="clan-card__cover">
+        {imageSrc ? (
+          <img src={imageSrc} alt={clan.name} className="clan-card__cover-img" />
         ) : (
-          <div className="clan-card__placeholder">
-            <FiUsers size={30} />
+          <div className="clan-card__cover-placeholder">
+            <FiUsers size={36} />
           </div>
+        )}
+        {/* شعار صغير فوق الغلاف */}
+        {clan.avatarImageUrl && (
+          <img src={clan.avatarImageUrl} alt={clan.name} className="clan-card__avatar" />
+        )}
+        {isPrivate && (
+          <span className="clan-card__private-badge">
+            <FiLock /> خاص
+          </span>
         )}
       </div>
       <div className="clan-card__info">
-        <h3 className="clan-card__name">{clan.name}</h3>
+        <div className="clan-card__name-row">
+          <h3 className="clan-card__name">{clan.name}</h3>
+          {clan.tag && <span className="clan-card__tag">#{clan.tag}</span>}
+        </div>
         <p className="clan-card__description">{clan.description || 'لا يوجد وصف'}</p>
         <div className="clan-card__stats">
-          <span><FiUsers /> {clan.memberCount || 0} عضو</span>
-          <span>
+          <span className="clan-card__stat">
+            <FiMembers /> {memberCount} / {maxMembers}
+          </span>
+          {clan.game && (
+            <span className="clan-card__stat">
+              <FiCpu /> {clan.game}
+            </span>
+          )}
+          <span className="clan-card__stat">
             {clan.type === 'public' ? <FiUnlock /> : <FiLock />}
             {clan.type === 'public' ? 'عام' : 'خاص'}
           </span>
@@ -223,7 +284,7 @@ function ClanCard({ clan, onClick, showJoin, onJoin }) {
       </div>
       {showJoin && (
         <div className="clan-card__actions" onClick={(e) => e.stopPropagation()}>
-          <Button onClick={onJoin} variant="primary" size="sm">
+          <Button onClick={onJoin} variant="primary" size="sm" className="join-btn">
             <FiUserPlus /> انضم
           </Button>
         </div>
