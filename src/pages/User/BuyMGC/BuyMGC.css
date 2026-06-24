@@ -3,7 +3,7 @@
 .buy-mgc {
   max-width: 900px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+ 
   animation: fadeIn 0.3s ease;
 }
 
@@ -150,7 +150,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   padding: 0.8rem 1.2rem;
   background: var(--color-bg-secondary);
   border-radius: 0.8rem;
@@ -166,10 +166,7 @@
 
 /* ===== استجابة للجوال ===== */
 @media (max-width: 640px) {
-  .buy-mgc {
-    padding: 0.5rem;
-  }
-
+ 
   .buy-mgc__packages {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 0.8rem;

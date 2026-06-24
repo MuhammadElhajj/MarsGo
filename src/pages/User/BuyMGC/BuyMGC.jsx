@@ -99,7 +99,7 @@ export default function BuyMGC() {
   return (
     <div className="buy-mgc" dir="rtl">
      <div className="buy-mgc__header">
-  <GoBackButton text="رجوع" />
+  {/* <GoBackButton text="رجوع" /> */}
   <h1>
     <FiDollarSign className="header-icon" style={{ color: '#f59e0b' }} />
     شراء عملات MGC
@@ -115,14 +115,11 @@ export default function BuyMGC() {
   secret={userData?.visaSecret}  // ✅ الرقم السري
 />
 
-      <p className="buy-mgc__subtitle">
-        <FiShoppingBag style={{ color: '#8b5cf6', marginLeft: '0.3rem' }} />
-        1 MGC = 1 سنت
-        <span style={{ margin: '0 0.5rem' }}>•</span>
-        <FiTag style={{ color: '#f59e0b', marginLeft: '0.3rem' }} />
-        خصم 5% على الباقات من 200 عملة فأكثر
-      </p>
-
+   
+ <div className="buy-mgc__note">
+        <FiDollarSign style={{ color: '#10b981', fontSize: '1.2rem' }} />
+        <p>سيتم خصم المبلغ من رصيدك الحقيقي المتاح.</p>
+      </div>
       <div className="buy-mgc__packages">
         {PACKAGES.map((pkg) => (
           <div key={pkg.mgc} className="buy-mgc__card">
@@ -158,10 +155,7 @@ export default function BuyMGC() {
         ))}
       </div>
 
-      <div className="buy-mgc__note">
-        <FiDollarSign style={{ color: '#10b981', fontSize: '1.2rem' }} />
-        <p>سيتم خصم المبلغ من رصيدك الحقيقي المتاح.</p>
-      </div>
+     
     </div>
   );
 }
