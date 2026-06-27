@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
-import { collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, serverTimestamp, updateDoc, increment } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, serverTimestamp, updateDoc, increment , getDoc} from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { FiMessageCircle, FiPlus, FiUsers } from 'react-icons/fi';

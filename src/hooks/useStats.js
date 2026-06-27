@@ -1,14 +1,25 @@
+// src/hooks/useStats.js
 import { useEffect, useState } from "react";
 import { collection, getCountFromServer, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 
-export default function useStats() {
+/**
+ * هوك لجلب إحصائيات المستخدم أو المدير
+ * @param {boolean} enabled - إذا كان false، لن يتم جلب البيانات (يُستخدم لتأخير التحميل)
+ */
+export default function useStats(enabled = true) {
   const { userData } = useAuth();
   const [stats, setStats] = useState({ users: 0, orders: 0, pendingOrders: 0, completedToday: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // إذا كان الهوك معطلاً أو لا يوجد مستخدم، نوقف التحميل
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     const fetchStats = async () => {
       if (!userData?.uid) {
         setLoading(false);
@@ -28,8 +39,7 @@ export default function useStats() {
         const pendingQuery = query(collection(db, "orders"), where("userId", "==", userData.uid), where("status", "not-in", ["completed", "rejected"]));
         const pendingSnap = await getCountFromServer(pendingQuery);
         
-        // ✅ تعديل: حساب الطلبات المكتملة اليوم بطريقة بسيطة دون استخدام `completedAt`
-        // نجلب جميع الطلبات المكتملة ثم نفلترها في JavaScript (أفضل من إنشاء فهرس معقد)
+        // حساب الطلبات المكتملة اليوم (نستخدم getDocs لأننا بحاجة للتاريخ)
         const completedQuery = query(
           collection(db, "orders"),
           where("userId", "==", userData.uid),
@@ -59,8 +69,9 @@ export default function useStats() {
         setLoading(false);
       }
     };
+
     fetchStats();
-  }, [userData]);
+  }, [userData, enabled]); // ✅ نضيف enabled كـ dependency
 
   return { stats, loading };
 }

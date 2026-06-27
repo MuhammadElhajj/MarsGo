@@ -4,23 +4,8 @@ import { useAuth } from '../../../context/AuthContext';
 import { db } from '../../../firebase';
 import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
 import Loading from '../../../components/GeneralComponents/Loading/Loading';
-import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
+import { ORDER_STATUS_LABELS, ORDER_TYPE_LABELS } from '../../../constants/orderConstants';
 import './MyOrdersPage.css';
-
-const orderTypes = {
-  gaming: 'شحن ألعاب',
-  transfer: 'تحويل شام كاش',
-  crypto: 'عملات رقمية',
-  exchange: 'صرافة',
-};
-
-const statusLabels = {
-  pending_verification: 'قيد التدقيق',
-  awaiting_customer_resubmit: 'بانتظار تعديلك',
-  verified_pending_execution: 'تم التدقيق',
-  rejected: 'مرفوض',
-  completed: 'مكتمل',
-};
 
 export default function MyOrdersPage() {
   const { userData } = useAuth();
@@ -42,7 +27,7 @@ export default function MyOrdersPage() {
         collection(db, 'orders'),
         where('userId', '==', userData.uid),
         orderBy('createdAt', 'desc'),
-        limit(10) // ✅ إضافة حد أقصى لمنع جلب آلاف الطلبات
+        limit(10)
       );
       const snapshot = await getDocs(q);
       const ordersList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -50,7 +35,6 @@ export default function MyOrdersPage() {
     } catch (err) {
       console.error('Firestore error:', err);
       if (err.code === 'failed-precondition') {
-        // محاولة بدون orderBy
         try {
           const q2 = query(
             collection(db, 'orders'),
@@ -78,9 +62,8 @@ export default function MyOrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-  }, [userData]); // ✅ يعتمد فقط على userData وليس filterType
+  }, [userData]);
 
-  // ✅ الفلترة تتم على الجهة العميل (Client‑side) بدون طلب جديد من Firestore
   const filteredOrders = useMemo(() => {
     if (filterType === 'all') return allOrders;
     return allOrders.filter(order => order.type === filterType);
@@ -94,12 +77,10 @@ export default function MyOrdersPage() {
   return (
     <div className="my-orders-page" dir="rtl">
       <div className="my-orders-header">
-        <GoBackButton text="رجوع" />
-        <h2 className="my-orders-page__title">طلباتي</h2>
+        {/* <h2 className="my-orders-page__title">طلباتي</h2> */}
         <div></div>
       </div>
 
-      {/* أزرار الفلترة */}
       <div className="filter-buttons">
         <button className={filterType === 'all' ? 'active' : ''} onClick={() => handleFilterChange('all')}>الكل</button>
         <button className={filterType === 'gaming' ? 'active' : ''} onClick={() => handleFilterChange('gaming')}> ألعاب</button>
@@ -122,7 +103,7 @@ export default function MyOrdersPage() {
               {filteredOrders.map(order => (
                 <tr key={order.id}>
                   <td>{order.id.slice(-6)}</td>
-                  <td>{orderTypes[order.type] || order.type}</td>
+                  <td>{ORDER_TYPE_LABELS[order.type] || order.type}</td>
                   <td>
                     {order.type === 'gaming' && `${order.gameName} - ${order.packageName} (${order.playerId})`}
                     {order.type === 'transfer' && `${order.recipientName} - ${order.shamCashPhone}`}
@@ -130,7 +111,7 @@ export default function MyOrdersPage() {
                     {order.type === 'exchange' && `${order.exchangeType === 'buy_dollar' ? 'شراء دولار' : 'بيع دولار'} - ${order.amount}`}
                   </td>
                   <td>{order.finalPrice || order.amount} {order.currency === 'USD' ? '$' : order.currency || 'USD'}</td>
-                  <td><span className={`status-badge status-${order.status}`}>{statusLabels[order.status] || order.status}</span></td>
+                  <td><span className={`status-badge status-${order.status}`}>{ORDER_STATUS_LABELS[order.status] || order.status}</span></td>
                   <td>{order.createdAt?.toDate?.().toLocaleDateString('ar-SY') || '—'}</td>
                 </tr>
               ))}

@@ -3,25 +3,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { db } from "../../../firebase";
 import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
+import { ORDER_STATUS_LABELS, ORDER_TYPE_LABELS } from "../../../constants/orderConstants";
 import "./OrdersList.css";
-
-const statusLabels = {
-  pending_verification: "قيد التدقيق",
-  awaiting_customer_resubmit: "بانتظار تعديل الزبون",
-  verified_pending_execution: "تم التدقيق - بانتظار التنفيذ",
-  rejected: "مرفوض",
-  completed: "مكتمل",
-};
-
-const getOrderTypeLabel = (type) => {
-  switch(type) {
-    case 'transfer': return 'تحويل شام كاش';
-    case 'gaming': return 'شحن ألعاب';
-    case 'crypto': return 'عملات رقمية';
-    case 'exchange': return 'صرافة';
-    default: return type;
-  }
-};
 
 const getOrderDetails = (order) => {
   switch(order.type) {
@@ -77,7 +60,6 @@ export default function OrdersList({ orderType = "transfer", title = "آخر ط�
         setOrders(ordersList);
       } catch (err) {
         console.error(`Error fetching orders:`, err);
-        // محاولة بدون orderBy
         try {
           let q2;
           if (orderType === 'all') {
@@ -126,12 +108,12 @@ export default function OrdersList({ orderType = "transfer", title = "آخر ط�
             {orders.map(order => (
               <tr key={order.id}>
                 <td>#{order.id.slice(-6)}</td>
-                {orderType === 'all' && <td>{getOrderTypeLabel(order.type)}</td>}
+                {orderType === 'all' && <td>{ORDER_TYPE_LABELS[order.type] || order.type}</td>}
                 <td>{getOrderDetails(order)}</td>
                 <td>{getAmount(order)} {getCurrency(order)}</td>
                 <td>
                   <span className={`orders-list__status orders-list__status--${order.status}`}>
-                    {statusLabels[order.status] || order.status}
+                    {ORDER_STATUS_LABELS[order.status] || order.status}
                   </span>
                 </td>
                 <td>

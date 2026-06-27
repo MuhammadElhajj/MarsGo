@@ -88,6 +88,41 @@
   box-sizing: border-box;
 }
 
+/* ========== Breadcrumb الثابت ========== */
+.layout__breadcrumb-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--color-bg-primary);
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  transition: box-shadow 0.2s ease;
+}
+
+/* ✅ تأثير الظل عند التمرير (يُضاف عبر JS) */
+.layout__breadcrumb-wrapper--scrolled {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ========== تعديل المحتوى الرئيسي ========== */
+.app-content {
+  flex: 1;
+  padding: 0.5rem 5rem; /* قللنا padding-top لأن Breadcrumb أصبح sticky */
+  background-color: var(--color-bg-primary);
+}
+
+/* ========== تحسينات الجوال ========== */
+@media (max-width: 768px) {
+  .layout__breadcrumb-wrapper {
+    padding: 0.15rem 0.25rem;
+  }
+
+  .app-content {
+    padding: 0.5rem;
+    margin-bottom: 70px;
+  }
+}
+
 /* ========== أنماط الجوال (المعدلة) ========== */
 @media (max-width: 768px) {
   .layout__search-mobile {

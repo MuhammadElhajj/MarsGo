@@ -1,9 +1,14 @@
+// src/hooks/useUserStats.js
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, query, where, getCountFromServer } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 
-export default function useUserStats() {
+/**
+ * هوك لجلب إحصائيات طلبات المستخدم (حسب الحالة)
+ * @param {boolean} enabled - إذا كان false، لن يتم جلب البيانات (يُستخدم لتأخير التحميل)
+ */
+export default function useUserStats(enabled = true) {
   const { userData } = useAuth();
   const [stats, setStats] = useState({
     pendingVerification: 0,      // قيد التدقيق
@@ -16,10 +21,17 @@ export default function useUserStats() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // إذا كان الهوك معطلاً، نوقف التحميل
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     if (!userData?.uid) {
       setLoading(false);
       return;
     }
+
     const fetchStats = async () => {
       try {
         const ordersRef = collection(db, "orders");
@@ -49,8 +61,9 @@ export default function useUserStats() {
         setLoading(false);
       }
     };
+
     fetchStats();
-  }, [userData]);
+  }, [userData, enabled]); // ✅ نضيف enabled كـ dependency
 
   return { stats, loading };
 }
