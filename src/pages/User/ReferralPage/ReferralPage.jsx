@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../../../store/store';
 import { useAuth } from '../../../context/AuthContext';
-import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import Button from '../../../components/GeneralComponents/Button/Button';
 import ReferralCard from '../../../components/UserComponents/Referral/ReferralCard';
 import { 
@@ -11,6 +10,8 @@ import {
   FiClock
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { db } from '../../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import './ReferralPage.css';
 
 export default function ReferralPage() {
@@ -29,6 +30,7 @@ export default function ReferralPage() {
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
+  const [referralUsers, setReferralUsers] = useState({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,8 +43,22 @@ export default function ReferralPage() {
       setReferralCount(count);
       
       const referrals = await getRecentReferrals(50);
-      setAllReferrals(referrals);
       
+      // جلب بيانات المستخدمين المحالين
+      const userIds = referrals.map(ref => ref.referredId).filter(Boolean);
+      const usersMap = {};
+      if (userIds.length > 0) {
+        const userPromises = userIds.map(async (uid) => {
+          const userSnap = await getDoc(doc(db, 'users', uid));
+          if (userSnap.exists()) {
+            usersMap[uid] = userSnap.data();
+          }
+        });
+        await Promise.all(userPromises);
+      }
+      
+      setAllReferrals(referrals);
+      setReferralUsers(usersMap);
       setLoading(false);
     };
     loadData();
@@ -81,8 +97,9 @@ export default function ReferralPage() {
     );
   }
 
-  const pendingReferrals = allReferrals.filter(ref => ref.status === 'pending');
-  const claimedReferrals = allReferrals.filter(ref => ref.status === 'claimed');
+  // استخدام rewardStatus بدلاً من status
+  const pendingReferrals = allReferrals.filter(ref => ref.rewardStatus === 'pending');
+  const claimedReferrals = allReferrals.filter(ref => ref.rewardStatus === 'claimed');
 
   const canClaim = referralBalance >= 100;
   const progressToNext = Math.min((referralBalance / 100) * 100, 100);
@@ -91,16 +108,13 @@ export default function ReferralPage() {
     <div className="referral-page" dir="rtl">
       {/* ===== الهيدر ===== */}
       <div className="referral-page__header">
-        {/* <GoBackButton text="رجوع" /> */}
         <h1 className="referral-page__title">
           <FiShare2 className="header-icon" style={{ color: '#10b981' }} />
           دعوة الأصدقاء
         </h1>
       </div>
 
-      {/* ============================================================
-          ✅ قسم شرح النظام (تم نقله إلى الأعلى)
-          ============================================================ */}
+      {/* ===== قسم شرح النظام ===== */}
       <div className="referral-page__info">
         <h4>
           <FiInfo className="info-icon" style={{ color: '#f59e0b' }} />
@@ -229,9 +243,16 @@ export default function ReferralPage() {
         <div className="referral-page__list">
           {activeTab === 'pending' ? (
             pendingReferrals.length > 0 ? (
-              pendingReferrals.map(ref => (
-                <ReferralCard key={ref.id} referral={ref} />
-              ))
+              pendingReferrals.map(ref => {
+                const user = referralUsers[ref.referredId] || {};
+                return (
+                  <ReferralCard 
+                    key={ref.id} 
+                    referral={ref} 
+                    user={user}
+                  />
+                );
+              })
             ) : (
               <div className="empty-state">
                 <p>لا توجد إحالات معلقة حالياً</p>
@@ -239,9 +260,16 @@ export default function ReferralPage() {
             )
           ) : (
             claimedReferrals.length > 0 ? (
-              claimedReferrals.map(ref => (
-                <ReferralCard key={ref.id} referral={ref} />
-              ))
+              claimedReferrals.map(ref => {
+                const user = referralUsers[ref.referredId] || {};
+                return (
+                  <ReferralCard 
+                    key={ref.id} 
+                    referral={ref} 
+                    user={user}
+                  />
+                );
+              })
             ) : (
               <div className="empty-state">
                 <p>لا توجد إحالات مودعة حتى الآن</p>

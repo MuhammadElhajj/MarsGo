@@ -4,21 +4,18 @@ import { doc, setDoc, getDoc, collection, getDocs, query, orderBy, where, writeB
 import { db } from '../../../firebase';
 import { showToast } from '../../GeneralComponents/ToastNotification/ToastNotification';
 import Button from '../../GeneralComponents/Button/Button';
-import Input from '../../GeneralComponents/Input/Input';
-import ImageUpload from '../../GeneralComponents/ImageUpload/ImageUpload';
 import GoBackButton from '../../GeneralComponents/GoBackButton/GoBackButton';
-import {
-  FiSearch, FiArrowUp, FiArrowDown, FiStar, FiFilter, FiSave, FiRefreshCw, FiX,
-  FiPlus, FiEdit, FiTrash2, FiToggleLeft, FiToggleRight, FiFolder, FiSettings,
-} from 'react-icons/fi';
+import { FiSearch, FiArrowUp, FiArrowDown, FiStar, FiFilter, FiSave, FiRefreshCw, FiX } from 'react-icons/fi';
 
-// استيراد المكونات الفرعية
-import { SubCategoryManager } from './components/SubCategoryManager';
-import { CategoryMappingManager } from './components/CategoryMappingManager';
-import { ProductCardItem } from './components/ProductCardItem';
+// المكونات الجديدة
+import ImportSettings from './components/ImportSettings/ImportSettings';
+import ParentSelector from './components/ParentSelector/ParentSelector';
+import ProductFilters from './components/ProductFilters/ProductFilters';
+import ProductGrid from './components/ProductGrid/ProductGrid';
+
 import { useParentItems } from './hooks/useParentItems';
 import { useProducts } from './hooks/useProducts';
-import { generateSlug, getQuantityType } from './utils/helpers';
+import { getQuantityType } from './utils/helpers';
 
 import './ExternalStoreImport.css';
 
@@ -48,6 +45,7 @@ export default function ExternalStoreImport() {
   const [maxPrice, setMaxPrice] = useState('');
   const [showOnlyPopular, setShowOnlyPopular] = useState(false);
   const [importing, setImporting] = useState({});
+  const [loading, setLoading] = useState(false);
 
   // جلب إعدادات التصنيف
   const loadMappingSettings = useCallback(async () => {
@@ -64,13 +62,11 @@ export default function ExternalStoreImport() {
     loadMappingSettings();
   }, []);
 
-  // عند تغيير التصنيف المستهدف، نعيد تعيين الأب المختار
   useEffect(() => {
     setSelectedParentId(null);
     setSelectedParentGlobalImage('');
   }, [selectedTargetCategoryId]);
 
-  // البيانات المشتقة
   const externalCategories = useMemo(() => [...new Set(products.map(p => p.category_name).filter(Boolean))], [products]);
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -103,7 +99,36 @@ export default function ExternalStoreImport() {
     setIsLoadingMore(false);
   }, []);
 
-  // منطق الاستيراد – مع إضافة الحقول الجديدة
+  const resetFilters = useCallback(() => {
+    setSearchTerm('');
+    setFilterExternalCategory('');
+    setMinPrice('');
+    setMaxPrice('');
+    setShowOnlyPopular(false);
+    setSortBy('name');
+    setSortOrder('asc');
+  }, []);
+
+  const togglePopular = useCallback((productId, imageUrl = null) => {
+    if (imageUrl !== null) {
+      setProductImages(prev => ({ ...prev, [productId]: imageUrl }));
+    } else {
+      setPopularProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.has(productId) ? newSet.delete(productId) : newSet.add(productId);
+        return newSet;
+      });
+    }
+  }, []);
+
+  const saveCategoryImage = useCallback(async () => {
+    if (selectedTargetCategoryId && globalCategoryImage) {
+      await setDoc(doc(db, 'categoryImages', selectedTargetCategoryId), { imageUrl: globalCategoryImage, updatedAt: new Date().toISOString() }, { merge: true });
+      showToast('تم حفظ صورة القسم', 'success');
+    }
+  }, [selectedTargetCategoryId, globalCategoryImage]);
+
+  // منطق الاستيراد
   const importToPackages = useCallback(async (productsToImport) => {
     if (!selectedTargetCategoryId || (selectedTargetCategoryId !== 'games' && selectedTargetCategoryId !== 'apps')) {
       showToast('الاستيراد ممكن فقط للألعاب أو التطبيقات', 'error');
@@ -125,7 +150,6 @@ export default function ExternalStoreImport() {
       const packageId = prod.id.toString();
       const packageDocRef = doc(packagesRef, packageId);
 
-      // ✅ إضافة معطيات الكمية المتغيرة
       const qtyValues = prod.qty_values || { min: 1, max: 1 };
       const quantityType = getQuantityType(qtyValues);
 
@@ -142,7 +166,6 @@ export default function ExternalStoreImport() {
         externalProductId: prod.id,
         externalAnyKey: '',
         isPopular: popularProducts.has(prod.id),
-        // ✅ الحقول الجديدة للكمية المتغيرة
         quantityType: quantityType,
         minQuantity: qtyValues.min ?? 1,
         maxQuantity: qtyValues.max ?? 1,
@@ -179,39 +202,8 @@ export default function ExternalStoreImport() {
     setLoading(false);
   }, [selectedParentId, importToPackages, filteredAndSortedProducts]);
 
-  // معالجات أخرى
-  const resetFilters = useCallback(() => {
-    setSearchTerm('');
-    setFilterExternalCategory('');
-    setMinPrice('');
-    setMaxPrice('');
-    setShowOnlyPopular(false);
-    setSortBy('name');
-    setSortOrder('asc');
-  }, []);
-
-  const togglePopular = useCallback((productId, imageUrl = null) => {
-    if (imageUrl !== null) {
-      setProductImages(prev => ({ ...prev, [productId]: imageUrl }));
-    } else {
-      setPopularProducts(prev => {
-        const newSet = new Set(prev);
-        newSet.has(productId) ? newSet.delete(productId) : newSet.add(productId);
-        return newSet;
-      });
-    }
-  }, []);
-
-  const saveCategoryImage = useCallback(async () => {
-    if (selectedTargetCategoryId && globalCategoryImage) {
-      await setDoc(doc(db, 'categoryImages', selectedTargetCategoryId), { imageUrl: globalCategoryImage, updatedAt: new Date().toISOString() }, { merge: true });
-      showToast('تم حفظ صورة القسم', 'success');
-    }
-  }, [selectedTargetCategoryId, globalCategoryImage]);
-
   if (productsLoading && products.length === 0) return <div className="import-loading">جاري تحميل البيانات...</div>;
 
-  const selectedParent = parentItems.find(p => p.id === selectedParentId);
   const titleLabel = selectedTargetCategoryId === 'games' ? 'اللعبة' : 'التطبيق';
 
   return (
@@ -225,148 +217,70 @@ export default function ExternalStoreImport() {
         <p>اختر التصنيف (ألعاب/تطبيقات) ثم اختر {titleLabel}، وارفع صورة موحدة (اختياري) ثم استورد الباقات داخلها</p>
       </div>
 
-      {/* الإعدادات الرئيسية */}
-      <div className="card settings-card">
-        <div className="settings-row">
-          <div className="target-selector">
-            <label>التصنيف المستهدف:</label>
-            <select value={selectedTargetCategoryId} onChange={e => setSelectedTargetCategoryId(e.target.value)}>
-              <option value="games">ألعاب</option>
-              <option value="apps">تطبيقات</option>
-            </select>
-          </div>
-          <div className="markup-input">
-            <Input label="نسبة الربح (%)" type="number" step="1" min="0" value={markupPercent} onChange={e => setMarkupPercent(Number(e.target.value))} />
-            <p className="hint">السعر النهائي = السعر الأصلي × (1 + نسبة الربح/100)</p>
-          </div>
-          <Button onClick={() => setShowMappingManager(!showMappingManager)} variant="outline" size="sm"><FiFilter /> إدارة التصنيفات</Button>
-        </div>
-        {showMappingManager && (
-          <CategoryMappingManager
-            externalCategories={externalCategories}
-            initialMappings={categoryMappings}
-            initialHierarchicalConfig={hierarchicalConfig}
-            onMappingChange={({ mappings, hierarchicalConfig: newConfig }) => {
-              setCategoryMappings(mappings);
-              setHierarchicalConfig(newConfig);
-              showToast('تم تحديث الإعدادات', 'info');
-            }}
-          />
-        )}
-        <div className="global-image-section">
-          <label>صورة عامة للقسم (تظهر في الباقات إذا لم ترفع صورة خاصة):</label>
-          <div className="image-upload-row">
-            <ImageUpload onUploadComplete={setGlobalCategoryImage} maxSizeMB={0.5} storagePath={`store_import/global/${selectedTargetCategoryId}`} label="رفع صورة" />
-            {globalCategoryImage && (
-              <div className="image-preview">
-                <img src={globalCategoryImage} alt="قسم" />
-                <button onClick={() => setGlobalCategoryImage('')} className="remove-btn"><FiX /></button>
-              </div>
-            )}
-          </div>
-          <Button onClick={saveCategoryImage} variant="secondary" size="sm"><FiSave /> حفظ صورة القسم</Button>
-        </div>
-      </div>
+      <ImportSettings
+        selectedTargetCategoryId={selectedTargetCategoryId}
+        setSelectedTargetCategoryId={setSelectedTargetCategoryId}
+        markupPercent={markupPercent}
+        setMarkupPercent={setMarkupPercent}
+        showMappingManager={showMappingManager}
+        setShowMappingManager={setShowMappingManager}
+        externalCategories={externalCategories}
+        categoryMappings={categoryMappings}
+        setCategoryMappings={setCategoryMappings}
+        hierarchicalConfig={hierarchicalConfig}
+        setHierarchicalConfig={setHierarchicalConfig}
+        globalCategoryImage={globalCategoryImage}
+        setGlobalCategoryImage={setGlobalCategoryImage}
+        saveCategoryImage={saveCategoryImage}
+      />
 
-      {/* قائمة الألعاب/التطبيقات الحالية */}
-      <div className="card parents-selection">
-        <h4><FiFolder /> اختر {titleLabel} التي تريد إضافة الباقات إليها</h4>
-        {parentItems.length === 0 ? (
-          <p className="no-parents">لا توجد {titleLabel === 'اللعبة' ? 'ألعاب' : 'تطبيقات'} مضافة بعد. قم بإضافتها من لوحة الإدارة أولاً.</p>
-        ) : (
-          <div className="parents-grid">
-            {parentItems.map(parent => (
-              <div
-                key={parent.id}
-                className={`parent-card ${selectedParentId === parent.id ? 'selected' : ''}`}
-                onClick={() => setSelectedParentId(parent.id)}
-              >
-                <div className="parent-image">
-                  {parent.imageUrl ? (
-                    <img src={parent.imageUrl} alt={parent.name} loading="lazy" />
-                  ) : (
-                    <div className="parent-placeholder">{selectedTargetCategoryId === 'games' ? '🎮' : '📱'}</div>
-                  )}
-                </div>
-                <div className="parent-info">
-                  <h5>{parent.name}</h5>
-                  <p className="parent-description">{parent.description?.slice(0, 60)}</p>
-                  <span className="parent-product-count">📦 {parent.packageCount} باقة</span>
-                </div>
-                {selectedParentId === parent.id && <div className="parent-selected-badge">✓</div>}
-              </div>
-            ))}
-          </div>
-        )}
-        {selectedParent && (
-          <div className="selected-parent-details">
-            <div className="selected-parent-header">
-              <strong>القسم المختار:</strong> {selectedParent.name}
-              <Button variant="outline" size="sm" onClick={() => { setSelectedParentId(null); setSelectedParentGlobalImage(''); }}>
-                تغيير
-              </Button>
-            </div>
-            <div className="parent-global-image">
-              <label>صورة موحدة لجميع الباقات المستوردة لهذا القسم (اختياري):</label>
-              <ImageUpload onUploadComplete={handleParentImageUpload} maxSizeMB={0.5} storagePath={`store_import/parent/${selectedParent.id}`} label="رفع صورة موحدة" />
-              {selectedParentGlobalImage && (
-                <div className="image-preview">
-                  <img src={selectedParentGlobalImage} alt="صورة موحدة" />
-                  <button onClick={() => setSelectedParentGlobalImage('')} className="remove-btn"><FiX /></button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      <ParentSelector
+        parentItems={parentItems}
+        selectedParentId={selectedParentId}
+        setSelectedParentId={setSelectedParentId}
+        selectedParentGlobalImage={selectedParentGlobalImage}
+        setSelectedParentGlobalImage={setSelectedParentGlobalImage}
+        titleLabel={titleLabel}
+      />
 
-      {/* الفلترة وعرض المنتجات */}
-      <div className="card filters-card">
-        <div className="filters-header"><h4>فلترة المنتجات الخارجية</h4><Button onClick={resetFilters} variant="outline" size="sm"><FiRefreshCw /> إعادة ضبط</Button></div>
-        <div className="filters-grid">
-          <div className="filter-item search-box"><FiSearch className="search-icon" /><input type="text" placeholder="بحث..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} /></div>
-          <div className="filter-item"><select value={filterExternalCategory} onChange={e => setFilterExternalCategory(e.target.value)}><option value="">كل التصنيفات الخارجية</option>{externalCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
-          <div className="filter-item price-range"><input type="number" placeholder="الحد الأدنى" value={minPrice} onChange={e => setMinPrice(e.target.value)} /><span>-</span><input type="number" placeholder="الحد الأعلى" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} /></div>
-          <div className="filter-item"><label className="checkbox-label"><input type="checkbox" checked={showOnlyPopular} onChange={e => setShowOnlyPopular(e.target.checked)} /> المميزة فقط</label></div>
-          <div className="filter-item sort-controls"><select value={sortBy} onChange={e => setSortBy(e.target.value)}><option value="name">الاسم</option><option value="price">السعر</option><option value="id">المعرف</option></select><button onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} className="sort-order-btn">{sortOrder === 'asc' ? <FiArrowUp /> : <FiArrowDown />}</button></div>
-        </div>
-      </div>
+      <ProductFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        filterExternalCategory={filterExternalCategory}
+        setFilterExternalCategory={setFilterExternalCategory}
+        externalCategories={externalCategories}
+        minPrice={minPrice}
+        setMinPrice={setMinPrice}
+        maxPrice={maxPrice}
+        setMaxPrice={setMaxPrice}
+        showOnlyPopular={showOnlyPopular}
+        setShowOnlyPopular={setShowOnlyPopular}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        resetFilters={resetFilters}
+      />
 
-      {/* شبكة المنتجات */}
-      <div className="products-grid">
-        {displayedProducts.map(product => {
-          const isPopular = popularProducts.has(product.id);
-          const imageUrl = selectedParentGlobalImage || productImages[product.id] || globalCategoryImage || product.image;
-          return (
-            <ProductCardItem
-              key={product.id}
-              product={product}
-              markupPercent={markupPercent}
-              isPopular={isPopular}
-              imageUrl={imageUrl}
-              onTogglePopular={togglePopular}
-              onImportSingle={handleImportSingle}
-              isImporting={importing[product.id]}
-              selectedParentId={selectedParentId}
-            />
-          );
-        })}
-      </div>
-      {hasMore && (
-        <div className="load-more-button" style={{ textAlign: 'center', marginTop: '1rem' }}>
-          <Button onClick={loadMore} disabled={isLoadingMore} variant="secondary">
-            {isLoadingMore ? 'جاري التحميل...' : `تحميل المزيد (${filteredAndSortedProducts.length - visibleCount} منتج متبقي)`}
-          </Button>
-        </div>
-      )}
-
-      {selectedParentId && filteredAndSortedProducts.length > 0 && (
-        <div className="import-all-button">
-          <Button onClick={handleImportAll} variant="secondary" disabled={loading}>
-            استيراد جميع المنتجات المعروضة كباقات ({filteredAndSortedProducts.length})
-          </Button>
-        </div>
-      )}
+      <ProductGrid
+        displayedProducts={displayedProducts}
+        markupPercent={markupPercent}
+        popularProducts={popularProducts}
+        togglePopular={togglePopular}
+        selectedParentId={selectedParentId}
+        handleImportSingle={handleImportSingle}
+        importing={importing}
+        selectedParentGlobalImage={selectedParentGlobalImage}
+        productImages={productImages}
+        globalCategoryImage={globalCategoryImage}
+        hasMore={hasMore}
+        loadMore={loadMore}
+        isLoadingMore={isLoadingMore}
+        filteredAndSortedProducts={filteredAndSortedProducts}
+        visibleCount={visibleCount}
+        handleImportAll={handleImportAll}
+        loading={loading}
+      />
     </div>
   );
 }

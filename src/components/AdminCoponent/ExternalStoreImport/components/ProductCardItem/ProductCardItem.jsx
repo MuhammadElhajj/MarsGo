@@ -5,18 +5,20 @@ import Button from '../../../../GeneralComponents/Button/Button';
 import ImageUpload from '../../../../GeneralComponents/ImageUpload/ImageUpload';
 import './ProductCardItem.css';
 
-export const ProductCardItem = memo(({ 
-  product, 
-  markupPercent, 
-  isPopular, 
-  imageUrl, 
-  onTogglePopular, 
-  onImportSingle, 
+export const ProductCardItem = memo(({
+  product,
+  markupPercent,
+  isPopular,
+  imageUrl,
+  onTogglePopular,
+  onImportSingle,
   isImporting,
-  selectedParentId 
+  selectedParentId
 }) => {
   const finalPrice = product.price * (1 + markupPercent / 100);
   const [localImageUrl, setLocalImageUrl] = useState(imageUrl);
+  const qtyValues = product.qty_values || { min: 1, max: 1 };
+  const isVariable = qtyValues.min !== qtyValues.max || qtyValues.min > 1;
 
   const handleImageUpload = (url) => {
     setLocalImageUrl(url);
@@ -32,12 +34,12 @@ export const ProductCardItem = memo(({
       <div className="product-card__image">
         {localImageUrl ? <img src={localImageUrl} alt={product.name} loading="lazy" /> : <div className="image-placeholder">📦</div>}
         <div className="image-upload-wrapper">
-          <ImageUpload 
-            onUploadComplete={handleImageUpload} 
-            maxSizeMB={0.5} 
-            storagePath={`store_import/products/${product.id}`} 
-            label="صورة خاصة" 
-            className="small-upload" 
+          <ImageUpload
+            onUploadComplete={handleImageUpload}
+            maxSizeMB={0.5}
+            storagePath={`store_import/products/${product.id}`}
+            label="صورة خاصة"
+            className="small-upload"
           />
         </div>
       </div>
@@ -49,6 +51,16 @@ export const ProductCardItem = memo(({
           <span className="final-price">{finalPrice.toFixed(2)} $</span>
         </div>
         <div className="stock">المخزون: {product.stock ?? 'غير محدد'}</div>
+        <div className="quantity-info">
+          <span className={`quantity-badge ${isVariable ? 'variable' : 'fixed'}`}>
+            {isVariable ? '🔄 كمية متغيرة' : '📦 كمية ثابتة'}
+          </span>
+          {isVariable && (
+            <span className="quantity-range">
+              الحد الأدنى: {qtyValues.min} - الحد الأعلى: {qtyValues.max}
+            </span>
+          )}
+        </div>
       </div>
       <div className="product-card__actions">
         <button className={`popular-btn ${isPopular ? 'active' : ''}`} onClick={handleTogglePopular}>

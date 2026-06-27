@@ -1,0 +1,27 @@
+/* أضف في نهاية الملف */
+.quantity-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  flex-wrap: wrap;
+}
+.quantity-badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  font-weight: 500;
+}
+.quantity-badge.fixed {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.quantity-badge.variable {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+.quantity-range {
+  font-weight: 500;
+  color: var(--color-accent);
+}

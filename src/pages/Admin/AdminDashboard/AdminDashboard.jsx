@@ -88,105 +88,107 @@ export default function AdminDashboard() {
   };
 
   // ===== 1. الإحصائيات الأساسية =====
-  const fetchStats = async () => {
-    try {
-      // المستخدمين
-      const usersSnap = await getCountFromServer(collection(db, 'users'));
-      const totalUsers = usersSnap.data().count;
+ // src/pages/Admin/AdminDashboard.jsx - داخل الدالة fetchStats
 
-      // المستخدمين النشطين (لديهم طلبات في آخر 30 يوم)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const activeUsersQuery = query(
-        collection(db, 'orders'),
-        where('createdAt', '>=', thirtyDaysAgo)
-      );
-      const activeOrdersSnap = await getDocs(activeUsersQuery);
-      const activeUserIds = new Set();
-      activeOrdersSnap.forEach(doc => {
-        const data = doc.data();
-        if (data.userId) activeUserIds.add(data.userId);
-      });
-      const activeUsers = activeUserIds.size;
+const fetchStats = async () => {
+  try {
+    // 1. المستخدمين - باستخدام getCountFromServer
+    const usersSnap = await getCountFromServer(collection(db, 'users'));
+    const totalUsers = usersSnap.data().count;
 
-      // الطلبات
-      const ordersSnap = await getCountFromServer(collection(db, 'orders'));
-      const totalOrders = ordersSnap.data().count;
+    // 2. المستخدمين النشطين - استعلام محدود
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const activeUsersQuery = query(
+      collection(db, 'orders'),
+      where('createdAt', '>=', thirtyDaysAgo)
+    );
+    const activeOrdersSnap = await getDocs(activeUsersQuery);
+    const activeUserIds = new Set();
+    activeOrdersSnap.forEach(doc => {
+      const data = doc.data();
+      if (data.userId) activeUserIds.add(data.userId);
+    });
+    const activeUsers = activeUserIds.size;
 
-      // الطلبات حسب الحالة
-      const pendingQuery = query(collection(db, 'orders'), where('status', 'in', ['pending_verification', 'awaiting_customer_resubmit', 'verified_pending_execution']));
-      const pendingSnap = await getCountFromServer(pendingQuery);
+    // 3. الطلبات - باستخدام getCountFromServer
+    const totalOrdersSnap = await getCountFromServer(collection(db, 'orders'));
+    const totalOrders = totalOrdersSnap.data().count;
 
-      const completedQuery = query(collection(db, 'orders'), where('status', '==', 'completed'));
-      const completedSnap = await getCountFromServer(completedQuery);
+    const pendingQuery = query(collection(db, 'orders'), where('status', 'in', ['pending_verification', 'awaiting_customer_resubmit', 'verified_pending_execution']));
+    const pendingSnap = await getCountFromServer(pendingQuery);
+    const pendingOrders = pendingSnap.data().count;
 
-      const rejectedQuery = query(collection(db, 'orders'), where('status', '==', 'rejected'));
-      const rejectedSnap = await getCountFromServer(rejectedQuery);
+    const completedQuery = query(collection(db, 'orders'), where('status', '==', 'completed'));
+    const completedSnap = await getCountFromServer(completedQuery);
+    const completedOrders = completedSnap.data().count;
 
-      // الإيرادات (من الطلبات المكتملة)
-      let totalRevenue = 0;
-      let todayRevenue = 0;
-      let monthlyRevenue = 0;
-      let todayOrders = 0;
-      let monthlyOrders = 0;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const rejectedQuery = query(collection(db, 'orders'), where('status', '==', 'rejected'));
+    const rejectedSnap = await getCountFromServer(rejectedQuery);
+    const rejectedOrders = rejectedSnap.data().count;
 
-      const allOrdersSnap = await getDocs(collection(db, 'orders'));
-      allOrdersSnap.forEach(doc => {
-        const order = doc.data();
-        if (order.status === 'completed') {
-          const amount = order.finalPriceUSD || order.finalPrice || order.amount || 0;
-          totalRevenue += amount;
-          
-          const orderDate = order.createdAt?.toDate?.() || new Date(order.createdAt);
-          if (orderDate >= today) {
-            todayRevenue += amount;
-            todayOrders++;
-          }
-          if (orderDate >= monthStart) {
-            monthlyRevenue += amount;
-            monthlyOrders++;
-          }
-        }
-      });
+    // 4. الإيرادات - جلب آخر 500 طلب مكتمل فقط وحساب المجموع
+    let totalRevenue = 0;
+    let todayRevenue = 0;
+    let monthlyRevenue = 0;
+    let todayOrders = 0;
+    let monthlyOrders = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-      // الإحالات
-      const referralQuery = query(collection(db, 'referral_rewards'));
-      const referralSnap = await getDocs(referralQuery);
-      const referrers = new Set();
-      let pendingReferrals = 0;
-      let claimedReferrals = 0;
-      referralSnap.forEach(doc => {
-        const data = doc.data();
-        if (data.referrerId) referrers.add(data.referrerId);
-        if (data.status === 'pending') pendingReferrals++;
-        else if (data.status === 'claimed') claimedReferrals++;
-      });
+    // استعلام محدود بآخر 500 طلب مكتمل (مرتبة تنازلياً)
+    const recentCompletedQuery = query(
+      collection(db, 'orders'),
+      where('status', '==', 'completed'),
+      orderBy('createdAt', 'desc'),
+      limit(500)
+    );
+    const recentCompletedSnap = await getDocs(recentCompletedQuery);
+    recentCompletedSnap.forEach(doc => {
+      const order = doc.data();
+      const amount = order.finalPriceUSD || order.finalPrice || order.amount || 0;
+      totalRevenue += amount;
 
-      setStats({
-        totalUsers,
-        activeUsers,
-        inactiveUsers: totalUsers - activeUsers,
-        totalOrders,
-        pendingOrders: pendingSnap.data().count,
-        completedOrders: completedSnap.data().count,
-        rejectedOrders: rejectedSnap.data().count,
-        totalRevenue,
-        todayOrders,
-        todayRevenue,
-        monthlyOrders,
-        monthlyRevenue,
-        totalReferrers: referrers.size,
-        totalReferred: referralSnap.size,
-        pendingReferrals,
-        claimedReferrals,
-      });
-    } catch (err) {
-      console.error('خطأ في جلب الإحصائيات:', err);
-    }
-  };
+      const orderDate = order.createdAt?.toDate?.() || new Date(order.createdAt);
+      if (orderDate >= today) {
+        todayRevenue += amount;
+        todayOrders++;
+      }
+      if (orderDate >= monthStart) {
+        monthlyRevenue += amount;
+        monthlyOrders++;
+      }
+    });
+
+    // 5. الإحالات - باستخدام getCountFromServer
+    const referralSnap = await getCountFromServer(collection(db, 'referral_rewards'));
+    const totalReferred = referralSnap.data().count;
+    // يمكن جلب عدد المُحيلين من خلال استعلام منفصل أو تجاهله مؤقتاً
+    const totalReferrers = 0; // يمكن تركه مؤقتاً أو حسابه بطريقة أخرى
+
+    setStats({
+      totalUsers,
+      activeUsers,
+      inactiveUsers: totalUsers - activeUsers,
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      rejectedOrders,
+      totalRevenue,
+      todayOrders,
+      todayRevenue,
+      monthlyOrders,
+      monthlyRevenue,
+      totalReferrers,
+      totalReferred,
+      pendingReferrals: 0, // يمكن إضافتها لاحقاً
+      claimedReferrals: 0,
+    });
+  } catch (err) {
+    console.error('خطأ في جلب الإحصائيات:', err);
+  }
+};
 
   // ===== 2. اتجاه الطلبات (آخر 7 أيام) =====
   const fetchOrderTrend = async () => {

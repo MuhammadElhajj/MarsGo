@@ -98,23 +98,23 @@ export default function UserDetails() {
         }
 
         // جلب قائمة الإحالات (المحالين)
-        const referralsList = [];
-        for (const docSnap of referralSnap.docs) {
-          const refData = docSnap.data();
-          const referredId = refData.referredId;
-          const referredSnap = await getDoc(doc(db, 'users', referredId));
-          if (referredSnap.exists()) {
-            referralsList.push({
-              id: referredId,
-              name: referredSnap.data().name || 'مستخدم',
-              status: refData.status || 'pending',
-              rewardAmount: refData.rewardAmount || 20,
-              createdAt: refData.createdAt,
-            });
-          }
-        }
-        setReferrals(referralsList);
-
+       const referralPromises = referralSnap.docs.map(async (docSnap) => {
+  const refData = docSnap.data();
+  const referredId = refData.referredId;
+  const referredSnap = await getDoc(doc(db, 'users', referredId));
+  if (referredSnap.exists()) {
+    return {
+      id: referredId,
+      name: referredSnap.data().name || 'مستخدم',
+      status: refData.status || 'pending',
+      rewardAmount: refData.rewardAmount || 20,
+      createdAt: refData.createdAt,
+    };
+  }
+  return null;
+});
+const referralsList = (await Promise.all(referralPromises)).filter(Boolean);
+setReferrals(referralsList);
         setStats({
           totalOrders: orders.length,
           completedOrders: completed,
