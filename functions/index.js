@@ -19,8 +19,8 @@ exports.updateExchangeRate = require('./autoUpdate').updateExchangeRate;
 exports.manualUpdateExchangeRate = require('./manualUpdate').manualUpdateExchangeRate;
 
 // ==================== بوت تيليجرام (معطل حالياً) ====================
-// const telegramBot = require('./telegramBot/telegramBot');
-// exports.telegramWebhook = telegramBot.telegramWebhook;
+exports.sendOrderNotification = require('./notifications/telegram').sendOrderNotification;
+exports.sendDepositNotification = require('./notifications/telegram').sendDepositNotification;
 
 // ==================== دالة وسيطة للمتجر الخارجي ====================
 exports.externalStoreProxy = require('./externalStoreProxy').externalStoreProxy;
@@ -31,3 +31,11 @@ exports.importProductsFromExternal = require('./admin/importFromExternal').impor
 
 // دالة تصحيح التصنيفات (تشغيل لمرة واحدة)
 exports.updateCategoryIds = require('./updateCategoryIds').updateCategoryIds;
+
+
+exports.updateBalance = require('./transactions/transactionFunctions').updateBalance;
+exports.buyMgc = require('./transactions/transactionFunctions').buyMgc;
+exports.sellMgc = require('./transactions/transactionFunctions').sellMgc;
+
+// functions/index.js
+exports.telegramDepositWebhook = require('./telegramBot/telegramBot').telegramDepositWebhook;

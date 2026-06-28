@@ -8,23 +8,16 @@
   direction: rtl;
 }
 
-.product-page__back {
-  margin-bottom: 1.2rem;
-}
-
-/* ===== البطاقة الرئيسية (تشبه Activity Card) ===== */
+/* ===== البطاقة الرئيسية ===== */
 .product-page__card {
-  /* background: var(--color-bg-secondary); */
 
-  padding: 1.5rem;
-   transition: box-shadow 0.2s ease;
+ 
+ 
+  transition: box-shadow 0.2s ease;
 }
 
-.product-page__card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-}
 
-/* ===== رأس البطاقة (صورة + اسم + سعر) ===== */
+/* ===== رأس البطاقة (صورة + اسم + سعر + ملاحظة) ===== */
 .product-page__header {
   display: flex;
   align-items: center;
@@ -108,68 +101,39 @@
   font-weight: 600;
 }
 
-.product-page__note-badge {
-  display: inline-flex;
+/* الملاحظة الآن تحت السعر */
+.product-page__note {
+  display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   color: var(--color-text-secondary);
-  background: var(--color-bg-primary);
-  padding: 0.2rem 0.7rem;
-  border-radius: 1.2rem;
-  border: 1px solid var(--color-border);
+  margin-top: 0.2rem;
+}
+
+.product-page__note-icon {
+  font-size: 0.9rem;
 }
 
 /* ===== كارد الرصيد ===== */
 .balance-card {
-  background: var(--color-bg-secondary);
-  border-radius: 0.9rem;
-  padding: 0.7rem 1.2rem;
-  margin-bottom: 1.2rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.8rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
-  transition: all 0.3s ease;
+  margin: 1rem 0;
 }
-.balance-card.balance-sufficient {
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  border-color: #10b981;
-  color: #064e3b;
-}
-.balance-card.balance-sufficient .balance-amount {
+.balance-sufficient {
+  background: #d1fae5;
   color: #065f46;
 }
-.balance-card.balance-insufficient {
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-  border-color: #ef4444;
-  color: #7f1d1d;
-}
-.balance-card.balance-insufficient .balance-amount {
+.balance-insufficient {
+  background: #fee2e2;
   color: #b91c1c;
 }
-
-.balance-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-.balance-amount {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
 .balance-warning {
-  background: rgba(239, 68, 68, 0.08);
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.8rem;
   color: #ef4444;
-  text-align: center;
+  margin-bottom: 1rem;
 }
 
 /* ===== النموذج ===== */
@@ -193,15 +157,24 @@
   align-items: center;
 }
 
+/* تحسين حقل الإدخال */
 .quantity-input {
-  width: 120px;
-  padding: 0.5rem;
+  width: 100%;
+  max-width: 200px;
+  padding: 0.6rem 0.8rem;
   border-radius: 0.6rem;
   border: 1px solid var(--color-border);
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-size: 1rem;
   text-align: center;
+  transition: border-color 0.2s;
+}
+
+.quantity-input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
 }
 
 .quantity-range-hint {
@@ -269,11 +242,7 @@
 
 /* ===== استجابة الجوال ===== */
 @media (max-width: 768px) {
-  .product-page__header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.8rem;
-  }
+
   .product-page__image-wrapper {
     width: 70px;
     height: 70px;
@@ -291,15 +260,12 @@
     font-size: 1rem;
   }
   .quantity-input {
-    width: 100px;
+    max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
- 
-  .product-page__card {
-    padding: 1rem;
-  }
+
   .product-page__image-wrapper {
     width: 60px;
     height: 60px;
@@ -328,4 +294,34 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/* ===== تنسيق خاص بحقل معرف اللاعب (playerId) ===== */
+.player-id-input {
+  width: 100% !important;
+  padding: 0.8rem 1rem !important;
+  font-size: 1.1rem !important;
+  font-family: monospace !important;
+  letter-spacing: 2px !important;
+  background: var(--color-bg-primary) !important;
+  border: 2px solid var(--color-accent) !important;
+  border-radius: 0.75rem !important;
+  color: var(--color-text-primary) !important;
+  transition: all 0.3s ease !important;
+  text-align: center !important;
+}
+
+.player-id-input:focus {
+  outline: none !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+  background: var(--color-bg-secondary) !important;
+}
+
+.player-id-input::placeholder {
+  text-align: center !important;
+  font-family: inherit !important;
+  letter-spacing: normal !important;
+  opacity: 0.6 !important;
 }

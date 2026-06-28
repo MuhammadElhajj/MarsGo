@@ -2,178 +2,248 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const axios = require('axios');
+const { defineSecret } = require('firebase-functions/params');
 
+// ===== تعريف الأسرار =====
+const BOT_TOKEN_SECRET = defineSecret('TELEGRAM_DEPOSIT_BOT_TOKEN');
+const ALLOWED_IDS_SECRET = defineSecret('ALLOWED_TELEGRAM_IDS');
+
+// ===== تهيئة Firebase Admin =====
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 const db = admin.firestore();
 
-// ✅ قراءة التوكن من متغيرات البيئة (process.env) بدلاً من functions.config()
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-if (!BOT_TOKEN) {
-  console.error('❌ TELEGRAM_BOT_TOKEN environment variable is missing');
+// ===== الدوال المساعدة =====
+
+async function answerCallback(callbackId, text, showAlert = false) {
+  const token = BOT_TOKEN_SECRET.value();
+  const url = `https://api.telegram.org/bot${token}/answerCallbackQuery`;
+  try {
+    await axios.post(url, {
+      callback_query_id: callbackId,
+      text: text,
+      show_alert: showAlert,
+    });
+  } catch (error) {
+    console.error('❌ فشل الرد على الاستعلام:', error.message);
+  }
 }
 
-exports.telegramWebhook = functions.https.onRequest(async (req, res) => {
-  // التحقق من صحة التوكن
-  if (!BOT_TOKEN) {
-    console.error('Missing TELEGRAM_BOT_TOKEN');
-    return res.status(500).send('Server configuration error: missing token');
+async function removeButtons(chatId, messageId) {
+  const token = BOT_TOKEN_SECRET.value();
+  const url = `https://api.telegram.org/bot${token}/editMessageReplyMarkup`;
+  try {
+    await axios.post(url, {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: {},
+    });
+  } catch (error) {
+    console.error('❌ فشل إزالة الأزرار:', error.message);
   }
+}
 
-  const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-
-  // ========== دوال مساعدة ==========
-  async function answerCallback(callbackId, text) {
-    try {
-      await axios.post(`${TELEGRAM_API}/answerCallbackQuery`, {
-        callback_query_id: callbackId,
-        text,
-        show_alert: false
-      });
-    } catch (err) {
-      console.error('❌ answerCallback error:', err.message);
-    }
+async function sendMessage(chatId, text, parseMode = null) {
+  const token = BOT_TOKEN_SECRET.value();
+  const url = `https://api.telegram.org/bot${token}/sendMessage`;
+  const payload = {
+    chat_id: chatId,
+    text: text,
+  };
+  if (parseMode) {
+    payload.parse_mode = parseMode;
   }
-
-  async function editMessageReplyMarkup(chatId, messageId) {
-    try {
-      await axios.post(`${TELEGRAM_API}/editMessageReplyMarkup`, {
-        chat_id: chatId,
-        message_id: messageId,
-        reply_markup: {}
-      });
-    } catch (err) {
-      console.error('❌ editMessageReplyMarkup error:', err.message);
-    }
-  }
-
-  async function sendTelegramMessage(chatId, text) {
-    try {
-      await axios.post(`${TELEGRAM_API}/sendMessage`, {
-        chat_id: chatId,
-        text,
-        parse_mode: 'Markdown'
-      });
-    } catch (err) {
-      console.error(`❌ sendMessage to ${chatId} failed:`, err.message);
-    }
-  }
-
-  async function notifyUser(userId, message) {
-    try {
-      const userDoc = await db.collection('users').doc(userId).get();
-      const telegramChatId = userDoc.data()?.telegramChatId;
-      if (telegramChatId) {
-        await sendTelegramMessage(telegramChatId, message);
-      } else {
-        console.log(`ℹ️ User ${userId} has no linked Telegram chat`);
+  try {
+    await axios.post(url, payload);
+    console.log(`✅ تم إرسال الرسالة إلى ${chatId}`);
+    return true;
+  } catch (error) {
+    console.error('❌ فشل إرسال الرسالة:', error.response?.data || error.message);
+    // محاولة إرسال بدون parse_mode كحل احتياطي
+    if (parseMode) {
+      try {
+        delete payload.parse_mode;
+        await axios.post(url, payload);
+        console.log(`✅ تم إرسال الرسالة (بدون تنسيق) إلى ${chatId}`);
+        return true;
+      } catch (retryError) {
+        console.error('❌ فشل حتى بدون تنسيق:', retryError.message);
+        return false;
       }
-    } catch (err) {
-      console.error(`❌ notifyUser error:`, err.message);
     }
+    return false;
   }
+}
 
-  async function saveTelegramChatIdMapping(chatId, username) {
-    if (!username) {
-      console.log('⚠️ No username provided, skipping mapping');
-      return;
+// ===== دالة الـ Webhook الرئيسية =====
+exports.telegramDepositWebhook = functions.https.onRequest(
+  { secrets: [BOT_TOKEN_SECRET, ALLOWED_IDS_SECRET] },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      return res.status(405).send('Method Not Allowed');
     }
-    try {
-      const snapshot = await db.collection('users').where('telegramUsername', '==', username).get();
-      if (!snapshot.empty) {
-        const userId = snapshot.docs[0].id;
-        await db.collection('users').doc(userId).update({ telegramChatId: chatId });
-        console.log(`✅ Linked chatId ${chatId} to user ${userId} (username: ${username})`);
-      } else {
-        console.log(`⚠️ No user found with telegramUsername = ${username}`);
+
+    const update = req.body;
+    console.log('📨 Webhook received:', JSON.stringify(update));
+
+    let userId = null;
+    let chatId = null;
+    let messageId = null;
+
+    if (update.message) {
+      userId = update.message.from.id.toString().replace(/\D/g, '');
+      chatId = update.message.chat.id;
+    } else if (update.callback_query) {
+      userId = update.callback_query.from.id.toString().replace(/\D/g, '');
+      chatId = update.callback_query.message.chat.id;
+      messageId = update.callback_query.message.message_id;
+    }
+
+    if (!userId) {
+      console.warn('⚠️ لا يمكن تحديد المستخدم');
+      return res.sendStatus(200);
+    }
+
+    // التحقق من الصلاحية
+    const allowedIds = ALLOWED_IDS_SECRET.value()
+      .split(',')
+      .map(id => id.trim().replace(/\D/g, ''))
+      .filter(id => id.length > 0);
+
+    if (!allowedIds.includes(userId)) {
+      console.log(`⛔ مستخدم غير مصرح: ${userId}`);
+      if (update.message) {
+        await sendMessage(chatId, '⛔ عذراً، هذا البوت مخصص للإدارة فقط.');
       }
-    } catch (err) {
-      console.error('❌ saveTelegramChatIdMapping error:', err.message);
+      return res.sendStatus(200);
     }
-  }
 
-  // ========== معالجة الطلب ==========
-  if (req.method !== 'POST') {
-    return res.status(405).send('Method Not Allowed');
-  }
+    // معالجة الأوامر النصية
+    if (update.message && update.message.text) {
+      const text = update.message.text.trim();
+      if (text === '/start') {
+        const welcomeText = 
+`👋 مرحباً بك في بوت الإدارة!
 
-  const update = req.body;
-  console.log('📨 Received update:', JSON.stringify(update));
+🔹 يمكنك استخدام هذا البوت لإدارة طلبات الإيداع.
+🔹 ستظهر لك الإشعارات مع أزرار التأكيد والرفض.
+🔹 اضغط على الزر المناسب لاتخاذ الإجراء.
 
-  // معالجة الضغط على الأزرار (callback_query)
-  if (update.callback_query) {
-    const callback = update.callback_query;
-    const chatId = callback.message.chat.id;
-    const data = callback.data;
-    console.log('🔘 Callback data:', data);
+📌 ملاحظة: هذا البوت مخصص للإدارة فقط.`;
+        await sendMessage(chatId, welcomeText);
+        return res.sendStatus(200);
+      }
+      await sendMessage(chatId, '❓ أمر غير معروف. استخدم /start للبدء.');
+      return res.sendStatus(200);
+    }
 
-    const parts = data.split('_');
-    const action = parts[0];
-    const type = parts[1];
-    const requestId = parts.slice(2).join('_');
+    // معالجة الأزرار
+    if (update.callback_query) {
+      const callback = update.callback_query;
+      const data = callback.data;
+      const callbackId = callback.id;
 
-    if (type === 'deposit' && requestId) {
-      const depositRef = db.collection('topUpRequests').doc(requestId);
-      const depositSnap = await depositRef.get();
+      console.log(`🔘 زر مضغوط: ${data}`);
+
+      const parts = data.split('_');
+      if (parts.length < 3) {
+        await answerCallback(callbackId, '⚠️ بيانات غير صالحة', true);
+        return res.sendStatus(200);
+      }
+
+      const action = parts[0];
+      const type = parts[1];
+      const docId = parts.slice(2).join('_');
+
+      if (type !== 'deposit') {
+        await answerCallback(callbackId, '⚠️ نوع غير معروف', true);
+        return res.sendStatus(200);
+      }
+
+      const depositRef = db.collection('topUpRequests').doc(docId);
+      let depositSnap;
+      try {
+        depositSnap = await depositRef.get();
+      } catch (err) {
+        console.error('❌ خطأ في قراءة Firestore:', err);
+        await answerCallback(callbackId, '❌ حدث خطأ في قاعدة البيانات', true);
+        return res.sendStatus(200);
+      }
 
       if (!depositSnap.exists) {
-        await answerCallback(callback.id, '⚠️ طلب الإيداع غير موجود');
+        await answerCallback(callbackId, '⚠️ طلب الإيداع غير موجود', true);
         return res.sendStatus(200);
       }
 
       const deposit = depositSnap.data();
-      console.log(`💰 Deposit ${requestId} status: ${deposit.status}`);
-
       if (deposit.status !== 'pending') {
-        await answerCallback(callback.id, `⚠️ تمت معالجة هذا الطلب مسبقاً (الحالة: ${deposit.status})`);
+        await answerCallback(callbackId, `⚠️ تمت معالجة هذا الطلب مسبقاً (الحالة: ${deposit.status})`, true);
+        if (chatId && messageId) {
+          await removeButtons(chatId, messageId);
+        }
         return res.sendStatus(200);
       }
 
-      if (action === 'approve') {
-        const userRef = db.collection('users').doc(deposit.userId);
-        try {
+      try {
+        if (action === 'approve') {
+          await answerCallback(callbackId, `⏳ جاري معالجة طلب ${deposit.amount} $...`, false);
+
           await db.runTransaction(async (transaction) => {
+            const userRef = db.collection('users').doc(deposit.userId);
             const userSnap = await transaction.get(userRef);
+            if (!userSnap.exists) throw new Error('المستخدم غير موجود');
             const currentBalance = userSnap.data()?.balance || 0;
             const newBalance = currentBalance + deposit.amount;
             transaction.update(userRef, { balance: newBalance });
             transaction.update(depositRef, {
               status: 'approved',
-              approvedAt: admin.firestore.FieldValue.serverTimestamp()
+              approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+              approvedBy: userId,
             });
-            console.log(`✅ Added ${deposit.amount} to user ${deposit.userId}, new balance: ${newBalance}`);
           });
-          await answerCallback(callback.id, `✅ تمت الموافقة على إيداع ${deposit.amount} $`);
-          await notifyUser(deposit.userId, `تم إضافة ${deposit.amount} $ إلى رصيدك بنجاح.`);
-        } catch (err) {
-          console.error('❌ Transaction failed:', err);
-          await answerCallback(callback.id, '❌ حدث خطأ أثناء الموافقة على الإيداع');
-          return res.sendStatus(200);
+
+          const userRef = db.collection('users').doc(deposit.userId);
+          const userSnap = await userRef.get();
+          const userData = userSnap.data();
+          if (userData?.telegramChatId) {
+            await sendMessage(userData.telegramChatId, `💰 تم إضافة ${deposit.amount} $ إلى رصيدك بنجاح.`);
+          }
+
+          await answerCallback(callbackId, `✅ تمت الموافقة على إيداع ${deposit.amount} $`, false);
+
+        } else if (action === 'reject') {
+          await answerCallback(callbackId, `⏳ جاري رفض طلب ${deposit.amount} $...`, false);
+
+          await depositRef.update({
+            status: 'rejected',
+            rejectedAt: admin.firestore.FieldValue.serverTimestamp(),
+            rejectedBy: userId,
+          });
+
+          const userRef = db.collection('users').doc(deposit.userId);
+          const userSnap = await userRef.get();
+          const userData = userSnap.data();
+          if (userData?.telegramChatId) {
+            await sendMessage(userData.telegramChatId, `❌ عذراً، تم رفض طلب إيداعك بقيمة ${deposit.amount} $.`);
+          }
+
+          await answerCallback(callbackId, `❌ تم رفض إيداع ${deposit.amount} $`, false);
         }
-      } 
-      else if (action === 'reject') {
-        await depositRef.update({
-          status: 'rejected',
-          rejectedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-        console.log(`❌ Deposit ${requestId} rejected`);
-        await answerCallback(callback.id, `❌ تم رفض إيداع ${deposit.amount} $`);
-        await notifyUser(deposit.userId, `عذراً، تم رفض طلب إيداعك بقيمة ${deposit.amount} $.`);
+
+        if (chatId && messageId) {
+          await removeButtons(chatId, messageId);
+        }
+
+      } catch (error) {
+        console.error('❌ خطأ أثناء تنفيذ الإجراء:', error);
+        await answerCallback(callbackId, `❌ حدث خطأ: ${error.message}`, true);
       }
 
-      await editMessageReplyMarkup(chatId, callback.message.message_id);
+      return res.sendStatus(200);
     }
+
+    console.log('ℹ️ تحديث غير معالج:', update);
     res.sendStatus(200);
   }
-  // معالجة الأمر /start
-  else if (update.message && update.message.text === '/start') {
-    const chatId = update.message.chat.id;
-    const username = update.message.from.username;
-    console.log(`📱 /start from @${username} (chatId: ${chatId})`);
-    await saveTelegramChatIdMapping(chatId, username);
-    await sendTelegramMessage(chatId, 'مرحباً! سيتم إعلامك عند الموافقة على طلبات الإيداع.');
-    res.sendStatus(200);
-  }
-  else {
-    console.log('ℹ️ Unhandled update type');
-    res.sendStatus(200);
-  }
-});
+);

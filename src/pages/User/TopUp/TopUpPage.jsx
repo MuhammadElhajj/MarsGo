@@ -6,7 +6,7 @@ import { db } from '../../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import { showToast } from '../../../components/GeneralComponents/ToastNotification/ToastNotification';
-import { sendTelegramDepositMessage, formatDepositMessage } from '../../../utils/depositBot';
+import { notifyDeposit , formatDepositMessage} from '../../../services/notificationService';
 import { useTopUpValidation } from '../../../hooks/useTopUpValidation';
 import WhatsappWarning from '../../../components/UserComponents/TopUp/WhatsappWarning/WhatsappWarning';
 import MaintenanceMessage from '../../../components/UserComponents/TopUp/MaintenanceMessage/MaintenanceMessage';
@@ -120,7 +120,7 @@ export default function TopUpPage() {
     return null;
   }, [activeAccount, selectedMethod]);
 
-  const handleSubmit = useCallback(
+const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
       if (!hasWhatsapp) {
@@ -164,6 +164,7 @@ export default function TopUpPage() {
           createdAt: new Date(),
         });
 
+        // ✅ إرسال إشعار إلى بوت الإيداع عبر الخدمة الجديدة
         try {
           const depositMessage = formatDepositMessage(
             {
@@ -174,7 +175,14 @@ export default function TopUpPage() {
             },
             docRef.id
           );
-          await sendTelegramDepositMessage(depositMessage, docRef.id);
+          // ✅ استخدام notifyDeposit بدلاً من sendTelegramDepositMessage
+          await notifyDeposit(
+            docRef.id,
+            depositMessage,
+            amountNum,
+            userData.name,
+            selectedMethod
+          );
         } catch (telegramErr) {
           console.error('فشل إرسال إشعار التلغرام:', telegramErr);
         }

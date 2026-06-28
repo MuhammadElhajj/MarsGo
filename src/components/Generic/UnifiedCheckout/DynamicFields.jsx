@@ -24,7 +24,7 @@ export default function DynamicFields({ fields, onChange, initialValues = {} }) 
           {field.type === 'text' && (
             <input
               type="text"
-              className="border p-2 rounded"
+              className={`border p-2 rounded ${field.name === 'playerId' ? 'player-id-input' : ''}`}
               placeholder={field.placeholder || ''}
               required={field.required}
               value={values[field.name] || ''}
@@ -34,7 +34,7 @@ export default function DynamicFields({ fields, onChange, initialValues = {} }) 
           {field.type === 'number' && (
             <input
               type="number"
-              className="border p-2 rounded"
+              className={`border p-2 rounded ${field.name === 'playerId' ? 'player-id-input' : ''}`}
               min={field.min}
               max={field.max}
               step={field.step || 1}

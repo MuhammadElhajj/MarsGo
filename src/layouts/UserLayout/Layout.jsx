@@ -18,7 +18,7 @@ export default function Layout() {
   const location = useLocation();
   const isChatRoom = location.pathname.startsWith('/chat/room/');
   const isChatPage = location.pathname.startsWith('/chat');
-
+const isCheckoutPage = location.pathname.includes('/checkout');
   // حالات حجم الشاشة
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isMedium, setIsMedium] = useState(
@@ -84,7 +84,7 @@ export default function Layout() {
             <Outlet />
           </main>
 
-          {!isChatPage && <Footer />}
+          {!isChatPage && !isCheckoutPage &&  <Footer />}
           {!isChatPage && <SupportButton />}
         </div>
 
