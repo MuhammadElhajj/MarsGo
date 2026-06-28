@@ -1,0 +1,75 @@
+/* src/pages/User/AddPhonePage/AddPhonePage.css */
+.add-phone-page {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: var(--space-24);
+  animation: fadeIn 0.3s ease;
+}
+
+.add-phone-page__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+}
+
+.add-phone-page__title {
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.add-phone-page__card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-card);
+  padding: var(--space-24);
+  border: var(--border-card);
+  box-shadow: var(--shadow-main);
+}
+
+.add-phone-page__desc {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-24);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}
+
+.add-phone-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.add-phone-page__actions {
+  display: flex;
+  gap: var(--space-16);
+  margin-top: var(--space-8);
+}
+
+.add-phone-page__actions .btn {
+  flex: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* استجابة الجوال */
+@media (max-width: 640px) {
+  .add-phone-page {
+    padding: var(--space-16);
+  }
+  .add-phone-page__card {
+    padding: var(--space-16);
+  }
+  .add-phone-page__actions {
+    flex-direction: column;
+  }
+}
+
+.add-phone-page__actions button {
+    margin-bottom: 10px;
+}

@@ -40,7 +40,7 @@ export default function BuyMGC() {
     }
 
     if (balance < price) {
-      toast.error(`⚠️ رصيدك الحقيقي غير كافٍ! تحتاج ${price.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
+      toast.error(` رصيدك  غير كافٍ! تحتاج ${price.toFixed(2)} $، رصيدك: ${balance.toFixed(2)} $`);
       return;
     }
 

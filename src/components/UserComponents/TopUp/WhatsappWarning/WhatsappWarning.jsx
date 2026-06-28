@@ -9,7 +9,7 @@ export default function WhatsappWarning() {
         <strong>رقم واتساب غير موجود</strong>
         <p>لضمان التواصل السريع بخصوص طلبات الإيداع، يرجى إضافة رقم واتساب الخاص بك أولاً.</p>
       </div>
-      <Button onClick={() => navigate('/profile')} variant="primary" className="whatsapp-warning-btn">
+      <Button onClick={() => navigate('/add-phone')} variant="primary" className="whatsapp-warning-btn">
          إضافة رقم واتساب
       </Button>
     </div>

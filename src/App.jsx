@@ -54,6 +54,7 @@ const MyActivitiesPage = lazy(() => import("./pages/User/MyActivities/MyActiviti
 import LeaderboardPage from "./pages/User/LeaderboardPage/LeaderboardPage"; // سياق عادي
 const MainFriendPage = lazy(() => import("./pages/User/MainFriendPage/MainFriendPage"));
 const SearchPage  = lazy(() => import("./pages/User/SearchPage/SearchPage"));
+const AddPhonePage = lazy(() => import("./pages/User/AddPhonePage/AddPhonePage"));
 
 // ============================================================
 //  صفحات المدير (Admin Pages) – تحميل كسول
@@ -193,7 +194,8 @@ function App() {
           <Route path="/missions" element={<MissionsPage />} />
           <Route path="/memberships" element={<MembershipsPage />} />
           <Route path="/buy-mgc" element={<BuyMGC />} />
-          <Route path="/my-orders" element={<MyOrdersPage />} />
+        
+          <Route path="/add-phone" element={<AddPhonePage />} />  <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/about" element={<AboutPage />} />
@@ -234,6 +236,7 @@ function App() {
             path="external-store-import"
             element={<ExternalStoreImport />}
           /> 
+        
           <Route path="missions" element={<AdminMissions />} />
           <Route path="content/:type/:itemId" element={<ContentManager />} />
           <Route path="/admin/categories" element={<AdminCategories />} />

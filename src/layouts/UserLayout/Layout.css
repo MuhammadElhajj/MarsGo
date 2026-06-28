@@ -94,7 +94,7 @@
   top: 0;
   z-index: 20;
   background: var(--color-bg-primary);
-  padding: 0.25rem 0.5rem;
+
   border-bottom: 1px solid var(--color-border);
   transition: box-shadow 0.2s ease;
 }
@@ -113,9 +113,7 @@
 
 /* ========== تحسينات الجوال ========== */
 @media (max-width: 768px) {
-  .layout__breadcrumb-wrapper {
-    padding: 0.15rem 0.25rem;
-  }
+ 
 
   .app-content {
     padding: 0.5rem;
