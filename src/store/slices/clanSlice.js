@@ -1,5 +1,5 @@
 // src/store/slices/clanSlice.js
-import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, arrayUnion, arrayRemove, increment, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, query, where, getDocs, updateDoc, arrayUnion, arrayRemove, increment,  orderBy,limit, deleteDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions'; // ✅ إضافة استيراد دوال Firebase Functions
 import { db } from '../../firebase';
 import toast from 'react-hot-toast';

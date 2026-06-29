@@ -1,21 +1,18 @@
-/* ========================================
-   StoreIntro - نسخة محسنة واحترافية
-   ======================================== */
+/* src/components/GeneralComponents/StoreIntro/StoreIntro.css */
 
 .store-intro {
   position: relative;
   border-radius: 1.5rem;
   padding: 2.5rem;
-     margin: 1rem 0;
+  margin: 1rem 0;
   overflow: hidden;
   color: white;
-  background-color: var(--color-accent); /* لون احتياطي */
+  background-color: var(--color-accent);
   box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.25);
   transition: all 0.3s ease;
   min-height: 220px;
 }
 
-/* صورة الخلفية مع تأثير Zoom بطيء */
 .store-intro__bg-image {
   position: absolute;
   top: 0;
@@ -31,7 +28,6 @@
   transform: scale(1.03);
 }
 
-/* طبقة التعتيم – تدرج حديث */
 .store-intro__overlay {
   position: absolute;
   top: 0;
@@ -42,7 +38,6 @@
   z-index: 1;
 }
 
-/* المحتوى فوق التعتيم */
 .store-intro__content {
   position: relative;
   z-index: 2;
@@ -60,65 +55,7 @@
   opacity: 0.92;
   line-height: 1.8;
   max-width: 600px;
-  margin-bottom: 1.5rem;
   font-size: 0.95rem;
-}
-
-/* ===== الميزات (شبكة مرنة) ===== */
-.store-intro__highlights {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  margin-bottom: 1.5rem;
-}
-
-.store-intro__highlight-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(6px);
-  padding: 0.4rem 1.2rem;
-  border-radius: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.3s ease;
-  cursor: default;
-  flex: 0 1 auto;
-}
-
-.store-intro__highlight-item:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.store-intro__icon {
-  font-size: 1.2rem;
-}
-
-/* ===== الإحصائيات الصغيرة ===== */
-.store-intro__stats-mini {
-  display: flex;
-  gap: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  padding-top: 1rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.store-intro__stat {
-  font-weight: 600;
-  font-size: 0.95rem;
-  opacity: 0.9;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.store-intro__stat::before {
-  content: "✦";
-  color: #fbbf24;
-  font-size: 0.7rem;
 }
 
 /* ===== استجابة الجوال ===== */
@@ -126,31 +63,12 @@
   .store-intro {
     padding: 1.5rem;
     border-radius: 1rem;
+    min-height: 180px;
   }
-  
   .store-intro__title {
     font-size: 1.4rem;
   }
-  
   .store-intro__description {
     font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
-  .store-intro__highlights {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-  }
-  
-  .store-intro__highlight-item {
-    justify-content: center;
-    padding: 0.3rem 0.8rem;
-    font-size: 0.75rem;
-  }
-  
-  .store-intro__stats-mini {
-    gap: 0.8rem;
-    font-size: 0.8rem;
   }
 }

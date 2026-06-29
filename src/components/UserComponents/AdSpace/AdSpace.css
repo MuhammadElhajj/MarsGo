@@ -1,323 +1,70 @@
-/* ===== الحاوية الرئيسية ===== */
+/* src/components/UserComponents/AdSpace/AdSpace.css */
 .ad-space {
-  margin-bottom: 2rem;
-  border-radius: 16px;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-radius: 0.75rem;
   overflow: hidden;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* ===== حاوية السلايدر ===== */
-.ad-space__slider {
+.ad-space__banner {
   position: relative;
   width: 100%;
-}
-
-/* ===== منطقة الصورة الخلفية (كاملة العرض والارتفاع) ===== */
-.ad-space__hero {
-  position: relative;
-  width: 100%;
-  height: 160px;           /* الارتفاع الذي حددته */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 12px;
+  height: 200px; /* ارتفاع ثابت مناسب للشاشات الكبيرة */
   overflow: hidden;
-  transition: opacity 0.3s ease-in-out;
-  opacity: 1;
-}
-.ad-space__hero.fade-out {
-  opacity: 0;
-}
-.ad-space__hero.fade-in {
-  opacity: 1;
+  background: #1a1a2e;
 }
 
-/* ===== طبقة التعتيم ===== */
+@media (max-width: 768px) {
+  .ad-space__banner {
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-space__banner {
+    height: 140px;
+  }
+}
+
+.ad-space__banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.5s ease;
+}
+
 .ad-space__overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
   z-index: 1;
 }
 
-/* ===== محتوى النص (في منتصف الصورة) ===== */
 .ad-space__content {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 20%;
+  left: 5%;
+  right: 5%;
   z-index: 2;
-  text-align: center;
   color: white;
-  width: 90%;
-  max-width: 80%;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  direction: rtl;
+  text-align: right;
 }
 
 .ad-space__title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.ad-space__text {
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  opacity: 0.95;
-}
-
-.ad-space__button {
-  display: inline-block;
-  background: var(--color-accent, #4f46e5);
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 40px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: background 0.3s, transform 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-.ad-space__button:hover {
-  background: var(--color-accent-hover, #4338ca);
-  transform: translateY(-2px);
-}
-
-/* ===== أزرار التنقل (السهمين) ===== */
-.ad-space__nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 28px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  transition: background 0.3s;
-}
-.ad-space__nav:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-.ad-space__nav--prev {
-  left: 10px;
-}
-.ad-space__nav--next {
-  right: 10px;
-}
-
-/* ===== نقاط التنقل (داخل الصورة، في الأسفل) ===== */
-.ad-space__dots {
-  position: absolute;
-  bottom: 12px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  z-index: 10;
-}
-.ad-space__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.6);
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.2s;
-}
-.ad-space__dot.active {
-  background-color: white;
-  transform: scale(1.2);
-}
-.ad-space__dot:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-/* ===== حالة عدم وجود إعلانات ===== */
-.ad-space__placeholder {
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-  text-align: center;
-  padding: 2rem;
-  border-radius: 12px;
-  color: #4b5563;
-}
-.ad-space__placeholder-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-/* ===== استجابة للجوال ===== */
-@media (max-width: 768px) {
-  .ad-space__hero {
-    height: 140px;  /* خفضت قليلاً للجوال ليتناسب مع الارتفاع الأصلي 160px، يمكنك تعديله */
-  }
-  .ad-space__title {
-    font-size: 1.3rem;
-  }
-  .ad-space__text {
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-  }
-  .ad-space__button {
-    padding: 0.3rem 1rem;
-    font-size: 0.75rem;
-  }
-  .ad-space__nav {
-    width: 32px;
-    height: 32px;
-    font-size: 22px;
-  }
-  .ad-space__nav--prev {
-    left: 5px;
-  }
-  .ad-space__nav--next {
-    right: 5px;
-  }
-}
-
-
-
-
-/* زززززززززززززززززززززززززززززززززززززززززززززززززززززززززززز */
-/* ===== الحاوية العامة ===== */
-.ad-space {
-  width: 100%;
-  margin-bottom: 1rem;
-  border-radius: 0.75rem;
- 
-}
-
-/* ===== كاروسيل ثلاثي الأبعاد (لجميع الشاشات) ===== */
-.carousel-3d {
-  position: relative;
-  padding: 0.5rem 0;
-}
-
-.carousel-container {
-  position: relative;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.carousel-items {
-  position: relative;
-  width: 100%;
-    height: clamp(160px, 30vw, 240px); /* يتناسب مع حجم الشاشة */
-  perspective: 100px;
-  overflow: visible;
-}
-
-/* العنصر الواحد – أساس التكديس */
-.carousel-item {
-  position: absolute;
-  width: 92%;
-  height: 100%;
-  left: 4%;
-  top: 0;
-  transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-  border-radius: 0.875rem;
-  background-size: cover;
-  background-position: center;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  z-index: 1;
-  overflow: hidden;
-  will-change: transform, opacity;
-}
-
-/* العنصر النشط – في المنتصف */
-.carousel-item.active {
-  opacity: 1;
-  z-index: 3;
-  transform: scale(1);
-  filter: blur(0);
-}
-
-/* العنصر الجانبي الأيسر */
-.carousel-item.prev {
-  opacity: 0.55;
-  z-index: 2;
-  transform: translateX(-28%) scale(0.82);
-  filter: blur(1px);
-}
-
-/* العنصر الجانبي الأيمن */
-.carousel-item.next {
-  opacity: 0.55;
-  z-index: 2;
-  transform: translateX(28%) scale(0.82);
-  filter: blur(1px);
-}
-
-/* طبقة تظليل شفافة فوق الصور الجانبية */
-.carousel-item::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: inherit;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.carousel-item.active::after {
-  background: transparent;
-}
-
-/* تدرج أسود أسفل النص */
-.item-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent 60%);
-  z-index: 1;
-}
-
-/* محتوى النص */
-.item-content {
-  position: absolute;
-  bottom: 12%;
-  left: 8%;
-  right: 8%;
-  z-index: 2;
-  color: white;
-  text-align: right;
-  direction: rtl;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
-
-.item-content h3 {
-  font-size: clamp(0.9rem, 4vw, 1.3rem);
+  font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 0.2rem;
 }
 
-.item-content h4 {
-  font-size: clamp(0.8rem, 3.5vw, 1rem);
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-}
-
-.item-content p {
-  font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+.ad-space__text {
+  font-size: 0.85rem;
   opacity: 0.9;
   margin-bottom: 0.3rem;
   display: -webkit-box;
@@ -326,175 +73,108 @@
   overflow: hidden;
 }
 
-.btn {
+.ad-space__button {
   display: inline-block;
-  background: #4f46e5;
+  background: var(--color-accent, #4f46e5);
   color: white;
-  padding: 0.2rem 0.7rem;
+  padding: 0.25rem 1rem;
   border-radius: 2rem;
-  text-decoration: none;
-  font-size: clamp(0.6rem, 2vw, 0.7rem);
+  font-size: 0.75rem;
   font-weight: 600;
-  transition: all 0.2s;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
 }
-.btn:hover {
-  background: #4338ca;
+
+.ad-space__button:hover {
+  background: var(--color-accent-hover, #4338ca);
   transform: translateY(-2px);
 }
 
-/* ===== أزرار التنقل ===== */
-.carousel-nav {
+/* ===== النقاط ===== */
+.ad-space__dots {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: clamp(28px, 5vw, 36px);
-  height: clamp(28px, 5vw, 36px);
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: white;
-  font-size: clamp(1.2rem, 4vw, 1.6rem);
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 20;
-  transition: all 0.2s;
-  backdrop-filter: blur(4px);
-}
-.carousel-nav:hover {
-  background: rgba(0, 0, 0, 0.8);
-  transform: translateY(-50%) scale(1.05);
-}
-.carousel-nav.prev {
-  left: max(4px, 2%);
-}
-.carousel-nav.next {
-  right: max(4px, 2%);
-}
-
-/* ===== نقاط التنقل ===== */
-.carousel-dots {
-  position: absolute;
-  bottom: -0.8rem;
+  bottom: 10px;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
-  gap: 0.4rem;
-  z-index: 15;
-}
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.dot.active {
-  background: #4f46e5;
-  transform: scale(1.2);
+  gap: 8px;
+  z-index: 3;
 }
 
-/* ===== حالة الإعلان الواحد ===== */
-.single-ad {
+.ad-space__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.ad-space__dot.active {
+  background: white;
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(255,255,255,0.3);
+}
+
+.ad-space__dot:hover {
+  background: rgba(255,255,255,0.8);
+}
+
+/* ===== حالة التحميل وعدم وجود إعلانات ===== */
+.ad-space.loading,
+.ad-space__placeholder {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.ad-space__placeholder-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+/* ===== إعلان واحد (نفس التنسيق) ===== */
+.ad-space.single .single-ad {
   position: relative;
+  width: 100%;
+  height: 200px;
   background-size: cover;
   background-position: center;
-  border-radius: 0.875rem;
-  padding-top: 28%;
+  border-radius: 0.75rem;
   overflow: hidden;
 }
+
 .single-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent 60%);
 }
+
 .single-content {
   position: absolute;
   bottom: 20%;
-  left: 10%;
-  right: 10%;
+  left: 5%;
+  right: 5%;
   color: white;
-  text-align: center;
+  text-align: right;
+  z-index: 2;
 }
+
 .single-content h3 {
-  font-size: clamp(1rem, 4vw, 1.3rem);
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
-/* ===== لا توجد أي breakpoints تغير الهيكل – نفس الشكل من 320px إلى 1920px ===== */
-/* فقط تحسين للارتفاع على الشاشات الصغيرة جداً (اختياري) */
-@media (max-width: 480px) {
-  .carousel-items {
-    height: 140px;   /* يمكن تعديله حسب رغبتك */
-  }
-  .carousel-item.prev {
-    transform: translateX(-22%) scale(0.78);
-  }
-  .carousel-item.next {
-    transform: translateX(22%) scale(0.78);
-  }
-  .item-content {
-    bottom: 8%;
-  }
-  .item-content p {
-    display: none;   /* إخفاء الوصف لتوفير مساحة والنظافة */
-  }
-  .carousel-nav {
-    width: 26px;
-    height: 26px;
-    font-size: 1rem;
-  }
-}
-
-/* دعم الشاشات الصغيرة جداً (350px وأقل) */
-@media (max-width: 350px) {
-  .carousel-items {
-    height: 100px;
-  }
-  .carousel-item.prev {
-    transform: translateX(-18%) scale(0.75);
-  }
-  .carousel-item.next {
-    transform: translateX(18%) scale(0.75);
-  }
-  .item-content h3 {
-    font-size: 0.75rem;
-  }
-  .item-content h4 {
-    font-size: 0.7rem;
-  }
-  .btn {
-    padding: 0.1rem 0.5rem;
-    font-size: 0.55rem;
-  }
-  .carousel-dots {
-    bottom: -0.5rem;
-  }
-}
-
-/* ===== باقي الحالات (تحميل، بلا إعلانات) ===== */
-.ad-space.loading {
-  text-align: center;
-  padding: 1.5rem;
-  background: #f3f4f6;
-  border-radius: 0.875rem;
-}
-.ad-space__placeholder {
-  text-align: center;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-  border-radius: 0.875rem;
-  color: #4b5563;
-}
-.ad-space__placeholder-icon {
-  font-size: 1.8rem;
-  display: block;
-  margin-bottom: 0.3rem;
+.single-content p {
+  font-size: 0.85rem;
+  opacity: 0.9;
 }

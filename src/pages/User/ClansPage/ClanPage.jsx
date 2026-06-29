@@ -14,7 +14,7 @@ import {
   FiChevronDown, FiChevronUp
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
-import './ClansListPage.css';
+import './ClansPage.css';
 
 // ترتيب المناصب (للترتيب التنازلي)
 const ROLE_ORDER = {
