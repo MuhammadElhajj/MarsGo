@@ -1,148 +1,147 @@
 // functions/clans/clanManagement.js
-const { onCall } = require("firebase-functions/v2/https");
-const admin = require("firebase-admin");
-const { logger } = require("firebase-functions/v2");
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const admin = require('firebase-admin');
+const { logger } = require('firebase-functions/v2');
+
+const VALID_ROLES = ['owner', 'general', 'deputy', 'moderator', 'member'];
+const ROLE_LIMITS = { general: 1, deputy: 1, moderator: 3 };
 
 /**
- * تعيين دور لعضو في الكلان (المالك فقط)
- * - يتحقق من أن المستخدم هو مالك الكلان
- * - يتحقق من صحة الدور الجديد
- * - يحدّث دور العضو في الكلان
+ * تعيين دور لعضو في الكلان (المالك فقط) - Atomic
  */
 exports.assignClanRole = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
-    throw new Error("يجب تسجيل الدخول");
+    throw new HttpsError('unauthenticated', 'يجب تسجيل الدخول');
   }
 
   const uid = request.auth.uid;
   const { clanId, targetUid, newRole } = request.data;
 
   if (!clanId || !targetUid || !newRole) {
-    throw new Error("جميع الحقول مطلوبة: clanId, targetUid, newRole");
+    throw new HttpsError('invalid-argument', 'جميع الحقول مطلوبة: clanId, targetUid, newRole');
+  }
+  if (!VALID_ROLES.includes(newRole)) {
+    throw new HttpsError('invalid-argument', `دور غير صالح. الأدوار المتاحة: ${VALID_ROLES.join(', ')}`);
+  }
+  if (newRole === 'owner') {
+    throw new HttpsError('invalid-argument', 'لا يمكن تعيين مالك جديد عبر هذه الدالة.');
+  }
+  if (uid === targetUid) {
+    throw new HttpsError('invalid-argument', 'لا يمكنك تغيير دورك بنفسك');
   }
 
   const db = admin.firestore();
-  const clanRef = db.collection("clans").doc(clanId);
 
   try {
-    // 1. قراءة بيانات الكلان
-    const clanSnap = await clanRef.get();
-    if (!clanSnap.exists) {
-      throw new Error("الكلان غير موجود");
-    }
+    const result = await db.runTransaction(async (tx) => {
+      const clanRef = db.collection('clans').doc(clanId);
+      const clanSnap = await tx.get(clanRef);
 
-    const clanData = clanSnap.data();
+      if (!clanSnap.exists) {
+        throw new HttpsError('not-found', 'الكلان غير موجود');
+      }
 
-    // 2. التحقق من أن المستخدم الحالي هو المالك
-    if (clanData.ownerId !== uid) {
-      throw new Error("المالك فقط يمكنه تغيير المناصب");
-    }
+      const clanData = clanSnap.data();
 
-    // 3. التحقق من أن المستخدم المستهدف عضو في الكلان
-    if (!clanData.members || !clanData.members.includes(targetUid)) {
-      throw new Error("المستخدم المستهدف ليس عضواً في هذا الكلان");
-    }
+      // التحقق من الملكية
+      if (clanData.ownerId !== uid) {
+        throw new HttpsError('permission-denied', 'المالك فقط يمكنه تغيير المناصب');
+      }
 
-    // 4. التحقق من صحة الدور الجديد
-    const validRoles = ["owner", "general", "deputy", "moderator", "member"];
-    if (!validRoles.includes(newRole)) {
-      throw new Error(`دور غير صالح. الأدوار المتاحة: ${validRoles.join(", ")}`);
-    }
+      // التحقق من العضوية
+      if (!clanData.members || !clanData.members.includes(targetUid)) {
+        throw new HttpsError('failed-precondition', 'المستخدم المستهدف ليس عضواً في هذا الكلان');
+      }
 
-    // 5. منع تغيير دور المالك (لا يمكن تعيين مالك آخر)
-    if (newRole === "owner") {
-      throw new Error("لا يمكن تعيين مالك جديد. فقط المالك الحالي يمكنه نقل الملكية عبر عملية منفصلة.");
-    }
+      // التحقق من القيود
+      const currentRoles = clanData.memberRoles || {};
+      const limit = ROLE_LIMITS[newRole];
+      if (limit !== undefined) {
+        const currentCount = Object.values(currentRoles).filter(r => r === newRole).length;
+        if (currentCount >= limit) {
+          throw new HttpsError('failed-precondition', `الحد الأقصى لمنصب ${newRole} هو ${limit}`);
+        }
+      }
 
-    // 6. التحقق من القيود (عدد المناصب)
-    const currentRoles = clanData.memberRoles || {};
-    const generalCount = Object.values(currentRoles).filter(r => r === "general").length;
-    const deputyCount = Object.values(currentRoles).filter(r => r === "deputy").length;
-    const moderatorCount = Object.values(currentRoles).filter(r => r === "moderator").length;
+      tx.update(clanRef, {
+        [`memberRoles.${targetUid}`]: newRole,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
 
-    if (newRole === "general" && generalCount >= 1) {
-      throw new Error("يوجد جينرال واحد فقط في الكلان");
-    }
-    if (newRole === "deputy" && deputyCount >= 1) {
-      throw new Error("يوجد عميد واحد فقط في الكلان");
-    }
-    if (newRole === "moderator" && moderatorCount >= 3) {
-      throw new Error("الحد الأقصى للمشرفين هو 3");
-    }
-
-    // 7. تحديث دور العضو
-    await clanRef.update({
-      [`memberRoles.${targetUid}`]: newRole,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      return { clanName: clanData.name || clanId };
     });
 
-    logger.info(`✅ المستخدم ${uid} غير دور المستخدم ${targetUid} إلى ${newRole} في الكلان ${clanId}`);
-    return { success: true, message: "تم تغيير المنصب بنجاح" };
+    logger.info(`✅ المستخدم ${uid} غير دور المستخدم ${targetUid} إلى ${newRole}`);
+    return { success: true, message: 'تم تغيير المنصب بنجاح' };
+
   } catch (error) {
-    logger.error("❌ فشل تغيير المنصب:", error);
-    throw new Error(error.message);
+    logger.error('❌ فشل تغيير المنصب:', error);
+    throw error instanceof HttpsError ? error : new HttpsError('internal', error.message);
   }
 });
 
 /**
- * حذف الكلان (المالك فقط)
- * - يتحقق من أن المستخدم هو مالك الكلان
- * - يحذف الكلان وجميع بياناته المرتبطة (الغرفة، الدعوات، ...)
+ * حذف الكلان (المالك فقط) - Atomic
  */
 exports.deleteClan = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
-    throw new Error("يجب تسجيل الدخول");
+    throw new HttpsError('unauthenticated', 'يجب تسجيل الدخول');
   }
 
   const uid = request.auth.uid;
   const { clanId } = request.data;
 
   if (!clanId) {
-    throw new Error("معرف الكلان مطلوب");
+    throw new HttpsError('invalid-argument', 'معرف الكلان مطلوب');
   }
 
   const db = admin.firestore();
-  const clanRef = db.collection("clans").doc(clanId);
 
   try {
-    // 1. قراءة بيانات الكلان
-    const clanSnap = await clanRef.get();
-    if (!clanSnap.exists) {
-      throw new Error("الكلان غير موجود");
-    }
+    await db.runTransaction(async (tx) => {
+      const clanRef = db.collection('clans').doc(clanId);
+      const clanSnap = await tx.get(clanRef);
 
-    const clanData = clanSnap.data();
+      if (!clanSnap.exists) {
+        throw new HttpsError('not-found', 'الكلان غير موجود');
+      }
 
-    // 2. التحقق من أن المستخدم هو المالك
-    if (clanData.ownerId !== uid) {
-      throw new Error("المالك فقط يمكنه حذف الكلان");
-    }
+      const clanData = clanSnap.data();
 
-    // 3. حذف الكلان
-    await clanRef.delete();
+      if (clanData.ownerId !== uid) {
+        throw new HttpsError('permission-denied', 'المالك فقط يمكنه حذف الكلان');
+      }
 
-    // 4. حذف غرفة الدردشة المرتبطة (إن وجدت)
-    const roomId = `clan_${clanId}`;
-    try {
-      await db.collection("rooms").doc(roomId).delete();
-    } catch (roomErr) {
-      logger.warn(`⚠️ فشل حذف الغرفة ${roomId}:`, roomErr.message);
-    }
+      // حذف الكلان
+      tx.delete(clanRef);
 
-    // 5. حذف جميع الدعوات المرتبطة بالكلان
-    const invitesQuery = await db.collection("clanInvites")
-      .where("clanId", "==", clanId)
-      .get();
-    const batch = db.batch();
-    invitesQuery.docs.forEach(doc => {
-      batch.delete(doc.ref);
+      // حذف غرفة الدردشة
+      const roomRef = db.collection('rooms').doc(`clan_${clanId}`);
+      tx.delete(roomRef);
+
+      // حذف الدعوات (نستخدم batch داخل transaction)
+      // ملاحظة: Firestore transaction لا يسمح بـ get() بعد write()
+      // لذلك نجيب الدعوات برا الـ transaction
     });
-    await batch.commit();
+
+    // حذف الدعوات برا الـ transaction (بسبب قيود Firestore)
+    const invitesQuery = await db.collection('clanInvites')
+      .where('clanId', '==', clanId)
+      .get();
+    
+    if (!invitesQuery.empty) {
+      const batch = db.batch();
+      invitesQuery.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+    }
 
     logger.info(`✅ المستخدم ${uid} حذف الكلان ${clanId}`);
-    return { success: true, message: "تم حذف الكلان بنجاح" };
+    return { success: true, message: 'تم حذف الكلان بنجاح' };
+
   } catch (error) {
-    logger.error("❌ فشل حذف الكلان:", error);
-    throw new Error(error.message);
+    logger.error('❌ فشل حذف الكلان:', error);
+    throw error instanceof HttpsError ? error : new HttpsError('internal', error.message);
   }
 });

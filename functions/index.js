@@ -1,7 +1,10 @@
-const functions = require('firebase-functions');
+// functions/index.js
 const admin = require('firebase-admin');
 
-admin.initializeApp();
+// تهيئة Firebase Admin مرة واحدة فقط
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
 
 // ==================== التحقق والمصادقة ====================
 const verification = require('./verification/verification');
@@ -17,8 +20,9 @@ exports.updateExchangeRate = require('./autoUpdate').updateExchangeRate;
 exports.manualUpdateExchangeRate = require('./manualUpdate').manualUpdateExchangeRate;
 
 // ==================== الإشعارات ====================
-exports.sendOrderNotification = require('./notifications/telegram').sendOrderNotification;
-exports.sendDepositNotification = require('./notifications/telegram').sendDepositNotification;
+const telegramNotifications = require('./notifications/telegram');
+exports.sendOrderNotification = telegramNotifications.sendOrderNotification;
+exports.sendDepositNotification = telegramNotifications.sendDepositNotification;
 exports.telegramDepositWebhook = require('./telegramBot/telegramBot').telegramDepositWebhook;
 
 // ==================== المعاملات المالية ====================
@@ -27,8 +31,15 @@ exports.updateBalance = tx.updateBalance;
 exports.buyMgc = tx.buyMgc;
 exports.sellMgc = tx.sellMgc;
 exports.createSecureOrder = tx.createSecureOrder;
-exports.spinWheel = require('./transactions/spinWheel').spinWheel;
-exports.pullMachine = require('./transactions/pullMachine').pullMachine;
+
+const spinWheelModule = require('./transactions/spinWheel');
+exports.spinWheel = spinWheelModule.spinWheel;
+
+const pullMachineModule = require('./transactions/pullMachine');
+exports.pullMachine = pullMachineModule.pullMachine;
+
+// ==================== دعم المستخدمين ====================
+exports.supportUser = require('./referral/supportUser').supportUser;
 
 // ==================== الإحالات والكلانات ====================
 exports.claimReferralRewards = require('./referral/claimReward').claimReferralRewards;

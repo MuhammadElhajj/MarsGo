@@ -1,112 +1,153 @@
 // functions/transactions/pullMachine.js
-const { onCall } = require("firebase-functions/v2/https");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions/v2");
 
-/**
- * ماكينة الحظ - الإصدار الجديد
- * - التكلفة: 25 MGC
- * - نظام التعويض: كل 500 دورة، 70% جوائز متوسطة، 30% جوائز عالية
- * - جوائز متنوعة: MGC, XP, كوبونات, ألقاب
- */
+// ===== ثوابت =====
+const SPIN_COST = 25;
+const PITY_INTERVAL = 500;
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW = 60;
+
+// ===== Rate Limiting Helper =====
+async function checkRateLimit(uid, action) {
+  const db = admin.firestore();
+  const rateRef = db.collection('rateLimits').doc(`${uid}_${action}`);
+  const now = admin.firestore.Timestamp.now();
+
+  return db.runTransaction(async (tx) => {
+    const doc = await tx.get(rateRef);
+    const windowStart = admin.firestore.Timestamp.fromMillis(now.toMillis() - (RATE_LIMIT_WINDOW * 1000));
+
+    let requests = [];
+    if (doc.exists) {
+      requests = (doc.data().requests || []).filter(t => t.toMillis() > windowStart.toMillis());
+    }
+
+    if (requests.length >= RATE_LIMIT_MAX) {
+      return { allowed: false, retryAfter: Math.ceil(RATE_LIMIT_WINDOW / 60) };
+    }
+
+    requests.push(now);
+    tx.set(rateRef, { requests, updatedAt: now }, { merge: true });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - requests.length };
+  });
+}
+
+// ===== ماكينة الحظ - Atomic مع Rate Limiting =====
 exports.pullMachine = onCall({ cors: true }, async (request) => {
   if (!request.auth) {
-    throw new Error("يجب تسجيل الدخول");
+    throw new HttpsError('unauthenticated', 'يجب تسجيل الدخول');
   }
+
   const uid = request.auth.uid;
-  const SPIN_COST = 25;
 
   try {
-    const userRef = admin.firestore().collection("users").doc(uid);
-    const userSnap = await userRef.get();
-    if (!userSnap.exists) throw new Error("المستخدم غير موجود");
-    const userData = userSnap.data();
-    const mgcBalance = userData.mgcBalance || 0;
-
-    if (mgcBalance < SPIN_COST) {
-      throw new Error(`رصيد MGC غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+    // 1. Rate Limiting
+    const rateCheck = await checkRateLimit(uid, 'pullMachine');
+    if (!rateCheck.allowed) {
+      throw new HttpsError('resource-exhausted', `لقد تجاوزت الحد المسموح. يرجى الانتظار دقيقة.`);
     }
 
-    // ===== نظام التعويض =====
-    let pityCounter = userData.pityCounter || 0;
-    let machineCounter = userData.machineCounter || 0;
-    machineCounter += 1;
+    const userRef = admin.firestore().collection('users').doc(uid);
 
-    // كل 500 دورة، نضمن جائزة مميزة
-    const isPityRound = (machineCounter % 500 === 0);
+    // 2. Atomic Transaction
+    const result = await admin.firestore().runTransaction(async (tx) => {
+      const userSnap = await tx.get(userRef);
+      if (!userSnap.exists) throw new HttpsError('not-found', 'المستخدم غير موجود');
 
-    // اختيار الجائزة
-    let reward = null;
-    let prizeValue = 0;
-    let xpGained = 0;
-    let coupon = null;
+      const userData = userSnap.data();
+      const mgcBalance = userData.mgcBalance || 0;
 
-    if (isPityRound) {
-      // دورة تعويض: جائزة مضمونة (MGC أو كوبون)
-      reward = getPityReward();
-    } else {
-      // دورات عادية: اختيار عشوائي مع وزن
-      reward = getRandomMachineReward();
-    }
+      if (mgcBalance < SPIN_COST) {
+        throw new HttpsError('failed-precondition', `رصيد MGC غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+      }
 
-    // تنفيذ الجائزة
-    if (reward.isMGC) {
-      prizeValue = reward.value;
-    } else if (reward.isXP) {
-      xpGained = reward.value;
-    } else if (reward.isCoupon) {
-      coupon = reward.coupon;
-    } else if (reward.isTitle) {
-      // سيتم إضافة اللقب لاحقاً
-    }
+      // التحقق من أن المستخدم غير محظور
+      if (userData.disabled === true) {
+        throw new HttpsError('permission-denied', 'الحساب محظور');
+      }
 
-    // خصم التكلفة وإضافة المكاسب
-    const newBalance = mgcBalance - SPIN_COST + prizeValue;
-    const updates = {
-      mgcBalance: newBalance,
-      machineCounter: machineCounter,
-      pityCounter: (reward.isFail && !isPityRound) ? pityCounter + 1 : 0,
-    };
+      // منطق اختيار الجائزة
+      let machineCounter = userData.machineCounter || 0;
+      machineCounter += 1;
 
-    if (xpGained > 0) {
-      updates.xp = admin.firestore.FieldValue.increment(xpGained);
-      // تحديث المستوى تلقائياً (يمكن إضافة منطق لاحقاً)
-    }
-    if (coupon) {
-      updates.coupons = admin.firestore.FieldValue.arrayUnion(coupon);
-    }
+      const isPityRound = (machineCounter % PITY_INTERVAL === 0);
+      let reward = null;
+      let prizeValue = 0;
+      let xpGained = 0;
+      let coupon = null;
 
-    await userRef.update(updates);
+      if (isPityRound) {
+        reward = getPityReward();
+      } else {
+        reward = getRandomMachineReward();
+      }
 
-    // تسجيل التاريخ
-    await admin.firestore().collection("machineHistory").add({
-      userId: uid,
-      reward: reward.label,
-      prize: prizeValue,
-      xp: xpGained,
-      cost: SPIN_COST,
-      isPity: isPityRound,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      // تنفيذ الجائزة
+      if (reward.isMGC) {
+        prizeValue = reward.value;
+      } else if (reward.isXP) {
+        xpGained = reward.value;
+      } else if (reward.isCoupon) {
+        coupon = reward.coupon;
+      }
+
+      const newBalance = mgcBalance - SPIN_COST + prizeValue;
+
+      // بناء التحديثات
+      const updates = {
+        mgcBalance: newBalance,
+        machineCounter: machineCounter,
+        pityCounter: (reward.isFail && !isPityRound) ? admin.firestore.FieldValue.increment(1) : 0,
+      };
+
+      if (xpGained > 0) {
+        updates.xp = admin.firestore.FieldValue.increment(xpGained);
+      }
+      if (coupon) {
+        updates.coupons = admin.firestore.FieldValue.arrayUnion(coupon);
+      }
+
+      tx.update(userRef, updates);
+
+      // تسجيل التاريخ داخل نفس الـ Transaction
+      const historyRef = admin.firestore().collection('machineHistory').doc();
+      tx.set(historyRef, {
+        userId: uid,
+        reward: reward.label,
+        prize: prizeValue,
+        xp: xpGained,
+        cost: SPIN_COST,
+        isPity: isPityRound,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return { reward, prizeValue, xpGained, isPityRound, previousBalance: mgcBalance, newBalance };
     });
 
-    logger.info(`✅ ماكينة: user=${uid}, reward=${reward.label}, isPity=${isPityRound}`);
-    return { success: true, reward: reward.label, prizeValue, xpGained, isPity: isPityRound };
+    logger.info(`✅ ماكينة: user=${uid}, reward=${result.reward.label}, isPity=${result.isPityRound}`);
+    return {
+      success: true,
+      reward: result.reward.label,
+      prizeValue: result.prizeValue,
+      xpGained: result.xpGained,
+      isPity: result.isPityRound,
+    };
 
   } catch (error) {
-    logger.error("❌ فشل سحب الماكينة:", error);
-    throw new Error(error.message);
+    logger.error('❌ فشل سحب الماكينة:', error);
+    throw error instanceof HttpsError ? error : new HttpsError('internal', error.message);
   }
 });
 
 // ===== دوال مساعدة =====
-
 function getPityReward() {
-  // جوائز مضمونة للدورات التعويضية
   const options = [
     { label: 'ربحت 100 MGC', isMGC: true, value: 100, weight: 25 },
     { label: 'ربحت 200 MGC', isMGC: true, value: 200, weight: 20 },
     { label: 'ربحت 50 MGC', isMGC: true, value: 50, weight: 30 },
-    { label: 'كوبون خصم 20%', isCoupon: true, coupon: { code: `PITY${Date.now()}`, value: 20, expiresAt: Date.now() + 30*24*60*60*1000 }, weight: 15 },
+    { label: 'كوبون خصم 20%', isCoupon: true, coupon: { code: `PITY${Date.now()}`, value: 20, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }, weight: 15 },
     { label: '+150 XP', isXP: true, value: 150, weight: 10 },
   ];
   return weightedRandomMachine(options);
@@ -123,7 +164,7 @@ function getRandomMachineReward() {
     { label: 'ربحت 32 MGC', isMGC: true, value: 32, weight: 4 },
     { label: '+50 XP', isXP: true, value: 50, weight: 8 },
     { label: '+100 XP', isXP: true, value: 100, weight: 5 },
-    { label: 'كوبون خصم 10%', isCoupon: true, coupon: { code: `DISCOUNT${Date.now()}`, value: 10, expiresAt: Date.now() + 30*24*60*60*1000 }, weight: 5 },
+    { label: 'كوبون خصم 10%', isCoupon: true, coupon: { code: `DISCOUNT${Date.now()}`, value: 10, expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }, weight: 5 },
     { label: 'لقب جديد', isTitle: true, weight: 1 },
   ];
   return weightedRandomMachine(options);
