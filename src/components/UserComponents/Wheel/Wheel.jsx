@@ -33,7 +33,7 @@ export default function Wheel({ onSpinComplete }) {
     }))
   );
 
-  const SPIN_COST = 0.25;
+  const SPIN_COST = 25;
 
   // رسم العجلة
   const drawWheel = useCallback((angle) => {

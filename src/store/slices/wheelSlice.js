@@ -1,19 +1,34 @@
 // src/store/slices/wheelSlice.js
 import { doc, updateDoc, addDoc, collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../../firebase';
 import toast from 'react-hot-toast';
 
-// ===== القطاعات الثابتة =====
+// ===== إعدادات الدولاب =====
+const SPIN_COST = 25; // تكلفة الدوران (MGC)
+
+// ===== توزيع الجوائز حسب النظام الجديد =====
+// 70% من الجوائز توزع على 400 دورة (من 0.5 إلى 32)
+// 30% من الجوائز توزع على 100 دورة (من 50 إلى 500)
+// إجمالي 500 دورة
 const WHEEL_SEGMENTS = [
-  { value: 0.5, weight: 35 },
-  { value: 0.5, weight: 35 },
-  { value: 1.5, weight: 15 },
-  { value: 3, weight: 8 },
-  { value: 7, weight: 4 },
-  { value: 15, weight: 2 },
-  { value: 50, weight: 0.8 },
-  { value: 500, weight: 0.2 },
+  // 70% من الوزن (35%) موزع على القيم الصغيرة
+  { value: 0.5, weight: 5 },   // 5%
+  { value: 1, weight: 8 },     // 8%
+  { value: 2, weight: 10 },    // 10%
+  { value: 4, weight: 12 },    // 12%
+  { value: 8, weight: 15 },    // 15%
+  { value: 16, weight: 10 },   // 10%
+  { value: 32, weight: 10 },   // 10%
+  // 30% من الوزن (15%) موزع على القيم الكبيرة
+  { value: 50, weight: 5 },    // 5%
+  { value: 100, weight: 4 },   // 4%
+  { value: 200, weight: 3 },   // 3%
+  { value: 500, weight: 3 },   // 3%
 ];
+
+// ===== ماكينة الحظ =====
+const MACHINE_SPIN_COST = 25; // تكلفة السحب
 
 const MACHINE_REWARDS = [
   { label: 'لا شيء', value: 0, weight: 30, isFail: true },
@@ -51,16 +66,6 @@ const LEVEL_TITLES = {
   9: 'سيد', 10: 'ملكي',
 };
 
-function getRandomReward(rewardsArray) {
-  const totalWeight = rewardsArray.reduce((sum, r) => sum + r.weight, 0);
-  let random = Math.random() * totalWeight;
-  for (const reward of rewardsArray) {
-    random -= reward.weight;
-    if (random <= 0) return reward;
-  }
-  return rewardsArray[0];
-}
-
 function calculateLevel(xp) {
   return Math.floor(Math.sqrt(xp / 100)) + 1;
 }
@@ -70,51 +75,48 @@ function getTitleByLevel(level) {
 }
 
 export const createWheelSlice = (set, get) => ({
+  // ===== دولاب الحظ (عبر Cloud Function) =====
   spinWheel: async () => {
     const { user, mgcBalance } = get();
-    const SPIN_COST = 0.25;
+    
+    // التحقق من الرصيد في الواجهة (لتحسين تجربة المستخدم)
     if (mgcBalance < SPIN_COST) {
       toast.error(`رصيد MGC غير كافٍ! تحتاج ${SPIN_COST} MGC`);
       return { success: false, prize: null, index: -1, message: 'رصيد MGC غير كافٍ' };
     }
-    const getRandomIndex = () => {
-      const totalWeight = WHEEL_SEGMENTS.reduce((sum, seg) => sum + seg.weight, 0);
-      let random = Math.random() * totalWeight;
-      for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
-        random -= WHEEL_SEGMENTS[i].weight;
-        if (random <= 0) return i;
-      }
-      return 0;
-    };
-    const selectedIndex = getRandomIndex();
-    const prize = WHEEL_SEGMENTS[selectedIndex].value;
-    const deductSuccess = await get().deductMgcBalance(SPIN_COST);
-    if (!deductSuccess) {
-      return { success: false, prize: null, index: -1, message: 'فشل الخصم' };
-    }
-    if (prize > 0) {
-      const addSuccess = await get().addMgcBalance(user.uid, prize);
-      if (!addSuccess) {
-        toast.error('فشل إضافة الجائزة، يرجى التواصل مع الدعم');
-        return { success: false, prize: null, index: -1, message: 'فشل إضافة الجائزة' };
-      }
-    }
+
     try {
-      const { collection, addDoc } = await import('firebase/firestore');
-      const { db } = await import('../../firebase');
-      await addDoc(collection(db, 'wheelHistory'), {
-        userId: user.uid,
-        username: user.displayName || 'مستخدم',
-        prize: prize,
-        cost: SPIN_COST,
-        timestamp: new Date().toISOString(),
-      });
+      const functions = getFunctions();
+      const spinFn = httpsCallable(functions, 'spinWheel');
+      const result = await spinFn();
+
+      if (result.data.success) {
+        const { prize, index } = result.data;
+        // تحديث الرصيد محلياً (سيتم تحديثه عبر onSnapshot أيضاً)
+        const newMgcBalance = get().mgcBalance - SPIN_COST + prize;
+        set({ mgcBalance: newMgcBalance });
+        // تحديث userData إذا لزم الأمر
+        if (get().userData) {
+          set({
+            userData: {
+              ...get().userData,
+              mgcBalance: newMgcBalance,
+            }
+          });
+        }
+        return { success: true, prize, index };
+      } else {
+        toast.error(result.data.message || 'فشل الدوران');
+        return { success: false, prize: null, index: -1, message: result.data.message };
+      }
     } catch (error) {
-      console.warn('فشل تسجيل تاريخ الدوران:', error);
+      console.error('❌ فشل spinWheel:', error);
+      toast.error(error.message || 'حدث خطأ أثناء الدوران');
+      return { success: false, prize: null, index: -1, message: error.message };
     }
-    return { success: true, prize, index: selectedIndex };
   },
 
+  // ===== جلب تاريخ الدولاب =====
   fetchWheelHistory: async (userId = null) => {
     try {
       const { collection, getDocs, query, where, orderBy, limit } = await import('firebase/firestore');
@@ -131,103 +133,69 @@ export const createWheelSlice = (set, get) => ({
     }
   },
 
+  // ===== ماكينة الحظ (عبر Cloud Function) =====
   pullMachine: async () => {
     const { user, mgcBalance, userData } = get();
-    const SPIN_COST = 75;
-    if (mgcBalance < SPIN_COST) {
-      toast.error(`رصيد MGC غير كافٍ! تحتاج ${SPIN_COST} MGC`);
+
+    // التحقق من الرصيد في الواجهة (لتحسين تجربة المستخدم)
+    if (mgcBalance < MACHINE_SPIN_COST) {
+      toast.error(`رصيد MGC غير كافٍ! تحتاج ${MACHINE_SPIN_COST} MGC`);
       return { success: false, error: 'رصيد MGC غير كافٍ' };
     }
-    let pityCounter = userData?.pityCounter || 0;
-    let reward = getRandomReward(MACHINE_REWARDS);
-    let isPity = false;
-    if (reward.isFail) {
-      pityCounter++;
-    } else {
-      pityCounter = 0;
-    }
-    if (pityCounter >= 2) {
-      reward = getRandomReward(PITY_REWARDS);
-      pityCounter = 0;
-      isPity = true;
-    }
-    const deductSuccess = await get().deductMgcBalance(SPIN_COST);
-    if (!deductSuccess) {
-      return { success: false, error: 'فشل الخصم' };
-    }
-    let prizeMessage = '';
-    let prizeValue = 0;
-    let xpGained = 0;
-    if (reward.isCoupon) {
-      const coupon = {
-        code: `DISCOUNT${Date.now()}`,
-        value: reward.couponValue,
-        expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
-      };
-      await updateDoc(doc(db, 'users', user.uid), {
-        coupons: [...(userData?.coupons || []), coupon],
-      });
-      prizeMessage = `🎫 كوبون خصم ${reward.couponValue}%!`;
-    } else if (reward.isFreeCoupon) {
-      const coupon = {
-        code: `FREE${Date.now()}`,
-        amount: reward.couponAmount,
-        expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
-      };
-      await updateDoc(doc(db, 'users', user.uid), {
-        freeCoupons: [...(userData?.freeCoupons || []), coupon],
-      });
-      prizeMessage = `🎁 كوبون شراء مجاني بقيمة ${reward.couponAmount}$!`;
-    } else if (reward.isXP) {
-      xpGained = reward.xpValue;
-      const newXP = (userData?.xp || 0) + xpGained;
-      const newLevel = calculateLevel(newXP);
-      const newTitle = getTitleByLevel(newLevel);
-      await updateDoc(doc(db, 'users', user.uid), {
-        xp: newXP,
-        level: newLevel,
-        title: newTitle,
-      });
-      prizeMessage = `⭐ +${xpGained} XP! المستوى ${newLevel} (${newTitle})`;
-    } else if (reward.isTitle) {
-      const specialTitles = ['الذهبي', 'الفضي', 'البرونزي', 'الماسي', 'الأسطوري'];
-      const newTitle = specialTitles[Math.floor(Math.random() * specialTitles.length)];
-      await updateDoc(doc(db, 'users', user.uid), {
-        title: newTitle,
-      });
-      prizeMessage = `🏅 لقب جديد: ${newTitle}!`;
-    } else {
-      prizeValue = reward.value;
-      await get().addMgcBalance(user.uid, prizeValue);
-      prizeMessage = `🎉 ربحت ${prizeValue} MGC!`;
-    }
-    await updateDoc(doc(db, 'users', user.uid), {
-      pityCounter: pityCounter,
-    });
+
     try {
-      const { collection, addDoc } = await import('firebase/firestore');
-      await addDoc(collection(db, 'machineHistory'), {
-        userId: user.uid,
-        reward: reward.label,
-        prize: prizeValue,
-        xp: xpGained,
-        cost: SPIN_COST,
-        isPity,
-        timestamp: new Date().toISOString(),
-      });
+      const functions = getFunctions();
+      const pullFn = httpsCallable(functions, 'pullMachine');
+      const result = await pullFn();
+
+      if (result.data.success) {
+        const { reward, prizeMessage, prizeValue, isPity, pityCounter } = result.data;
+        
+        // تحديث الرصيد محلياً
+        const newMgcBalance = get().mgcBalance - MACHINE_SPIN_COST + prizeValue;
+        set({ mgcBalance: newMgcBalance });
+        
+        // تحديث userData إذا لزم الأمر
+        if (get().userData) {
+          set({
+            userData: {
+              ...get().userData,
+              mgcBalance: newMgcBalance,
+              pityCounter: pityCounter,
+              ...(result.data.xpGained && {
+                xp: (get().userData?.xp || 0) + result.data.xpGained,
+                level: result.data.newLevel || get().userData?.level,
+                title: result.data.newTitle || get().userData?.title,
+              }),
+              ...(result.data.coupons && { coupons: result.data.coupons }),
+              ...(result.data.freeCoupons && { freeCoupons: result.data.freeCoupons }),
+            }
+          });
+        }
+
+        // عرض رسالة النجاح
+        toast.success(prizeMessage || `🎉 ربحت ${prizeValue} MGC!`);
+        
+        return {
+          success: true,
+          reward,
+          prizeMessage,
+          prizeValue,
+          isPity,
+          pityCounter,
+        };
+      } else {
+        toast.error(result.data.error || 'فشل السحب');
+        return { success: false, error: result.data.error };
+      }
     } catch (error) {
-      console.warn('فشل تسجيل تاريخ الماكينة:', error);
+      console.error('❌ فشل pullMachine:', error);
+      toast.error(error.message || 'حدث خطأ أثناء السحب');
+      return { success: false, error: error.message };
     }
-    return {
-      success: true,
-      reward: reward.label,
-      prizeMessage,
-      prizeValue,
-      isPity,
-      pityCounter: pityCounter,
-    };
   },
 
+  // ===== إحصائيات =====
   getWheelCount: async () => {
     const { user } = get();
     if (!user) return 0;

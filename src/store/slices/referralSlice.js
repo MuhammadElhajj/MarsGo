@@ -1,5 +1,6 @@
 // src/store/slices/referralSlice.js
 import { doc, updateDoc, increment, addDoc, collection, serverTimestamp, query, where, getDocs, writeBatch , orderBy, limit, getDoc} from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions'; // ✅ إضافة استيراد
 import { db } from '../../firebase';
 import toast from 'react-hot-toast';
 
@@ -74,48 +75,44 @@ export const createReferralSlice = (set, get) => ({
     }
   },
 
+  // ===== صرف مكافآت الإحالة (عبر Cloud Function) =====
   claimReferralRewards: async () => {
-    const { user, userData, referralBalance } = get();
+    const { user } = get();
     if (!user) {
       toast.error('يجب تسجيل الدخول');
       return false;
     }
-    if (referralBalance < 100) {
-      toast.error(`رصيد الإحالات غير كافٍ! تحتاج 100 MGC، لديك ${referralBalance} MGC`);
-      return false;
-    }
+
     try {
-      const userRef = doc(db, 'users', user.uid);
-      const batch = writeBatch(db);
-      batch.update(userRef, {
-        balance: increment(referralBalance),
-        referralBalance: 0,
-        totalReferralEarnings: increment(referralBalance),
-      });
-      const q = query(
-        collection(db, 'referral_rewards'),
-        where('referrerId', '==', user.uid),
-        where('status', '==', 'pending')
-      );
-      const snap = await getDocs(q);
-      snap.docs.forEach(docSnap => {
-        batch.update(docSnap.ref, {
-          status: 'claimed',
-          claimedAt: serverTimestamp(),
+      const functions = getFunctions();
+      const claimFn = httpsCallable(functions, 'claimReferralRewards');
+      const result = await claimFn();
+
+      if (result.data.success) {
+        const claimedAmount = result.data.claimedAmount;
+        const currentBalance = get().balance || 0;
+        
+        // تحديث الحالة المحلية مباشرة (لتحسين تجربة المستخدم)
+        set({
+          balance: currentBalance + claimedAmount,
+          referralBalance: 0,
+          userData: {
+            ...get().userData,
+            balance: currentBalance + claimedAmount,
+            referralBalance: 0,
+            totalReferralEarnings: (get().userData?.totalReferralEarnings || 0) + claimedAmount,
+          },
         });
-      });
-      await batch.commit();
-      const newBalance = (get().balance || 0) + referralBalance;
-      set({
-        balance: newBalance,
-        userData: { ...userData, referralBalance: 0, totalReferralEarnings: (userData.totalReferralEarnings || 0) + referralBalance },
-        referralBalance: 0,
-      });
-      toast.success(`✅ تم تحويل ${referralBalance} MGC إلى رصيدك الرئيسي!`);
-      return true;
+        
+        toast.success(`✅ تم تحويل ${claimedAmount} MGC إلى رصيدك الرئيسي!`);
+        return true;
+      } else {
+        toast.error(result.data.message || 'فشل صرف المكافآت');
+        return false;
+      }
     } catch (error) {
       console.error('فشل صرف المكافآت:', error);
-      toast.error('حدث خطأ أثناء صرف المكافآت');
+      toast.error(error.message || 'حدث خطأ أثناء صرف المكافآت');
       return false;
     }
   },
@@ -125,58 +122,33 @@ export const createReferralSlice = (set, get) => ({
     toast.success('تم نسخ المعرف: ' + uniqueId);
   },
 
-  // ===== نظام دعم الشعبية =====
-  supportUser: async (targetUserId) => {
-    const { user, mgcBalance } = get();
-    const SUPPORT_COST = 20;
-    if (!user) {
-      toast.error('يجب تسجيل الدخول أولاً');
-      return { success: false, error: 'يجب تسجيل الدخول' };
+ // ===== نظام دعم الشعبية (عبر Cloud Function) =====
+supportUser: async (targetUserId) => {
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول أولاً');
+    return { success: false, error: 'يجب تسجيل الدخول' };
+  }
+
+  try {
+    const functions = getFunctions();
+    const supportFn = httpsCallable(functions, 'supportUser');
+    const result = await supportFn({ targetUserId });
+
+    if (result.data.success) {
+      // تحديث الحالة المحلية (اختياري، لأن onSnapshot سيقوم بالتحديث)
+      toast.success(`🌹 تم دعم المستخدم! -20 MGC (+1 شعبية)`);
+      return { success: true };
+    } else {
+      toast.error(result.data.message || 'فشل الدعم');
+      return { success: false, error: result.data.message };
     }
-    if (user.uid === targetUserId) {
-      toast.error('لا يمكنك دعم نفسك');
-      return { success: false, error: 'لا يمكنك دعم نفسك' };
-    }
-    if (mgcBalance < SUPPORT_COST) {
-      toast.error(`رصيد MGC غير كافٍ! تحتاج ${SUPPORT_COST} MGC، رصيدك: ${mgcBalance.toFixed(0)} MGC`);
-      return { success: false, error: 'رصيد MGC غير كافٍ' };
-    }
-    try {
-      const deducted = await get().deductMgcBalance(SUPPORT_COST);
-      if (!deducted) {
-        return { success: false, error: 'فشل خصم MGC' };
-      }
-      await addDoc(collection(db, 'support_activities'), {
-        fromUserId: user.uid,
-        toUserId: targetUserId,
-        type: 'popularity',
-        value: 1,
-        cost: SUPPORT_COST,
-        createdAt: serverTimestamp(),
-      });
-      const targetRef = doc(db, 'users', targetUserId);
-      await updateDoc(targetRef, {
-        popularity: increment(1),
-        xp: increment(5),
-      });
-      if (get().userData?.uid === targetUserId) {
-        const currentUserData = get().userData;
-        set({
-          userData: {
-            ...currentUserData,
-            popularity: (currentUserData.popularity || 0) + 1,
-            xp: (currentUserData.xp || 0) + 5,
-          }
-        });
-      }
-      toast.success(`🌹 تم دعم المستخدم! -${SUPPORT_COST} MGC (+1 شعبية)`);
-      return { success: true, newBalance: get().mgcBalance };
-    } catch (error) {
-      console.error('فشل الدعم:', error);
-      toast.error('حدث خطأ أثناء الدعم');
-      return { success: false, error: error.message };
-    }
-  },
+  } catch (error) {
+    console.error('فشل الدعم:', error);
+    toast.error(error.message || 'حدث خطأ أثناء الدعم');
+    return { success: false, error: error.message };
+  }
+},
 
   getTotalSupportCount: async (targetUserId) => {
     try {

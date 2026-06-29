@@ -1,0 +1,48 @@
+/* src/pages/User/GamesHubPage/GamesHubPage.css */
+.games-hub-page {
+  max-width: 800px;
+  margin: 0 auto;
+ 
+  animation: fadeIn 0.3s ease;
+}
+
+.games-hub-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.games-hub-page__title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.games-hub-page__subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.games-hub-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .games-hub-page__grid {
+    grid-template-columns: 1fr;
+  }
+  .games-hub-page__title {
+    font-size: 1.3rem;
+  }
+}

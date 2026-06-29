@@ -39,3 +39,14 @@ exports.sellMgc = require('./transactions/transactionFunctions').sellMgc;
 
 // functions/index.js
 exports.telegramDepositWebhook = require('./telegramBot/telegramBot').telegramDepositWebhook;
+
+// في أعلى الملف، بعد باقي الاستيرادات
+exports.claimReferralRewards = require('./referral/claimReward').claimReferralRewards;
+
+// ===== دولاب الحظ =====
+exports.spinWheel = require('./transactions/spinWheel').spinWheel;
+exports.pullMachine = require('./transactions/pullMachine').pullMachine;
+
+// ===== إدارة الكلانات (خلفية) =====
+exports.assignClanRole = require('./clans/clanManagement').assignClanRole;
+exports.deleteClan = require('./clans/clanManagement').deleteClan;

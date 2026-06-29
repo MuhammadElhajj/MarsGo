@@ -1,12 +1,18 @@
 // src/components/UserComponents/Chat/ChatPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAppStore } from '../../../store/store';
 import { useShallow } from 'zustand/react/shallow';
-import { collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, serverTimestamp, updateDoc, increment , getDoc} from 'firebase/firestore';
+import { 
+  collection, query, where, orderBy, onSnapshot, getDocs, doc, setDoc, 
+  serverTimestamp, updateDoc, increment, getDoc 
+} from 'firebase/firestore';
 import { db } from '../../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { FiMessageCircle, FiPlus, FiUsers } from 'react-icons/fi';
 import './ChatPage.css';
+
+// عدد العناصر المسموح بها في استعلام `in` هي 10 كحد أقصى
+const MAX_IN_QUERY = 10;
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -20,11 +26,14 @@ export default function ChatPage() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usersMap, setUsersMap] = useState({});
-
   const uid = user?.uid || userData?.uid || null;
 
-  // دالة لإنشاء الغرفة العامة
-  const ensureGlobalRoom = async () => {
+  // استخدام ref لتتبع ما إذا تم إنشاء الغرفة العامة لتجنب التكرار
+  const globalRoomCreatedRef = useRef(false);
+
+  // دالة لإنشاء الغرفة العامة (تتم مرة واحدة فقط)
+  const ensureGlobalRoom = useCallback(async () => {
+    if (!uid || globalRoomCreatedRef.current) return;
     try {
       const q = query(collection(db, 'rooms'), where('type', '==', 'global'));
       const snapshot = await getDocs(q);
@@ -41,33 +50,69 @@ export default function ChatPage() {
         });
         console.log('✅ تم إنشاء الغرفة العامة');
       }
+      globalRoomCreatedRef.current = true;
     } catch (error) {
       console.error('خطأ في إنشاء الغرفة العامة:', error);
     }
-  };
+  }, [uid]);
 
-  // جلب بيانات المستخدمين الآخرين
-  const fetchUsersData = async (userIds) => {
+  // دالة لجلب بيانات المستخدمين دفعة واحدة (مع تجزئة إذا تجاوز العدد 10)
+  const fetchUsersData = useCallback(async (userIds) => {
+    if (!userIds || userIds.length === 0) return;
+
+    // تصفية المعرفات التي ليست موجودة بالفعل في usersMap
+    const newIds = userIds.filter(id => !usersMap[id]);
+    if (newIds.length === 0) return;
+
     try {
       const users = {};
-      for (const id of userIds) {
-        if (!usersMap[id]) {
-          const docSnap = await getDoc(doc(db, 'users', id));
-          if (docSnap.exists()) {
-            users[id] = docSnap.data();
-          }
-        }
+      // تجزئة المعرفات إلى مجموعات بحجم 10
+      for (let i = 0; i < newIds.length; i += MAX_IN_QUERY) {
+        const chunk = newIds.slice(i, i + MAX_IN_QUERY);
+        const q = query(collection(db, 'users'), where('__name__', 'in', chunk));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(doc => {
+          users[doc.id] = doc.data();
+        });
       }
+      // تحديث usersMap بطريقة دمج (بدلاً من الاستبدال الكامل)
       setUsersMap(prev => ({ ...prev, ...users }));
     } catch (error) {
       console.error('خطأ في جلب بيانات المستخدمين:', error);
     }
-  };
+  }, [usersMap]);
 
+  // استخراج معرفات المستخدمين الآخرين من الغرف الخاصة
+  const otherUserIds = useMemo(() => {
+    const ids = new Set();
+    rooms.forEach(room => {
+      if (room.type === 'private' && room.members) {
+        room.members.forEach(memberId => {
+          if (memberId !== uid) ids.add(memberId);
+        });
+      }
+    });
+    return Array.from(ids);
+  }, [rooms, uid]);
+
+  // جلب بيانات المستخدمين الآخرين عند تغير المعرفات
   useEffect(() => {
-    if (!uid) return;
+    if (otherUserIds.length > 0) {
+      fetchUsersData(otherUserIds);
+    }
+  }, [otherUserIds, fetchUsersData]);
+
+  // الاستماع للغرف (خاصة + العامة)
+  useEffect(() => {
+    if (!uid) {
+      setLoading(false);
+      return;
+    }
+
+    // إنشاء الغرفة العامة (مرة واحدة)
     ensureGlobalRoom();
 
+    // استعلام الغرف الخاصة
     const roomsRef = collection(db, 'rooms');
     const privateQuery = query(
       roomsRef,
@@ -81,41 +126,34 @@ export default function ChatPage() {
         ...doc.data(),
       }));
 
+      // جلب الغرفة العامة (مرة واحدة فقط، ثم تخزينها محلياً)
+      let globalRoom = null;
       try {
         const globalQuery = query(collection(db, 'rooms'), where('type', '==', 'global'));
         const globalSnap = await getDocs(globalQuery);
-        let globalRoom = null;
         if (!globalSnap.empty) {
           globalRoom = { id: globalSnap.docs[0].id, ...globalSnap.docs[0].data() };
         }
-
-        let roomsList = [];
-        if (globalRoom) {
-          roomsList.push(globalRoom);
-        }
-        roomsList = [...roomsList, ...privateRooms];
-
-        // جلب بيانات المستخدمين
-        const privateRoomsList = roomsList.filter(r => r.type === 'private');
-        const userIds = privateRoomsList.flatMap(r => r.members || []).filter(id => id !== uid);
-        if (userIds.length > 0) {
-          await fetchUsersData(userIds);
-        }
-
-        setRooms(roomsList);
-        setLoading(false);
       } catch (error) {
         console.error('خطأ في جلب الغرفة العامة:', error);
-        setRooms(privateRooms);
-        setLoading(false);
       }
+
+      // دمج القوائم: الغرفة العامة أولاً ثم الخاصة
+      let roomsList = [];
+      if (globalRoom) {
+        roomsList.push(globalRoom);
+      }
+      roomsList = [...roomsList, ...privateRooms];
+
+      setRooms(roomsList);
+      setLoading(false);
     }, (error) => {
       console.error('خطأ في تحميل الغرف:', error);
       setLoading(false);
     });
 
     return () => unsubscribePrivate();
-  }, [uid]);
+  }, [uid, ensureGlobalRoom]);
 
   const handleRoomClick = (roomId) => {
     navigate(`/chat/room/${roomId}`);
@@ -130,7 +168,6 @@ export default function ChatPage() {
   return (
     <div className="chat-page">
       <div className="chat-page__header">
-        {/* ✅ إضافة أيقونة/شعار الدردشة */}
         <div className="chat-page__header-left">
           <div className="chat-page__header-avatar">
             <FiMessageCircle size={24} />
@@ -180,13 +217,12 @@ export default function ChatPage() {
               >
                 <div className="chat-page__room-avatar">
                   {imageUrl ? (
-                    <img src={imageUrl} alt={displayName} />
+                    <img src={imageUrl} alt={displayName} loading="lazy" />
                   ) : (
                     <span className="chat-page__room-avatar-placeholder">
                       {displayName.charAt(0).toUpperCase()}
                     </span>
                   )}
-                  {/* ✅ نقطة حالة (أخضر/رمادي) اختيارية */}
                 </div>
                 <div className="chat-page__room-info">
                   <div className="chat-page__room-name">{displayName}</div>
@@ -199,7 +235,6 @@ export default function ChatPage() {
                     {room.lastMessageTime?.toDate?.()
                       ?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
                   </div>
-                  {/* ✅ عداد الرسائل غير المقروءة */}
                   {unreadCount > 0 && (
                     <div className="chat-page__room-unread">{unreadCount}</div>
                   )}

@@ -9,7 +9,7 @@ import Search from "../../components/GeneralComponents/Search/Search";
 import SupportButton from "../../components/GeneralComponents/SupportButton/SupportButton";
 import Breadcrumb from "../../components/GeneralComponents/Breadcrumb/Breadcrumb"; // ✅ إضافة
 import './Layout.css';
-
+import GamesWidget from '../../components/GeneralComponents/GamesWidget/GamesWidget';
 export default function Layout() {
   // حالات السايدبارين
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,6 +19,8 @@ export default function Layout() {
   const isChatRoom = location.pathname.startsWith('/chat/room/');
   const isChatPage = location.pathname.startsWith('/chat');
 const isCheckoutPage = location.pathname.includes('/checkout');
+// تحديد إذا كنا في Dashboard أو Profile
+  const showGamesWidget = location.pathname === '/dashboard' || location.pathname.startsWith('/profile');
   // حالات حجم الشاشة
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isMedium, setIsMedium] = useState(
@@ -79,7 +81,7 @@ const isCheckoutPage = location.pathname.includes('/checkout');
               <Breadcrumb />
             </div>
           )}
-
+{showGamesWidget && <GamesWidget />}
           <main className={`app-content ${isChatPage ? 'chat-page-layout' : ''}`}>
             <Outlet />
           </main>

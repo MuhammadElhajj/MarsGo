@@ -1,13 +1,12 @@
 // src/pages/User/LeaderboardPage/LeaderboardPage.jsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiAward, FiUser, FiTrendingUp, FiHeart, 
   FiHash, FiLoader, FiShield, FiZap
 } from 'react-icons/fi';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
-import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoBackButton';
 import './LeaderboardPage.css';
 
 // ===== أيقونات الميداليات =====
@@ -38,12 +37,30 @@ const getCardClass = (index) => {
   return 'leaderboard__item';
 };
 
-// ===== حساب النقاط الإجمالية (للفلتر العام) =====
-const calculateTotalScore = (user) => {
-  const popularity = user.popularity || 0;
-  const power = user.power || 0;
-  const level = user.level || 1;
-  return popularity + (power * 2) + (level * 5);
+// ===== جلب المستخدمين (أول 10) حسب الحقل المطلوب =====
+const fetchTopUsers = async (field) => {
+  try {
+    const q = query(
+      collection(db, 'users'),
+      orderBy(field, 'desc'),
+      limit(10)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      name: doc.data().name || doc.data().displayName || 'مستخدم',
+      avatar: doc.data().avatar || doc.data().photoURL || null,
+      power: doc.data().power || 0,
+      popularity: doc.data().popularity || 0,
+      wins: doc.data().wins || 0,
+      level: doc.data().level || 1,
+      rank: doc.data().rank || 'عضو',
+    }));
+  } catch (error) {
+    console.error('خطأ في جلب المتصدرين:', error);
+    return [];
+  }
 };
 
 export default function LeaderboardPage() {
@@ -52,50 +69,24 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('popularity');
 
-  // ===== جلب المستخدمين من Firestore =====
+  // ===== جلب البيانات عند تغيير الفلتر =====
   useEffect(() => {
-    const fetchUsers = async () => {
+    const loadData = async () => {
       setLoading(true);
-      try {
-        const q = query(collection(db, 'users'), orderBy('popularity', 'desc'));
-        const snapshot = await getDocs(q);
-        const usersList = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          name: doc.data().name || doc.data().displayName || 'مستخدم',
-          avatar: doc.data().avatar || doc.data().photoURL || null,
-          power: doc.data().power || 0,
-          popularity: doc.data().popularity || 0,
-          wins: doc.data().wins || 0,
-          level: doc.data().level || 1,
-          rank: doc.data().rank || 'عضو',
-        }));
-        setUsers(usersList);
-      } catch (error) {
-        console.error('خطأ في جلب المتصدرين:', error);
-      } finally {
-        setLoading(false);
-      }
+      // نحدد الحقل الذي سنفرز عليه
+      let orderField = 'popularity';
+      if (filter === 'power') orderField = 'power';
+      else if (filter === 'wins') orderField = 'wins';
+      // بالنسبة لـ 'all' نستخدم popularity مؤقتاً (أو يمكن إضافة totalScore لاحقاً)
+      else if (filter === 'all') orderField = 'popularity';
+
+      const usersList = await fetchTopUsers(orderField);
+      setUsers(usersList);
+      setLoading(false);
     };
 
-    fetchUsers();
-  }, []);
-
-  // ===== الترتيب حسب الفلتر =====
-  const sortedUsers = useMemo(() => {
-    const list = [...users];
-    switch (filter) {
-      case 'power':
-        return list.sort((a, b) => b.power - a.power);
-      case 'popularity':
-        return list.sort((a, b) => b.popularity - a.popularity);
-      case 'wins':
-        return list.sort((a, b) => b.wins - a.wins);
-      case 'all':
-      default:
-        return list.sort((a, b) => calculateTotalScore(b) - calculateTotalScore(a));
-    }
-  }, [users, filter]);
+    loadData();
+  }, [filter]);
 
   const handleUserClick = (userId) => {
     navigate(`/profile/${userId}`);
@@ -112,20 +103,12 @@ export default function LeaderboardPage() {
 
   return (
     <div className="leaderboard-page">
-      {/* زر الرجوع */}
       <div className="leaderboard__back">
-      <div className="leaderboard__header">
-        <h2>
-          {/* <FiAward className="header-icon" /> */}
-          قائمة المتصدرين
-        </h2>
+        <div className="leaderboard__header">
+          <h2>قائمة المتصدرين</h2>
+        </div>
       </div>
-      </div>
-        {/* <p>ترتيب الأكثر تأثيراً ونشاطاً في المنصة</p> */}
 
-      {/* الهيدر */}
-
-      {/* أزرار التصفية */}
       <div className="leaderboard__filters">
         <button 
           className={filter === 'popularity' ? 'active' : ''} 
@@ -153,12 +136,11 @@ export default function LeaderboardPage() {
         </button>
       </div>
 
-      {/* قائمة المتصدرين */}
       <div className="leaderboard__list">
-        {sortedUsers.length === 0 ? (
+        {users.length === 0 ? (
           <p className="leaderboard__empty">لا يوجد مستخدمون مسجلون بعد</p>
         ) : (
-          sortedUsers.map((user, index) => (
+          users.map((user, index) => (
             <div 
               key={user.id} 
               className={getCardClass(index)}
@@ -172,13 +154,11 @@ export default function LeaderboardPage() {
                 }
               }}
             >
-              {/* المركز */}
               <div className="leaderboard__rank">
                 {getMedalIcon(index)}
                 <span>#{index + 1}</span>
               </div>
 
-              {/* الصورة الرمزية */}
               <div className="leaderboard__avatar">
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.name} className="avatar-img" />
@@ -187,7 +167,6 @@ export default function LeaderboardPage() {
                 )}
               </div>
 
-              {/* معلومات المستخدم */}
               <div className="leaderboard__info">
                 <div className="leaderboard__name">
                   {user.name}
@@ -200,7 +179,6 @@ export default function LeaderboardPage() {
                 </div>
               </div>
 
-              {/* اللقب الرسمي للثلاثة الأوائل */}
               {index < 3 && (
                 <div className="leaderboard__badge">
                   <FiShield /> {getOfficialTitle(index)}
@@ -211,9 +189,8 @@ export default function LeaderboardPage() {
         )}
       </div>
 
-      {/* الفوتر */}
       <div className="leaderboard__footer">
-        <p>إجمالي المتصدرين: <strong>{sortedUsers.length}</strong> مستخدم</p>
+        <p>إجمالي المتصدرين: <strong>{users.length}</strong> مستخدم</p>
         <p>يتم تحديث الترتيب تلقائياً بناءً على الشعبية والنشاط</p>
       </div>
     </div>

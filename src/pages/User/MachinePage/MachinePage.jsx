@@ -1,10 +1,10 @@
-// src/pages/User/WheelPage/WheelPage.jsx
+// src/pages/User/MachinePage/MachinePage.jsx
 import { useState, useEffect } from 'react';
-import Wheel from '../../../components/UserComponents/Wheel/Wheel'; // ✅ استيراد Wheel بشكل صحيح
-import './WheelPage.css';
+import Machine from '../../../components/UserComponents/Machine/Machine';
+import './MachinePage.css';
 
 // ============================================================
-// 🏆 مكون شريط الفائزين (PUBG-style)
+// 🏆 مكون شريط الفائزين (PUBG-style) - نسخ من WheelPage
 // ============================================================
 function WinnerFeed() {
   const [winners, setWinners] = useState([]);
@@ -15,15 +15,14 @@ function WinnerFeed() {
     'ماجد', 'دينا', 'سامي', 'روان', 'أسامة', 'جمانة', 'باسل', 'شهد'
   ];
 
-  const PRIZES = [10, 15, 20, 25, 30, 50, 75, 100, 150, 200, 250, 300, 500];
-  const GAMES = ['الدولاب', 'ماكينة الحظ', 'الدولاب الذهبي', 'الماكينة الفاخرة'];
+  const PRIZES = [15, 30, 60, 90, 150, 225, 300, 600, 1500, 3000];
+  const GAMES = ['ماكينة الحظ', 'الماكينة الفاخرة', 'ماكينة الجوائز', 'الماكينة الذهبية'];
 
   const generateRandomWinner = () => {
     const name = NAMES[Math.floor(Math.random() * NAMES.length)];
     const prize = PRIZES[Math.floor(Math.random() * PRIZES.length)];
     const game = GAMES[Math.floor(Math.random() * GAMES.length)];
-    const isMGC = Math.random() > 0.3;
-    const reward = isMGC ? `${prize} MGC` : Math.random() > 0.5 ? `${prize} XP` : 'لقب نادر';
+    const reward = `${prize} MGC`;
     return {
       id: Date.now() + Math.random(),
       name,
@@ -58,7 +57,7 @@ function WinnerFeed() {
             <span className="winner-feed__name">{winner.name}</span>
             <span className="winner-feed__action">ربح</span>
             <span className="winner-feed__reward">{winner.reward}</span>
-            <span className="winner-feed__game">🎮 {winner.game}</span>
+            <span className="winner-feed__game">🎰 {winner.game}</span>
             <span className="winner-feed__time">
               {winner.time.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
             </span>
@@ -70,53 +69,59 @@ function WinnerFeed() {
 }
 
 // ============================================================
-// الصفحة الرئيسية (تعرض الدولاب فقط)
+// الصفحة الرئيسية (تعرض الماكينة فقط)
 // ============================================================
-export default function WheelPage() {
+export default function MachinePage() {
   const [lastWin, setLastWin] = useState(null);
   const [spinCount, setSpinCount] = useState(0);
 
-  const handleSpinComplete = (prize) => {
-    setLastWin(prize);
+  const handleSpinComplete = (result) => {
+    // result يحتوي على prizeValue أو prizeMessage
+    const prize = result?.prizeValue || 0;
+    if (prize > 0) {
+      setLastWin(prize);
+    } else {
+      setLastWin(null);
+    }
     setSpinCount(prev => prev + 1);
   };
 
   return (
-    <div className="wheel-page">
+    <div className="machine-page">
       <WinnerFeed />
 
-      <div className="wheel-page__header">
-        <h1>🎡 دولاب الحظ</h1>
-        <p>دور العجلة واربح جوائز تصل إلى 1000 MGC!</p>
+      <div className="machine-page__header">
+        <h1>🎰 ماكينة الحظ</h1>
+        <p>اسحب الماكينة واربح جوائز، كوبونات، XP، وألقاب!</p>
       </div>
 
-      <div className="wheel-page__body">
-        {/* ✅ عرض مكون الدولاب فقط */}
-        <Wheel onSpinComplete={handleSpinComplete} />
+      <div className="machine-page__body">
+        <Machine onSpinComplete={handleSpinComplete} />
       </div>
 
-      <div className="wheel-page__stats">
-        <div className="wheel-page__stat-card">
-          <span className="stat-label">عدد مرات اللعب</span>
+      <div className="machine-page__stats">
+        <div className="machine-page__stat-card">
+          <span className="stat-label">عدد مرات السحب</span>
           <span className="stat-value">{spinCount}</span>
         </div>
-        <div className="wheel-page__stat-card">
+        <div className="machine-page__stat-card">
           <span className="stat-label">آخر ربح</span>
           <span className="stat-value" style={{ color: lastWin > 0 ? '#2ed573' : '#ff6b6b' }}>
             {lastWin !== null ? `${lastWin} MGC` : '—'}
           </span>
         </div>
-        <div className="wheel-page__stat-card">
+        <div className="machine-page__stat-card">
           <span className="stat-label">أعلى جائزة</span>
-          <span className="stat-value">1000 MGC</span>
+          <span className="stat-value">3000 MGC</span>
         </div>
       </div>
 
-      <div className="wheel-page__rules">
+      <div className="machine-page__rules">
         <h3>📋 قواعد اللعبة</h3>
         <ul>
-          <li>🎡 <strong>الدولاب:</strong> سعر الدخول <strong>25 MGC</strong>، جوائز تصل إلى <strong>1000 MGC</strong>.</li>
-          <li>💡 70% من الدورات رابحة، 30% خاسرة.</li>
+          <li>🎰 <strong>ماكينة الحظ:</strong> سعر الدخول <strong>75 MGC</strong>، جوائز تصل إلى <strong>3000 MGC</strong>.</li>
+          <li>🎁 جوائز تشمل: عملات MGC، كوبونات خصم، كوبونات شراء مجاني، نقاط XP، وألقاب نادرة.</li>
+          <li>💡 نظام التعويض: بعد سحبين فاشلين، السحب الثالث مضمون بجائزة (كوبون، XP، أو لقب).</li>
           <li>جميع الأرباح تُضاف تلقائياً إلى رصيدك.</li>
         </ul>
       </div>

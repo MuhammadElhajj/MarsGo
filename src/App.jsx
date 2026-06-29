@@ -55,7 +55,10 @@ import LeaderboardPage from "./pages/User/LeaderboardPage/LeaderboardPage"; // �
 const MainFriendPage = lazy(() => import("./pages/User/MainFriendPage/MainFriendPage"));
 const SearchPage  = lazy(() => import("./pages/User/SearchPage/SearchPage"));
 const AddPhonePage = lazy(() => import("./pages/User/AddPhonePage/AddPhonePage"));
-
+// src/App.jsx
+const MachinePage = lazy(() => import("./pages/User/MachinePage/MachinePage"));
+const GamesHubPage = lazy(() => import('./pages/User/GamesHubPage/GamesHubPage'));
+// const MachineGamePage = lazy(() => import('./pages/User/MachinePage/MachinePage')); // أنشئها إذا لم تكن موجودة
 // ============================================================
 //  صفحات المدير (Admin Pages) – تحميل كسول
 // ============================================================
@@ -177,7 +180,7 @@ function App() {
           <Route path="/gaming/*" element={<GamingPage />} />
           <Route path="/chat/room/:roomId" element={<ChatRoom />} />
           <Route path="/quests" element={<QuestsPage />} />
-          <Route path="/wheel" element={<WheelPage />} />
+          {/* <Route path="/wheel" element={<WheelPage />} /> */}
           <Route path="/referral" element={<ReferralPage />} />
           <Route path="/my-activities" element={<MyActivitiesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
@@ -194,7 +197,10 @@ function App() {
           <Route path="/missions" element={<MissionsPage />} />
           <Route path="/memberships" element={<MembershipsPage />} />
           <Route path="/buy-mgc" element={<BuyMGC />} />
-        
+       
+        <Route path="/games-hub/machine" element={<MachinePage />} /> <Route path="/games-hub" element={<GamesHubPage />} />
+  <Route path="/games-hub/wheel" element={<WheelPage />} />
+  {/* <Route path="/games-hub/machine" element={<MachineGamePage />} /> */}
           <Route path="/add-phone" element={<AddPhonePage />} />  <Route path="/my-orders" element={<MyOrdersPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
