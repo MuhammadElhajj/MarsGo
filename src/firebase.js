@@ -1,7 +1,10 @@
+
+
 // import { initializeApp } from "firebase/app";
 // import { getAuth } from "firebase/auth";
 // import { getFirestore } from "firebase/firestore";
 // import { getStorage } from "firebase/storage";
+// import { getPerformance } from "firebase/performance"; // ✅ إضافة
 
 // const firebaseConfig = {
 //   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,23 +15,17 @@
 //   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 // };
 
-// // تحقق اختياري (يمكن إزالة)
-// // if (!firebaseConfig.apiKey) {
-// //   console.error("Firebase config is missing. Please check your .env file.");
-// // }
-
 // const app = initializeApp(firebaseConfig);
 // export const auth = getAuth(app);
 // export const db = getFirestore(app);
 // export const storage = getStorage(app);
-// export { app };  // ✅ أضف هذا السطر
-
+// export const perf = getPerformance(app); // ✅ تصدير كائن الأداء
+// export { app };
 
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getPerformance } from "firebase/performance"; // ✅ إضافة
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -39,9 +36,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+if (!firebaseConfig.apiKey) {
+  console.error("❌ Firebase: VITE_FIREBASE_API_KEY is missing! Check your .env file.");
+}
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const perf = getPerformance(app); // ✅ تصدير كائن الأداء
 export { app };

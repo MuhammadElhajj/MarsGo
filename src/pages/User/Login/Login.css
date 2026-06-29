@@ -506,3 +506,63 @@
 .password-toggle:hover {
   background: rgba(0, 0, 0, 0.05);
 }
+
+
+/* ===== Footer Improvements ===== */
+.login-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 1rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.login-footer-links a {
+  color: var(--color-text-tertiary, #94a3b8);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-footer-links a:hover {
+  color: var(--color-primary, #4f46e5);
+  text-decoration: underline;
+}
+
+.login-copyright {
+  text-align: center;
+  padding: 0.5rem 1rem 1.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+/* ===== Mobile: Reduce phone section ===== */
+@media (max-width: 768px) {
+  .login-phone {
+    display: none;
+  }
+
+  .login-wrapper {
+    justify-content: center;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 360px;
+  }
+}
+
+/* ===== Smooth transitions ===== */
+.login-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.login-submit,
+.google-login {
+  transition: all 0.2s ease;
+}
+
+.login-submit:hover:not(:disabled),
+.google-login:hover:not(:disabled) {
+  transform: translateY(-1px);
+}

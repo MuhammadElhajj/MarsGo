@@ -1,182 +1,160 @@
-// functions/transactions/transactionFunctions.js
-const { onCall } = require("firebase-functions/v2/https");
-const admin = require("firebase-admin");
-const { logger } = require("firebase-functions/v2");
+const { onCall } = require('firebase-functions/v2/https');
+const admin = require('firebase-admin');
 
-// ===== 1. دالة إضافة/خصم الرصيد (يدعم الرصيد الحقيقي و MGC) =====
-exports.updateBalance = onCall({ cors: true }, async (request) => {
-  console.log("🚀 updateBalance START");
-  console.log("📥 request.auth:", request.auth);
-  console.log("📥 request.data:", request.data);
-  
+// ===== دالة مساعدة: جلب سعر MGC من Firestore =====
+async function getMgcRate() {
   try {
-    if (!request.auth) {
-      console.log("❌ no auth");
-      throw new Error("يجب تسجيل الدخول");
-    }
+    const snap = await admin.firestore().collection('settings').doc('exchange').get();
+    const rate = snap.exists ? snap.data().mgcRate : null;
+    if (rate && rate > 0) return rate;
+  } catch (e) {
+    console.warn('⚠️ فشل جلب سعر MGC:', e.message);
+  }
+  return 0.007; // fallback
+}
+
+// ===== 1. إضافة/خصم رصيد (atomic transaction) =====
+exports.updateBalance = onCall({ cors: true }, async (request) => {
+  try {
+    if (!request.auth) throw new Error('يجب تسجيل الدخول');
+
     const uid = request.auth.uid;
     const { amount, type } = request.data;
 
-    console.log(`📥 uid: ${uid}, amount: ${amount}, type: ${type}`);
+    if (typeof amount !== 'number' || amount === 0) throw new Error('قيمة غير صالحة');
+    if (!type || (type !== 'real' && type !== 'mgc')) throw new Error('نوع الرصيد يجب أن يكون real أو mgc');
 
-    if (typeof amount !== 'number' || amount === 0) {
-      console.log("❌ invalid amount");
-      throw new Error("قيمة غير صالحة");
-    }
-    if (!type || (type !== 'real' && type !== 'mgc')) {
-      console.log("❌ invalid type");
-      throw new Error("نوع الرصيد غير صحيح (يجب أن يكون 'real' أو 'mgc')");
-    }
-
-    const userRef = admin.firestore().collection("users").doc(uid);
+    const userRef = admin.firestore().collection('users').doc(uid);
     const fieldName = type === 'real' ? 'balance' : 'mgcBalance';
-    console.log(`📥 fieldName: ${fieldName}`);
 
-    await admin.firestore().runTransaction(async (transaction) => {
-      console.log("🔁 transaction start");
-      const userSnap = await transaction.get(userRef);
-      if (!userSnap.exists) {
-        console.log("❌ user not found");
-        throw new Error("المستخدم غير موجود");
-      }
-      const currentBalance = userSnap.data()[fieldName] || 0;
-      console.log(`📊 currentBalance: ${currentBalance}`);
-      const newBalance = currentBalance + amount;
-      console.log(`📊 newBalance: ${newBalance}`);
-      if (newBalance < 0) {
-        console.log("❌ insufficient balance");
-        throw new Error(`الرصيد (${type === 'real' ? 'الحقيقي' : 'MGC'}) غير كافٍ`);
-      }
-      transaction.update(userRef, { [fieldName]: newBalance });
-      console.log("✅ transaction committed");
+    await admin.firestore().runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists) throw new Error('المستخدم غير موجود');
+
+      const current = snap.data()[fieldName] || 0;
+      const next = current + amount;
+
+      if (next < 0) throw new Error(type === 'real' ? 'الرصيد غير كافٍ' : 'رصيد MGC غير كافٍ');
+
+      tx.update(userRef, { [fieldName]: next });
     });
 
-    logger.info(`✅ تم تحديث رصيد المستخدم ${uid} (${type}) بمبلغ ${amount}`);
-    console.log("✅ updateBalance SUCCESS");
     return { success: true };
   } catch (error) {
-    console.error("❌ updateBalance ERROR:", error);
-    logger.error("❌ فشل تحديث الرصيد:", error);
+    console.error('❌ updateBalance:', error);
     throw new Error(error.message);
   }
 });
 
-// ===== 2. دالة شراء MGC (تحويل من USD إلى MGC) =====
+// ===== 2. شراء MGC (USD → MGC) =====
 exports.buyMgc = onCall({ cors: true }, async (request) => {
-  if (!request.auth) throw new Error("يجب تسجيل الدخول");
-  const uid = request.auth.uid;
-  const { mgcAmount, priceUSD } = request.data;
-
-  if (mgcAmount <= 0 || priceUSD <= 0) throw new Error("بيانات غير صالحة");
-
-  const userRef = admin.firestore().collection("users").doc(uid);
-
   try {
-    await admin.firestore().runTransaction(async (transaction) => {
-      const userSnap = await transaction.get(userRef);
-      if (!userSnap.exists) throw new Error("المستخدم غير موجود");
-      
-      const userData = userSnap.data();
-      if ((userData.balance || 0) < priceUSD) {
-        throw new Error("الرصيد الحقيقي غير كافٍ");
-      }
+    if (!request.auth) throw new Error('يجب تسجيل الدخول');
 
-      transaction.update(userRef, {
-        balance: (userData.balance || 0) - priceUSD,
-        mgcBalance: (userData.mgcBalance || 0) + mgcAmount,
+    const uid = request.auth.uid;
+    const { mgcAmount, priceUSD } = request.data;
+    if (!mgcAmount || mgcAmount <= 0 || !priceUSD || priceUSD <= 0) throw new Error('بيانات غير صالحة');
+
+    const userRef = admin.firestore().collection('users').doc(uid);
+
+    await admin.firestore().runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists) throw new Error('المستخدم غير موجود');
+
+      const data = snap.data();
+      if ((data.balance || 0) < priceUSD) throw new Error('الرصيد غير كافٍ');
+
+      tx.update(userRef, {
+        balance: admin.firestore.FieldValue.increment(-priceUSD),
+        mgcBalance: admin.firestore.FieldValue.increment(mgcAmount),
       });
     });
 
-    // تسجيل عملية الشراء
-    await admin.firestore().collection("mgcPurchases").add({
-      userId: uid,
-      mgcAmount: mgcAmount,
-      priceUSD: priceUSD,
+    await admin.firestore().collection('transactions').add({
+      userId: uid, type: 'buy_mgc', mgcAmount, priceUSD, status: 'completed',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     return { success: true };
   } catch (error) {
+    console.error('❌ buyMgc:', error);
     throw new Error(error.message);
   }
 });
 
-// ===== 3. دالة بيع MGC (تحويل من MGC إلى USD) =====
+// ===== 3. بيع MGC (MGC → USD) - سعر ديناميكي =====
 exports.sellMgc = onCall({ cors: true }, async (request) => {
-  if (!request.auth) throw new Error("يجب تسجيل الدخول");
-  const uid = request.auth.uid;
-  const { mgcAmount } = request.data;
-  const RATE = 0.007; // يجب جلبها من مكان مركزي لاحقاً
-
-  if (mgcAmount <= 0) throw new Error("الكمية غير صالحة");
-
-  const userRef = admin.firestore().collection("users").doc(uid);
-
   try {
-    await admin.firestore().runTransaction(async (transaction) => {
-      const userSnap = await transaction.get(userRef);
-      if (!userSnap.exists) throw new Error("المستخدم غير موجود");
-      
-      const userData = userSnap.data();
-      if ((userData.mgcBalance || 0) < mgcAmount) {
-        throw new Error("رصيد MGC غير كافٍ");
-      }
+    if (!request.auth) throw new Error('يجب تسجيل الدخول');
 
-      const usdAmount = mgcAmount * RATE;
+    const uid = request.auth.uid;
+    const { mgcAmount } = request.data;
+    if (!mgcAmount || mgcAmount <= 0) throw new Error('الكمية غير صالحة');
 
-      transaction.update(userRef, {
-        mgcBalance: (userData.mgcBalance || 0) - mgcAmount,
-        balance: (userData.balance || 0) + usdAmount,
+    const rate = await getMgcRate();
+    const usdAmount = mgcAmount * rate;
+    const userRef = admin.firestore().collection('users').doc(uid);
+
+    await admin.firestore().runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists) throw new Error('المستخدم غير موجود');
+
+      const data = snap.data();
+      if ((data.mgcBalance || 0) < mgcAmount) throw new Error('رصيد MGC غير كافٍ');
+
+      tx.update(userRef, {
+        mgcBalance: admin.firestore.FieldValue.increment(-mgcAmount),
+        balance: admin.firestore.FieldValue.increment(usdAmount),
       });
     });
-    return { success: true };
+
+    await admin.firestore().collection('transactions').add({
+      userId: uid, type: 'sell_mgc', mgcAmount, usdAmount, rate, status: 'completed',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return { success: true, rate, usdAmount };
   } catch (error) {
+    console.error('❌ sellMgc:', error);
     throw new Error(error.message);
   }
 });
 
-// ===== 4. إنشاء طلب جديد بأمان (مع خصم الرصيد) =====
+// ===== 4. إنشاء طلب آمن (مع خصم رصيد) =====
 exports.createSecureOrder = onCall({ cors: true }, async (request) => {
-  if (!request.auth) throw new Error("يجب تسجيل الدخول");
-  const uid = request.auth.uid;
-  const orderData = request.data;
-
-  const { finalPriceUSD } = orderData;
-
-  if (!finalPriceUSD || finalPriceUSD <= 0) throw new Error("سعر غير صالح");
-
-  const userRef = admin.firestore().collection("users").doc(uid);
-  let orderRef;
-
   try {
-    await admin.firestore().runTransaction(async (transaction) => {
-      const userSnap = await transaction.get(userRef);
-      if (!userSnap.exists) throw new Error("المستخدم غير موجود");
-      
-      const userData = userSnap.data();
-      if ((userData.balance || 0) < finalPriceUSD) {
-        throw new Error("الرصيد غير كافٍ لتنفيذ الطلب");
-      }
+    if (!request.auth) throw new Error('يجب تسجيل الدخول');
 
-      // 1. خصم الرصيد
-      transaction.update(userRef, {
-        balance: (userData.balance || 0) - finalPriceUSD,
-      });
+    const uid = request.auth.uid;
+    const { finalPriceUSD, productId, productName, category } = request.data;
+    if (!finalPriceUSD || finalPriceUSD <= 0) throw new Error('سعر غير صالح');
 
-      // 2. إنشاء الطلب داخل المعاملة
-      const newOrderRef = admin.firestore().collection("orders").doc();
-      transaction.set(newOrderRef, {
-        ...orderData,
-        userId: uid,
-        status: 'pending_verification', // أو 'completed' حسب سير العمل
+    const userRef = admin.firestore().collection('users').doc(uid);
+    let orderId;
+
+    await admin.firestore().runTransaction(async (tx) => {
+      const snap = await tx.get(userRef);
+      if (!snap.exists) throw new Error('المستخدم غير موجود');
+
+      const data = snap.data();
+      if ((data.balance || 0) < finalPriceUSD) throw new Error('الرصيد غير كافٍ');
+
+      tx.update(userRef, { balance: admin.firestore.FieldValue.increment(-finalPriceUSD) });
+
+      const orderRef = admin.firestore().collection('orders').doc();
+      orderId = orderRef.id;
+
+      tx.set(orderRef, {
+        userId: uid, userName: data.name || 'مستخدم',
+        productId: productId || null, productName: productName || 'منتج',
+        category: category || 'عام', price: finalPriceUSD, status: 'pending',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        paidByBalance: true,
       });
-      orderRef = newOrderRef;
     });
 
-    return { success: true, orderId: orderRef.id };
+    return { success: true, orderId };
   } catch (error) {
+    console.error('❌ createSecureOrder:', error);
     throw new Error(error.message);
   }
 });

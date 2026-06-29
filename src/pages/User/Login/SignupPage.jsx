@@ -1,15 +1,14 @@
-// src/pages/User/Login/SignupPage.jsx
 import { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../../firebase';
+import { auth, db } from '../../../firebase';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../store/store';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../firebase';
 import './SignupPage.css';
 import Logo1 from "../../../assets/logo-light.png";
-import { FiEyeOff , FiEye } from 'react-icons/fi';
+import { FiEyeOff, FiEye } from 'react-icons/fi';
+
 const DEFAULT_PHONE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 350'%3E%3Crect width='200' height='350' fill='%234f46e5'/%3E%3Ccircle cx='100' cy='120' r='40' fill='%23ffffff' opacity='0.8'/%3E%3Crect x='60' y='180' width='80' height='10' rx='5' fill='%23ffffff' opacity='0.6'/%3E%3Crect x='50' y='210' width='100' height='10' rx='5' fill='%23ffffff' opacity='0.4'/%3E%3Crect x='70' y='240' width='60' height='10' rx='5' fill='%23ffffff' opacity='0.3'/%3E%3Ctext x='100' y='300' font-size='20' text-anchor='middle' fill='white' font-family='Arial'%3EMarsGo%3C/text%3E%3C/svg%3E";
 
 const isStrongPassword = (password) => /^.{6,}$/.test(password);
@@ -19,7 +18,7 @@ export default function SignupPage() {
   const loginPhoneImage = storeSettings?.loginPhoneImageUrl;
   const [imageLoading, setImageLoading] = useState(true);
   const [showDefault, setShowDefault] = useState(false);
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,6 +47,25 @@ export default function SignupPage() {
       }
     }
   }, []);
+
+  // تحميل صورة الهاتف
+  useEffect(() => {
+    if (!loginPhoneImage) {
+      setImageLoading(false);
+      setShowDefault(true);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      setImageLoading(false);
+      setShowDefault(false);
+    };
+    img.onerror = () => {
+      setImageLoading(false);
+      setShowDefault(true);
+    };
+    img.src = loginPhoneImage;
+  }, [loginPhoneImage]);
 
   // التحقق من صحة كود الإحالة
   const verifyReferralCode = async (code) => {
@@ -113,16 +131,13 @@ export default function SignupPage() {
     }
 
     try {
-      // حفظ كود الإحالة في sessionStorage ليقرأه AuthContext
       if (referralCode.trim()) {
         sessionStorage.setItem('referralCode', referralCode.trim());
       }
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      console.log("📧 Email being used for signup:", email);
 
-      // ✅ تخزين الاسم مؤقتاً ليستخدمه AuthContext عند إنشاء المستند
       if (name.trim()) {
         sessionStorage.setItem('temp_user_name', name.trim());
       }
@@ -147,27 +162,10 @@ export default function SignupPage() {
     }
   };
 
-  useEffect(() => {
-    if (!loginPhoneImage) {
-      setImageLoading(false);
-      setShowDefault(true);
-      return;
-    }
-    const img = new Image();
-    img.onload = () => {
-      setImageLoading(false);
-      setShowDefault(false);
-    };
-    img.onerror = () => {
-      setImageLoading(false);
-      setShowDefault(true);
-    };
-    img.src = loginPhoneImage;
-  }, [loginPhoneImage]);
-
   return (
     <div className="signup-container">
       <div className="signup-wrapper">
+        {/* ===== صورة الهاتف ===== */}
         <div className="signup-phone">
           <div className="phone-mockup">
             {loginPhoneImage && imageLoading && !showDefault && (
@@ -186,10 +184,11 @@ export default function SignupPage() {
           </div>
         </div>
 
+        {/* ===== نموذج إنشاء الحساب ===== */}
         <div className="signup-form-container">
           <div className="signup-card">
             <div className="signup-logo">
-              <img src={Logo1} alt="Logo" className="Signup-Logo--img" />
+              <img src={Logo1} alt="MarsGo Logo" className="Signup-Logo--img" />
               <h1 className="signup-title">إنشاء حساب جديد</h1>
             </div>
 
@@ -226,12 +225,16 @@ export default function SignupPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex="-1"
                 >
-                  {showPassword ? <FiEyeOff/> : <FiEye/>}
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
               </div>
-              {passwordError && <div className="signup-error" style={{ background: '#fef3c7', color: '#92400e' }}>{passwordError}</div>}
-              
-              {/* حقل كود الإحالة */}
+              {passwordError && (
+                <div className="signup-error" style={{ background: '#fef3c7', color: '#92400e' }}>
+                  {passwordError}
+                </div>
+              )}
+
+              {/* ===== كود الإحالة ===== */}
               <div className="input-group referral-group">
                 <input
                   type="text"
@@ -250,6 +253,7 @@ export default function SignupPage() {
               </div>
 
               {error && <div className="signup-error">{error}</div>}
+
               <button type="submit" className="signup-submit" disabled={loading}>
                 {loading ? 'جاري...' : 'إنشاء حساب'}
               </button>
@@ -269,20 +273,17 @@ export default function SignupPage() {
         </div>
       </div>
 
-      <div className="signup-footer-links">
-        <a href="#">Meta</a>
-        <a href="#">حول</a>
-        <a href="#">المدونة</a>
-        <a href="#">وظائف</a>
-        <a href="#">مساعدة</a>
-        <a href="#">API</a>
-        <a href="#">الخصوصية</a>
+      {/* ===== Footer مصحوح ===== */}
+      <footer className="signup-footer-links">
+        <a href="/about">حول MarsGo</a>
+        <a href="/">الرئيسية</a>
+        <a href="/privacy-policy">الخصوصية</a>
         <a href="#">الشروط</a>
-        <a href="#">المواقع الشائعة</a>
-        <a href="#">Instagram Lite</a>
-        <a href="#">Threads</a>
+        <a href="/about">تواصل معنا</a>
+      </footer>
+      <div className="signup-copyright">
+        © {new Date().getFullYear()} MarsGo Team
       </div>
-      <div className="signup-copyright">© {new Date().getFullYear()} MarsGo من Meta</div>
     </div>
   );
 }
