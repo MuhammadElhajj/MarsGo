@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
@@ -17,11 +17,31 @@ export function AuthProvider({ children }) {
   const setStoreUserData = useAppStore((state) => state.setUserData);
   const setStoreBalance = useAppStore((state) => state.setBalance);
   const setStoreMgcBalance = useAppStore((state) => state.setMgcBalance);
-  
+
   // دوال توليد المعرف الفريد والفيزا والرقم السري
   const generateUniqueId = useAppStore((state) => state.generateUniqueId);
   const generateVisaNumber = useAppStore((state) => state.generateVisaNumber);
   const generateVisaSecret = useAppStore((state) => state.generateVisaSecret);
+
+  // دالة لتحديث بيانات المستخدم - useCallback لتقليل re-renders
+  const updateUserData = useCallback(async (updates) => {
+    if (!user) return false;
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { ...updates, updatedAt: new Date() });
+      const newData = { ...userData, ...updates };
+      setUserData(newData);
+      setStoreUserData(newData);
+      if (updates.balance !== undefined) setStoreBalance(updates.balance);
+      if (updates.mgcBalance !== undefined) setStoreMgcBalance(updates.mgcBalance);
+      return true;
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error("❌ Error updating user data:", error.message);
+      }
+      return false;
+    }
+  }, [user, userData, setStoreUserData, setStoreBalance, setStoreMgcBalance]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -42,147 +62,66 @@ export function AuthProvider({ children }) {
         const userRef = doc(db, "users", firebaseUser.uid);
         const docSnap = await getDoc(userRef);
         let data;
+
         if (docSnap.exists()) {
           data = docSnap.data();
-          let needsUpdate = false;
-          const now = new Date();
 
           // ===== التحقق من الحقول الأساسية وإضافتها إذا كانت مفقودة =====
+          const updates = {};
+
           if (!data.uniqueId) {
-            data.uniqueId = await generateUniqueId();
-            needsUpdate = true;
+            try {
+              updates.uniqueId = await generateUniqueId();
+            } catch (err) {
+              // ignore
+            }
           }
           if (!data.visaNumber) {
             try {
-              data.visaNumber = await generateVisaNumber(firebaseUser.uid);
-              needsUpdate = true;
+              updates.visaNumber = await generateVisaNumber(firebaseUser.uid);
             } catch (err) {
-              console.warn('⚠️ فشل توليد رقم الفيزا:', err);
+              // ignore
             }
           }
           if (!data.visaSecret) {
-            data.visaSecret = generateVisaSecret();
-            needsUpdate = true;
-          }
-          if (!data.customerType) {
-            data.customerType = 'customer';
-            needsUpdate = true;
-          }
-          if (!data.friends) {
-            data.friends = [];
-            needsUpdate = true;
-          }
-          if (!data.blockedUsers) {
-            data.blockedUsers = [];
-            needsUpdate = true;
-          }
-          if (data.popularity === undefined) {
-            data.popularity = 0;
-            needsUpdate = true;
-          }
-          if (data.power === undefined) {
-            data.power = 0;
-            needsUpdate = true;
-          }
-          if (!data.rank) {
-            data.rank = 'عضو';
-            needsUpdate = true;
-          }
-          if (data.balance === undefined) {
-            data.balance = 0;
-            needsUpdate = true;
-          }
-          if (data.mgcBalance === undefined) {
-            data.mgcBalance = 0;
-            needsUpdate = true;
-          }
-          if (data.xp === undefined) {
-            data.xp = 0;
-            needsUpdate = true;
-          }
-          if (data.level === undefined) {
-            data.level = 1;
-            needsUpdate = true;
-          }
-          if (data.title === undefined) {
-            data.title = null;
-            needsUpdate = true;
-          }
-          if (data.pityCounter === undefined) {
-            data.pityCounter = 0;
-            needsUpdate = true;
-          }
-          if (data.coupons === undefined) {
-            data.coupons = [];
-            needsUpdate = true;
-          }
-          if (data.freeCoupons === undefined) {
-            data.freeCoupons = [];
-            needsUpdate = true;
+            updates.visaSecret = generateVisaSecret();
           }
 
-          // ===== حقول الإحالة (للتأكد من وجودها) =====
-          if (data.referralBalance === undefined) {
-            data.referralBalance = 0;
-            needsUpdate = true;
-          }
-          if (data.totalReferralEarnings === undefined) {
-            data.totalReferralEarnings = 0;
-            needsUpdate = true;
-          }
-          if (data.referralRewardClaimed === undefined) {
-            data.referralRewardClaimed = false;
-            needsUpdate = true;
-          }
-          if (data.referredBy === undefined) {
-            data.referredBy = null;
-            needsUpdate = true;
-          }
+          // الحقول الافتراضية
+          const defaults = {
+            customerType: 'customer',
+            friends: [],
+            blockedUsers: [],
+            popularity: 0,
+            power: 0,
+            rank: 'عضو',
+            balance: 0,
+            mgcBalance: 0,
+            xp: 0,
+            level: 1,
+            title: null,
+            pityCounter: 0,
+            coupons: [],
+            freeCoupons: [],
+            referralBalance: 0,
+            totalReferralEarnings: 0,
+            referralRewardClaimed: false,
+            referredBy: null,
+            membership: null,
+            membershipExpiry: null,
+            lastActive: new Date(),
+          };
 
-          // ===== حقول العضوية (للاستخدام في الإحصائيات والمهام) =====
-          if (data.membership === undefined) {
-            data.membership = null; // يمكن أن تكون 'adventurer', 'marsgo', 'master', 'legendary'
-            needsUpdate = true;
-          }
-          if (data.membershipExpiry === undefined) {
-            data.membershipExpiry = null; // تاريخ انتهاء العضوية
-            needsUpdate = true;
-          }
-
-          // ===== آخر نشاط (يُحدّث كل مرة يسجل فيها الدخول) =====
-          if (data.lastActive === undefined || data.lastActive !== now) {
-            data.lastActive = now;
-            needsUpdate = true;
+          for (const [key, value] of Object.entries(defaults)) {
+            if (data[key] === undefined) {
+              updates[key] = value;
+            }
           }
 
           // ===== حفظ التحديثات إذا لزم الأمر =====
-          if (needsUpdate) {
-            await updateDoc(userRef, {
-              customerType: data.customerType,
-              friends: data.friends,
-              blockedUsers: data.blockedUsers,
-              popularity: data.popularity,
-              power: data.power,
-              rank: data.rank,
-              balance: data.balance,
-              mgcBalance: data.mgcBalance,
-              xp: data.xp,
-              level: data.level,
-              title: data.title,
-              pityCounter: data.pityCounter,
-              coupons: data.coupons,
-              freeCoupons: data.freeCoupons,
-              uniqueId: data.uniqueId,
-              visaNumber: data.visaNumber,
-              visaSecret: data.visaSecret,
-              referralBalance: data.referralBalance,
-              totalReferralEarnings: data.totalReferralEarnings,
-              referralRewardClaimed: data.referralRewardClaimed,
-              referredBy: data.referredBy,
-              membership: data.membership,
-              membershipExpiry: data.membershipExpiry,
-              lastActive: data.lastActive,
-            });
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(userRef, updates);
+            data = { ...data, ...updates };
           }
         } else {
           // ============================================================
@@ -191,8 +130,10 @@ export function AuthProvider({ children }) {
 
           let referredBy = null;
           let refCode = null;
+
           try {
-            refCode = sessionStorage.getItem('referralCode');
+            // ✅ استخدام localStorage بدل sessionStorage (أكثر ثباتاً)
+            refCode = localStorage.getItem('referralCode');
             if (!refCode) {
               const queryParams = new URLSearchParams(window.location.search);
               refCode = queryParams.get('ref');
@@ -202,15 +143,15 @@ export function AuthProvider({ children }) {
               const snap = await getDocs(q);
               if (!snap.empty) {
                 referredBy = snap.docs[0].id;
-                console.log(`✅ تم العثور على المُحيل: ${referredBy}`);
-              } else {
-                console.warn(`⚠️ لم يتم العثور على مستخدم بالمعرف: ${refCode}`);
               }
             }
           } catch (err) {
-            console.warn('⚠️ خطأ في قراءة كود الإحالة:', err);
+            // ignore referral errors silently in production
           } finally {
-            if (refCode) sessionStorage.removeItem('referralCode');
+            if (refCode) {
+              localStorage.removeItem('referralCode');
+              sessionStorage.removeItem('referralCode');
+            }
           }
 
           const tempName = sessionStorage.getItem('temp_user_name');
@@ -259,18 +200,17 @@ export function AuthProvider({ children }) {
             uniqueId: uniqueId,
             visaNumber: visaNumber,
             visaSecret: visaSecret,
-            // حقول الإحالة
             referredBy: referredBy,
             referralBalance: 0,
             totalReferralEarnings: 0,
             referralRewardClaimed: false,
-            // حقول العضوية
             membership: null,
             membershipExpiry: null,
           };
+
           await setDoc(userRef, data);
 
-          // إنشاء سجل إحالة فوراً إذا كان هناك مُحيل
+          // إنشاء سجل إحالة إذا كان هناك مُحيل
           if (referredBy) {
             try {
               await addDoc(collection(db, 'referral_rewards'), {
@@ -280,9 +220,8 @@ export function AuthProvider({ children }) {
                 status: 'pending',
                 createdAt: serverTimestamp(),
               });
-              console.log(`✅ تم إنشاء سجل إحالة pending للمستخدم ${firebaseUser.uid} (المُحيل: ${referredBy})`);
             } catch (err) {
-              console.error('❌ فشل إنشاء سجل الإحالة:', err);
+              // ignore silently
             }
           }
         }
@@ -295,14 +234,14 @@ export function AuthProvider({ children }) {
         setUser(firebaseUser);
         setEmailVerified(true);
 
-        // مزامنة الـ Store مع البيانات الكاملة
+        // مزامنة الـ Store
         setStoreUser(firebaseUser);
         setStoreUserData(data);
         setStoreBalance(data.balance || 0);
         setStoreMgcBalance(data.mgcBalance || 0);
 
       } else {
-        // تسجيل الخروج: مسح الحالة المحلية والـ Store
+        // تسجيل الخروج: مسح الحالة
         setUser(null);
         setUserData(null);
         setEmailVerified(false);
@@ -313,26 +252,10 @@ export function AuthProvider({ children }) {
       }
       setLoading(false);
     });
-    return unsubscribe;
-  }, []);
 
-  // دالة لتحديث بيانات المستخدم
-  const updateUserData = async (updates) => {
-    if (!user) return false;
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, { ...updates, updatedAt: new Date() });
-      const newData = { ...userData, ...updates };
-      setUserData(newData);
-      setStoreUserData(newData);
-      if (updates.balance !== undefined) setStoreBalance(updates.balance);
-      if (updates.mgcBalance !== undefined) setStoreMgcBalance(updates.mgcBalance);
-      return true;
-    } catch (error) {
-      console.error("Error updating user data:", error);
-      return false;
-    }
-  };
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value = {
     user,
