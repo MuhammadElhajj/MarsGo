@@ -53,7 +53,8 @@ export default function BuyMGC() {
         return;
       }
 
-      await addMgcBalance(user.uid, mgc);
+      // await addMgcBalance(user.uid, mgc);
+      await addMgcBalance( mgc);
 
       // تسجيل عملية الشراء
       try {

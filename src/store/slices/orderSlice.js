@@ -1,5 +1,5 @@
 // src/store/slices/orderSlice.js
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp , orderBy , limit} from 'firebase/firestore';
 import { db } from '../../firebase';
 import toast from 'react-hot-toast';
 
@@ -69,20 +69,20 @@ export const createOrderSlice = (set, get) => ({
   },
 
   getMgcSalesHistory: async () => {
-    const { user } = get();
-    if (!user) return [];
-    try {
-      const q = query(
-        collection(db, 'mgcSales'),
-        where('userId', '==', user.uid),
-        orderBy('timestamp', 'desc'),
-        limit(20)
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-      console.error('خطأ في جلب سجل البيع:', error);
-      return [];
-    }
-  },
+  const { user } = get();
+  if (!user) return [];
+  try {
+    const q = query(
+      collection(db, 'mgcSales'),
+      where('userId', '==', user.uid),
+      orderBy('timestamp', 'desc'),
+      limit(20)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('خطأ في جلب سجل البيع:', error);
+    return [];
+  }
+},
 });

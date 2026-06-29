@@ -3,38 +3,59 @@ const { onCall } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions/v2");
 
-// ===== 1. دالة إضافة/خصم الرصيد الحقيقي (USD) =====
+// ===== 1. دالة إضافة/خصم الرصيد (يدعم الرصيد الحقيقي و MGC) =====
 exports.updateBalance = onCall({ cors: true }, async (request) => {
-  if (!request.auth) {
-    throw new Error("يجب تسجيل الدخول");
-  }
-  const uid = request.auth.uid;
-  const { amount } = request.data; // amount: رقم موجب للإضافة، سالب للخصم
-
-  if (typeof amount !== 'number' || amount === 0) {
-    throw new Error("قيمة غير صالحة");
-  }
-
-  const userRef = admin.firestore().collection("users").doc(uid);
-
+  console.log("🚀 updateBalance START");
+  console.log("📥 request.auth:", request.auth);
+  console.log("📥 request.data:", request.data);
+  
   try {
+    if (!request.auth) {
+      console.log("❌ no auth");
+      throw new Error("يجب تسجيل الدخول");
+    }
+    const uid = request.auth.uid;
+    const { amount, type } = request.data;
+
+    console.log(`📥 uid: ${uid}, amount: ${amount}, type: ${type}`);
+
+    if (typeof amount !== 'number' || amount === 0) {
+      console.log("❌ invalid amount");
+      throw new Error("قيمة غير صالحة");
+    }
+    if (!type || (type !== 'real' && type !== 'mgc')) {
+      console.log("❌ invalid type");
+      throw new Error("نوع الرصيد غير صحيح (يجب أن يكون 'real' أو 'mgc')");
+    }
+
+    const userRef = admin.firestore().collection("users").doc(uid);
+    const fieldName = type === 'real' ? 'balance' : 'mgcBalance';
+    console.log(`📥 fieldName: ${fieldName}`);
+
     await admin.firestore().runTransaction(async (transaction) => {
+      console.log("🔁 transaction start");
       const userSnap = await transaction.get(userRef);
-      if (!userSnap.exists) throw new Error("المستخدم غير موجود");
-
-      const currentBalance = userSnap.data().balance || 0;
-      const newBalance = currentBalance + amount;
-
-      if (newBalance < 0) {
-        throw new Error("الرصيد غير كافٍ");
+      if (!userSnap.exists) {
+        console.log("❌ user not found");
+        throw new Error("المستخدم غير موجود");
       }
-
-      transaction.update(userRef, { balance: newBalance });
+      const currentBalance = userSnap.data()[fieldName] || 0;
+      console.log(`📊 currentBalance: ${currentBalance}`);
+      const newBalance = currentBalance + amount;
+      console.log(`📊 newBalance: ${newBalance}`);
+      if (newBalance < 0) {
+        console.log("❌ insufficient balance");
+        throw new Error(`الرصيد (${type === 'real' ? 'الحقيقي' : 'MGC'}) غير كافٍ`);
+      }
+      transaction.update(userRef, { [fieldName]: newBalance });
+      console.log("✅ transaction committed");
     });
-    
-    logger.info(`✅ تم تحديث رصيد المستخدم ${uid} بمبلغ ${amount}`);
+
+    logger.info(`✅ تم تحديث رصيد المستخدم ${uid} (${type}) بمبلغ ${amount}`);
+    console.log("✅ updateBalance SUCCESS");
     return { success: true };
   } catch (error) {
+    console.error("❌ updateBalance ERROR:", error);
     logger.error("❌ فشل تحديث الرصيد:", error);
     throw new Error(error.message);
   }
@@ -66,7 +87,7 @@ exports.buyMgc = onCall({ cors: true }, async (request) => {
       });
     });
 
-    // تسجيل عملية الشراء (اختياري)
+    // تسجيل عملية الشراء
     await admin.firestore().collection("mgcPurchases").add({
       userId: uid,
       mgcAmount: mgcAmount,
@@ -153,9 +174,6 @@ exports.createSecureOrder = onCall({ cors: true }, async (request) => {
       });
       orderRef = newOrderRef;
     });
-
-    // هنا يمكنك استدعاء دالة إرسال الإشعار (سنضيفها لاحقاً)
-    // await sendTelegramNotification(...)
 
     return { success: true, orderId: orderRef.id };
   } catch (error) {
