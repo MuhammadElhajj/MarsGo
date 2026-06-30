@@ -1,0 +1,326 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================================
+    // 🔒 قواعد عامة - منع الوصول الافتراضي
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ============================================================
+    // 👤 المستخدمون
+    // ============================================================
+    match /users/{userId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'verifier']
+      );
+      allow write: if request.auth != null && (
+        request.auth.uid == userId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ============================================================
+    // 📋 الطلبات (Orders)
+    // ============================================================
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'verifier']
+      );
+      allow create: if request.auth != null &&
+                     request.resource.data.userId == request.auth.uid &&
+                     request.resource.data.status == 'pending_verification';
+      allow update: if request.auth != null && (
+        (request.auth.uid == resource.data.userId && resource.data.status == 'pending_verification') ||
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'verifier' &&
+         resource.data.status == 'pending_verification') ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      allow delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================================
+    // 💰 طلبات الإيداع (TopUpRequests)
+    // ============================================================
+    match /topUpRequests/{requestId} {
+      allow read: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'finance_verifier']
+      );
+      allow create: if request.auth != null &&
+                     request.resource.data.userId == request.auth.uid &&
+                     request.resource.data.status == 'pending';
+      allow update: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'finance_verifier'];
+    }
+
+    // ============================================================
+    // 💬 غرف الدردشة (Rooms) - تم إصلاحها
+    // ============================================================
+    match /rooms/{document} {
+      allow read: if request.auth != null && (
+        resource.data.type == 'global' ||
+        request.auth.uid in resource.data.members
+      );
+      allow write: if request.auth != null && (
+        // السماح بإنشاء غرفة خاصة إذا كان المستخدم عضواً
+        (request.resource.data.type == 'private' &&
+         request.auth.uid in request.resource.data.members) ||
+        // السماح بتحديث الغرف التي هو عضو فيها (ما عدا الغرف العامة)
+        (resource.data.type != 'global' && request.auth.uid in resource.data.members) ||
+        // المدير يمكنه تعديل أي غرفة
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // ============================================================
+    // 💬 الرسائل (Messages) - تم إصلاحها
+    // ============================================================
+    match /messages/{document} {
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/rooms/$(resource.data.roomId)).data.type == 'global' ||
+        request.auth.uid in get(/databases/$(database)/documents/rooms/$(resource.data.roomId)).data.members
+      );
+      allow write: if request.auth != null &&
+        request.resource.data.uid == request.auth.uid && (
+          get(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)).data.type == 'global' ||
+          request.auth.uid in get(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)).data.members
+        );
+    }
+
+    // ============================================================
+    // 🤝 طلبات الصداقة
+    // ============================================================
+    match /friendRequests/{document} {
+      allow read: if request.auth != null &&
+        (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow write: if request.auth != null &&
+        (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+    }
+
+    // ============================================================
+    // 🎁 مكافآت الإحالة - تم توحيد القاعدة وإزالة المكررة
+    // ============================================================
+    match /referral_rewards/{document} {
+      allow read: if request.auth != null &&
+        resource.data.referrerId == request.auth.uid;
+      allow write: if request.auth != null &&
+        request.resource.data.referrerId == request.auth.uid &&
+        request.resource.data.status == 'pending';
+    }
+
+    // ============================================================
+    // 🤝 أنشطة الدعم - تم تقييدها
+    // ============================================================
+    match /support_activities/{document} {
+      allow read: if request.auth != null && (
+        resource.data.fromUserId == request.auth.uid ||
+        resource.data.toUserId == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+      allow write: if request.auth != null &&
+        request.resource.data.fromUserId == request.auth.uid;
+    }
+
+    // ============================================================
+    // ⭐ التقييمات - تم إصلاحها
+    // ============================================================
+    match /ratings/{ratingId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================================
+    // 🏰 الكلانات
+    // ============================================================
+    match /clans/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        (request.resource.data.ownerId == request.auth.uid ||
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // ============================================================
+    // 📨 دعوات الكلانات
+    // ============================================================
+    match /clanInvites/{document} {
+      allow read: if request.auth != null && (
+        resource.data.invitedUserId == request.auth.uid ||
+        resource.data.invitedBy == request.auth.uid
+      );
+      allow write: if request.auth != null && (
+        resource.data.invitedBy == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // ============================================================
+    // 🎮 الألعاب والتطبيقات والمنتجات (قراءة عامة، كتابة للمدير)
+    // ============================================================
+    match /games/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /games/{gameId}/packages/{packageId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /apps/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /apps/{appId}/packages/{packageId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /products/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /categories/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================================
+    // 📢 الإعلانات
+    // ============================================================
+    match /ads/{adId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================================
+    // 🛠️ الإعدادات (قراءة للجميع، كتابة للمدير فقط)
+    // ============================================================
+    match /storeSettings/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /pageInstructions/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /paymentSettings/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /topUpSettings/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /tickerSettings/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /discountSettings/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /merchantSettings/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /siteConfig/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================================
+    // 💱 سعر الصرف
+    // ============================================================
+    match /exchangeRate/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================================
+    // 🔧 الخدمات وروابط التنقل
+    // ============================================================
+    match /services/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /navigationLinks/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================================
+    // 🎡 تاريخ الألعاب (للمستخدم نفسه فقط)
+    // ============================================================
+    match /wheelHistory/{document} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /machineHistory/{document} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================================
+    // 💰 عمليات MGC (قراءة للمستخدم نفسه فقط)
+    // ============================================================
+    match /mgcPurchases/{document} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /mgcSales/{document} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================================
+    // 🔐 أكواد التفعيل وإعادة تعيين كلمة المرور
+    // ============================================================
+    match /verificationCodes/{document} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+    match /passwordResets/{document} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.uid;
+    }
+
+    // ============================================================
+    // 📊 سجل التدقيق (Audit Logs) - للقراءة فقط للمديرين
+    // ============================================================
+    match /auditLogs/{logId} {
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow write: if false; // فقط من خلال Cloud Functions
+    }
+
+    // ============================================================
+    // 🔒 تأمين إضافي: منع الكتابة المباشرة على الحقول المالية
+    // ============================================================
+    // يتم التعامل مع الأرصدة عبر Cloud Functions فقط،
+    // والقواعد تمنع أي كتابة مباشرة على balance أو mgcBalance
+    match /users/{userId} {
+      allow write: if false; // منع الكتابة المباشرة على المستخدم (نستخدم Functions)
+    }
+  }
+}

@@ -395,3 +395,237 @@
     font-size: 0.5rem;
   }
 }
+
+/* ===== زر تبديل الرقم السري (إظهار/إخفاء) ===== */
+.visa-card__secret-toggle {
+  background: none;
+  border: none;
+  color: #fbbf24;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  margin-right: 0.3rem;
+  border-radius: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-size: 0.9rem;
+}
+
+.visa-card__secret-toggle:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.visa-card__secret-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.visa-card__secret-spinner {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+  font-size: 0.9rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* تعديل ترتيب العناصر في صف المعلومات لاستيعاب الزر */
+.visa-card__info-item.secret strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+/* ===== قسم إدخال الكود ===== */
+.visa-card__code-section {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+.visa-card__code-hint {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.visa-card__code-input-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.visa-card__code-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 0.9rem;
+  font-family: monospace;
+  letter-spacing: 2px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.visa-card__code-input:focus {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
+.visa-card__code-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.visa-card__code-verify-btn {
+  padding: 0.4rem 0.8rem;
+  background: #fbbf24;
+  color: #0f172a;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.visa-card__code-verify-btn:hover:not(:disabled) {
+  background: #f59e0b;
+  transform: scale(1.02);
+}
+
+.visa-card__code-verify-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.visa-card__code-cancel-btn {
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.visa-card__code-cancel-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.visa-card__code-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.visa-card__code-resend-btn {
+  background: none;
+  border: none;
+  color: #fbbf24;
+  font-size: 0.7rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-top: 0.4rem;
+  padding: 0;
+}
+
+.visa-card__code-resend-btn:hover:not(:disabled) {
+  color: #f59e0b;
+}
+
+.visa-card__code-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* رسائل النجاح والخطأ */
+.visa-card__code-message {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.4rem;
+}
+
+.visa-card__code-message--success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.visa-card__code-message--error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* العد التنازلي */
+.visa-card__countdown {
+  font-size: 0.6rem;
+  color: #fbbf24;
+  margin-left: 0.2rem;
+  font-weight: 400;
+}
+
+/* ===== زر تبديل الرقم السري (إظهار/إخفاء) ===== */
+.visa-card__secret-toggle {
+  background: none;
+  border: none;
+  color: #fbbf24;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  margin-right: 0.3rem;
+  border-radius: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-size: 0.9rem;
+}
+
+.visa-card__secret-toggle:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.visa-card__secret-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.visa-card__secret-spinner {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+  font-size: 0.9rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* تعديل ترتيب العناصر في صف المعلومات لاستيعاب الزر */
+.visa-card__info-item.secret strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}

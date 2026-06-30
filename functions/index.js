@@ -50,3 +50,6 @@ exports.deleteClan = require('./clans/clanManagement').deleteClan;
 exports.externalStoreProxy = require('./externalStoreProxy').externalStoreProxy;
 exports.importProductsFromExternal = require('./admin/importFromExternal').importProductsFromExternal;
 exports.updateCategoryIds = require('./updateCategoryIds').updateCategoryIds;
+
+// ✅ دالة جديدة لإرسال كود تأكيد الرقم السري
+exports.sendSecretVerificationCode = verification.sendSecretVerificationCode;

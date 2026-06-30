@@ -40,7 +40,7 @@ class ErrorBoundary extends Component {
             color: "var(--color-text-primary, #0f172a)",
           }}
         >
-          <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>⚠️</div>
+          {/* <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>⚠️</div> */}
           <h2 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.5rem" }}>
             حدث خطأ غير متوقع
           </h2>

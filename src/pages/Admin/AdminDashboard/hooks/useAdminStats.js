@@ -12,7 +12,7 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { db } from '../../../../firebase';
-import { COLORS } from '../utils/constants';   // ✅ استيراد الألوان
+import { COLORS } from '../utils/constants';
 
 export function useAdminStats() {
   const [stats, setStats] = useState({
@@ -60,6 +60,9 @@ export function useAdminStats() {
     }
   };
 
+  // ============================================================
+  // ✅ 1. الإحصائيات العامة (باستخدام getCountFromServer)
+  // ============================================================
   const fetchStats = async () => {
     try {
       const usersSnap = await getCountFromServer(collection(db, 'users'));
@@ -107,6 +110,7 @@ export function useAdminStats() {
       const rejectedSnap = await getCountFromServer(rejectedQuery);
       const rejectedOrders = rejectedSnap.data().count;
 
+      // ✅ الإيرادات: نجلب فقط آخر 500 طلب مكتمل (لتحسين الأداء)
       let totalRevenue = 0;
       let todayRevenue = 0;
       let monthlyRevenue = 0;
@@ -143,7 +147,6 @@ export function useAdminStats() {
         collection(db, 'referral_rewards')
       );
       const totalReferred = referralSnap.data().count;
-      const totalReferrers = 0;
 
       setStats({
         totalUsers,
@@ -158,16 +161,17 @@ export function useAdminStats() {
         todayRevenue,
         monthlyOrders,
         monthlyRevenue,
-        totalReferrers,
+        totalReferrers: 0,
         totalReferred,
-        pendingReferrals: 0,
-        claimedReferrals: 0,
       });
     } catch (err) {
       console.error('خطأ في جلب الإحصائيات:', err);
     }
   };
 
+  // ============================================================
+  // ✅ 2. اتجاه الطلبات (آخر 7 أيام)
+  // ============================================================
   const fetchOrderTrend = async () => {
     try {
       const days = 7;
@@ -215,6 +219,9 @@ export function useAdminStats() {
     }
   };
 
+  // ============================================================
+  // ✅ 3. توزيع الطلبات حسب الحالة (باستخدام getCountFromServer)
+  // ============================================================
   const fetchOrderStatus = async () => {
     try {
       const statuses = [
@@ -255,6 +262,9 @@ export function useAdminStats() {
     }
   };
 
+  // ============================================================
+  // ✅ 4. توزيع الطلبات حسب النوع (باستخدام getCountFromServer)
+  // ============================================================
   const fetchOrderTypes = async () => {
     try {
       const types = ['transfer', 'gaming', 'apps', 'crypto', 'exchange'];
@@ -291,6 +301,9 @@ export function useAdminStats() {
     }
   };
 
+  // ============================================================
+  // ✅ 5. نمو المستخدمين (آخر 7 أيام)
+  // ============================================================
   const fetchUserGrowth = async () => {
     try {
       const days = 7;
@@ -323,6 +336,9 @@ export function useAdminStats() {
     }
   };
 
+  // ============================================================
+  // ✅ 6. آخر الطلبات (مع limit)
+  // ============================================================
   const fetchRecentOrders = async () => {
     try {
       const q = query(
@@ -341,9 +357,19 @@ export function useAdminStats() {
     }
   };
 
+  // ============================================================
+  // ✅ 7. أهم المستخدمين (محسّن: نأخذ أول 100 طلب فقط)
+  // ============================================================
   const fetchTopUsers = async () => {
     try {
-      const ordersSnap = await getDocs(collection(db, 'orders'));
+      // ✅ نجلب فقط أول 100 طلب (مرتبة تنازلياً حسب createdAt)
+      const ordersQuery = query(
+        collection(db, 'orders'),
+        orderBy('createdAt', 'desc'),
+        limit(100)
+      );
+      const ordersSnap = await getDocs(ordersQuery);
+      
       const userOrders = {};
       ordersSnap.forEach((doc) => {
         const data = doc.data();
