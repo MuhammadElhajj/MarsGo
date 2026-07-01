@@ -51,7 +51,7 @@ export default function SupervisorCandidacyPage() {
   return (
     <div className="supervisor-candidacy-page" dir="rtl">
       <div className="candidacy-header">
-        <GoBackButton text="رجوع" />
+       
         <h1 className="candidacy-title">
           <FiAward className="title-icon" />
           الترشح لمشرف مارسغو
@@ -97,7 +97,7 @@ export default function SupervisorCandidacyPage() {
 
       {/* المزايا */}
       <div className="benefits-section">
-        <h3>🎖️ مزايا المشرف</h3>
+        <h3> مزايا المشرف</h3>
         <div className="benefits-grid">
           <div className="benefit-item">
             <FiCheckCircle className="benefit-icon" />

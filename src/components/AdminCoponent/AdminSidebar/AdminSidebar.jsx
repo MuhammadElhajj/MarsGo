@@ -1,6 +1,7 @@
 // src/components/AdminCoponent/AdminSidebar/AdminSidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import './AdminSidebar.css';
+import { FiTag } from 'react-icons/fi'; // تأكد من إضافة الاستيراد
 import { FiTarget } from 'react-icons/fi';
 import ExchangeRateWidget from '../../GeneralComponents/ExchangeRateWidget/ExchangeRateWidget'; // ✅ استيراد الـ widget
 import { lazy, Suspense } from 'react';
@@ -24,6 +25,11 @@ export default function AdminSidebar({ isOpen, onClose }) {
           <li><Link to="/admin/orders" className={linkClass('/admin/orders')} onClick={handleLinkClick}>📋 إدارة الطلبات</Link></li>
           <li><Link to="/admin/users" className={linkClass('/admin/users')} onClick={handleLinkClick}>👥 إدارة المستخدمين</Link></li>
     {/* ✅ رابط إدارة المهام (جديد) */}
+    <li>
+  <Link to="/admin/mgc-discounts" className={linkClass('/admin/mgc-discounts')} onClick={handleLinkClick}>
+    <FiTag className="admin-sidebar__icon" /> شرائح خصم MGC
+  </Link>
+</li>
           <li>
             <Link to="/admin/missions" className={linkClass('/admin/missions')} onClick={handleLinkClick}>
               <FiTarget className="admin-sidebar__icon" /> إدارة المهام

@@ -24,7 +24,7 @@ const SignupPage = lazy(() => import("./pages/User/Login/SignupPage"));
 const VerifyCodePage = lazy(() => import("./pages/User/VerifyCode/VerifyCodePage"));
 const ForgotPasswordPage = lazy(() => import("./pages/User/ForgotPassword/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/User/ResetPassword/ResetPasswordPage"));
-
+const AdminMgcDiscounts = lazy(() => import('./pages/Admin/AdminMgcDiscounts/AdminMgcDiscounts'));
 const Dashboard = lazy(() => import("./pages/User/Dashboard/Dashboard"));
 const SearchPage = lazy(() => import("./pages/User/SearchPage/SearchPage"));
 const AppsPage = lazy(() => import("./pages/User/Apps/AppsPage"));
@@ -559,6 +559,14 @@ function App() {
               </Suspense>
             }
           />
+<Route
+  path="mgc-discounts"
+  element={
+    <Suspense fallback={<Loading text="جاري تحميل شرائح الخصم..." />}>
+      <AdminMgcDiscounts />
+    </Suspense>
+  }
+/>
           <Route
             path="services"
             element={

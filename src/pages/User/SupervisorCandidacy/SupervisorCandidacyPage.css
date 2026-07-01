@@ -32,11 +32,8 @@
 
 /* ===== البطاقة الرئيسية (تشبه بطاقة النشاط) ===== */
 .candidacy-card {
-  background: var(--color-bg-secondary);
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  
+  
   margin-bottom: 1.25rem;
   transition: box-shadow 0.2s;
 }
@@ -151,12 +148,10 @@
 
 /* ===== قسم المزايا ===== */
 .benefits-section {
-  background: var(--color-bg-secondary);
-  border-radius: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid var(--color-border);
+
+
   margin-bottom: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  
 }
 
 .benefits-section h3 {
@@ -205,11 +200,8 @@
 
 /* ===== قسم المتقدمين ===== */
 .candidates-section {
-  background: var(--color-bg-secondary);
-  border-radius: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  
 }
 
 .candidates-section h3 {

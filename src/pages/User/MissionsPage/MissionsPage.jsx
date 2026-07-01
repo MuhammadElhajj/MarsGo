@@ -41,6 +41,7 @@ export default function MissionsPage() {
   const [quests, setQuests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userMembership, setUserMembership] = useState(null);
+  const [fetchError, setFetchError] = useState(false);
 
   // حساب الوقت المتبقي للمهمة
   const getRemainingTime = useCallback((quest) => {
@@ -67,7 +68,9 @@ export default function MissionsPage() {
   // جلب المهام من Firestore
   const fetchQuests = useCallback(async () => {
     setLoading(true);
+    setFetchError(false);
     try {
+      // ✅ محاولة جلب المهام مع التصفية
       const q = query(
         collection(db, 'quests'),
         where('isActive', '==', true),
@@ -82,7 +85,6 @@ export default function MissionsPage() {
         completed: false,
         claimed: false,
         locked: !!doc.data().membershipRequired,
-        // حساب الوقت المتبقي
         remainingTime: null,
         isExpired: false,
       }));
@@ -118,7 +120,67 @@ export default function MissionsPage() {
       setQuests(questsData);
     } catch (err) {
       console.error('خطأ في جلب المهام:', err);
-      toast.error('فشل تحميل المهام');
+      
+      // ✅ إذا كان الخطأ بسبب الصلاحيات، نحاول جلب المهام بدون تصفية isActive
+      if (err.code === 'permission-denied' || err.message.includes('permissions')) {
+        try {
+          // محاولة ثانية: جلب جميع المهام دون شرط isActive
+          const fallbackQuery = query(collection(db, 'quests'), orderBy('order', 'asc'));
+          const fallbackSnapshot = await getDocs(fallbackQuery);
+          const fallbackData = fallbackSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            icon: iconMap[doc.data().icon] || FiAward,
+            progress: 0,
+            completed: false,
+            claimed: false,
+            locked: !!doc.data().membershipRequired,
+            remainingTime: null,
+            isExpired: false,
+          }));
+          
+          // تصفية المهام النشطة يدوياً
+          const activeQuests = fallbackData.filter(q => q.isActive !== false);
+          
+          // حساب الوقت المتبقي
+          activeQuests.forEach(q => {
+            const remaining = getRemainingTime(q);
+            if (remaining) {
+              q.remainingTime = remaining;
+              q.isExpired = remaining.expired;
+            }
+          });
+          
+          // تحميل التقدم من localStorage
+          const savedProgressFallback = localStorage.getItem('weeklyQuestsProgress');
+          if (savedProgressFallback) {
+            const parsed = JSON.parse(savedProgressFallback);
+            const today = new Date().toDateString();
+            const lastReset = localStorage.getItem('questsResetDate');
+            if (lastReset === today) {
+              activeQuests.forEach(q => {
+                const saved = parsed.find(p => p.id === q.id);
+                if (saved) {
+                  q.progress = saved.progress || 0;
+                  q.completed = saved.completed || false;
+                  q.claimed = saved.claimed || false;
+                }
+              });
+            }
+          }
+          
+          setQuests(activeQuests);
+          toast.info('تم تحميل المهام بنجاح (معالجة بديلة)', { duration: 3000 });
+          return;
+        } catch (fallbackErr) {
+          console.error('فشل المحاولة البديلة:', fallbackErr);
+          setFetchError(true);
+          toast.error('لا يمكن تحميل المهام حالياً. يرجى المحاولة لاحقاً.');
+        }
+      } else {
+        setFetchError(true);
+        toast.error('فشل تحميل المهام');
+      }
     } finally {
       setLoading(false);
     }
@@ -135,7 +197,7 @@ export default function MissionsPage() {
           isExpired: remaining ? remaining.expired : false,
         };
       }));
-    }, 60000); // كل دقيقة
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [getRemainingTime]);
@@ -206,6 +268,24 @@ export default function MissionsPage() {
       <div className="missions-page-loading">
         <div className="loading-spinner"></div>
         <p>جاري تحميل المهام...</p>
+      </div>
+    );
+  }
+
+  // ✅ عرض رسالة خطأ عند فشل التحميل
+  if (fetchError) {
+    return (
+      <div className="missions-page-loading" style={{ minHeight: '400px' }}>
+        <FiAlertCircle size={48} style={{ color: '#ef4444', marginBottom: '1rem' }} />
+        <p style={{ fontSize: '1.1rem', color: 'var(--color-text-primary)' }}>
+          تعذر تحميل المهام
+        </p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>
+          يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بالدعم.
+        </p>
+        <Button onClick={fetchQuests} style={{ marginTop: '1rem' }}>
+          إعادة المحاولة
+        </Button>
       </div>
     );
   }

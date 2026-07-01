@@ -241,7 +241,7 @@ export default function ClanPage() {
   if (!clan) {
     return (
       <div className="clans-page">
-        <GoBackButton text="رجوع" />
+       
         <div className="empty-state">
           <p>الكلان غير موجود</p>
         </div>
@@ -256,7 +256,7 @@ export default function ClanPage() {
     <div className="clan-page" dir="rtl">
       {/* ===== الهيدر ===== */}
       <div className="clan-page__header">
-        <GoBackButton text="رجوع" />
+
         <div className="clan-page__header-center">
           <h1 className="clan-page__title">
             {clan.name}

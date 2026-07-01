@@ -1,6 +1,6 @@
 // src/store/slices/referralSlice.js
-import { doc, updateDoc, increment, addDoc, collection, serverTimestamp, query, where, getDocs, writeBatch , orderBy, limit, getDoc} from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions'; // ✅ إضافة استيراد
+import { doc, updateDoc, increment, addDoc, collection, serverTimestamp, query, where, getDocs, writeBatch, orderBy, limit, getDoc } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../../firebase';
 import toast from 'react-hot-toast';
 
@@ -30,9 +30,11 @@ export const createReferralSlice = (set, get) => ({
     }
   },
 
+  // ✅ تحسين getRecentReferrals: الاعتماد على status من referral_rewards بدلاً من قراءة topUpRequests
   getRecentReferrals: async (limitCount = 10) => {
     const { user } = get();
     if (!user) return [];
+
     try {
       const q = query(
         collection(db, 'referral_rewards'),
@@ -42,34 +44,46 @@ export const createReferralSlice = (set, get) => ({
       );
       const snap = await getDocs(q);
       const referrals = [];
+
       for (const docSnap of snap.docs) {
         const data = docSnap.data();
         const referredId = data.referredId;
-        const userSnap = await getDoc(doc(db, 'users', referredId));
-        if (!userSnap.exists()) continue;
-        const userData = userSnap.data();
-        const depositQuery = query(
-          collection(db, 'topUpRequests'),
-          where('userId', '==', referredId),
-          where('status', '==', 'approved')
-        );
-        const depositSnap = await getDocs(depositQuery);
-        const hasDeposited = !depositSnap.empty;
+
+        // ✅ محاولة جلب اسم المستخدم المحال (اختياري، لتجميل العرض)
+        let userData = null;
+        try {
+          const userSnap = await getDoc(doc(db, 'users', referredId));
+          if (userSnap.exists()) {
+            userData = userSnap.data();
+          }
+        } catch (err) {
+          // تجاهل فشل جلب بيانات المستخدم، نستخدم بيانات افتراضية
+        }
+
+        // ✅ الحالة من referral_rewards نفسه (موثوقة)
         const rewardStatus = data.status || 'pending';
+        // إذا كانت الحالة 'claimed' فهذا يعني أن المستخدم قام بأول إيداع معتمد
+        const hasDeposited = (rewardStatus === 'claimed');
+
         referrals.push({
           id: docSnap.id,
           referredId: referredId,
-          name: userData.name || 'مستخدم',
-          avatar: userData.avatar || null,
-          uniqueId: userData.uniqueId || null,
+          name: userData?.name || data.referredName || 'مستخدم',
+          avatar: userData?.avatar || data.referredAvatar || null,
+          uniqueId: userData?.uniqueId || data.referredUniqueId || null,
           hasDeposited: hasDeposited,
           rewardAmount: data.rewardAmount || 20,
           rewardStatus: rewardStatus,
           createdAt: data.createdAt,
         });
       }
+
       return referrals;
     } catch (error) {
+      // ✅ معالجة خطأ الصلاحية: إذا كان الخطأ بسبب الصلاحيات، نرجع مصفوفة فارغة بدون طباعة
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        return [];
+      }
       console.error('خطأ في جلب الإحالات:', error);
       return [];
     }
@@ -91,8 +105,8 @@ export const createReferralSlice = (set, get) => ({
       if (result.data.success) {
         const claimedAmount = result.data.claimedAmount;
         const currentBalance = get().balance || 0;
-        
-        // تحديث الحالة المحلية مباشرة (لتحسين تجربة المستخدم)
+
+        // تحديث الحالة المحلية مباشرة
         set({
           balance: currentBalance + claimedAmount,
           referralBalance: 0,
@@ -103,8 +117,8 @@ export const createReferralSlice = (set, get) => ({
             totalReferralEarnings: (get().userData?.totalReferralEarnings || 0) + claimedAmount,
           },
         });
-        
-        toast.success(`✅ تم تحويل ${claimedAmount} MGC إلى رصيدك الرئيسي!`);
+
+        toast.success(`تم تحويل ${claimedAmount} MGC إلى رصيدك الرئيسي`);
         return true;
       } else {
         toast.error(result.data.message || 'فشل صرف المكافآت');
@@ -122,33 +136,32 @@ export const createReferralSlice = (set, get) => ({
     toast.success('تم نسخ المعرف: ' + uniqueId);
   },
 
- // ===== نظام دعم الشعبية (عبر Cloud Function) =====
-supportUser: async (targetUserId) => {
-  const { user } = get();
-  if (!user) {
-    toast.error('يجب تسجيل الدخول أولاً');
-    return { success: false, error: 'يجب تسجيل الدخول' };
-  }
-
-  try {
-    const functions = getFunctions();
-    const supportFn = httpsCallable(functions, 'supportUser');
-    const result = await supportFn({ targetUserId });
-
-    if (result.data.success) {
-      // تحديث الحالة المحلية (اختياري، لأن onSnapshot سيقوم بالتحديث)
-      toast.success(`🌹 تم دعم المستخدم! -20 MGC (+1 شعبية)`);
-      return { success: true };
-    } else {
-      toast.error(result.data.message || 'فشل الدعم');
-      return { success: false, error: result.data.message };
+  // ===== نظام دعم الشعبية (عبر Cloud Function) =====
+  supportUser: async (targetUserId) => {
+    const { user } = get();
+    if (!user) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return { success: false, error: 'يجب تسجيل الدخول' };
     }
-  } catch (error) {
-    console.error('فشل الدعم:', error);
-    toast.error(error.message || 'حدث خطأ أثناء الدعم');
-    return { success: false, error: error.message };
-  }
-},
+
+    try {
+      const functions = getFunctions();
+      const supportFn = httpsCallable(functions, 'supportUser');
+      const result = await supportFn({ targetUserId });
+
+      if (result.data.success) {
+        toast.success(`تم دعم المستخدم! -20 MGC (+1 شعبية)`);
+        return { success: true };
+      } else {
+        toast.error(result.data.message || 'فشل الدعم');
+        return { success: false, error: result.data.message };
+      }
+    } catch (error) {
+      console.error('فشل الدعم:', error);
+      toast.error(error.message || 'حدث خطأ أثناء الدعم');
+      return { success: false, error: error.message };
+    }
+  },
 
   getTotalSupportCount: async (targetUserId) => {
     try {

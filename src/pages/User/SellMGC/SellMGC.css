@@ -3,7 +3,7 @@
 .sell-mgc-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 0.5rem 1rem;
+
   animation: fadeIn 0.3s ease;
 }
 
@@ -302,9 +302,7 @@
    ✅ استجابة الجوال: الإحصائيات تبقى 3 كاردات جنب بعض
    ============================================================ */
 @media (max-width: 640px) {
-  .sell-mgc-page {
-    padding: 0.5rem;
-  }
+
 
   .sell-mgc__balance-summary {
     grid-template-columns: repeat(3, 1fr);

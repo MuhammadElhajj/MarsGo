@@ -232,3 +232,171 @@
     transform: translateY(0);
   }
 }
+
+
+/* ===== القسم المخصص ===== */
+.buy-mgc__custom {
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.buy-mgc__input-group {
+  margin-bottom: 1.5rem;
+}
+
+.buy-mgc__label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.buy-mgc__input-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.buy-mgc__input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.buy-mgc__range-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.buy-mgc__slider-container {
+  margin-top: 1rem;
+}
+
+.buy-mgc__slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  /* background: linear-gradient(to right, var(--color-accent), var(--color-accent-light)); */
+  outline: none;
+  background-color: var(--color-text-primary);
+}
+
+.buy-mgc__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.buy-mgc__slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid white;
+}
+
+.buy-mgc__slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.2rem;
+}
+
+/* ===== ملخص الشراء ===== */
+.buy-mgc__summary {
+  background: var(--color-bg-primary);
+  border-radius: 0.8rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+}
+
+.buy-mgc__summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.buy-mgc__summary-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.buy-mgc__original-price {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+.buy-mgc__discount-row {
+  color: #10b981;
+}
+
+.buy-mgc__discount-amount {
+  font-weight: 600;
+}
+
+.buy-mgc__total-row {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  border-bottom: none !important;
+}
+
+.buy-mgc__final-price {
+  color: var(--color-accent);
+  font-size: 1.3rem;
+}
+
+.buy-mgc__per-mgc {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  border-bottom: none !important;
+  padding-top: 0.2rem;
+}
+
+/* ===== تحميل ===== */
+.buy-mgc-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+/* ===== استجابة ===== */
+@media (max-width: 640px) {
+  .buy-mgc__input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .buy-mgc__input {
+    width: 100%;
+  }
+  .buy-mgc__summary-row {
+    font-size: 0.8rem;
+  }
+  .buy-mgc__final-price {
+    font-size: 1.1rem;
+  }
+}

@@ -69,8 +69,9 @@
 .my-activities-page__tabs {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
 }
 
 .tab-btn {
@@ -88,12 +89,10 @@
   transition: all 0.2s;
 }
 
-.tab-btn:hover {
-  color: var(--color-text-primary);
-}
+
 
 .tab-btn.active {
-  color: var(--color-accent);
+  
   border-bottom-color: var(--color-accent);
 }
 

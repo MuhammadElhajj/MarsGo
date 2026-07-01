@@ -197,7 +197,7 @@ export const createFriendSlice = (set, get) => ({
     }
   },
 
-  // ===== جلب قائمة الأصدقاء =====
+  // ===== جلب قائمة الأصدقاء (مع تجاهل أخطاء الصلاحية) =====
   fetchFriendsList: async () => {
     const { user } = get();
     if (!user) return;
@@ -210,13 +210,24 @@ export const createFriendSlice = (set, get) => ({
       }
       const friendsData = [];
       for (const fid of friendsIds) {
-        const fSnap = await getDoc(doc(db, 'users', fid));
-        if (fSnap.exists()) {
-          friendsData.push({ id: fid, ...fSnap.data() });
+        try {
+          const fSnap = await getDoc(doc(db, 'users', fid));
+          if (fSnap.exists()) {
+            friendsData.push({ id: fid, ...fSnap.data() });
+          }
+        } catch (err) {
+          // تجاهل فشل جلب بيانات صديق معين (قد يكون بسبب الصلاحيات)
+          // لا نطبع الخطأ في الكونسول لتجنب الفوضى
         }
       }
       set({ friendsList: friendsData });
     } catch (error) {
+      // إذا كان الخطأ بسبب الصلاحيات، لا نطبعه
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        // فقط نعيد تعيين القائمة فارغة
+        set({ friendsList: [] });
+        return;
+      }
       console.error('خطأ جلب قائمة الأصدقاء:', error);
     }
   },
@@ -279,7 +290,7 @@ export const createFriendSlice = (set, get) => ({
     }
   },
 
-  // ===== جلب اقتراحات الأصدقاء =====
+  // ===== جلب اقتراحات الأصدقاء (مع تجاهل أخطاء الصلاحية) =====
   fetchSuggestedFriends: async () => {
     const { user, userData } = get();
     if (!user) return [];
@@ -318,6 +329,10 @@ export const createFriendSlice = (set, get) => ({
 
       return suggested;
     } catch (error) {
+      // إذا كان الخطأ بسبب الصلاحيات، نرجع مصفوفة فارغة بدون طباعة
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        return [];
+      }
       console.error('خطأ في جلب اقتراحات الأصدقاء:', error);
       return [];
     }

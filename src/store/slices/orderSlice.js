@@ -41,15 +41,18 @@ export const createOrderSlice = (set, get) => ({
     const RATE = 0.007;
     const usdAmount = mgcAmount * RATE;
     try {
-      const deducted = await get().deductMgcBalance(mgcAmount);
+    // ✅ خصم MGC (تمرير reason)
+      const deducted = await get().deductMgcBalance(mgcAmount, 'بيع MGC');
       if (!deducted) {
         toast.error('فشل خصم MGC');
         return false;
       }
-      const added = await get().addBalance(user.uid, usdAmount);
+     // ✅ إضافة رصيد حقيقي (المبلغ أولاً، وليس userId)
+      const added = await get().addBalance(usdAmount, 'بيع MGC');
       if (!added) {
+        // استرجاع MGC في حال فشل إضافة الرصيد
+        await get().addMgcBalance(mgcAmount, 'استرجاع MGC');
         toast.error('فشل إضافة الرصيد، تم استرجاع MGC');
-        await get().addMgcBalance(user.uid, mgcAmount);
         return false;
       }
       await addDoc(collection(db, 'mgcSales'), {

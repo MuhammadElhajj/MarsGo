@@ -12,7 +12,7 @@ export default function ReferralCard({ referral, user }) {
 
   const isClaimed = rewardStatus === 'claimed';
   const statusIcon = isClaimed ? <FiCheckCircle className="status-icon claimed" /> : <FiClock className="status-icon pending" />;
-  const statusText = isClaimed ? 'مودعة ✅' : 'بانتظار الإيداع ⏳';
+  const statusText = isClaimed ? 'مودعة ' : 'بانتظار الإيداع ';
 
   const handleViewProfile = () => {
     if (referredId) {

@@ -119,8 +119,11 @@ export default defineConfig({
       'firebase/app',
       'firebase/auth',
       'firebase/firestore',
+      'es-toolkit', 
+        'es-toolkit/compat',
+      
     ],
-    exclude: ['recharts'], // تجنب تحميل recharts في التطوير (يتم تحميله فقط عند الحاجة)
+    exclude: ['recharts' , 'use-sync-external-store'], // تجنب تحميل recharts في التطوير (يتم تحميله فقط عند الحاجة)
   },
 
   // ===== تحسينات CSS =====

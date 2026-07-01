@@ -52,4 +52,4 @@ exports.importProductsFromExternal = require('./admin/importFromExternal').impor
 exports.updateCategoryIds = require('./updateCategoryIds').updateCategoryIds;
 
 // ✅ دالة جديدة لإرسال كود تأكيد الرقم السري
-exports.sendSecretVerificationCode = verification.sendSecretVerificationCode;
+exports.sendSecretVerificationCodeV2 = require('./verification/verification').sendSecretVerificationCodeV2;

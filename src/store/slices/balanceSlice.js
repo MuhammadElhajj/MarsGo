@@ -41,13 +41,13 @@ export const createBalanceSlice = (set, get) => ({
   },
 
   // ===== الرصيد الحقيقي (USD) - عبر Cloud Function =====
-  addBalance: async (amountUSD) => {
+  addBalance: async (amountUSD, reason = 'إضافة رصيد') => {
     if (amountUSD <= 0) {
       toast.error('المبلغ يجب أن يكون أكبر من صفر');
       return false;
     }
     try {
-      const result = await updateBalanceFn({ amount: amountUSD, type: 'real' });
+      const result = await updateBalanceFn({ amount: amountUSD, type: 'real', reason });
       if (result.data.success) {
         // تحديث الرصيد محلياً (سيتم تحديثه أيضاً عبر onSnapshot)
         set((state) => ({ balance: state.balance + amountUSD }));
@@ -62,7 +62,7 @@ export const createBalanceSlice = (set, get) => ({
     }
   },
 
-  deductBalance: async (amountUSD) => {
+  deductBalance: async (amountUSD, reason = 'خصم رصيد') => {
     if (amountUSD <= 0) {
       toast.error('المبلغ يجب أن يكون أكبر من صفر');
       return false;
@@ -73,7 +73,7 @@ export const createBalanceSlice = (set, get) => ({
       return false;
     }
     try {
-      const result = await updateBalanceFn({ amount: -amountUSD, type: 'real' });
+      const result = await updateBalanceFn({ amount: -amountUSD, type: 'real', reason });
       if (result.data.success) {
         set((state) => ({ balance: state.balance - amountUSD }));
         toast.success(`تم خصم ${amountUSD.toFixed(2)} $ من رصيدك الحقيقي`);
@@ -88,13 +88,13 @@ export const createBalanceSlice = (set, get) => ({
   },
 
   // ===== رصيد MGC - عبر Cloud Function =====
-  addMgcBalance: async (amountMGC) => {
+  addMgcBalance: async (amountMGC, reason = 'إضافة MGC') => {
     if (amountMGC <= 0) {
       toast.error('المبلغ يجب أن يكون أكبر من صفر');
       return false;
     }
     try {
-      const result = await updateBalanceFn({ amount: amountMGC, type: 'mgc' });
+      const result = await updateBalanceFn({ amount: amountMGC, type: 'mgc', reason });
       if (result.data.success) {
         set((state) => ({ mgcBalance: state.mgcBalance + amountMGC }));
         toast.success(`تم إضافة ${amountMGC.toFixed(2)} MGC إلى رصيدك`);
@@ -108,7 +108,7 @@ export const createBalanceSlice = (set, get) => ({
     }
   },
 
-  deductMgcBalance: async (amountMGC) => {
+  deductMgcBalance: async (amountMGC, reason = 'خصم MGC') => {
     if (amountMGC <= 0) {
       toast.error('المبلغ يجب أن يكون أكبر من صفر');
       return false;
@@ -119,7 +119,7 @@ export const createBalanceSlice = (set, get) => ({
       return false;
     }
     try {
-      const result = await updateBalanceFn({ amount: -amountMGC, type: 'mgc' });
+      const result = await updateBalanceFn({ amount: -amountMGC, type: 'mgc', reason });
       if (result.data.success) {
         set((state) => ({ mgcBalance: state.mgcBalance - amountMGC }));
         toast.success(`تم خصم ${amountMGC.toFixed(2)} MGC من رصيدك`);

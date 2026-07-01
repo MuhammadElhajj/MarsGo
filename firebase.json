@@ -2,6 +2,7 @@
   "functions": [
     {
       "codebase": "default",
+      "runtime": "nodejs20",  
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",

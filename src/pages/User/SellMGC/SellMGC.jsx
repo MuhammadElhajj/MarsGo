@@ -66,7 +66,7 @@ export default function SellMGC() {
   return (
     <div className="sell-mgc-page" dir="rtl">
       <div className="sell-mgc__header">
-        <GoBackButton text="رجوع" />
+
         <h1>
           <FiDollarSign className="header-icon" style={{ color: '#f59e0b' }} />
           بيع عملات MGC
@@ -94,7 +94,7 @@ export default function SellMGC() {
       {/* سعر البيع */}
       <div className="sell-mgc__rate-info">
         <FiTrendingUp style={{ color: '#8b5cf6', marginLeft: '0.5rem' }} />
-        <span>سعر البيع: <strong>100 MGC = 0.70 $</strong> (خصم 30%)</span>
+        <span>سعر البيع: <strong>100 MGC = 0.70 $</strong></span>
       </div>
 
       {/* نموذج البيع */}

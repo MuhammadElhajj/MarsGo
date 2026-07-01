@@ -23,7 +23,7 @@
 .referral-card__info {
   flex: 1;
   display: flex;
-  flex-direction: column;
+justify-content: space-between;
   gap: 0.2rem;
 }
 

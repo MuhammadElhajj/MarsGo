@@ -49,6 +49,7 @@ export const createAuthSlice = (set, get) => ({
     }
   },
 
+  // ===== البحث عن مستخدم بواسطة المعرف الفريد (مع تجاهل أخطاء الصلاحية) =====
   searchByUniqueId: async (uniqueId) => {
     if (!uniqueId || uniqueId.length < 3) {
       toast.error('الرجاء إدخال معرف صحيح (مثل: NE1234)');
@@ -63,12 +64,18 @@ export const createAuthSlice = (set, get) => ({
       }
       return { id: snap.docs[0].id, ...snap.docs[0].data() };
     } catch (error) {
+      // تجاهل خطأ الصلاحية وعدم طباعته في الكونسول
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        toast.error('لا يمكنك البحث عن مستخدمين آخرين حالياً');
+        return null;
+      }
       console.error('خطأ في البحث:', error);
       toast.error('حدث خطأ أثناء البحث');
       return null;
     }
   },
 
+  // ===== البحث عن المستخدمين ببادئة (مع تجاهل أخطاء الصلاحية) =====
   searchUsersByPrefix: async (prefix) => {
     if (!prefix || prefix.length < 2) return [];
     try {
@@ -84,6 +91,10 @@ export const createAuthSlice = (set, get) => ({
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
+      // تجاهل خطأ الصلاحية وعدم طباعته في الكونسول
+      if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+        return [];
+      }
       console.error('خطأ في البحث بالبادئة:', error);
       return [];
     }

@@ -121,7 +121,7 @@ export default function CreateClanPage() {
   return (
     <div className="create-clan-page" dir="rtl">
       <div className="create-clan-page__header">
-        <GoBackButton text="رجوع" />
+        
         <h1 className="create-clan-page__title">
           <FiUsers className="header-icon" style={{ color: '#8b5cf6' }} />
           إنشاء كلان جديد

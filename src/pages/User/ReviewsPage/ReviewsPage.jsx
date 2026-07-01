@@ -158,7 +158,7 @@ export default function ReviewsPage() {
     <div className="reviews-page" dir="rtl">
       {/* ===== الهيدر ===== */}
       <div className="reviews-page__header">
-        <GoBackButton text="رجوع" />
+       
         <h1 className="reviews-page__title">
           <FaStar className="header-icon" style={{ color: '#f59e0b' }} />
           التقييمات والمراجعات

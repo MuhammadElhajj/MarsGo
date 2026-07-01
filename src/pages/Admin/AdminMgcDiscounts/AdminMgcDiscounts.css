@@ -1,0 +1,224 @@
+/* src/pages/Admin/AdminMgcDiscounts/AdminMgcDiscounts.css */
+
+.admin-mgc-discounts {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.admin-mgc-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-mgc-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.admin-mgc-description {
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.admin-mgc-description p {
+  margin: 0.2rem 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.admin-mgc-hint {
+  font-size: 0.8rem !important;
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+}
+
+.admin-mgc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.admin-mgc-toolbar .btn {
+  width: auto;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.admin-mgc-add-form {
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.admin-mgc-add-form h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+}
+
+.admin-mgc-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-mgc-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.admin-mgc-form-actions .btn {
+  width: auto;
+}
+
+.admin-mgc-table-wrapper {
+  overflow-x: auto;
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-mgc-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+}
+
+.admin-mgc-table th,
+.admin-mgc-table td {
+  padding: 0.8rem 0.6rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.admin-mgc-table th {
+  background: var(--color-bg-primary);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.admin-mgc-table tr:hover td {
+  background: rgba(79, 70, 229, 0.03);
+}
+
+.admin-mgc-input {
+  width: 80px;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.4rem;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.admin-mgc-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.admin-mgc-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.4rem;
+  transition: all 0.2s;
+}
+
+.admin-mgc-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.admin-mgc-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-border);
+}
+
+.admin-mgc-loading,
+.admin-mgc-unauthorized {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+}
+
+/* استجابة الجوال */
+@media (max-width: 768px) {
+  .admin-mgc-form-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .admin-mgc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-mgc-toolbar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-mgc-table th,
+  .admin-mgc-table td {
+    padding: 0.5rem 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .admin-mgc-input {
+    width: 60px;
+    font-size: 0.8rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* دعم الوضع الداكن */
+.dark .admin-mgc-add-form {
+  background: var(--color-bg-secondary);
+}
+
+.dark .admin-mgc-table-wrapper {
+  background: var(--color-bg-secondary);
+}
+
+.dark .admin-mgc-table th {
+  background: var(--color-bg-primary);
+}
+
+.dark .admin-mgc-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dark .admin-mgc-input {
+  background: var(--color-bg-primary);
+}

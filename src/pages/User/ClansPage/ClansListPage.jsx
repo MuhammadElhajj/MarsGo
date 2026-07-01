@@ -119,7 +119,7 @@ export default function ClansListPage() {
   return (
     <div className="clans-list-page" dir="rtl">
       <div className="clans-list-page__header">
-        <GoBackButton text="رجوع" />
+
         <h1 className="clans-list-page__title">
           <FiUsers className="header-icon" style={{ color: '#8b5cf6' }} />
           الكلانات

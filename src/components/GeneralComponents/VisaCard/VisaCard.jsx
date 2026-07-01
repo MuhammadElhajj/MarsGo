@@ -62,7 +62,9 @@
 //     </div>
 //   );
 // }
-// src/components/GeneralComponents/VisaCard/VisaCard.jsx
+
+
+
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
@@ -93,8 +95,8 @@ export default function VisaCard({
   const [countdown, setCountdown] = useState(0);
 
   const functions = getFunctions();
-  // ✅ استخدام الدالة الجديدة المخصصة
-  const sendSecretVerificationCode = httpsCallable(functions, 'sendSecretVerificationCode');
+  // ✅ استخدام الدالة الجديدة المخصصة (تم إزالة httpsCallable للدالة القديمة)
+  // const sendSecretVerificationCode = httpsCallable(functions, 'sendSecretVerificationCode');
   const verifyCodeFn = httpsCallable(functions, 'verifyCode');
 
   const timerRef = useRef(null);
@@ -110,7 +112,7 @@ export default function VisaCard({
     }
   };
 
-  // إرسال الكود إلى البريد (باستخدام الدالة الجديدة)
+  // ✅ إرسال الكود إلى البريد (باستخدام fetch للدالة الجديدة V2)
   const handleSendCode = async () => {
     if (!user) {
       setMessage({ text: 'يجب تسجيل الدخول أولاً', type: 'error' });
@@ -123,14 +125,26 @@ export default function VisaCard({
 
     setIsSendingCode(true);
     setMessage({ text: '', type: '' });
+
     try {
-      // ✅ استدعاء الدالة الجديدة
-      const result = await sendSecretVerificationCode({ email: user.email, uid: user.uid });
-      if (result.data.success) {
+      // ✅ استخدام fetch بدلاً من httpsCallable للدالة الجديدة
+      const response = await fetch(
+        'https://us-central1-marsgo-bec3a.cloudfunctions.net/sendSecretVerificationCodeV2',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email, uid: user.uid }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
         setMessage({ text: '✅ تم إرسال كود التأكيد إلى بريدك الإلكتروني', type: 'success' });
         setShowCodeInput(true);
       } else {
-        setMessage({ text: '❌ فشل إرسال الكود، حاول مرة أخرى', type: 'error' });
+        const errorMsg = result.error?.message || result.error || 'فشل إرسال الكود، حاول مرة أخرى';
+        setMessage({ text: `❌ ${errorMsg}`, type: 'error' });
       }
     } catch (error) {
       console.error('❌ Error sending code:', error);
@@ -151,7 +165,7 @@ export default function VisaCard({
     try {
       const result = await verifyCodeFn({ email: user.email, uid: user.uid, code });
       if (result.data.success) {
-        setMessage({ text: '✅ تم التحقق بنجاح! سيظهر الرقم السري لمدة 60 ثانية', type: 'success' });
+        setMessage({ text: 'تم التحقق بنجاح! سيظهر الرقم السري لمدة 60 ثانية', type: 'success' });
         setSecretVisible(true);
         setShowCodeInput(false);
         setCode('');
@@ -172,11 +186,11 @@ export default function VisaCard({
           });
         }, 1000);
       } else {
-        setMessage({ text: '❌ الكود غير صحيح أو منتهي الصلاحية', type: 'error' });
+        setMessage({ text: ' الكود غير صحيح أو منتهي الصلاحية', type: 'error' });
       }
     } catch (error) {
-      console.error('❌ Error verifying code:', error);
-      setMessage({ text: '❌ حدث خطأ أثناء التحقق من الكود', type: 'error' });
+      console.error(' Error verifying code:', error);
+      setMessage({ text: 'الكود غير صحيح', type: 'error' });
     } finally {
       setIsVerifying(false);
     }

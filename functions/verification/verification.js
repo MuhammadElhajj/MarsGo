@@ -1142,108 +1142,115 @@ exports.verifyPasswordResetCode = onCall({ cors: true }, async (request) => {
 });
 
 
-// ========== 7. إرسال كود تأكيد للرقم السري (مع رسالة مخصصة) ==========
-// ========== 7. إرسال كود تأكيد للرقم السري (مع رسالة مخصصة) ==========
-exports.sendSecretVerificationCode = onCall(
-  { secrets: [emailUserSecret, emailPassSecret], cors: true },
-  async (request) => {
-    console.log('🚀 sendSecretVerificationCode started');
 
-    const data = request.data;
-    let email = data?.email || data?.data?.email;
-    let uid = data?.uid || data?.data?.uid;
+// ... (الدوال المساعدة generateVerificationCode, getTransporter كما هي)
+const { onRequest } = require('firebase-functions/v2/https');
+const cors = require('cors')({ origin: true });
 
-    console.log('📨 Extracted:', { email, uid });
-
-    if (!email) {
-      throw new HttpsError('invalid-argument', 'البريد الإلكتروني مطلوب');
-    }
-
-    let finalUid = uid;
-    if (!finalUid) {
+/**
+ * دالة جديدة لإرسال كود تأكيد الرقم السري (مع CORS يدوي)
+ * الاسم: sendSecretVerificationCodeV2
+ */
+exports.sendSecretVerificationCodeV2 = onRequest(
+  { secrets: [emailUserSecret, emailPassSecret] },
+  async (req, res) => {
+    cors(req, res, async () => {
       try {
-        const userRecord = await admin.auth().getUserByEmail(email);
-        finalUid = userRecord.uid;
-      } catch (err) {
-        console.error('❌ Failed to get uid:', err.message);
-        throw new HttpsError('not-found', 'لا يوجد مستخدم بهذا البريد');
+        console.log('🚀 sendSecretVerificationCodeV2 started');
+
+        const data = req.body.data || req.body;
+        const email = data?.email;
+        const uid = data?.uid;
+
+        if (!email) {
+          return res.status(400).json({ error: 'البريد الإلكتروني مطلوب' });
+        }
+
+        let finalUid = uid;
+        if (!finalUid) {
+          try {
+            const userRecord = await admin.auth().getUserByEmail(email);
+            finalUid = userRecord.uid;
+          } catch (err) {
+            return res.status(404).json({ error: 'لا يوجد مستخدم بهذا البريد' });
+          }
+        }
+
+        // التحقق من وجود المستخدم
+        try {
+          const userRecord = await admin.auth().getUser(finalUid);
+          if (userRecord.email !== email) throw new Error('Email mismatch');
+        } catch (err) {
+          return res.status(404).json({ error: 'بيانات المستخدم غير صحيحة' });
+        }
+
+        // منع التكرار
+        const codeDocRef = admin.firestore().collection('verificationCodes').doc(finalUid);
+        const codeSnap = await codeDocRef.get();
+        const now = Date.now();
+
+        if (codeSnap.exists) {
+          const lastSent = codeSnap.data().lastSentAt?.toMillis?.() || 0;
+          if (now - lastSent < 60000) {
+            return res.status(429).json({ error: 'الرجاء الانتظار دقيقة قبل طلب كود جديد' });
+          }
+        }
+
+        const code = generateVerificationCode();
+        const expiresAt = admin.firestore.Timestamp.fromMillis(now + 10 * 60 * 1000);
+
+        await codeDocRef.set(
+          {
+            code,
+            email,
+            expiresAt,
+            lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+            attempts: 0,
+            purpose: 'show_secret',
+          },
+          { merge: true }
+        );
+
+        // إرسال البريد الإلكتروني
+        const emailUser = emailUserSecret.value();
+        const emailPass = emailPassSecret.value();
+        const transporter = getTransporter(emailUser, emailPass);
+        let emailSent = false;
+
+        if (transporter) {
+          try {
+            await transporter.sendMail({
+              from: `"MarsGo" <${emailUser}>`,
+              to: email,
+              subject: ' كود تأكيد لعرض الرقم السري - MarsGo',
+              html: `
+  <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right; padding: 20px; background-color: #f9f9f9;">
+    <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <h2 style="color: #4f46e5;"> طلب عرض الرقم السري</h2>
+      <p>لقد طلبت عرض الرقم السري لبطاقتك في MarsGo. استخدم الكود التالي لتأكيد هويتك:</p>
+      <div style="background: #f0f0f0; font-size: 28px; font-weight: bold; text-align: center; padding: 15px; margin: 20px 0; letter-spacing: 8px; border-radius: 8px; direction: ltr;">
+        ${code}
+      </div>
+      <p><strong>ملاحظة:</strong> هذا الكود صالح لمدة 10 دقائق وللاستخدام مرة واحدة فقط.</p>
+      <p>إذا لم تقم بطلب هذا الكود، يرجى تجاهل هذه الرسالة وتأمين حسابك فوراً.</p>
+      <hr style="margin: 20px 0;">
+      <p style="font-size: 12px; color: #aaa;">هذه رسالة آلية من MarsGo – لا ترد على هذا البريد.</p>
+    </div>
+  </div>
+`, // نفس المحتوى السابق
+            });
+            emailSent = true;
+          } catch (err) {
+            console.error('❌ Email error:', err.message);
+          }
+        }
+
+        return res.status(200).json({ success: true, emailSent, uid: finalUid });
+
+      } catch (error) {
+        console.error('❌ Error:', error.message);
+        res.status(500).json({ error: error.message });
       }
-    }
-
-    // التحقق من وجود المستخدم
-    try {
-      const userRecord = await admin.auth().getUser(finalUid);
-      if (userRecord.email !== email) throw new Error('Email mismatch');
-    } catch (err) {
-      console.error('❌ Invalid user:', err.message);
-      throw new HttpsError('not-found', 'بيانات المستخدم غير صحيحة');
-    }
-
-    // منع التكرار (مرة كل دقيقة)
-    const codeDocRef = admin.firestore().collection('verificationCodes').doc(finalUid);
-    const codeSnap = await codeDocRef.get();
-    const now = Date.now();
-
-    if (codeSnap.exists) {
-      const lastSent = codeSnap.data().lastSentAt?.toMillis?.() || 0;
-      if (now - lastSent < 60000) {
-        throw new HttpsError('failed-precondition', 'الرجاء الانتظار دقيقة قبل طلب كود جديد');
-      }
-    }
-
-    const code = generateVerificationCode();
-    const expiresAt = admin.firestore.Timestamp.fromMillis(now + 10 * 60 * 1000);
-
-    await codeDocRef.set(
-      {
-        code,
-        email,
-        expiresAt,
-        lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
-        attempts: 0,
-        purpose: 'show_secret', // لتحديد الغرض
-      },
-      { merge: true }
-    );
-    console.log('✅ Code saved to Firestore (for secret)');
-
-    // إرسال البريد الإلكتروني المخصص
-    const emailUser = emailUserSecret.value();
-    const emailPass = emailPassSecret.value();
-    const transporter = getTransporter(emailUser, emailPass);
-    let emailSent = false;
-
-    try {
-      if (transporter) {
-        await transporter.sendMail({
-          from: `"MarsGo" <${emailUser}>`,
-          to: email,
-          subject: '🔐 كود تأكيد لعرض الرقم السري - MarsGo',
-          html: `
-            <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right; padding: 20px; background-color: #f9f9f9;">
-              <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <h2 style="color: #4f46e5;">🔐 طلب عرض الرقم السري</h2>
-                <p>لقد طلبت عرض الرقم السري لبطاقتك في MarsGo. استخدم الكود التالي لتأكيد هويتك:</p>
-                <div style="background: #f0f0f0; font-size: 28px; font-weight: bold; text-align: center; padding: 15px; margin: 20px 0; letter-spacing: 8px; border-radius: 8px; direction: ltr;">
-                  ${code}
-                </div>
-                <p><strong>ملاحظة:</strong> هذا الكود صالح لمدة 10 دقائق وللاستخدام مرة واحدة فقط.</p>
-                <p>إذا لم تقم بطلب هذا الكود، يرجى تجاهل هذه الرسالة وتأمين حسابك فوراً.</p>
-                <hr style="margin: 20px 0;">
-                <p style="font-size: 12px; color: #aaa;">هذه رسالة آلية من MarsGo – لا ترد على هذا البريد.</p>
-              </div>
-            </div>
-          `,
-        });
-        emailSent = true;
-        console.log(`✅ Secret verification email sent to ${email} with code ${code}`);
-      } else {
-        console.warn('⚠️ No transporter available for secret email');
-      }
-    } catch (err) {
-      console.error('❌ Email sending failed for secret:', err.message);
-    }
-
-    return { success: true, emailSent, uid: finalUid };
+    });
   }
 );

@@ -37,7 +37,7 @@
 
 /* ===== البطاقات ===== */
 .referral-page__card {
-  background: var(--color-bg-secondary);
+
   border-radius: 1rem;
   /* padding: 1.2rem 1.5rem; */
   margin-bottom: 1.2rem;
@@ -294,7 +294,7 @@
 .empty-state {
   text-align: center;
   padding: 1.5rem;
-  background: var(--color-bg-secondary);
+  
   border-radius: 0.8rem;
   color: var(--color-text-secondary);
   font-size: 0.9rem;
@@ -303,7 +303,7 @@
 
 /* ===== شرح النظام ===== */
 .referral-page__info {
-  background: var(--color-bg-secondary);
+  
   border-radius: 1rem;
 
   box-shadow: var(--shadow-sm);
