@@ -169,7 +169,7 @@ export default function AdminMgcDiscounts() {
   return (
     <div className="admin-mgc-discounts" dir="rtl">
       <div className="admin-mgc-header">
-        <GoBackButton text="رجوع" />
+       
         <h2>إدارة شرائح خصم MGC</h2>
       </div>
 

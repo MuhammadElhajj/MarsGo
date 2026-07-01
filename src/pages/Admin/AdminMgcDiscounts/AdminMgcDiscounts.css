@@ -3,8 +3,7 @@
 .admin-mgc-discounts {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 1rem;
-  animation: fadeIn 0.3s ease;
+   animation: fadeIn 0.3s ease;
 }
 
 .admin-mgc-header {
