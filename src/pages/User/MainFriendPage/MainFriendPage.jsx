@@ -308,7 +308,7 @@ export default function MainFriendPage() {
   return (
     <div className="main-friend-page" dir="rtl">
       <div className="main-friend-header">
-        <GoBackButton text="رجوع" />
+     
         <h1 className="main-friend-title">
           <FiUsers className="main-friend-title-icon" style={{ color: '#3b82f6' }} />
           الأصدقاء
