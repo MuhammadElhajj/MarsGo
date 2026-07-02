@@ -61,11 +61,7 @@ export default function CatalogList({
 
   return (
     <div className="catalog-list" dir="rtl">
-      {showBackButton && (
-        <div className="catalog-list__back">
-          <GoBackButton text={backButtonText} onClick={onBackClick} />
-        </div>
-      )}
+     
       {title && <h2 className="catalog-list__title">{title}</h2>}
       <div className="catalog-list__grid">
         {renderedCards}
