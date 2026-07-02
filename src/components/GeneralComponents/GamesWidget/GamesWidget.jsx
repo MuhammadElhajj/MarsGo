@@ -12,12 +12,12 @@ export default function GamesWidget() {
   const widgetRef = useRef(null);
   const hasMoved = useRef(false);
 
-  // الموضع الافتراضي: أسفل يمين الشاشة مع خروج جزئي
+  // ✅ الموضع الابتدائي: منتصف الجانب الأيمن مع إزاحة 5px
   useEffect(() => {
     const size = 60; // حجم الدائرة
-    const x = window.innerWidth - size + 10; // يخرج جزء بسيط (10px) خارج الشاشة
-    const y = window.innerHeight - size - 20; // أسفل مع مسافة بسيطة
-    setPosition({ x, y });
+    const initialX = window.innerWidth - size - 5; // right: 5px
+    const initialY = (window.innerHeight - size) / 1.4; // top: 50% - half size
+    setPosition({ x: initialX, y: initialY });
   }, []);
 
   const handleDragStart = (e) => {
@@ -39,7 +39,7 @@ export default function GamesWidget() {
       const newX = touch.clientX - offset.x;
       const newY = touch.clientY - offset.y;
 
-      const size = 60; // حجم الدائرة
+      const size = 60;
       const maxX = window.innerWidth - size;
       const maxY = window.innerHeight - size;
       setPosition({

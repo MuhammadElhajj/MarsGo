@@ -243,14 +243,11 @@
 }
 
 .sidebar__link--admin {
-  background: #dc2626;
+  background: #524ae4;
 }
-.sidebar__link--admin:hover {
-  background: #b91c1c;
-  transform: translateX(-3px);
-}
+
 .sidebar__link--admin.sidebar__link--active {
-  background: #991b1b;
+  background: #524ae4;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
