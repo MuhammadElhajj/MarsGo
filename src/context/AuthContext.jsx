@@ -154,20 +154,28 @@ export function AuthProvider({ children }) {
             }
           }
 
-          const tempName = sessionStorage.getItem('temp_user_name');
-          if (tempName) sessionStorage.removeItem('temp_user_name');
+// ✅ قراءة الاسم مع إعطاء الأولوية للاسم المخزن مؤقتاً
+const tempName = sessionStorage.getItem('temp_user_name');
+let displayName = null;
 
-          let displayName = firebaseUser.displayName;
-          if (!displayName && tempName) {
-            displayName = tempName;
-          } else if (!displayName) {
-            const emailPart = firebaseUser.email?.split('@')[0] || '';
-            displayName = emailPart
-              .replace(/[._-]/g, ' ')
-              .replace(/\b\w/g, char => char.toUpperCase())
-              .trim();
-            if (!displayName) displayName = 'مستخدم';
-          }
+// أولوية 1: الاسم المخزن مؤقتاً (من نموذج التسجيل)
+if (tempName) {
+  displayName = tempName;
+  sessionStorage.removeItem('temp_user_name');
+}
+// أولوية 2: اسم من Firebase (تسجيل Google)
+else if (firebaseUser.displayName) {
+  displayName = firebaseUser.displayName;
+}
+// أولوية 3: استخراج من البريد الإلكتروني
+else {
+  const emailPart = firebaseUser.email?.split('@')[0] || '';
+  displayName = emailPart
+    .replace(/[._-]/g, ' ')
+    .replace(/\b\w/g, char => char.toUpperCase())
+    .trim();
+  if (!displayName) displayName = 'مستخدم';
+}
 
           const uniqueId = await generateUniqueId();
           const visaNumber = await generateVisaNumber(firebaseUser.uid);

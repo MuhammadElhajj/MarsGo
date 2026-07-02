@@ -22,6 +22,9 @@ import { db } from '../../../firebase';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import useFormattedPrice from '../../../hooks/useFormattedPrice';
 import './ProfilePage.css';
+import { FaTrashAlt } from 'react-icons/fa';
+// أو
+import { FiTrash2 } from 'react-icons/fi';
 
 export default function ProfilePage() {
   const { userData, updateUserData } = useAuth();
@@ -257,6 +260,18 @@ export default function ProfilePage() {
             </p>
           </div>
         </div>
+
+        <div className="profile-page__card">
+  <h3><FiTrash2 /> حذف الحساب</h3>
+  <div className="profile-page__activity-link">
+    <Link to="/delete-account" className="activity-link delete-link">
+      حذف الحساب نهائياً <span className="arrow">→</span>
+    </Link>
+    <p className="profile-page__activity-hint text-danger">
+      حذف الحساب نهائياً مع جميع بياناته
+    </p>
+  </div>
+</div>
       </div>
     </div>
   );

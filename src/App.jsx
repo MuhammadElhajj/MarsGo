@@ -64,7 +64,8 @@ const TopUpPage = lazy(() => import("./pages/User/TopUp/TopUpPage"));
 const CatalogPage = lazy(() => import("./pages/User/Catalog/CatalogPage"));
 const CategoryProductsPage = lazy(() => import("./pages/User/CategoryProductsPage/CategoryProductsPage"));
 const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePackagesPage"));
-
+const DeleteAccountPage = lazy(() => import("./pages/User/DeleteAccount/DeleteAccountPage"));
+const VerifyDeleteAccountPage = lazy(() => import("./pages/User/DeleteAccount/VerifyDeleteAccountPage"));
 // ============================================================
 //  صفحات المدير (Admin Pages) – تحميل كسول
 // ============================================================
@@ -530,6 +531,24 @@ function App() {
               </Suspense>
             }
           />
+
+          <Route
+  path="/delete-account"
+  element={
+    <Suspense fallback={<Loading text="جاري تحميل صفحة حذف الحساب..." />}>
+      <DeleteAccountPage />
+    </Suspense>
+  }
+/>
+<Route
+  path="/verify-delete-account"
+  element={
+    <Suspense fallback={<Loading text="جاري تحميل صفحة تأكيد الحذف..." />}>
+      <VerifyDeleteAccountPage />
+    </Suspense>
+  }
+/>
+
         </Route>
 
         {/* ===== مسارات المدير ===== */}
@@ -567,6 +586,8 @@ function App() {
     </Suspense>
   }
 />
+
+
           <Route
             path="services"
             element={

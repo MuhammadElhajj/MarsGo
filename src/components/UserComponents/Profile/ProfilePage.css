@@ -634,3 +634,27 @@
     padding: 0.05rem 0.4rem;
   }
 }
+
+
+/* ===== كارد حذف الحساب ===== */
+.profile-page__card--danger {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.03);
+}
+
+.profile-page__card--danger h3 {
+  color: #ef4444;
+  border-right-color: #ef4444;
+}
+
+.delete-link {
+  color: #ef4444 !important;
+}
+
+.delete-link:hover {
+  color: #dc2626 !important;
+}
+
+.text-danger {
+  color: #ef4444;
+}

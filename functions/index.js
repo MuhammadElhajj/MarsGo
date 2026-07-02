@@ -53,3 +53,10 @@ exports.updateCategoryIds = require('./updateCategoryIds').updateCategoryIds;
 
 // ✅ دالة جديدة لإرسال كود تأكيد الرقم السري
 exports.sendSecretVerificationCodeV2 = require('./verification/verification').sendSecretVerificationCodeV2;
+
+
+// functions/index.js
+// ==================== حذف الحساب ====================
+const deleteAccount = require('./deleteAccount/deleteAccount');
+exports.sendDeleteVerificationCode = deleteAccount.sendDeleteVerificationCode;
+exports.verifyAndDeleteAccount = deleteAccount.verifyAndDeleteAccount;

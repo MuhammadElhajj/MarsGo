@@ -1,0 +1,165 @@
+/* src/pages/User/DeleteAccount/VerifyDeleteAccountPage.css */
+
+.verify-delete-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+ 
+}
+
+.verify-delete-card {
+  
+  width: 100%;
+  padding-top: 5rem;
+
+}
+
+.verify-delete-card__back {
+  margin-bottom: 1.5rem;
+}
+
+.verify-delete-card__icon {
+  text-align: center;
+  font-size: 3rem;
+  color: #f59e0b;
+  margin-bottom: 0.75rem;
+}
+
+.verify-delete-card__title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.verify-delete-card__description {
+  text-align: center;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.verify-delete-card__code-section {
+  margin-bottom: 1.5rem;
+}
+
+.verify-delete-card__input {
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 6px;
+  font-family: monospace;
+  border-color: var(--color-border);
+  width: 100%;
+  padding: 0.75rem;
+}
+
+.verify-delete-card__input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.verify-delete-card__input::placeholder {
+  letter-spacing: normal;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.verify-delete-card__error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  text-align: right;
+  font-size: 0.9rem;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.verify-delete-card__warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.verify-delete-card__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.verify-delete-card__delete-btn {
+  min-width: 200px;
+  flex: 1;
+}
+
+.verify-delete-card__delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.verify-delete-card__cancel-btn {
+  min-width: 120px;
+  flex: 0.5;
+}
+
+/* استجابة الجوال */
+@media (max-width: 640px) {
+
+
+  
+  .verify-delete-card__title {
+    font-size: 1.3rem;
+  }
+
+  .verify-delete-card__description {
+    font-size: 0.85rem;
+  }
+
+  .verify-delete-card__actions {
+    flex-direction: column;
+  }
+
+  .verify-delete-card__delete-btn,
+  .verify-delete-card__cancel-btn {
+    width: 100%;
+    min-width: auto;
+    flex: none;
+  }
+
+  .verify-delete-card__icon {
+    font-size: 2.5rem;
+  }
+
+  .verify-delete-card__input {
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    padding: 0.6rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
