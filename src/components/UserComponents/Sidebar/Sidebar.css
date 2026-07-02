@@ -1,224 +1,84 @@
 /* ========================================
-   Sidebar - تحسين التموضع والمظهر
+   Sidebar - Professional Design
    ======================================== */
 
 .sidebar {
   width: 320px !important;
   background-color: var(--color-bg-secondary);
   box-shadow: var(--shadow-sm);
-  padding: 0 0.5rem;
+  padding: 0 0.75rem;
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
   z-index: 60 !important;
+  border-right: 1px solid var(--color-border);
 }
 
 /* القسم القابل للتمرير */
 .sidebar__scrollable {
   flex: 1;
   overflow-y: auto;
-  padding: 0 5px;
-  padding-bottom: 1rem;
+  padding: 0.5rem 0 0.5rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
 
+.sidebar__scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar__scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar__scrollable::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 10px;
 }
 
 /* القسم الثابت في الأسفل */
 .sidebar__fixed-bottom {
   flex-shrink: 0;
   border-top: 1px solid var(--color-border);
-  padding: 0.5rem 0;
+  padding: 0.75rem 0.5rem 0.75rem 0.5rem;
   background: var(--color-bg-secondary);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-/* ===== القائمة الرئيسية ===== */
-.sidebar__list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
   gap: 0.5rem;
-  margin: 0;
-  padding: 0;
 }
 
-.sidebar__category-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: all 0.2s;
-}
-
-.sidebar__category-btn:hover {
-  background-color: rgba(79, 70, 229, 0.1);
-  color: var(--color-accent);
-}
-
-.sidebar__chevron {
-  transition: transform 0.2s;
-  color: var(--color-text-secondary);
-}
-
-.sidebar__chevron--open {
-  transform: rotate(180deg);
-}
-
-.sidebar__sublist {
-  list-style: none;
-  margin-right: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; max-height: 0; }
-  to { opacity: 1; max-height: 200px; }
-}
-
-/* الروابط العادية */
-.sidebar__link {
-  display: block;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  color: var(--color-text-primary);
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.sidebar__link:hover {
-  background-color: rgba(79, 70, 229, 0.1);
-  transform: translateX(-3px);
-}
-
-.sidebar__link--active {
-  background-color: rgba(79, 70, 229, 0.15);
-  color: var(--color-accent);
-  font-weight: 500;
-}
-
-/* ===== روابط الأدوار الخاصة (تظهر في الأسفل) ===== */
-.sidebar__link--verifier {
-  background: #059669;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.sidebar__link--verifier:hover {
-  background: #047857;
-  transform: translateX(-3px);
-}
-.sidebar__link--verifier.sidebar__link--active {
-  background: #065f46;
-  box-shadow: inset 0 0 0 2px #fff3;
-}
-
-.sidebar__link--admin {
-  background: #dc2626;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.sidebar__link--admin:hover {
-  background: #b91c1c;
-  transform: translateX(-3px);
-}
-.sidebar__link--admin.sidebar__link--active {
-  background: #991b1b;
-  box-shadow: inset 0 0 0 2px #fff3;
-}
-
-.sidebar__link--finance {
-  background: #f59e0b;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.sidebar__link--finance:hover {
-  background: #d97706;
-  transform: translateX(-3px);
-}
-.sidebar__link--finance.sidebar__link--active {
-  background: #b45309;
-  box-shadow: inset 0 0 0 2px #fff3;
-}
-
-/* أيقونات الروابط */
-.sidebar__link-icon {
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-/* ===== أزرار الثابتة (المظهر والخروج) ===== */
-.sidebar__theme-btn,
-.sidebar__logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.6rem 1rem;
-  border-radius: 0.75rem;
-  border: none;
-  background: rgba(79, 70, 229, 0.1);
-  color: var(--color-text-primary);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.sidebar__theme-btn:hover,
-.sidebar__logout-btn:hover {
-  background: var(--color-accent);
-  color: white;
-  transform: translateY(-2px);
-}
-
-.sidebar__logout-btn:hover {
-  background: #ef4444;
-}
-
-/* ===== كارد معلومات المستخدم ===== */
+/* ===== كارد المستخدم ===== */
 .sidebar__user-card {
   display: flex;
   align-items: center;
   gap: 1rem;
   background: var(--color-bg-primary);
   padding: 1rem;
-  margin: 0.75rem 0.5rem 1rem 0.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 0.5rem 0.25rem 1rem 0.25rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--color-border);
-  transition: all 0.2s;
+  transition: all 0.25s ease;
 }
 
 .sidebar__user-card:hover {
   background: var(--color-bg-secondary);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .sidebar__user-avatar {
   flex-shrink: 0;
+}
+
+.sidebar__user-avatar .avatar--lg {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--color-accent);
 }
 
 .sidebar__user-text {
@@ -229,7 +89,7 @@
 .sidebar__user-name {
   font-size: 1rem;
   font-weight: 700;
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 0.15rem 0;
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -243,22 +103,210 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 0.8;
 }
 
-/* ===== مكونات إضافية ===== */
+/* ===== المكونات الإضافية (سعر الصرف، تقدم الإنفاق) ===== */
 .sidebar__exchange-rate,
 .sidebar__spending-progress {
-  margin: 0 0.5rem 1rem 0.5rem;
+  margin: 0 0.25rem 1rem 0.25rem;
 }
 
 .sidebar__currency-toggle {
-  margin: 0.5rem;
+  margin: 0 0.25rem 1rem 0.25rem;
+}
+
+/* ===== القائمة الرئيسية ===== */
+.sidebar__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0 0.25rem;
+}
+
+.sidebar__category-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.sidebar__category-btn:hover {
+  background-color: rgba(79, 70, 229, 0.08);
+  color: var(--color-accent);
+}
+
+.sidebar__chevron {
+  transition: transform 0.3s ease;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.sidebar__chevron--open {
+  transform: rotate(180deg);
+}
+
+.sidebar__sublist {
+  list-style: none;
+  margin-right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  animation: slideDown 0.25s ease;
+  padding: 0.2rem 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
+}
+
+/* ===== الروابط العادية ===== */
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.sidebar__link:hover {
+  background-color: rgba(79, 70, 229, 0.08);
+  transform: translateX(-3px);
+  color: var(--color-accent);
+}
+
+.sidebar__link--active {
+  background-color: rgba(79, 70, 229, 0.12);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.sidebar__link--active::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  background: var(--color-accent);
+  border-radius: 0 3px 3px 0;
+}
+
+/* ===== روابط الأدوار الخاصة (تظهر في الأسفل) ===== */
+.sidebar__link--verifier,
+.sidebar__link--admin,
+.sidebar__link--finance {
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.sidebar__link--verifier {
+  background: #059669;
+}
+.sidebar__link--verifier:hover {
+  background: #047857;
+  transform: translateX(-3px);
+}
+.sidebar__link--verifier.sidebar__link--active {
+  background: #065f46;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.sidebar__link--admin {
+  background: #dc2626;
+}
+.sidebar__link--admin:hover {
+  background: #b91c1c;
+  transform: translateX(-3px);
+}
+.sidebar__link--admin.sidebar__link--active {
+  background: #991b1b;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.sidebar__link--finance {
+  background: #f59e0b;
+}
+.sidebar__link--finance:hover {
+  background: #d97706;
+  transform: translateX(-3px);
+}
+.sidebar__link--finance.sidebar__link--active {
+  background: #b45309;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* أيقونات الروابط */
+.sidebar__link-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ===== أزرار الثابتة (تسجيل الخروج) ===== */
+.sidebar__logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar__logout-btn:hover {
+  background: #ef4444;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.sidebar__logout-btn svg {
+  transition: transform 0.2s;
+}
+
+.sidebar__logout-btn:hover svg {
+  transform: rotate(180deg);
 }
 
 /* ===== زر الإغلاق (يظهر فقط في الجوال) ===== */
 .sidebar__close-btn {
   display: none;
-  
+  position: absolute;
   top: 0.75rem;
   left: 0.75rem;
   background: #ef4444;
@@ -272,11 +320,13 @@
   z-index: 26;
   color: white;
   font-size: 1rem;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
   padding: 0 !important;
 }
+
 .sidebar__close-btn:hover {
   background: #dc2626;
+  transform: scale(1.05);
 }
 
 /* ===== سبينر التحميل ===== */
@@ -291,7 +341,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .sidebar-skeleton {
@@ -310,20 +362,20 @@
 /* ============================================================
    استجابة الجوال (المعدلة)
    ============================================================ */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .sidebar {
     position: fixed;
-    top: 4rem;                 /* ✅ يبدأ من تحت الهيدر مباشرة */
+    top: 4rem;
     right: 0;
     bottom: 0;
-   
     transform: translateX(100%);
     box-shadow: none;
-    padding-top: 0;            /* ✅ إزالة padding الزائد */
-    height: calc(100vh - 4rem); /* ✅ ملء المساحة المتبقية */
-    width: 280px !important;   /* تصغير قليلاً للجوال */
+    padding-top: 0;
+    height: calc(100vh - 4rem);
+    width: 280px !important;
     border-left: 1px solid var(--color-border);
     padding-bottom: 3.5rem !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .sidebar--open {
@@ -335,17 +387,19 @@
     display: flex;
     top: 0.75rem;
     left: 0.75rem;
-            margin: 5px !important;
+    margin: 5px !important;
   }
 
   .sidebar__user-card {
     padding: 0.75rem;
     gap: 0.75rem;
-    margin: 0.5rem;
+    margin: 0.5rem 0.25rem;
   }
+
   .sidebar__user-name {
     font-size: 0.9rem;
   }
+
   .sidebar__user-email {
     font-size: 0.7rem;
   }
@@ -355,23 +409,49 @@
     height: 22px;
     border-width: 2px;
   }
+
   .sidebar-skeleton p {
     font-size: 0.65rem;
   }
 
-  /* ضبط القسم الثابت في الأسفل */
   .sidebar__fixed-bottom {
     padding: 0.5rem 0.75rem;
   }
 }
 
 /* ===== دعم الوضع الداكن ===== */
-.dark .sidebar__link--verifier {
-  background: #059669;
+.dark .sidebar {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border);
 }
-.dark .sidebar__link--admin {
-  background: #dc2626;
+
+.dark .sidebar__user-card {
+  background: var(--color-bg-primary);
+  border-color: var(--color-border);
 }
-.dark .sidebar__link--finance {
-  background: #f59e0b;
+
+.dark .sidebar__user-card:hover {
+  background: var(--color-bg-secondary);
+}
+
+.dark .sidebar__link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .sidebar__link--active {
+  background-color: rgba(79, 70, 229, 0.2);
+}
+
+.dark .sidebar__logout-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-text-primary);
+}
+
+.dark .sidebar__logout-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.dark .sidebar__category-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }

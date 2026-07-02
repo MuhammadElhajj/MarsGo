@@ -170,11 +170,7 @@
     padding: 0.5rem 1rem;
   }
 
-  /* إظهار زر الهامبرغر */
-  .header__hamburger {
-    display: flex;
-  }
-
+  
   /* إخفاء شريط البحث */
   .header__center {
     display: none;
@@ -199,5 +195,11 @@
 
   .header__icons {
     gap: 0.25rem;
+  }
+}
+
+@media (max-width: 1000px)    {/* إظهار زر الهامبرغر */
+  .header__hamburger {
+    display: flex;
   }
 }

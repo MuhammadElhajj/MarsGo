@@ -107,7 +107,7 @@
 /* ========== تعديل المحتوى الرئيسي ========== */
 .app-content {
   flex: 1;
-  padding: 0.5rem 5rem; /* قللنا padding-top لأن Breadcrumb أصبح sticky */
+  padding: 0.5rem 1rem; /* قللنا padding-top لأن Breadcrumb أصبح sticky */
   background-color: var(--color-bg-primary);
 }
 

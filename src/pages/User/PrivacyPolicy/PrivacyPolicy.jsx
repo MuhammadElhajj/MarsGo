@@ -9,9 +9,7 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="privacy-policy-page" dir="rtl">
-      <div className="privacy-policy-page__back">
-        <GoBackButton text="رجوع" />
-      </div>
+     
       <div className="privacy-policy-page__hero">
         <h1>سياسة الخصوصية</h1>
         <p>نحن في MarsGo نولي خصوصية بياناتك أهمية قصوى</p>

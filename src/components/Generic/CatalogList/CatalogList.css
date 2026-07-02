@@ -38,7 +38,7 @@
 /* 8 أعمدة للشاشات الكبيرة جداً (> 1400px) */
 @media (min-width: 1400px) {
   .catalog-list__grid {
-    grid-template-columns: repeat(9, minmax(100px, 1fr));
+    grid-template-columns: repeat(7, minmax(100px, 1fr));
     gap: 0.8rem;
   }
 }
@@ -46,7 +46,7 @@
 /* 7 أعمدة (1200px - 1399px) */
 @media (min-width: 1200px) and (max-width: 1399px) {
   .catalog-list__grid {
-    grid-template-columns: repeat(7, minmax(100px, 1fr));
+    grid-template-columns: repeat(6, minmax(100px, 1fr));
     gap: 0.8rem;
   }
 }
@@ -54,7 +54,7 @@
 /* 6 أعمدة (1000px - 1199px) */
 @media (min-width: 1000px) and (max-width: 1199px) {
   .catalog-list__grid {
-    grid-template-columns: repeat(6, minmax(100px, 1fr));
+    grid-template-columns: repeat(4, minmax(100px, 1fr));
     gap: 0.7rem;
   }
 }
@@ -62,7 +62,7 @@
 /* 5 أعمدة (800px - 999px) */
 @media (min-width: 950px) and (max-width: 999px) {
   .catalog-list__grid {
-    grid-template-columns: repeat(5, minmax(100px, 1fr));
+    grid-template-columns: repeat(6, minmax(100px, 1fr));
     gap: 0.6rem;
   }
 }
@@ -70,7 +70,7 @@
 /* 4 أعمدة (600px - 799px) */
 @media (min-width: 600px) and (max-width: 950px) {
   .catalog-list__grid {
-    grid-template-columns: repeat(4, minmax(100px, 1fr));
+    grid-template-columns: repeat(5, minmax(100px, 1fr));
     gap: 0.5rem;
   }
 }
