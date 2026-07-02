@@ -281,12 +281,7 @@
     flex-wrap: wrap;
     gap: 0.3rem;
   }
-  .exchange-rate-card__footer {
-    flex-direction: column;
-    gap: 0.3rem;
-    align-items: flex-start;
-  }
-}
+
 
 @media (max-width: 480px) {
   .exchange-rate-card__value {
