@@ -101,7 +101,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-border);
 }
@@ -468,5 +467,117 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ===== سجل البحث ===== */
+.search-page__history {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+}
+
+.search-page__history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.search-page__history-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.search-page__history-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  transition: all 0.2s;
+}
+
+.search-page__history-clear:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.search-page__history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.search-page__history-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 2rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.4rem;
+  transition: all 0.2s;
+}
+
+.search-page__history-item:hover {
+  border-color: var(--color-accent);
+}
+
+.search-page__history-term {
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.3rem;
+  transition: background 0.2s;
+}
+
+.search-page__history-term:hover {
+  background: rgba(79, 70, 229, 0.06);
+}
+
+.search-page__history-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.1rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+  width: 20px;
+  height: 20px;
+}
+
+.search-page__history-remove:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* استجابة للجوال */
+@media (max-width: 768px) {
+  .search-page__history {
+    padding: 0.5rem 0.75rem;
+  }
+  .search-page__history-item {
+    padding: 0.15rem 0.4rem;
+  }
+  .search-page__history-term {
+    font-size: 0.75rem;
   }
 }

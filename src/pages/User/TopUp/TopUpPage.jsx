@@ -214,10 +214,7 @@ const handleSubmit = useCallback(
   if (settingsLoading) {
     return (
       <div className="topup-page" dir="rtl">
-        <div className="topup-page__header">
-          <GoBackButton text="رجوع" />
-          <h2>شحن الرصيد</h2>
-        </div>
+     
         <div className="topup-loading">
           <div className="spinner-small"></div>
           <p>جاري تحميل طرق الدفع...</p>
@@ -230,18 +227,8 @@ const handleSubmit = useCallback(
   if (!topUpSettings) {
     return (
       <div className="topup-page" dir="rtl">
-        <div className="topup-page__header">
-          <GoBackButton text="رجوع" />
-          <h2>شحن الرصيد</h2>
-        </div>
-        <VisaCard
-          balance={balance}
-          mgcBalance={mgcBalance}
-          cardHolderName={userData?.name || 'MarsGo User'}
-          cardNumber={userData?.visaNumber}
-          brand="MarsGo Visa"
-          secret={userData?.visaSecret}
-        />
+      
+      
         <MaintenanceMessage
           message="لا توجد طرق دفع مفعلة حالياً، يرجى مراجعة الإدارة."
           supportWhatsApp={supportWhatsApp}
@@ -260,18 +247,8 @@ const handleSubmit = useCallback(
   if (methods.length === 0) {
     return (
       <div className="topup-page" dir="rtl">
-        <div className="topup-page__header">
-          <GoBackButton text="رجوع" />
-          <h2>شحن الرصيد</h2>
-        </div>
-        <VisaCard
-          balance={balance}
-          mgcBalance={mgcBalance}
-          cardHolderName={userData?.name || 'MarsGo User'}
-          cardNumber={userData?.visaNumber}
-          brand="MarsGo Visa"
-          secret={userData?.visaSecret}
-        />
+      
+       
         <MaintenanceMessage
           message="لا توجد طرق دفع مفعلة حالياً، يرجى مراجعة الإدارة."
           supportWhatsApp={supportWhatsApp}
@@ -289,23 +266,10 @@ const handleSubmit = useCallback(
   return (
     <div className="topup-page" dir="rtl">
       {/* رأس الصفحة */}
-      <div className="topup-page__header">
-        <GoBackButton text="رجوع" />
-        <h2>
-          <FaWallet className="header-icon" style={{ marginLeft: '0.5rem' }} />
-          شحن الرصيد
-        </h2>
-      </div>
+    
 
       {/* بطاقة الفيزا */}
-      <VisaCard
-        balance={balance}
-        mgcBalance={mgcBalance}
-        cardHolderName={userData?.name || 'MarsGo User'}
-        cardNumber={userData?.visaNumber}
-        brand="MarsGo Visa"
-        secret={userData?.visaSecret}
-      />
+      
 
       {/* تحذير واتساب */}
       {!hasWhatsapp && <WhatsappWarning />}

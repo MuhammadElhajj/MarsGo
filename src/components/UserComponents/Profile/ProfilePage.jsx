@@ -74,13 +74,7 @@ export default function ProfilePage() {
 
   return (
     <div className="profile-page" dir="rtl">
-      {/* ===== الهيدر ===== */}
-      <div className="profile-page__header">
-        <div className="profile-page__header-left">
-          <GoBackButton text="رجوع" />
-          <h1 className="profile-page__title">الملف الشخصي</h1>
-        </div>
-      </div>
+     
 
       {/* ===== كارد البحث عن أصدقاء (كارد صغير فوق الكارد الأول) ===== */}
      {/* ===== كارد البحث عن أصدقاء ===== */}
@@ -109,7 +103,7 @@ export default function ProfilePage() {
             {userData.uniqueId && (
               <div className="profile-page__unique-id">
                 <span className="unique-id-label">
-                  <FaUserTag /> المعرف:
+                  <FaUserTag /> ID:
                 </span>
                 <span className="unique-id-value">{userData.uniqueId}</span>
                 <button 

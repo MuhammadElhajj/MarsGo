@@ -163,21 +163,9 @@ export default function BuyMGC() {
 
   return (
     <div className="buy-mgc" dir="rtl">
-      <div className="buy-mgc__header">
-        <h1>
-          <FiDollarSign className="header-icon" style={{ color: '#f59e0b' }} />
-          شراء عملات MGC
-        </h1>
-      </div>
+    
 
-      <VisaCard
-        balance={balance}
-        mgcBalance={mgcBalance}
-        cardHolderName={userData?.name || 'MarsGo User'}
-        cardNumber={userData?.visaNumber || '8888 8888 8888 8888'}
-        brand="MarsGo Visa"
-        secret={userData?.visaSecret}
-      />
+    
 
       {/* في حال فشل جلب الإعدادات، نعرض تنبيهاً بسيطاً (بدون إيموجي) */}
       {settingsError && (

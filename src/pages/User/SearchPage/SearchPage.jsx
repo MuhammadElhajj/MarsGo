@@ -1,5 +1,5 @@
 // src/pages/User/SearchPage/SearchPage.jsx
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../store/store';
 import { useAuth } from '../../../context/AuthContext';
@@ -11,7 +11,7 @@ import GoBackButton from '../../../components/GeneralComponents/GoBackButton/GoB
 import { 
   FiSearch, FiGrid, FiUsers, FiUser, FiShoppingBag, 
   FiPackage, FiFileText, FiX, FiClock, FiCheckCircle,
-  FiAlertCircle, FiBox, FiTag
+  FiAlertCircle, FiBox, FiTag, FiTrash2
 } from 'react-icons/fi';
 import './SearchPage.css';
 
@@ -51,6 +51,54 @@ export default function SearchPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
+
+  // ===== سجل البحث =====
+  const [searchHistory, setSearchHistory] = useState([]);
+  const HISTORY_KEY = 'searchHistory';
+  const MAX_HISTORY = 5;
+
+  // تحميل السجل من localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(HISTORY_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setSearchHistory(parsed.slice(0, MAX_HISTORY));
+        }
+      } catch (e) {
+        // تجاهل
+      }
+    }
+  }, []);
+
+  // دالة لإضافة مصطلح إلى السجل
+  const addToHistory = useCallback((term) => {
+    if (!term.trim()) return;
+    const trimmed = term.trim();
+    setSearchHistory(prev => {
+      // إزالة التكرارات (نحافظ على الأحدث)
+      const filtered = prev.filter(item => item !== trimmed);
+      const newHistory = [trimmed, ...filtered].slice(0, MAX_HISTORY);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  }, []);
+
+  // دالة لحذف عنصر من السجل
+  const removeFromHistory = useCallback((index) => {
+    setSearchHistory(prev => {
+      const newHistory = prev.filter((_, i) => i !== index);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  }, []);
+
+  // دالة لمسح السجل بالكامل
+  const clearHistory = useCallback(() => {
+    setSearchHistory([]);
+    localStorage.removeItem(HISTORY_KEY);
+  }, []);
 
   // بيانات من الـ Store
   const games = useAppStore((state) => state.games) || [];
@@ -103,6 +151,9 @@ export default function SearchPage() {
       setResults([]);
       return;
     }
+
+    // ✅ إضافة إلى سجل البحث
+    addToHistory(query);
 
     setLoading(true);
     const lowerQuery = query.toLowerCase().trim();
@@ -260,6 +311,12 @@ export default function SearchPage() {
     return () => clearTimeout(delay);
   }, [searchQuery, activeTab]);
 
+  // النقر على عنصر من السجل
+  const handleHistoryClick = (term) => {
+    setSearchQuery(term);
+    performSearch(term, activeTab);
+  };
+
   // عرض العنصر حسب نوعه
   const renderResultItem = (item) => {
     switch (item.type) {
@@ -346,14 +403,7 @@ export default function SearchPage() {
 
   return (
     <div className="search-page" dir="rtl">
-      {/* ===== الهيدر ===== */}
-      <div className="search-page__header">
-        {/* <GoBackButton text="رجوع" /> */}
-        <h1 className="search-page__title">
-          <FiSearch className="search-page__title-icon" />
-          بحث شامل
-        </h1>
-      </div>
+    
 
       {/* ===== شريط البحث ===== */}
       <div className="search-page__search-wrapper">
@@ -375,6 +425,8 @@ export default function SearchPage() {
         </div>
       </div>
 
+     
+
       {/* ===== أزرار الفلترة ===== */}
       <div className="search-page__tabs">
         {TABS.map((tab) => (
@@ -389,6 +441,41 @@ export default function SearchPage() {
         ))}
       </div>
 
+ {/* ===== سجل البحث ===== */}
+      {searchHistory.length > 0 && (
+        <div className="search-page__history">
+          <div className="search-page__history-header">
+            <span className="search-page__history-title">
+              <FiClock /> آخر عمليات البحث
+            </span>
+            <button className="search-page__history-clear" onClick={clearHistory}>
+              <FiTrash2 /> مسح الكل
+            </button>
+          </div>
+          <div className="search-page__history-list">
+            {searchHistory.map((term, index) => (
+              <div key={index} className="search-page__history-item">
+                <span 
+                  className="search-page__history-term"
+                  onClick={() => handleHistoryClick(term)}
+                >
+                  {term}
+                </span>
+                <button 
+                  className="search-page__history-remove"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFromHistory(index);
+                  }}
+                  aria-label="حذف"
+                >
+                  <FiX />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* ===== النتائج ===== */}
       <div className="search-page__results">
         {searchQuery.length < 2 ? (

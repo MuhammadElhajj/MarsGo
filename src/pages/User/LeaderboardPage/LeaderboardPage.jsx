@@ -104,9 +104,7 @@ export default function LeaderboardPage() {
   return (
     <div className="leaderboard-page">
       <div className="leaderboard__back">
-        <div className="leaderboard__header">
-          <h2>قائمة المتصدرين</h2>
-        </div>
+      
       </div>
 
       <div className="leaderboard__filters">

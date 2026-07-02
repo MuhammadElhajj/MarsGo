@@ -236,7 +236,7 @@
 .profile-page__avatar-card {
   background: var(--color-bg-secondary);
   border-radius: 1.2rem;
-  padding: 1.5rem;
+  padding: 1rem;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -276,7 +276,7 @@
     grid-template-columns: 1fr;
   }
   .profile-page__avatar-row {
-    flex-direction: column;
+
     text-align: center;
   }
   .balance-container {
@@ -469,5 +469,168 @@
   }
   .search-hint {
     font-size: 0.7rem;
+  }
+}
+
+
+
+
+/* ===== صف الأفاتار والمعلومات ===== */
+.profile-page__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-direction: row; /* الأفاتار على اليسار، المعلومات على اليمين */
+}
+
+/* صورة الأفاتار */
+.profile-page__avatar-image {
+  flex-shrink: 0; /* يمنع تقلص الصورة */
+}
+
+.profile-page__avatar-image .avatar--xl {
+  width: 80px;
+  height: 80px;
+  border: 3px solid var(--color-accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* معلومات المستخدم */
+.profile-page__avatar-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0; /* يمنع تجاوز المحتوى */
+}
+
+.profile-page__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.profile-page__email {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* المعرف الفريد */
+.profile-page__unique-id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-bg-primary);
+  padding: 0.3rem 0.8rem;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border);
+  width: fit-content;
+  margin-top: 0.2rem;
+}
+
+.unique-id-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.unique-id-value {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-accent);
+  direction: ltr;
+  font-size: 0.9rem;
+}
+
+.unique-id-copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  color: var(--color-text-secondary);
+}
+
+.unique-id-copy-btn:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+/* الإحصائيات (الأصدقاء، الشعبية، القوة) */
+.profile-page__avatar-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  margin-top: 0.3rem;
+}
+
+.avatar-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  padding: 0.1rem 0.6rem;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border);
+}
+
+.avatar-stat svg {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+}
+
+/* ===== استجابة للجوال ===== */
+@media (max-width: 768px) {
+  .profile-page__avatar-row {
+   
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .profile-page__avatar-image .avatar--xl {
+    width: 70px;
+    height: 70px;
+  }
+
+  .profile-page__avatar-info {
+    align-items: center;
+  }
+
+  .profile-page__unique-id {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .profile-page__avatar-stats {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page__avatar-image .avatar--xl {
+    width: 60px;
+    height: 60px;
+  }
+
+  .profile-page__name {
+    font-size: 1.2rem;
+  }
+
+  .profile-page__email {
+    font-size: 0.8rem;
+  }
+
+  .avatar-stat {
+    font-size: 0.75rem;
+    padding: 0.05rem 0.4rem;
   }
 }
