@@ -20,6 +20,9 @@ export default function Layout() {
   const isChatPage = location.pathname.startsWith('/chat');
 const isCheckoutPage = location.pathname.includes('/checkout');
 // تحديد إذا كنا في Dashboard أو Profile
+// ✅ إخفاء الفوتر وزر الدعم في صفحات حذف الحساب
+  const isDeletePage = location.pathname.startsWith('/delete-account') || 
+                       location.pathname.startsWith('/verify-delete-account');
   const showGamesWidget = location.pathname === '/dashboard' || location.pathname.startsWith('/profile');
   // حالات حجم الشاشة
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -86,7 +89,7 @@ const isCheckoutPage = location.pathname.includes('/checkout');
             <Outlet />
           </main>
 
-          {!isChatPage && !isCheckoutPage &&  <Footer />}
+          {!isChatPage && !isCheckoutPage && !isDeletePage  &&  <Footer />}
           {!isChatPage && <SupportButton />}
         </div>
 

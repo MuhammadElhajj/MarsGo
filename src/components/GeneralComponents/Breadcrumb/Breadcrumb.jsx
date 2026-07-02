@@ -36,6 +36,9 @@ const routeNames = {
   '/privacy-policy': 'سياسة الخصوصية',
   '/supervisor-candidacy': 'الترشح لمشرف',
   '/my-activities': 'نشاطاتي',
+  '/delete-account': 'حذف الحساب',
+  '/verify-delete-account': 'تأكيد حذف الحساب',
+  '/games-hub': 'العاب الحظ ',
 };
 
 // ✅ صفحات نريد إخفاء Breadcrumb فيها
