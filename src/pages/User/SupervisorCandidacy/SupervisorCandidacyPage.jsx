@@ -50,13 +50,7 @@ export default function SupervisorCandidacyPage() {
 
   return (
     <div className="supervisor-candidacy-page" dir="rtl">
-      <div className="candidacy-header">
-       
-        <h1 className="candidacy-title">
-          <FiAward className="title-icon" />
-          الترشح لمشرف مارسغو
-        </h1>
-      </div>
+     
 
       {/* البطاقة الرئيسية */}
       <div className="candidacy-card">

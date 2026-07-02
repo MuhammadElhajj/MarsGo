@@ -65,13 +65,7 @@ export default function SellMGC() {
 
   return (
     <div className="sell-mgc-page" dir="rtl">
-      <div className="sell-mgc__header">
-
-        <h1>
-          <FiDollarSign className="header-icon" style={{ color: '#f59e0b' }} />
-          بيع عملات MGC
-        </h1>
-      </div>
+    
 
       {/* بطاقة الرصيد الإجمالي */}
       <div className="sell-mgc__balance-summary">

@@ -120,10 +120,7 @@ export default function ClansListPage() {
     <div className="clans-list-page" dir="rtl">
       <div className="clans-list-page__header">
 
-        <h1 className="clans-list-page__title">
-          <FiUsers className="header-icon" style={{ color: '#8b5cf6' }} />
-          الكلانات
-        </h1>
+        
         <Button onClick={() => navigate('/clan/create')} variant="primary" size="sm">
           <FiPlus /> إنشاء كلان
         </Button>

@@ -157,13 +157,7 @@ export default function ReviewsPage() {
   return (
     <div className="reviews-page" dir="rtl">
       {/* ===== الهيدر ===== */}
-      <div className="reviews-page__header">
-       
-        <h1 className="reviews-page__title">
-          <FaStar className="header-icon" style={{ color: '#f59e0b' }} />
-          التقييمات والمراجعات
-        </h1>
-      </div>
+    
 
       {/* ===== الإحصائيات ===== */}
       <div className="reviews-page__stats">
