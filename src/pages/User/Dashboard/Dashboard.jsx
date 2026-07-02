@@ -10,7 +10,7 @@ import useStats from "../../../hooks/useStats";
 import useUserStats from "../../../hooks/useUserStats";
 import Loading from "../../../components/GeneralComponents/Loading/Loading";
 import './Dashboard.css';
-
+const ExchangeRateCard = lazy(() => import("../../../components/GeneralComponents/ExchangeRateCard/ExchangeRateCard"));
 // ===== lazy imports للمكونات الثقيلة =====
 const StoreIntro = lazy(() => import("../../../components/UserComponents/StoreIntro/StoreIntro"));
 const VisaCard = lazy(() => import("../../../components/GeneralComponents/VisaCard/VisaCard"));
@@ -131,19 +131,26 @@ export default function Dashboard() {
          <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
             <AdSpace />
           </Suspense>
-      {/* ===== فيزا كارد ===== */}
-      <div className="dashboard__visa-wrapper">
-        <Suspense fallback={<Loading text="جاري تحميل البطاقة..." />}>
-          <VisaCard 
-            balance={balance} 
-            mgcBalance={mgcBalance}
-            cardHolderName={userData?.name || 'MarsGo User'}
-            cardNumber={userData?.visaNumber}
-            brand="MarsGo Visa"
-            secret={userData?.visaSecret}
-          />
-        </Suspense>
-      </div>
+     {/* ===== صف الفيزا وسعر الصرف ===== */}
+<div className="dashboard__visa-row">
+  <div className="dashboard__visa-wrapper">
+    <Suspense fallback={<Loading text="جاري تحميل البطاقة..." />}>
+      <VisaCard 
+        balance={balance} 
+        mgcBalance={mgcBalance}
+        cardHolderName={userData?.name || 'MarsGo User'}
+        cardNumber={userData?.visaNumber}
+        brand="MarsGo Visa"
+        secret={userData?.visaSecret}
+      />
+    </Suspense>
+  </div>
+  <div className="dashboard__exchange-rate-wrapper">
+    <Suspense fallback={<Loading text="جاري تحميل سعر الصرف..." />}>
+      <ExchangeRateCard />
+    </Suspense>
+  </div>
+</div>
 
       {/* ===== الإجراءات السريعة ===== */}
       <Suspense fallback={<Loading text="جاري التحميل..." />}>

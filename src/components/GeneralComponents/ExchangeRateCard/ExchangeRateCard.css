@@ -1,0 +1,270 @@
+/* ExchangeRateCard.css */
+.exchange-rate-card {
+  background: var(--color-bg-secondary);
+  border-radius: 1.25rem;
+  padding: 0.5rem;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease;
+  min-height: 180px;
+}
+
+.exchange-rate-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.exchange-rate-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.exchange-rate-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.exchange-rate-card__pair {
+  background: var(--color-accent-alpha);
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.exchange-rate-card__icon {
+  color: var(--color-accent);
+  font-size: 1.2rem;
+}
+
+.exchange-rate-card__live {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  color: var(--color-success);
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-success);
+  border-radius: 50%;
+  animation: pulse-dot 1.2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.exchange-rate-card__body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.exchange-rate-card__rate {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.exchange-rate-card__currency {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.exchange-rate-card__value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: 0.5px;
+}
+
+.exchange-rate-card__currency-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-right: 0.2rem;
+}
+
+.exchange-rate-card__change {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.change-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.change-badge.up {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-success);
+}
+
+.change-badge.down {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-danger);
+}
+
+.change-label {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+/* ===== شريط السعر (spread) ===== */
+.exchange-rate-card__spread {
+  display: flex;
+  justify-content: space-around;
+  background: var(--color-bg-primary);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.2rem;
+  margin: 0.5rem 0;
+  border: 1px solid var(--color-border);
+}
+
+.spread-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spread-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.spread-value {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.spread-item.buy .spread-value {
+  color: var(--color-success);
+}
+
+.spread-item.sell .spread-value {
+  color: var(--color-danger);
+}
+
+.spread-item.spread .spread-value {
+  color: var(--color-accent);
+}
+
+/* ===== الفوتر ===== */
+.exchange-rate-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.exchange-rate-card__update {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.exchange-rate-card__update strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.exchange-rate-card__range {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.exchange-rate-card__range span {
+  background: var(--color-bg-primary);
+  padding: 0.1rem 0.4rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+}
+
+/* ===== حالة التحميل ===== */
+.exchange-rate-card.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.exchange-rate-card__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== استجابة ===== */
+@media (max-width: 768px) {
+  .exchange-rate-card {
+    padding: 1rem;
+    min-height: 160px;
+  }
+  .exchange-rate-card__value {
+    font-size: 1.6rem;
+  }
+  .exchange-rate-card__spread {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .exchange-rate-card__footer {
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .exchange-rate-card__value {
+    font-size: 1.3rem;
+  }
+
+  .exchange-rate-card__header {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .exchange-rate-card__range {
+    flex-wrap: wrap;
+  }
+}
