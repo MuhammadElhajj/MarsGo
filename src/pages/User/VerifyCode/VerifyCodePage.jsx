@@ -15,6 +15,7 @@ export default function VerifyCodePage() {
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
   const [uid, setUid] = useState('');
+  const [name, setName] = useState(''); // ✅ إضافة حالة الاسم
 
   const functionsRef = useRef(getFunctions());
   const verifyCodeRef = useRef(httpsCallable(functionsRef.current, 'verifyCode'));
@@ -25,14 +26,20 @@ export default function VerifyCodePage() {
     if (state && state.email && state.uid) {
       setEmail(state.email);
       setUid(state.uid);
+      if (state.name) {
+        setName(state.name);
+        sessionStorage.setItem('verify_name', state.name);
+      }
       sessionStorage.setItem('verify_email', state.email);
       sessionStorage.setItem('verify_uid', state.uid);
     } else {
       const storedEmail = sessionStorage.getItem('verify_email');
       const storedUid = sessionStorage.getItem('verify_uid');
+      const storedName = sessionStorage.getItem('verify_name');
       if (storedEmail && storedUid) {
         setEmail(storedEmail);
         setUid(storedUid);
+        if (storedName) setName(storedName);
         setError('تم استعادة بياناتك، يرجى المحاولة مرة أخرى.');
         setTimeout(() => setError(''), 3000);
       } else {
@@ -63,10 +70,17 @@ export default function VerifyCodePage() {
     setMessage('');
 
     try {
-      const result = await verifyCodeRef.current({ email, uid, code });
+      // ✅ إرسال الاسم مع طلب التحقق
+      const payload = { email, uid, code };
+      if (name) {
+        payload.name = name;
+      }
+      const result = await verifyCodeRef.current(payload);
+      
       if (result.data.success) {
         sessionStorage.removeItem('verify_email');
         sessionStorage.removeItem('verify_uid');
+        sessionStorage.removeItem('verify_name');
 
         // تحديث حالة المستخدم محلياً
         if (auth.currentUser) {

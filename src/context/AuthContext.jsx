@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
@@ -129,53 +130,41 @@ export function AuthProvider({ children }) {
           // ============================================================
 
           let referredBy = null;
-          let refCode = null;
-
-          try {
-            // ✅ استخدام localStorage بدل sessionStorage (أكثر ثباتاً)
-            refCode = localStorage.getItem('referralCode');
-            if (!refCode) {
-              const queryParams = new URLSearchParams(window.location.search);
-              refCode = queryParams.get('ref');
-            }
-            if (refCode) {
-              const q = query(collection(db, 'users'), where('uniqueId', '==', refCode));
-              const snap = await getDocs(q);
-              if (!snap.empty) {
-                referredBy = snap.docs[0].id;
-              }
-            }
-          } catch (err) {
-            // ignore referral errors silently in production
-          } finally {
+       // في AuthContext، داخل if (!docSnap.exists())
+let refCode = null;
+try {
+  // جلب الكود من localStorage أولاً
+  refCode = localStorage.getItem('referralCode');
+  if (!refCode) {
+    const queryParams = new URLSearchParams(window.location.search);
+    refCode = queryParams.get('ref');
+  }
+  if (refCode) {
+    const q = query(collection(db, 'users'), where('uniqueId', '==', refCode));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      referredBy = snap.docs[0].id;
+      // ✅ تخزين معرف المحيل في sessionStorage مؤقتاً
+      sessionStorage.setItem('referredBy', referredBy);
+    }
+  }
+} catch (err) { /* ignore */ } finally {
             if (refCode) {
               localStorage.removeItem('referralCode');
               sessionStorage.removeItem('referralCode');
             }
           }
 
-// ✅ قراءة الاسم مع إعطاء الأولوية للاسم المخزن مؤقتاً
-const tempName = sessionStorage.getItem('temp_user_name');
-let displayName = null;
-
-// أولوية 1: الاسم المخزن مؤقتاً (من نموذج التسجيل)
-if (tempName) {
-  displayName = tempName;
-  sessionStorage.removeItem('temp_user_name');
-}
-// أولوية 2: اسم من Firebase (تسجيل Google)
-else if (firebaseUser.displayName) {
-  displayName = firebaseUser.displayName;
-}
-// أولوية 3: استخراج من البريد الإلكتروني
-else {
-  const emailPart = firebaseUser.email?.split('@')[0] || '';
-  displayName = emailPart
-    .replace(/[._-]/g, ' ')
-    .replace(/\b\w/g, char => char.toUpperCase())
-    .trim();
-  if (!displayName) displayName = 'مستخدم';
-}
+          // ✅ استخدام الاسم من Firebase مباشرة (بدون sessionStorage)
+          let displayName = firebaseUser.displayName;
+          if (!displayName) {
+            const emailPart = firebaseUser.email?.split('@')[0] || '';
+            displayName = emailPart
+              .replace(/[._-]/g, ' ')
+              .replace(/\b\w/g, char => char.toUpperCase())
+              .trim();
+            if (!displayName) displayName = 'مستخدم';
+          }
 
           const uniqueId = await generateUniqueId();
           const visaNumber = await generateVisaNumber(firebaseUser.uid);

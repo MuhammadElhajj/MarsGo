@@ -40,73 +40,56 @@ export default function FinanceTopUpRequests() {
   // ============================================================
   // ✅ دالة صرف مكافأة الإحالة (تُستدعى عند أول إيداع معتمد)
   // ============================================================
-  const handleReferralReward = async (userId) => {
-    try {
-      // 1. جلب بيانات المستخدم
-      const userRef = doc(db, 'users', userId);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) return;
-      const userData = userSnap.data();
+const handleReferralReward = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) return;
+    const userData = userSnap.data();
 
-      // 2. التحقق من وجود مُحيل
-      if (!userData.referredBy) return;
+    // التحقق من وجود مُحيل
+    if (!userData.referredBy) return;
 
-      // 3. التحقق من أن هذا هو أول إيداع للمستخدم
-      const depositQuery = query(
-        collection(db, 'topUpRequests'),
-        where('userId', '==', userId),
-        where('status', '==', 'approved')
-      );
-      const depositSnap = await getDocs(depositQuery);
-      if (depositSnap.size > 1) return; // ليس أول إيداع
+    // التحقق من أن هذا هو أول إيداع معتمد
+    const depositQuery = query(
+      collection(db, 'topUpRequests'),
+      where('userId', '==', userId),
+      where('status', '==', 'approved')
+    );
+    const depositSnap = await getDocs(depositQuery);
+    if (depositSnap.size > 1) return;
 
-      // 4. التحقق من عدم وجود مكافأة مسجلة مسبقاً
-      const rewardQuery = query(
-        collection(db, 'referral_rewards'),
-        where('referredId', '==', userId)
-      );
-      const rewardSnap = await getDocs(rewardQuery);
-      if (!rewardSnap.empty) return; // تم صرف المكافأة سابقاً
-
-      // 5. إضافة 20 MGC إلى referralBalance للمُحيل
-      const referrerId = userData.referredBy;
-      await updateDoc(doc(db, 'users', referrerId), {
-        referralBalance: increment(20),
-      });
-
-      // 6. تسجيل المكافأة في referral_rewards (حالة pending)
-      await addDoc(collection(db, 'referral_rewards'), {
-        referrerId: referrerId,
-        referredId: userId,
-        rewardAmount: 20,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      });
-
-      // 7. تحديث userRef لمنع تكرار المكافأة (اختياري)
-      await updateDoc(userRef, {
-        referralRewardClaimed: true,
-      });
-
-      // 8. إشعار للمُحيل
-      try {
-        await addNotification({
-          userId: referrerId,
-          title: '🎉 مكافأة إحالة جديدة!',
-          message: `تم إضافة 20 MGC إلى رصيد إحالاتك. اجمع 100 MGC لصرفها.`,
-          type: 'referral_reward',
-          read: false,
-          createdAt: new Date(),
-        });
-      } catch (notifErr) {
-        console.warn('فشل إرسال الإشعار:', notifErr);
-      }
-
-      console.log(`✅ تم إضافة 20 MGC إلى رصيد إحالات المستخدم ${referrerId}`);
-    } catch (err) {
-      console.error('فشل صرف مكافأة الإحالة:', err);
+    // البحث عن سجل الإحالة
+    const rewardQuery = query(
+      collection(db, 'referral_rewards'),
+      where('referredId', '==', userId),
+      where('status', '==', 'pending')
+    );
+    const rewardSnap = await getDocs(rewardQuery);
+    if (rewardSnap.empty) {
+      console.warn('⚠️ لا يوجد سجل إحالة معلق لهذا المستخدم');
+      return;
     }
-  };
+
+    const rewardDoc = rewardSnap.docs[0];
+    const referrerId = rewardDoc.data().referrerId;
+
+    // إضافة المكافأة للمُحيل
+    await updateDoc(doc(db, 'users', referrerId), {
+      referralBalance: increment(20),
+    });
+
+    // تحديث حالة سجل الإحالة
+    await updateDoc(rewardDoc.ref, {
+      status: 'claimed',
+      claimedAt: serverTimestamp(),
+    });
+
+    console.log(`✅ تم إضافة 20 MGC إلى رصيد إحالات المستخدم ${referrerId}`);
+  } catch (err) {
+    console.error('❌ فشل صرف مكافأة الإحالة:', err);
+  }
+};
 
   const handleApprove = async (request) => {
     if (!window.confirm(`تأكيد الموافقة على طلب الإيداع رقم #${request.id.slice(-6)} بقيمة ${request.amount} $؟`)) return;

@@ -180,9 +180,13 @@ export default function SignupPage() {
         // المستخدم مسجل الدخول تلقائياً عبر createUserWithEmailAndPassword
         // نوجه إلى صفحة التحقق مع الاحتفاظ بحالة تسجيل الدخول
         navigate('/verify-code', {
-          state: { email, uid: user.uid },
-          replace: true,
-        });
+  state: { 
+    email, 
+    uid: user.uid,
+    name: name.trim() 
+  },
+  replace: true,
+});
       } else {
         throw new Error(result.data.message || 'فشل إرسال كود التفعيل');
       }

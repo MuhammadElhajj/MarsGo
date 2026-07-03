@@ -91,45 +91,42 @@ export const createReferralSlice = (set, get) => ({
 
   // ===== صرف مكافآت الإحالة (عبر Cloud Function) =====
   claimReferralRewards: async () => {
-    const { user } = get();
-    if (!user) {
-      toast.error('يجب تسجيل الدخول');
-      return false;
-    }
+  const { user } = get();
+  if (!user) {
+    toast.error('يجب تسجيل الدخول');
+    return false;
+  }
 
-    try {
-      const functions = getFunctions();
-      const claimFn = httpsCallable(functions, 'claimReferralRewards');
-      const result = await claimFn();
+  try {
+    const functions = getFunctions();
+    const claimFn = httpsCallable(functions, 'claimReferralRewards');
+    const result = await claimFn();
 
-      if (result.data.success) {
-        const claimedAmount = result.data.claimedAmount;
-        const currentBalance = get().balance || 0;
-
-        // تحديث الحالة المحلية مباشرة
-        set({
-          balance: currentBalance + claimedAmount,
+    if (result.data.success) {
+      const claimedAmount = result.data.claimedAmount;
+      // تحديث الحالة المحلية
+      set((state) => ({
+        balance: state.balance + claimedAmount,
+        referralBalance: 0,
+        userData: {
+          ...state.userData,
+          balance: state.balance + claimedAmount,
           referralBalance: 0,
-          userData: {
-            ...get().userData,
-            balance: currentBalance + claimedAmount,
-            referralBalance: 0,
-            totalReferralEarnings: (get().userData?.totalReferralEarnings || 0) + claimedAmount,
-          },
-        });
-
-        toast.success(`تم تحويل ${claimedAmount} MGC إلى رصيدك الرئيسي`);
-        return true;
-      } else {
-        toast.error(result.data.message || 'فشل صرف المكافآت');
-        return false;
-      }
-    } catch (error) {
-      console.error('فشل صرف المكافآت:', error);
-      toast.error(error.message || 'حدث خطأ أثناء صرف المكافآت');
+          totalReferralEarnings: (state.userData?.totalReferralEarnings || 0) + claimedAmount,
+        }
+      }));
+      toast.success(`تم تحويل ${claimedAmount} MGC إلى رصيدك الرئيسي`);
+      return true;
+    } else {
+      toast.error(result.data.message || 'فشل صرف المكافآت');
       return false;
     }
-  },
+  } catch (error) {
+    console.error('فشل صرف المكافآت:', error);
+    toast.error(error.message || 'حدث خطأ أثناء صرف المكافآت');
+    return false;
+  }
+},
 
   copyUniqueId: (uniqueId) => {
     navigator.clipboard.writeText(uniqueId);

@@ -71,22 +71,23 @@ export default function ReferralPage() {
     }
   };
 
-  const handleClaim = async () => {
-    if (referralBalance < 100) {
-      toast.error(`رصيد الإحالات غير كافٍ! تحتاج 100 MGC، لديك ${referralBalance} MGC`);
-      return;
-    }
-    setClaiming(true);
-    const success = await claimReferralRewards();
-    setClaiming(false);
-    if (success) {
-      const count = await getReferralCount();
-      setReferralCount(count);
-      const referrals = await getRecentReferrals(50);
-      setAllReferrals(referrals);
-      toast.success('✅ تم تحويل المكافآت إلى رصيدك الرئيسي!');
-    }
-  };
+ const handleClaim = async () => {
+  if (referralBalance < 100) {
+    toast.error(`رصيد الإحالات غير كافٍ! تحتاج 100 MGC، لديك ${referralBalance} MGC`);
+    return;
+  }
+  setClaiming(true);
+  const success = await claimReferralRewards();
+  setClaiming(false);
+  if (success) {
+    // تحديث البيانات
+    const count = await getReferralCount();
+    setReferralCount(count);
+    const referrals = await getRecentReferrals(50);
+    setAllReferrals(referrals);
+    toast.success('✅ تم تحويل المكافآت إلى رصيدك الرئيسي!');
+  }
+};
 
   if (loading) {
     return (
