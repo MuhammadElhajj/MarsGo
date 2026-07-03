@@ -1,0 +1,246 @@
+/* src/pages/User/RecentViewed/RecentViewedPage.css */
+.recent-viewed-page {
+  max-width: 1000px;
+  margin: 0 auto;
+
+}
+
+.recent-viewed-page__header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.recent-viewed-page__title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-primary);
+  border-right: 4px solid var(--color-accent);
+  padding-right: 0.75rem;
+}
+
+/* ===== الفلترة ===== */
+.recent-viewed-page__filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(79, 70, 229, 0.06);
+  color: var(--color-text-primary);
+}
+
+.filter-btn.active {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+/* ===== الشبكة ===== */
+.recent-viewed-page__list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+
+.recent-viewed-page__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.5rem;
+  background: var(--color-bg-secondary);
+  border-radius: 0.8rem;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 120px;
+}
+
+.recent-viewed-page__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-accent);
+}
+
+.recent-viewed-page__item-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 0.4rem;
+}
+
+.recent-viewed-page__item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.icon-placeholder {
+  color: var(--color-text-secondary);
+}
+
+.recent-viewed-page__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.item-category {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+.recent-viewed-page__item-date {
+  font-size: 0.6rem;
+  color: var(--color-text-secondary);
+  direction: ltr;
+  margin-top: 0.2rem;
+}
+
+/* ===== حالة فارغة ===== */
+.recent-viewed-page__empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: var(--color-bg-secondary);
+  border-radius: 1rem;
+  color: var(--color-text-secondary);
+  grid-column: 1 / -1;
+}
+
+.recent-viewed-page__empty span {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.recent-viewed-page__empty p {
+  margin: 0.3rem 0;
+}
+
+.empty-hint {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* ===== استجابة الشاشات ===== */
+
+/* شاشات كبيرة (من 992px فما فوق) = 4 أعمدة */
+@media (min-width: 992px) {
+  .recent-viewed-page__list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* شاشات متوسطة (بين 768px و 991px) = 3 أعمدة */
+@media (max-width: 991px) {
+  .recent-viewed-page__list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* شاشات صغيرة (بين 480px و 767px) = 2 أعمدة */
+@media (max-width: 767px) {
+  .recent-viewed-page__list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .recent-viewed-page__item {
+    min-height: 100px;
+    padding: 0.8rem 0.3rem;
+  }
+
+  .recent-viewed-page__item-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .item-name {
+    font-size: 0.8rem;
+  }
+}
+
+/* شاشات صغيرة جداً (أقل من 480px) = عمود واحد */
+@media (max-width: 479px) {
+  .recent-viewed-page__list {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .recent-viewed-page__item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0.6rem 0.8rem;
+    min-height: 60px;
+    gap: 0.8rem;
+  }
+
+  .recent-viewed-page__item-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 0;
+  }
+
+  .recent-viewed-page__item-info {
+    align-items: flex-start;
+  }
+
+  .item-name {
+    font-size: 0.85rem;
+    white-space: normal;
+  }
+
+  .recent-viewed-page__item-date {
+    margin-top: 0;
+    font-size: 0.55rem;
+  }
+}
+
+/* ===== الوضع الداكن ===== */
+.dark .recent-viewed-page__item {
+  background: var(--color-bg-secondary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -4,7 +4,8 @@ import {
   FiHome, 
   FiSend, 
   FiSearch, 
-  FiBarChart2 
+  FiBarChart2 ,
+  FiCreditCard  
 } from "react-icons/fi";
 import { useAuth } from "../../../context/AuthContext";
 import Avatar from "../../GeneralComponents/Avatar/Avatar";
@@ -17,7 +18,9 @@ export default function MobileNav() {
     { to: '/', icon: <FiHome />, label: 'الرئيسية' },
     { to: '/chat', icon: <FiSend />, label: 'دردشة' },
     { to: '/search', icon: <FiSearch />, label: 'بحث' },
-    { to: '/leaderboard', icon: <FiBarChart2 />, label: 'المتصدرين' },
+    // { to: '/leaderboard', icon: <FiBarChart2 />, label: 'المتصدرين' },
+    // ✅ استبدل "المتصدرين" بـ "المحفظة" (أو أضف بجانبه)
+    { to: '/wallet', icon: <FiCreditCard   />, label: 'المحفظة' },
     { 
       to: '/profile', 
       icon: <Avatar 

@@ -66,6 +66,8 @@ const CategoryProductsPage = lazy(() => import("./pages/User/CategoryProductsPag
 const GamePackagesPage = lazy(() => import("./pages/User/GamePackagesPage/GamePackagesPage"));
 const DeleteAccountPage = lazy(() => import("./pages/User/DeleteAccount/DeleteAccountPage"));
 const VerifyDeleteAccountPage = lazy(() => import("./pages/User/DeleteAccount/VerifyDeleteAccountPage"));
+const WalletPage = lazy(() => import("./pages/User/WalletPage/WalletPage"));
+const RecentViewedPage = lazy(() => import("./pages/User/RecentViewed/RecentViewedPage"));
 // ============================================================
 //  صفحات المدير (Admin Pages) – تحميل كسول
 // ============================================================
@@ -531,6 +533,22 @@ function App() {
               </Suspense>
             }
           />
+            <Route
+            path="/wallet"
+            element={
+              <Suspense fallback={<Loading text="جاري تحميل المحفظة..." />}>
+                <WalletPage />
+              </Suspense>
+            }
+          />
+          <Route
+  path="/recent-viewed"
+  element={
+    <Suspense fallback={<Loading text="جاري تحميل الزيارات..." />}>
+      <RecentViewedPage />
+    </Suspense>
+  }
+/>
 
           <Route
   path="/delete-account"

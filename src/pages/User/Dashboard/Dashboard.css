@@ -217,3 +217,8 @@
     width: 100%;
   }
 }
+
+.dashboard__recent-row {
+  margin: 0.5rem 0 1rem;
+  width: 100%;
+}

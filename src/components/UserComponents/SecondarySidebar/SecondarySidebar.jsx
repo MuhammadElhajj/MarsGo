@@ -5,7 +5,8 @@ import {
   FiUser, 
   FiAward, 
   FiBarChart2,
-  FiSearch
+  FiSearch,
+  FiCreditCard  
 } from "react-icons/fi";
 import AdSpace from "../../UserComponents/AdSpace/AdSpace";
 import './SecondarySidebar.css';
@@ -13,8 +14,10 @@ import './SecondarySidebar.css';
 export default function SecondarySidebar({ isOpen, onClose }) {
   const navItems = [
     { to: '/', icon: <FiHome />, label: 'داشبورد' },
-    { to: '/chat', icon: <FiMessageCircle />, label: 'دردشة جماعية' },
+    // ✅ أضف رابط المحفظة هنا
+    { to: '/wallet', icon: <FiCreditCard   />, label: 'المحفظة' },
     { to: '/profile', icon: <FiUser />, label: 'بروفايل' },
+    { to: '/chat', icon: <FiMessageCircle />, label: 'دردشة جماعية' },
     { to: '/wheel', icon: <FiAward />, label: 'دولاب' },
     { to: '/leaderboard', icon: <FiBarChart2 />, label: 'المتصدرين' },
   ];

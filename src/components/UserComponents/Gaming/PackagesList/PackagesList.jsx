@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../../store/store';
+import { useAuth } from '../../../../context/AuthContext';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../../../firebase';
+import { addRecentlyViewed } from '../../../../services/recentlyViewedService';
 import CatalogList from '../../../Generic/CatalogList/CatalogList';
 import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton';
 import { FiStar } from 'react-icons/fi';
@@ -14,6 +16,7 @@ export default function PackagesList() {
   const navigate = useNavigate();
   const games = useAppStore((state) => state.games);
   const fetchGameContent = useAppStore((state) => state.fetchGameContent);
+  const { userData } = useAuth();
 
   const [game, setGame] = useState(null);
   const [packages, setPackages] = useState([]);
@@ -27,14 +30,25 @@ export default function PackagesList() {
       const foundGame = games?.find(g => g.id === gameId);
       setGame(foundGame || null);
 
+      // ✅ تسجيل الزيارة في "آخر ما شاهدت"
+      if (foundGame && userData?.email) {
+        addRecentlyViewed(userData.email, {
+          id: foundGame.id,
+          name: foundGame.name,
+          imageUrl: foundGame.imageUrl || '',
+          type: 'game',
+          link: `/gaming/game/${foundGame.id}`,
+        });
+      }
+
       const extraContent = await fetchGameContent(gameId);
       console.log('📦 المحتوى المستلم من Firestore:', extraContent);
 
       // ✅ التوزيع الصحيح: النص القصير فوق، النص الطويل تحت
       const normalizedContent = {
-        shortDescription: extraContent?.shortDescription || extraContent?.description || '', // يأخذ shortDescription أو description (فوق)
+        shortDescription: extraContent?.shortDescription || extraContent?.description || '',
         shortImages: extraContent?.shortImages || [],
-        longDescription: extraContent?.longDescription || '', // فقط longDescription (تحت)
+        longDescription: extraContent?.longDescription || '',
         longImages: extraContent?.longImages || extraContent?.images || [],
         tips: extraContent?.tips || [],
         videoUrl: extraContent?.videoUrl || '',
@@ -53,7 +67,7 @@ export default function PackagesList() {
       }
     };
     load();
-  }, [gameId, games, fetchGameContent]);
+  }, [gameId, games, fetchGameContent, userData?.email]);
 
   const handlePackageSelect = (pkg) => {
     navigate('/gaming/checkout', { state: { item: game, package: pkg, serviceType: 'gaming' } });

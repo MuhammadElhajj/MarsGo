@@ -19,7 +19,7 @@ const CatalogSection = lazy(() => import("../../../components/Generic/CatalogSec
 const QuickActions = lazy(() => import("../../../components/UserComponents/QuickActions/QuickActions"));
 const AdSpace = lazy(() => import("../../../components/UserComponents/AdSpace/AdSpace"));
 const WhyChooseUs = lazy(() => import("../../../components/UserComponents/WhyChooseUs/WhyChooseUs"));
-
+import RecentlyViewed from "../../../components/UserComponents/RecentlyViewed/RecentlyViewed";
 export default function Dashboard() {
   const { userData } = useAuth();
   const navigate = useNavigate();
@@ -131,26 +131,10 @@ export default function Dashboard() {
          <Suspense fallback={<Loading text="جاري تحميل الإعلانات..." />}>
             <AdSpace />
           </Suspense>
-     {/* ===== صف الفيزا وسعر الصرف ===== */}
-<div className="dashboard__visa-row">
-  <div className="dashboard__visa-wrapper">
-    <Suspense fallback={<Loading text="جاري تحميل البطاقة..." />}>
-      <VisaCard 
-        balance={balance} 
-        mgcBalance={mgcBalance}
-        cardHolderName={userData?.name || 'MarsGo User'}
-        cardNumber={userData?.visaNumber}
-        brand="MarsGo Visa"
-        secret={userData?.visaSecret}
-      />
-    </Suspense>
-  </div>
-  <div className="dashboard__exchange-rate-wrapper">
-    <Suspense fallback={<Loading text="جاري تحميل سعر الصرف..." />}>
-      <ExchangeRateCard />
-    </Suspense>
-  </div>
-</div>
+    {/* ===== صف آخر ما زار ===== */}
+      <div className="dashboard__recent-row">
+        <RecentlyViewed />
+      </div>
 
       {/* ===== الإجراءات السريعة ===== */}
       <Suspense fallback={<Loading text="جاري التحميل..." />}>

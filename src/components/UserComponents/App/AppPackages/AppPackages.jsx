@@ -2,17 +2,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../../store/store';
+import { useAuth } from '../../../../context/AuthContext';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../../../firebase';
+import { addRecentlyViewed } from '../../../../services/recentlyViewedService';
 import CatalogList from '../../../Generic/CatalogList/CatalogList';
 import GoBackButton from '../../../GeneralComponents/GoBackButton/GoBackButton';
 import { FiStar } from 'react-icons/fi';
-import './AppPackages.css'; // سننشئ ملف CSS خاص
+import './AppPackages.css';
 
 export default function AppPackages() {
   const { appId } = useParams();
   const navigate = useNavigate();
   const apps = useAppStore((state) => state.apps);
+  const { userData } = useAuth();
+
   const [app, setApp] = useState(null);
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +24,20 @@ export default function AppPackages() {
   useEffect(() => {
     const load = async () => {
       if (!appId) return;
+
       const foundApp = apps?.find(a => a.id === appId);
       setApp(foundApp || null);
+
+      // ✅ تسجيل الزيارة في "آخر ما شاهدت"
+      if (foundApp && userData?.email) {
+        addRecentlyViewed(userData.email, {
+          id: foundApp.id,
+          name: foundApp.name,
+          imageUrl: foundApp.imageUrl || '',
+          type: 'app',
+          link: `/apps/app/${foundApp.id}`,
+        });
+      }
 
       try {
         const q = query(collection(db, 'apps', appId, 'packages'), orderBy('order', 'asc'));
@@ -35,7 +51,7 @@ export default function AppPackages() {
       }
     };
     load();
-  }, [appId, apps]);
+  }, [appId, apps, userData?.email]);
 
   const handlePackageSelect = (pkg) => {
     navigate('/apps/checkout', { state: { item: app, package: pkg, serviceType: 'apps' } });
