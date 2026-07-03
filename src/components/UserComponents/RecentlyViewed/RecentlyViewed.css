@@ -64,8 +64,8 @@
   align-items: center;
   gap: 0.5rem;
   
-  background: var(--color-bg-primary);
-  border-radius: 0.6rem;
+ 
+
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
@@ -143,6 +143,3 @@
   background: var(--color-bg-secondary);
 }
 
-.dark .recently-viewed__item {
-  background: var(--color-bg-primary);
-}
